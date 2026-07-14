@@ -380,7 +380,7 @@ export function WalkInPOSPage({
   );
   const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
   return (
-    <div className="tablet-pos flex h-full min-h-0 flex-col overflow-hidden rounded-[18px] border border-border bg-card shadow-[0_18px_45px_rgba(67,42,23,0.09)] ring-1 ring-white/70">
+    <div className="tablet-pos flex h-full min-h-0 flex-col overflow-hidden rounded-[18px] border">
       <POSOrderHeader
         orderType={values.orderType}
         discountType={values.discountType}
@@ -402,7 +402,11 @@ export function WalkInPOSPage({
           <ErrorBanner message={error} onRetry={() => setError("")} />
         </div>
       )}
-      <div className="pos-tablet-switch" role="tablist" aria-label="Point of sale view">
+      <div
+        className="pos-tablet-switch"
+        role="tablist"
+        aria-label="Point of sale view"
+      >
         <button
           type="button"
           role="tab"
@@ -430,7 +434,9 @@ export function WalkInPOSPage({
         </button>
       </div>
       <div className="pos-workspace flex min-h-0 flex-1 flex-col lg:flex-row">
-        <div className={`pos-pane pos-menu-pane min-h-0 min-w-0 flex-1 ${tabletPane === "menu" ? "is-active" : ""}`}>
+        <div
+          className={`pos-pane pos-menu-pane min-h-0 min-w-0 flex-1 ${tabletPane === "menu" ? "is-active" : ""}`}
+        >
           <MenuGrid
             menuItems={state.menuItems}
             cart={cart}
@@ -441,9 +447,13 @@ export function WalkInPOSPage({
             onSelect={setSelectedItem}
           />
         </div>
-        <aside className={`pos-pane pos-order-pane w-full shrink-0 flex-col overflow-hidden border-t border-border bg-white shadow-[-8px_0_24px_rgba(67,42,23,0.035)] lg:flex lg:w-[390px] lg:border-t-0 ${tabletPane === "order" ? "is-active flex" : "hidden"}`}>
+        <aside
+          className={`pos-pane pos-order-pane w-full shrink-0 flex-col overflow-hidden border-t lg:flex lg:w-[390px] lg:border-t-0 ${tabletPane === "order" ? "is-active flex" : "hidden"}`}
+        >
           <POSCart
             items={cart}
+            orderType={values.orderType}
+            tableNumber={values.tableNumber}
             onAdjust={adjust}
             onRemove={remove}
             onNoteChange={note}
@@ -451,17 +461,19 @@ export function WalkInPOSPage({
               if (window.confirm("Clear all items from the cart?")) setCart([]);
             }}
           />
-          <details className="pos-order-notes shrink-0 border-t border-border bg-[#fffdfb]">
+          <details className="pos-order-notes shrink-0 border-t">
             <summary className="flex min-h-12 cursor-pointer items-center justify-between px-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
               Order instructions
-              <span className="normal-case tracking-normal text-primary">Add note</span>
+              <span className="normal-case tracking-normal text-primary">
+                Add note
+              </span>
             </summary>
             <div className="px-4 pb-3">
               <textarea
                 id="order-instructions"
                 aria-label="Order instructions"
                 placeholder="Special instructions for the whole order…"
-                className="min-h-16 w-full rounded-xl border border-border bg-[#fbf8f4] p-3 text-xs outline-none transition focus:border-primary/50 focus:bg-white focus:ring-4 focus:ring-primary/10"
+                className="min-h-16 w-full rounded-xl border p-3 text-xs outline-none transition focus:ring-4 focus:ring-amber-500/10"
                 {...register("orderInstructions")}
               />
             </div>

@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Bell,
   CheckCheck,
   ChevronDown,
   CircleDot,
+  Clock3,
   LogOut,
   Menu,
   X,
@@ -45,12 +46,20 @@ export function AppShell<T extends string>({
   onLogout?: () => void;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [now, setNow] = useState(() => new Date());
   const roleSlug = user.role.toLowerCase().replace(/\s+/g, "-");
   const isCashier = roleSlug === "cashier";
   const isCashierPOS = isCashier && String(active) === "walkin-pos";
   const activeLabel =
     groups.flatMap((group) => group.items).find((item) => item.id === active)
       ?.label ?? "Workspace";
+
+  useEffect(() => {
+    if (!isCashierPOS) return;
+    setNow(new Date());
+    const timer = window.setInterval(() => setNow(new Date()), 30_000);
+    return () => window.clearInterval(timer);
+  }, [isCashierPOS]);
 
   const SidebarContent = () => (
     <>
@@ -155,7 +164,11 @@ export function AppShell<T extends string>({
   );
 
   return (
-    <div className="rrj-app-shell flex h-full overflow-hidden bg-background" data-role={roleSlug}>
+    <div
+      className="rrj-app-shell flex h-full overflow-hidden bg-background"
+      data-role={roleSlug}
+      data-page={String(active)}
+    >
       {/* Mobile overlay backdrop */}
       {sidebarOpen && (
         <div
@@ -183,7 +196,9 @@ export function AppShell<T extends string>({
 
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-        <header className={`app-shell-topbar flex flex-shrink-0 items-center gap-3 border-b border-border/70 bg-card/80 px-3 shadow-[0_1px_18px_rgba(65,42,26,0.035)] backdrop-blur-xl sm:px-4 lg:px-6 ${isCashier ? "h-16" : "h-[72px]"}`}>
+        <header
+          className={`app-shell-topbar flex flex-shrink-0 items-center gap-3 border-b border-border/70 bg-card/80 px-3 shadow-[0_1px_18px_rgba(65,42,26,0.035)] backdrop-blur-xl sm:px-4 lg:px-6 ${isCashier ? "h-16" : "h-[72px]"}`}
+        >
           {/* Hamburger — mobile only */}
           <button
             onClick={() => setSidebarOpen(true)}
@@ -195,7 +210,7 @@ export function AppShell<T extends string>({
 
           <div className="min-w-0">
             <p className="hidden text-[9px] font-black uppercase tracking-[0.2em] text-primary/70 sm:block">
-              {user.role} workspace
+              {isCashierPOS ? "RRJ's Food-Haus" : `${user.role} workspace`}
             </p>
             <div className="flex items-center gap-2">
               <p className="truncate text-sm font-black tracking-[-0.01em] text-foreground sm:mt-0.5">
@@ -209,7 +224,10 @@ export function AppShell<T extends string>({
           </div>
 
           {isCashier && (
-            <nav className="cashier-tablet-quick-nav hidden min-w-0 items-center gap-1 md:flex xl:hidden" aria-label="Cashier shortcuts">
+            <nav
+              className="cashier-tablet-quick-nav hidden min-w-0 items-center gap-1 md:flex xl:hidden"
+              aria-label="Cashier shortcuts"
+            >
               {groups
                 .flatMap((group) => group.items)
                 .filter((item) =>
@@ -227,7 +245,9 @@ export function AppShell<T extends string>({
                       className={`relative flex min-h-11 items-center gap-2 rounded-xl px-3 text-[10px] font-black transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${active === item.id ? "bg-[#2b1b12] text-white shadow-md" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
                     >
                       <Icon className="h-4 w-4" />
-                      <span className="hidden lg:inline">{item.label.replace("Pending ", "")}</span>
+                      <span className="hidden lg:inline">
+                        {item.label.replace("Pending ", "")}
+                      </span>
                       {item.badge ? (
                         <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[9px] text-white">
                           {item.badge}
@@ -240,6 +260,25 @@ export function AppShell<T extends string>({
           )}
 
           <div className="ml-auto flex items-center gap-1">
+            {isCashierPOS && (
+              <div className="pos-shell-clock hidden items-center gap-2 border-l px-3 sm:flex">
+                <Clock3 className="h-4 w-4" />
+                <span>
+                  <strong className="block text-[11px] leading-none">
+                    {now.toLocaleTimeString("en-PH", {
+                      hour: "numeric",
+                      minute: "2-digit",
+                    })}
+                  </strong>
+                  <small className="mt-1 block text-[8px] font-bold uppercase tracking-wider">
+                    {now.toLocaleDateString("en-PH", {
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </small>
+                </span>
+              </div>
+            )}
             <DropdownMenu
               onOpenChange={(open) => {
                 if (open && notifications.some((entry) => !entry.read))
@@ -328,7 +367,9 @@ export function AppShell<T extends string>({
           </div>
         </header>
 
-        <main className={`app-shell-main rrj-main-canvas flex-1 ${isCashierPOS ? "overflow-hidden p-2 sm:p-3 xl:p-4" : "overflow-y-auto p-4 sm:p-5 lg:p-6 xl:p-8"}`}>
+        <main
+          className={`app-shell-main rrj-main-canvas flex-1 ${isCashierPOS ? "overflow-hidden p-2 sm:p-3 xl:p-4" : "overflow-y-auto p-4 sm:p-5 lg:p-6 xl:p-8"}`}
+        >
           {children}
         </main>
       </div>
