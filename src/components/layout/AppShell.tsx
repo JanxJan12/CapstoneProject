@@ -46,6 +46,8 @@ export function AppShell<T extends string>({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const roleSlug = user.role.toLowerCase().replace(/\s+/g, "-");
+  const isCashier = roleSlug === "cashier";
+  const isCashierPOS = isCashier && String(active) === "walkin-pos";
   const activeLabel =
     groups.flatMap((group) => group.items).find((item) => item.id === active)
       ?.label ?? "Workspace";
@@ -74,7 +76,7 @@ export function AppShell<T extends string>({
         {/* Close button — mobile only */}
         <button
           onClick={() => setSidebarOpen(false)}
-          className="flex h-11 w-11 items-center justify-center rounded-lg text-white/60 hover:bg-white/[0.08] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 md:hidden"
+          className={`flex h-12 w-12 items-center justify-center rounded-xl text-white/60 hover:bg-white/[0.08] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${isCashier ? "xl:hidden" : "md:hidden"}`}
           aria-label="Close navigation"
         >
           <X className="w-4 h-4" />
@@ -157,7 +159,7 @@ export function AppShell<T extends string>({
       {/* Mobile overlay backdrop */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/40 z-30 md:hidden"
+          className={`fixed inset-0 z-30 bg-black/45 backdrop-blur-[2px] ${isCashier ? "xl:hidden" : "md:hidden"}`}
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -166,9 +168,14 @@ export function AppShell<T extends string>({
       <aside
         className={[
           "app-shell-sidebar relative flex h-full flex-col overflow-hidden border-r border-white/[0.06] bg-[#1d1713] shadow-[12px_0_45px_rgba(31,20,13,0.14)] z-40 transition-transform duration-200",
-          "fixed md:relative",
-          "w-64 md:w-[15rem] flex-shrink-0",
-          sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
+          isCashier ? "fixed xl:relative" : "fixed md:relative",
+          isCashier ? "w-72 xl:w-[15rem]" : "w-64 md:w-[15rem]",
+          "flex-shrink-0",
+          sidebarOpen
+            ? "translate-x-0"
+            : isCashier
+              ? "-translate-x-full xl:translate-x-0"
+              : "-translate-x-full md:translate-x-0",
         ].join(" ")}
       >
         <SidebarContent />
@@ -176,11 +183,11 @@ export function AppShell<T extends string>({
 
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-        <header className="app-shell-topbar flex h-[72px] flex-shrink-0 items-center gap-3 border-b border-border/70 bg-card/80 px-4 shadow-[0_1px_18px_rgba(65,42,26,0.035)] backdrop-blur-xl sm:px-6 lg:px-7">
+        <header className={`app-shell-topbar flex flex-shrink-0 items-center gap-3 border-b border-border/70 bg-card/80 px-3 shadow-[0_1px_18px_rgba(65,42,26,0.035)] backdrop-blur-xl sm:px-4 lg:px-6 ${isCashier ? "h-16" : "h-[72px]"}`}>
           {/* Hamburger — mobile only */}
           <button
             onClick={() => setSidebarOpen(true)}
-            className="md:hidden w-11 h-11 rounded-lg hover:bg-muted flex items-center justify-center text-muted-foreground flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className={`h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl border border-border/70 bg-white/75 text-muted-foreground shadow-sm hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${isCashier ? "flex xl:hidden" : "flex md:hidden"}`}
             aria-label="Open navigation"
           >
             <Menu className="w-4 h-4" />
@@ -200,6 +207,37 @@ export function AppShell<T extends string>({
               </span>
             </div>
           </div>
+
+          {isCashier && (
+            <nav className="cashier-tablet-quick-nav hidden min-w-0 items-center gap-1 md:flex xl:hidden" aria-label="Cashier shortcuts">
+              {groups
+                .flatMap((group) => group.items)
+                .filter((item) =>
+                  ["walkin-pos", "pending-payments", "order-list"].includes(
+                    String(item.id),
+                  ),
+                )
+                .map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      key={String(item.id)}
+                      onClick={() => onSelect(item.id)}
+                      aria-current={active === item.id ? "page" : undefined}
+                      className={`relative flex min-h-11 items-center gap-2 rounded-xl px-3 text-[10px] font-black transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${active === item.id ? "bg-[#2b1b12] text-white shadow-md" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
+                    >
+                      <Icon className="h-4 w-4" />
+                      <span className="hidden lg:inline">{item.label.replace("Pending ", "")}</span>
+                      {item.badge ? (
+                        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[9px] text-white">
+                          {item.badge}
+                        </span>
+                      ) : null}
+                    </button>
+                  );
+                })}
+            </nav>
+          )}
 
           <div className="ml-auto flex items-center gap-1">
             <DropdownMenu
@@ -290,7 +328,7 @@ export function AppShell<T extends string>({
           </div>
         </header>
 
-        <main className="app-shell-main rrj-main-canvas flex-1 overflow-y-auto p-4 sm:p-6 lg:p-7 xl:p-8">
+        <main className={`app-shell-main rrj-main-canvas flex-1 ${isCashierPOS ? "overflow-hidden p-2 sm:p-3 xl:p-4" : "overflow-y-auto p-4 sm:p-5 lg:p-6 xl:p-8"}`}>
           {children}
         </main>
       </div>

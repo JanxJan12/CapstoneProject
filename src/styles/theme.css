@@ -1075,6 +1075,174 @@
   backdrop-filter: blur(12px);
 }
 
+/* Cashier tablet workstation */
+.pos-tablet-switch {
+  display: none;
+}
+
+.pos-menu-pane {
+  min-width: 0;
+}
+
+.pos-order-notes summary {
+  list-style: none;
+}
+
+.pos-order-notes summary::-webkit-details-marker {
+  display: none;
+}
+
+.payment-review-actions {
+  margin-inline: -0.25rem;
+  padding-inline: 0.25rem;
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  .rrj-app-shell[data-role="cashier"] .app-shell-main > * {
+    max-width: none;
+  }
+
+  .rrj-app-shell[data-role="cashier"] .cashier-page {
+    gap: 0.9rem;
+  }
+
+  .rrj-app-shell[data-role="cashier"] .cashier-compact-hero .min-h-\[128px\] {
+    min-height: 7.25rem;
+  }
+
+  .rrj-app-shell[data-role="cashier"] button,
+  .rrj-app-shell[data-role="cashier"] input,
+  .rrj-app-shell[data-role="cashier"] select {
+    touch-action: manipulation;
+  }
+
+  .tablet-pos .pos-order-header input,
+  .tablet-pos .pos-order-header select {
+    min-height: 3rem;
+  }
+
+  .tablet-pos .pos-order-fields {
+    row-gap: 0.65rem;
+  }
+
+  .payment-review-shell {
+    min-height: calc(100vh - 11.5rem);
+  }
+
+  .payment-review-shell > aside {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) and (orientation: landscape) {
+  .tablet-pos .pos-workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(360px, 2fr);
+  }
+
+  .tablet-pos .pos-menu-pane,
+  .tablet-pos .pos-order-pane {
+    display: flex !important;
+    width: auto !important;
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .tablet-pos .pos-order-pane {
+    border-top: 0;
+    border-left: 1px solid var(--border);
+  }
+
+  .tablet-pos .pos-payment-panel > div {
+    padding-top: 0.6rem;
+    padding-bottom: 0.6rem;
+  }
+
+  .tablet-pos .pos-payment-panel .min-h-14 {
+    min-height: 3.25rem;
+  }
+}
+
+@media (max-width: 767px), (max-width: 1023px) and (orientation: portrait) {
+  .tablet-pos .pos-tablet-switch {
+    display: grid;
+    flex: 0 0 auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.35rem;
+    border-bottom: 1px solid var(--border);
+    padding: 0.4rem;
+    background: #f5eee6;
+  }
+
+  .tablet-pos .pos-tablet-switch button {
+    display: flex;
+    min-height: 3rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    border-radius: 0.75rem;
+    color: var(--muted-foreground);
+    font-size: 0.68rem;
+    font-weight: 800;
+  }
+
+  .tablet-pos .pos-tablet-switch button.is-active {
+    background: #2b1b12;
+    box-shadow: 0 6px 16px rgba(43, 27, 18, 0.18);
+    color: white;
+  }
+
+  .tablet-pos .pos-tablet-switch button span {
+    display: flex;
+    min-width: 1.2rem;
+    height: 1.2rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: rgba(189, 84, 19, 0.12);
+    color: var(--primary);
+    font-size: 0.58rem;
+  }
+
+  .tablet-pos .pos-tablet-switch button.is-active span {
+    background: rgba(255, 255, 255, 0.14);
+    color: white;
+  }
+
+  .tablet-pos .pos-tablet-switch button strong {
+    margin-left: auto;
+    padding-right: 0.4rem;
+    color: inherit;
+    font-size: 0.68rem;
+  }
+
+  .tablet-pos .pos-workspace {
+    display: flex;
+  }
+
+  .tablet-pos .pos-pane {
+    display: none !important;
+    width: 100% !important;
+    min-height: 0;
+  }
+
+  .tablet-pos .pos-pane.is-active {
+    display: flex !important;
+  }
+
+  .tablet-pos .pos-order-pane {
+    border-top: 0;
+  }
+}
+
+@media (hover: none) {
+  .rrj-app-shell[data-role="cashier"] button:hover,
+  .rrj-app-shell[data-role="cashier"] .rrj-card-hover:hover {
+    transform: none;
+  }
+}
+
 /* Kitchen board */
 .kitchen-column {
   position: relative;

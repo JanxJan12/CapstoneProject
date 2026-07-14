@@ -17,13 +17,13 @@ export function CashierDashboardPage({
     <div className="cashier-page">
       <CashierHero onNavigate={onNavigate} />
       <CashierMetrics />
-      <div className="grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
+      <div className="grid gap-4 lg:grid-cols-[1.28fr_0.72fr]">
         <div className="space-y-4">
-          <CashierWorkbench onNavigate={onNavigate} />
+          <LiveOrderQueue onSelect={setSelectedOrder} />
           <RestaurantControlLanes />
         </div>
         <div className="space-y-4">
-          <LiveOrderQueue onSelect={setSelectedOrder} />
+          <CashierWorkbench onNavigate={onNavigate} />
           <ActivityFeed />
         </div>
       </div>

@@ -30,8 +30,8 @@ export function MenuGrid({
           .includes(search.toLowerCase())),
   );
   return (
-    <div className="flex min-w-0 flex-1 flex-col overflow-hidden border-r border-border bg-[#fbf8f4]/60">
-      <div className="space-y-2.5 border-b border-border bg-white/90 p-3.5 backdrop-blur-sm">
+    <div className="pos-menu-grid flex h-full min-w-0 flex-1 flex-col overflow-hidden border-r border-border bg-[#fbf8f4]/60">
+      <div className="space-y-2 border-b border-border bg-white/90 p-3 backdrop-blur-sm">
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <CashierInput
@@ -48,7 +48,7 @@ export function MenuGrid({
               type="button"
               key={entry}
               onClick={() => onCategoryChange(entry)}
-              className={`min-h-10 shrink-0 rounded-full border px-4 text-[10px] font-black transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${category === entry ? "border-primary bg-gradient-to-r from-primary to-orange-600 text-white shadow-md shadow-orange-900/10" : "border-border bg-white text-muted-foreground shadow-sm hover:-translate-y-0.5 hover:border-primary/35 hover:text-primary"}`}
+              className={`min-h-12 shrink-0 rounded-full border px-4 text-[10px] font-black transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${category === entry ? "border-primary bg-gradient-to-r from-primary to-orange-600 text-white shadow-md shadow-orange-900/10" : "border-border bg-white text-muted-foreground shadow-sm hover:-translate-y-0.5 hover:border-primary/35 hover:text-primary"}`}
             >
               {entry}
               <span className="ml-1.5 opacity-60">
@@ -60,9 +60,9 @@ export function MenuGrid({
           ))}
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto p-3.5">
+      <div className="flex-1 overflow-y-auto p-3">
         {filtered.length ? (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
             {filtered.map((item) => (
               <MenuItemCard
                 key={item.id}

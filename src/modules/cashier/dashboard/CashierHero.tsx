@@ -33,41 +33,31 @@ export function CashierHero({
   }, []);
   const current = new Date();
   return (
-    <section className="relative overflow-hidden rounded-[22px] border border-orange-300/15 bg-[#2b1b12] text-white shadow-[0_22px_55px_rgba(55,31,16,0.2)] ring-1 ring-white/5">
+    <section className="cashier-compact-hero relative overflow-hidden rounded-[20px] border border-orange-300/15 bg-[#2b1b12] text-white shadow-[0_18px_42px_rgba(55,31,16,0.18)] ring-1 ring-white/5">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(249,115,22,0.24),transparent_35%),linear-gradient(135deg,rgba(255,255,255,0.04),transparent_55%)]" />
-      <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full border border-white/10 bg-orange-400/5" />
-      <div className="absolute -bottom-24 right-32 h-56 w-56 rounded-full border border-orange-300/10" />
-      <div className="relative grid gap-7 p-5 sm:p-7 lg:grid-cols-[1.15fr_0.85fr] lg:p-8">
-        <div className="flex flex-col justify-between gap-6">
+      <div className="absolute -right-16 -top-24 h-56 w-56 rounded-full border border-white/10 bg-orange-400/5" />
+      <div className="relative grid grid-cols-2 gap-3 p-4 md:grid-cols-[minmax(280px,1.35fr)_repeat(3,minmax(130px,0.65fr))] md:p-5">
+        <div className="col-span-2 flex min-w-0 flex-col justify-between gap-4 rounded-2xl border border-white/10 bg-white/[0.055] p-4 backdrop-blur-sm md:col-span-1">
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <span
-                className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-widest ${activeShift ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-200" : "border-amber-400/30 bg-amber-400/10 text-amber-100"}`}
-              >
-                <Circle
-                  className={`h-2 w-2 ${activeShift ? "fill-emerald-300 text-emerald-300" : "fill-amber-300 text-amber-300"}`}
-                />
+              <span className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[9px] font-black uppercase tracking-widest ${activeShift ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-200" : "border-amber-400/30 bg-amber-400/10 text-amber-100"}`}>
+                <Circle className={`h-2 w-2 ${activeShift ? "fill-emerald-300 text-emerald-300" : "fill-amber-300 text-amber-300"}`} />
                 {activeShift ? "Shift Active" : "Shift Closed"}
               </span>
-              <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white/70">
+              <span className="rounded-full border border-white/10 bg-white/10 px-2.5 py-1 text-[9px] font-bold uppercase tracking-widest text-white/65">
                 {state.cashier.terminal}
               </span>
             </div>
-            <p className="mt-6 text-[10px] font-black uppercase tracking-[0.22em] text-orange-200/90">
-              RRJ Food-House Cashier Operations
-            </p>
-            <h1 className="mt-2.5 max-w-2xl text-[28px] font-black leading-[1.12] tracking-[-0.035em] text-white sm:text-[34px]">
-              Orders, payments, kitchen handoff, and settlement in one connected
-              workspace.
+            <h1 className="mt-3 text-[22px] font-black leading-tight tracking-[-0.035em] text-white sm:text-[25px]">
+              Ready for service, {state.cashier.name.split(" ")[0]}.
             </h1>
-            <p className="mt-4 max-w-xl text-sm font-medium leading-6 text-white/60">
-              Every cashier action updates the same order, payment, transaction,
-              and shift records.
+            <p className="mt-1.5 text-[11px] font-medium text-white/50">
+              Start orders, clear payments, and release ready meals.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
             <CashierButton
-              className="bg-white from-white to-white text-[#2b1b12] shadow-[0_8px_24px_rgba(0,0,0,0.18)] hover:bg-amber-50 hover:from-amber-50 hover:to-white"
+              className="min-h-12 bg-white from-white to-white px-4 text-[#2b1b12] shadow-[0_8px_24px_rgba(0,0,0,0.18)] hover:bg-amber-50 hover:from-amber-50 hover:to-white"
               disabled={!activeShift}
               onClick={() => onNavigate("walkin-pos")}
             >
@@ -78,7 +68,7 @@ export function CashierHero({
               </kbd>
             </CashierButton>
             <CashierButton
-              className="border border-white/15 bg-white/10 from-white/10 to-white/5 text-white shadow-none backdrop-blur-sm hover:border-white/25 hover:bg-white/15 hover:from-white/15 hover:to-white/10"
+              className="min-h-12 border border-white/15 bg-white/10 from-white/10 to-white/5 px-4 text-white shadow-none backdrop-blur-sm hover:border-white/25 hover:bg-white/15 hover:from-white/15 hover:to-white/10"
               disabled={!activeShift}
               onClick={() => onNavigate("pending-payments")}
             >
@@ -90,44 +80,31 @@ export function CashierHero({
             </CashierButton>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-3 self-stretch">
-          <HeroDatum
-            label="Current Time"
-            value={current.toLocaleTimeString("en-PH", {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-            detail={current.toLocaleDateString("en-PH", {
-              weekday: "short",
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            })}
-          />
-          <HeroDatum
-            icon={Clock3}
-            label="Shift Duration"
-            value={elapsed(activeShift?.startedAt)}
-            detail={
-              activeShift
-                ? `Started ${new Date(activeShift.startedAt).toLocaleTimeString("en-PH", { hour: "numeric", minute: "2-digit" })}`
-                : "Start a new shift to transact"
-            }
-          />
-          <HeroDatum
-            label="Cashier on Duty"
-            value={state.cashier.name}
-            detail={state.cashier.terminal}
-            small
-          />
-          <HeroDatum
-            icon={Banknote}
-            label="Cash Drawer"
-            value={activeShift ? formatMoney(shiftTotals.expectedCash) : "—"}
-            detail={activeShift ? "Expected drawer amount" : "No open drawer"}
-            accent
-          />
-        </div>
+        <HeroDatum
+          label="Current Time"
+          value={current.toLocaleTimeString("en-PH", {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+          detail={current.toLocaleDateString("en-PH", {
+            weekday: "short",
+            month: "short",
+            day: "numeric",
+          })}
+        />
+        <HeroDatum
+          icon={Clock3}
+          label="Shift Duration"
+          value={elapsed(activeShift?.startedAt)}
+          detail={activeShift ? "Active counter time" : "No active shift"}
+        />
+        <HeroDatum
+          icon={Banknote}
+          label="Expected Drawer"
+          value={activeShift ? formatMoney(shiftTotals.expectedCash) : "—"}
+          detail={activeShift ? "Opening cash + sales" : "Drawer closed"}
+          accent
+        />
       </div>
     </section>
   );
@@ -138,28 +115,24 @@ function HeroDatum({
   value,
   detail,
   icon: Icon,
-  small,
   accent,
 }: {
   label: string;
   value: string;
   detail: string;
   icon?: React.ElementType;
-  small?: boolean;
   accent?: boolean;
 }) {
   return (
     <div
-      className={`group rounded-2xl border p-4 backdrop-blur-md transition hover:-translate-y-0.5 hover:border-white/20 ${accent ? "border-emerald-300/20 bg-emerald-300/10" : "border-white/10 bg-white/[0.075]"}`}
+      className={`group flex min-h-[128px] flex-col justify-center rounded-2xl border p-4 backdrop-blur-md transition hover:-translate-y-0.5 hover:border-white/20 ${accent ? "border-emerald-300/20 bg-emerald-300/10" : "border-white/10 bg-white/[0.075]"}`}
     >
       <p className="text-[9px] font-black uppercase tracking-[0.17em] text-white/40">
         {label}
       </p>
       <div className="mt-2 flex items-center gap-2">
         {Icon && <Icon className="h-4 w-4 text-amber-200" />}
-        <p
-          className={`${small ? "text-base" : "text-xl sm:text-2xl"} truncate font-black tracking-tight text-white`}
-        >
+        <p className="truncate text-xl font-black tracking-tight text-white sm:text-2xl">
           {value}
         </p>
       </div>

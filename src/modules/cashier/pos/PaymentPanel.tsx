@@ -36,7 +36,7 @@ export function PaymentPanel({
     (amount) => amount >= total && amount !== total,
   );
   return (
-    <div className="border-t border-border bg-gradient-to-b from-white to-[#fffaf5]">
+    <div className="pos-payment-panel shrink-0 border-t border-border bg-gradient-to-b from-white to-[#fffaf5] shadow-[0_-10px_28px_rgba(67,42,23,0.055)]">
       <div className="space-y-1.5 px-4 py-3 text-xs">
         <div className="flex justify-between text-muted-foreground">
           <span>Subtotal</span>
@@ -149,7 +149,7 @@ export function PaymentPanel({
           type="button"
           disabled={!canPlace || !shiftOpen}
           onClick={onConfirm}
-          className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-orange-600 px-4 text-sm font-black text-white shadow-[0_8px_20px_rgba(184,79,10,0.22)] transition-all hover:-translate-y-0.5 hover:shadow-[0_12px_24px_rgba(184,79,10,0.28)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 active:translate-y-0 active:scale-[0.99] disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-40 disabled:shadow-none"
+          className="flex min-h-14 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-orange-600 px-4 text-sm font-black text-white shadow-[0_8px_20px_rgba(184,79,10,0.22)] transition-all hover:-translate-y-0.5 hover:shadow-[0_12px_24px_rgba(184,79,10,0.28)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 active:translate-y-0 active:scale-[0.99] disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-40 disabled:shadow-none"
         >
           <CheckCircle2 className="h-4 w-4" />
           Place Order · {formatMoney(total)}

@@ -98,7 +98,7 @@ export function PendingPaymentsPage() {
         }
       />
       {error && <ErrorBanner message={error} onRetry={() => setError("")} />}
-      <div className="rrj-card grid min-h-[650px] overflow-hidden lg:grid-cols-[350px_1fr]">
+      <div className="payment-review-shell rrj-card grid min-h-[590px] overflow-hidden lg:grid-cols-[310px_1fr]">
         <aside className="border-b border-border bg-[#fffaf5]/70 lg:border-b-0 lg:border-r">
           <div className="border-b border-border bg-gradient-to-r from-amber-50 to-orange-50/40 px-4 py-4">
             <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { LayoutGrid, ShoppingBasket } from "lucide-react";
 import { DISCOUNT_RATE, POS_DRAFT_STORAGE_KEY } from "../constants";
 import { useCashierStore } from "../hooks/CashierStore";
 import { posSchema, type POSForm } from "../schemas";
@@ -62,6 +63,7 @@ export function WalkInPOSPage({
   const [category, setCategory] = useState("All");
   const [search, setSearch] = useState("");
   const [selectedItem, setSelectedItem] = useState<MenuItem>();
+  const [tabletPane, setTabletPane] = useState<"menu" | "order">("menu");
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [voidOpen, setVoidOpen] = useState(false);
   const [receiptOrder, setReceiptOrder] = useState<Order>();
@@ -376,8 +378,9 @@ export function WalkInPOSPage({
   const receiptPayment = state.payments.find(
     (entry) => entry.orderId === receiptOrder?.id,
   );
+  const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
   return (
-    <div className="flex h-full min-h-[700px] flex-col overflow-hidden rounded-[18px] border border-border bg-card shadow-[0_18px_45px_rgba(67,42,23,0.09)] ring-1 ring-white/70 lg:-m-1">
+    <div className="tablet-pos flex h-full min-h-0 flex-col overflow-hidden rounded-[18px] border border-border bg-card shadow-[0_18px_45px_rgba(67,42,23,0.09)] ring-1 ring-white/70">
       <POSOrderHeader
         orderType={values.orderType}
         discountType={values.discountType}
@@ -399,17 +402,46 @@ export function WalkInPOSPage({
           <ErrorBanner message={error} onRetry={() => setError("")} />
         </div>
       )}
-      <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
-        <MenuGrid
-          menuItems={state.menuItems}
-          cart={cart}
-          category={category}
-          search={search}
-          onCategoryChange={setCategory}
-          onSearchChange={setSearch}
-          onSelect={setSelectedItem}
-        />
-        <aside className="flex w-full shrink-0 flex-col border-t border-border bg-white shadow-[-8px_0_24px_rgba(67,42,23,0.035)] lg:w-[390px] lg:border-t-0">
+      <div className="pos-tablet-switch" role="tablist" aria-label="Point of sale view">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tabletPane === "menu"}
+          onClick={() => setTabletPane("menu")}
+          className={tabletPane === "menu" ? "is-active" : ""}
+        >
+          <LayoutGrid className="h-4 w-4" /> Menu
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tabletPane === "order"}
+          onClick={() => setTabletPane("order")}
+          className={tabletPane === "order" ? "is-active" : ""}
+        >
+          <ShoppingBasket className="h-4 w-4" /> Current Order
+          <span>{itemCount}</span>
+          <strong>
+            {total.toLocaleString("en-PH", {
+              style: "currency",
+              currency: "PHP",
+            })}
+          </strong>
+        </button>
+      </div>
+      <div className="pos-workspace flex min-h-0 flex-1 flex-col lg:flex-row">
+        <div className={`pos-pane pos-menu-pane min-h-0 min-w-0 flex-1 ${tabletPane === "menu" ? "is-active" : ""}`}>
+          <MenuGrid
+            menuItems={state.menuItems}
+            cart={cart}
+            category={category}
+            search={search}
+            onCategoryChange={setCategory}
+            onSearchChange={setSearch}
+            onSelect={setSelectedItem}
+          />
+        </div>
+        <aside className={`pos-pane pos-order-pane w-full shrink-0 flex-col overflow-hidden border-t border-border bg-white shadow-[-8px_0_24px_rgba(67,42,23,0.035)] lg:flex lg:w-[390px] lg:border-t-0 ${tabletPane === "order" ? "is-active flex" : "hidden"}`}>
           <POSCart
             items={cart}
             onAdjust={adjust}
@@ -419,20 +451,21 @@ export function WalkInPOSPage({
               if (window.confirm("Clear all items from the cart?")) setCart([]);
             }}
           />
-          <div className="border-t border-border bg-[#fffdfb] p-4">
-            <label
-              className="mb-1.5 block text-[10px] font-black uppercase tracking-widest text-muted-foreground"
-              htmlFor="order-instructions"
-            >
+          <details className="pos-order-notes shrink-0 border-t border-border bg-[#fffdfb]">
+            <summary className="flex min-h-12 cursor-pointer items-center justify-between px-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
               Order instructions
-            </label>
-            <textarea
-              id="order-instructions"
-              placeholder="Special instructions for the whole order…"
-              className="min-h-16 w-full rounded-xl border border-border bg-[#fbf8f4] p-3 text-xs outline-none transition focus:border-primary/50 focus:bg-white focus:ring-4 focus:ring-primary/10"
-              {...register("orderInstructions")}
-            />
-          </div>
+              <span className="normal-case tracking-normal text-primary">Add note</span>
+            </summary>
+            <div className="px-4 pb-3">
+              <textarea
+                id="order-instructions"
+                aria-label="Order instructions"
+                placeholder="Special instructions for the whole order…"
+                className="min-h-16 w-full rounded-xl border border-border bg-[#fbf8f4] p-3 text-xs outline-none transition focus:border-primary/50 focus:bg-white focus:ring-4 focus:ring-primary/10"
+                {...register("orderInstructions")}
+              />
+            </div>
+          </details>
           <PaymentPanel
             subtotal={subtotal}
             discountAmount={discountAmount}
@@ -457,7 +490,7 @@ export function WalkInPOSPage({
       <PlaceOrderDialog
         open={confirmOpen}
         loading={loading}
-        itemCount={cart.reduce((sum, item) => sum + item.quantity, 0)}
+        itemCount={itemCount}
         customerName={values.customerName?.trim() || "Walk-in Customer"}
         orderType={values.orderType}
         tableNumber={

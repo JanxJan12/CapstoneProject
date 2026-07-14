@@ -17,7 +17,7 @@ export function MenuItemCard({
       disabled={!item.available}
       onClick={onSelect}
       aria-label={`View ${item.name} details`}
-      className={`group relative min-h-[200px] overflow-hidden rounded-2xl border bg-white p-2.5 text-left shadow-[0_3px_12px_rgba(67,42,23,0.04)] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${item.available ? "hover:-translate-y-1 hover:border-primary/35 hover:shadow-[0_12px_24px_rgba(67,42,23,0.1)] active:scale-[0.98]" : "cursor-not-allowed border-zinc-200 opacity-65"} ${quantity ? "border-primary/50 ring-2 ring-primary/10" : "border-border"}`}
+      className={`group relative min-h-[188px] overflow-hidden rounded-2xl border bg-white p-2.5 text-left shadow-[0_3px_12px_rgba(67,42,23,0.04)] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${item.available ? "hover:-translate-y-1 hover:border-primary/35 hover:shadow-[0_12px_24px_rgba(67,42,23,0.1)] active:scale-[0.98]" : "cursor-not-allowed border-zinc-200 opacity-65"} ${quantity ? "border-primary/50 ring-2 ring-primary/10" : "border-border"}`}
     >
       {quantity > 0 && (
         <span
@@ -28,7 +28,7 @@ export function MenuItemCard({
         </span>
       )}
       <div
-        className={`relative flex h-24 items-center justify-center overflow-hidden rounded-xl ${item.available ? "bg-gradient-to-br from-[#fbf4eb] to-[#f1e3d4] text-primary/35" : "bg-zinc-100 text-zinc-400"}`}
+        className={`relative flex h-20 items-center justify-center overflow-hidden rounded-xl ${item.available ? "bg-gradient-to-br from-[#fbf4eb] to-[#f1e3d4] text-primary/35" : "bg-zinc-100 text-zinc-400"}`}
       >
         <ImageIcon
           className="h-7 w-7"
@@ -45,7 +45,7 @@ export function MenuItemCard({
           </p>
         </div>
         {item.available && (
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition-all group-hover:rotate-90 group-hover:bg-primary group-hover:text-white">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary transition-all group-hover:rotate-90 group-hover:bg-primary group-hover:text-white">
             <Plus className="h-4 w-4" />
           </span>
         )}

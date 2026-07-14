@@ -30,7 +30,7 @@ export function PaymentQueue({
           <button
             key={payment.id}
             onClick={() => onSelect(payment.id)}
-            className={`group min-h-[108px] w-full p-4 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary ${selectedId === payment.id ? "border-l-4 border-l-primary bg-gradient-to-r from-amber-50 to-white shadow-[inset_0_0_0_1px_rgba(184,79,10,0.05)]" : "hover:bg-white hover:shadow-[inset_3px_0_0_rgba(184,79,10,0.18)]"}`}
+            className={`group min-h-[116px] w-full p-4 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary ${selectedId === payment.id ? "border-l-4 border-l-primary bg-gradient-to-r from-amber-50 to-white shadow-[inset_0_0_0_1px_rgba(184,79,10,0.05)]" : "hover:bg-white hover:shadow-[inset_3px_0_0_rgba(184,79,10,0.18)]"}`}
           >
             <div className="flex items-start justify-between gap-3">
               <div>

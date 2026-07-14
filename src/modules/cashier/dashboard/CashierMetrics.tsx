@@ -5,7 +5,7 @@ import { useCashierMetrics } from "../hooks/useCashierMetrics";
 export function CashierMetrics() {
   const metrics = useCashierMetrics();
   return (
-    <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
       <Metric
         label="Pending Payments"
         value={String(metrics.pendingPayments)}
@@ -52,7 +52,7 @@ function Metric({
   tone: string;
 }) {
   return (
-    <div className="rrj-card rrj-card-hover group relative overflow-hidden p-4 sm:p-5">
+    <div className="rrj-card rrj-card-hover group relative min-h-[118px] overflow-hidden p-4">
       <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-primary/70 via-orange-400/40 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">

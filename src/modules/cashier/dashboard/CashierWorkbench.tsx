@@ -3,8 +3,6 @@ import {
   Banknote,
   ChefHat,
   CreditCard,
-  History,
-  Printer,
   Search,
   ShoppingCart,
   PackageCheck,
@@ -35,21 +33,6 @@ export function CashierWorkbench({
       action: () => onNavigate("pending-payments"),
     },
     {
-      label: "Kitchen Order List",
-      detail: `${metrics.kitchenOrders} kitchen tickets`,
-      icon: ChefHat,
-      action: () =>
-        onNavigate("order-list", {
-          statuses: ["Confirmed", "Preparing", "Ready"],
-        }),
-    },
-    {
-      label: "Transaction History",
-      detail: "Search and export receipts",
-      icon: History,
-      action: () => onNavigate("transactions"),
-    },
-    {
       label: "Release Ready Order",
       detail: `${metrics.readyOrders} ready for handoff`,
       icon: PackageCheck,
@@ -62,30 +45,18 @@ export function CashierWorkbench({
       icon: Search,
       action: () => onNavigate("order-list", { focusSearch: true }),
     },
-    {
-      label: "Reprint Receipt",
-      detail: "Open the latest transaction",
-      icon: Printer,
-      action: () => onNavigate("transactions", { openMostRecentReceipt: true }),
-    },
-    {
-      label: "End Shift",
-      detail: "Count drawer and settle",
-      icon: Banknote,
-      action: () => onNavigate("shift-settlement"),
-    },
   ];
   return (
     <section className="rrj-card p-4 sm:p-5">
       <div className="mb-4">
         <h2 className="text-sm font-black tracking-tight text-foreground">
-          Cashier Workbench
+          Priority Actions
         </h2>
         <p className="text-[11px] font-semibold text-muted-foreground">
-          Fast access to connected counter tasks
+          The four tasks used most often at the counter
         </p>
       </div>
-      <div className="grid gap-2 sm:grid-cols-2">
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1 2xl:grid-cols-2">
         {actions.map(({ label, detail, icon: Icon, action, primary }) => (
           <button
             key={label}

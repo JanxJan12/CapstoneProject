@@ -59,7 +59,7 @@ export function POSCart({
                       type="button"
                       aria-label={`Decrease ${item.name}`}
                       onClick={() => onAdjust(item.menuItemId, -1)}
-                      className="flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-white shadow-sm transition hover:border-primary/30 hover:bg-amber-50 hover:text-primary"
+                      className="flex h-12 w-12 items-center justify-center rounded-xl border border-border bg-white shadow-sm transition hover:border-primary/30 hover:bg-amber-50 hover:text-primary"
                     >
                       <Minus className="h-3.5 w-3.5" />
                     </button>
@@ -70,7 +70,7 @@ export function POSCart({
                       type="button"
                       aria-label={`Increase ${item.name}`}
                       onClick={() => onAdjust(item.menuItemId, 1)}
-                      className="flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-white shadow-sm transition hover:border-primary/30 hover:bg-amber-50 hover:text-primary"
+                      className="flex h-12 w-12 items-center justify-center rounded-xl border border-border bg-white shadow-sm transition hover:border-primary/30 hover:bg-amber-50 hover:text-primary"
                     >
                       <Plus className="h-3.5 w-3.5" />
                     </button>
@@ -82,7 +82,7 @@ export function POSCart({
                     type="button"
                     aria-label={`Remove ${item.name}`}
                     onClick={() => onRemove(item.menuItemId)}
-                    className="flex h-10 w-10 items-center justify-center rounded-lg text-red-500 transition hover:bg-red-50 hover:text-red-700"
+                    className="flex h-12 w-12 items-center justify-center rounded-xl text-red-500 transition hover:bg-red-50 hover:text-red-700"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>

@@ -36,9 +36,9 @@ export function POSOrderHeader({
   onReopen: (id: string) => void;
 }) {
   return (
-    <div className="border-b border-border bg-gradient-to-r from-white via-[#fffaf5] to-orange-50/30 p-3.5 shadow-[0_4px_14px_rgba(67,42,23,0.035)]">
-      <div className="flex flex-wrap items-end gap-3">
-        <div className="min-w-[180px] flex-1 lg:max-w-[240px]">
+    <div className="pos-order-header border-b border-border bg-gradient-to-r from-white via-[#fffaf5] to-orange-50/30 p-3 shadow-[0_4px_14px_rgba(67,42,23,0.035)]">
+      <div className="pos-order-fields flex flex-wrap items-end gap-2.5">
+        <div className="min-w-[180px] flex-1 lg:max-w-[230px]">
           <Label htmlFor="customer-name">
             <span className="flex items-center gap-1">
               <UserRound className="h-3 w-3" />
@@ -55,11 +55,11 @@ export function POSOrderHeader({
         </div>
         <div>
           <Label>Order type</Label>
-          <div className="flex min-h-11 items-center rounded-xl border border-border bg-muted/70 p-1 shadow-inner">
+          <div className="flex min-h-12 items-center rounded-xl border border-border bg-muted/70 p-1 shadow-inner">
             {(["Dine-in", "Take-out"] as const).map((type) => (
               <label
                 key={type}
-                className={`flex min-h-9 cursor-pointer items-center rounded-lg px-4 text-xs font-black transition has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary ${orderType === type ? "bg-white text-primary shadow-sm ring-1 ring-border/60" : "text-muted-foreground hover:text-foreground"}`}
+                className={`flex min-h-10 cursor-pointer items-center rounded-lg px-4 text-xs font-black transition has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary ${orderType === type ? "bg-white text-primary shadow-sm ring-1 ring-border/60" : "text-muted-foreground hover:text-foreground"}`}
               >
                 <input
                   type="radio"
@@ -82,7 +82,7 @@ export function POSOrderHeader({
             </Label>
             <select
               id="table-number"
-              className="min-h-11 w-full rounded-xl border border-border bg-white px-3 text-xs font-bold outline-none focus:ring-2 focus:ring-primary/20"
+              className="min-h-12 w-full rounded-xl border border-border bg-white px-3 text-xs font-bold outline-none focus:ring-2 focus:ring-primary/20"
               {...register("tableNumber")}
             >
               <option value="">Select table</option>
@@ -109,7 +109,7 @@ export function POSOrderHeader({
           </Label>
           <select
             id="discount-type"
-            className="min-h-11 w-full rounded-xl border border-border bg-white px-3 text-xs font-bold outline-none focus:ring-2 focus:ring-primary/20"
+            className="min-h-12 w-full rounded-xl border border-border bg-white px-3 text-xs font-bold outline-none focus:ring-2 focus:ring-primary/20"
             {...register("discountType")}
           >
             <option>None</option>
@@ -138,7 +138,7 @@ export function POSOrderHeader({
                 if (event.target.value) onReopen(event.target.value);
                 event.target.value = "";
               }}
-              className="min-h-11 w-full rounded-xl border border-border bg-white px-3 text-xs font-bold"
+              className="min-h-12 w-full rounded-xl border border-border bg-white px-3 text-xs font-bold"
             >
               <option value="">Reopen held…</option>
               {heldOrders.map((held) => (
@@ -151,7 +151,7 @@ export function POSOrderHeader({
             </select>
           </div>
         )}
-        <div className="ml-auto flex flex-wrap gap-1">
+        <div className="pos-order-actions ml-auto flex flex-wrap gap-1.5">
           <Action label="New" icon={RotateCcw} onClick={onNew} />
           <Action label="Hold" icon={PauseCircle} onClick={onHold} />
           <Action label="Void" icon={XCircle} danger onClick={onVoid} />
@@ -176,7 +176,7 @@ function Action({
     <button
       type="button"
       onClick={onClick}
-      className={`inline-flex min-h-11 items-center gap-1.5 rounded-xl border px-3 text-[10px] font-black shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${danger ? "border-red-200 bg-red-50 text-red-700 hover:bg-red-100" : "border-border bg-white text-muted-foreground hover:border-primary/25 hover:bg-amber-50/40 hover:text-foreground"}`}
+      className={`inline-flex min-h-12 items-center gap-1.5 rounded-xl border px-3 text-[10px] font-black shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${danger ? "border-red-200 bg-red-50 text-red-700 hover:bg-red-100" : "border-border bg-white text-muted-foreground hover:border-primary/25 hover:bg-amber-50/40 hover:text-foreground"}`}
     >
       <Icon className="h-3.5 w-3.5" />
       {label}
