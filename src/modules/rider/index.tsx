@@ -1,0 +1,421 @@
+import { useState } from "react";
+import {
+  UtensilsCrossed, Bike, LayoutDashboard, History, User,
+  MapPin, Phone, Check, X, ArrowLeft, Upload, Camera,
+  Navigation, Clock, ImageIcon, LogOut, ChefHat,
+} from "lucide-react";
+
+type RiderScreen =
+  | "splash" | "login" | "home" | "requests" | "delivery-detail"
+  | "nav-assist" | "update-status" | "upload-proof" | "history" | "profile";
+
+type BottomTab = "home" | "deliveries" | "history" | "profile";
+
+// ── Android phone shell ───────────────────────────────────────────
+// On mobile (< md): full-screen, no chrome
+// On desktop (>= md): phone frame centered on dark bg
+function PhoneShell({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="rider-app flex h-full w-full items-center justify-center bg-background md:overflow-auto md:py-6">
+      <div
+        className="rider-phone flex h-full w-full flex-col overflow-hidden md:h-[720px] md:w-[360px] md:flex-shrink-0 md:rounded-[2.7rem] md:border-[7px] md:border-[#17110e] md:shadow-[0_42px_90px_-32px_rgba(18,10,5,0.8)]"
+      >
+        {/* Status bar — desktop phone chrome only */}
+        <div className="hidden md:flex items-center justify-between px-5 pt-3 pb-1 bg-zinc-900 flex-shrink-0">
+          <span className="text-white text-[10px] font-semibold">9:41</span>
+          <div className="flex items-center gap-1.5">
+            <div className="flex gap-0.5 items-end">
+              {[3, 5, 7, 9].map((h, i) => (
+                <div key={i} className={`w-1 rounded-sm ${i < 3 ? "bg-white" : "bg-white/40"}`} style={{ height: h }} />
+              ))}
+            </div>
+            <div className="w-5 h-2.5 rounded-sm border border-white/60 flex items-center px-0.5 ml-1">
+              <div className="h-1.5 bg-green-400 rounded-xs" style={{ width: "70%" }} />
+            </div>
+          </div>
+        </div>
+        {/* Screen content */}
+        <div className="rider-screen flex flex-1 flex-col overflow-hidden bg-background">
+          {children}
+        </div>
+        {/* Home indicator — desktop only */}
+        <div className="hidden md:flex bg-background items-center justify-center py-2 flex-shrink-0">
+          <div className="w-24 h-1 bg-zinc-300 rounded-full" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Bottom navigation ─────────────────────────────────────────────
+function BottomNav({ active, onSelect }: { active: BottomTab; onSelect: (t: BottomTab) => void }) {
+  const tabs: { id: BottomTab; label: string; icon: React.ElementType }[] = [
+    { id: "home",       label: "Home",       icon: LayoutDashboard },
+    { id: "deliveries", label: "Deliveries", icon: Bike },
+    { id: "history",    label: "History",    icon: History },
+    { id: "profile",    label: "Profile",    icon: User },
+  ];
+  return (
+    <div className="rider-bottom-nav flex flex-shrink-0 border-t border-border bg-white/95 backdrop-blur-xl">
+      {tabs.map((t) => {
+        const Icon = t.icon;
+        return (
+          <button
+            key={t.id}
+            onClick={() => onSelect(t.id)}
+            className={`flex-1 flex flex-col items-center gap-0.5 py-2.5 transition-colors ${active === t.id ? "text-primary" : "text-muted-foreground"}`}
+          >
+            <Icon className="w-5 h-5" strokeWidth={active === t.id ? 2.5 : 1.8} />
+            <span className="text-[9px] font-semibold">{t.label}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── Splash ────────────────────────────────────────────────────────
+function SplashScreen({ onNext }: { onNext: () => void }) {
+  return (
+    <div className="rider-splash relative flex flex-1 flex-col items-center justify-center gap-6 overflow-hidden bg-primary px-8">
+      <div className="w-20 h-20 rounded-3xl bg-white/20 flex items-center justify-center">
+        <UtensilsCrossed className="w-10 h-10 text-white" strokeWidth={2} />
+      </div>
+      <div className="text-center">
+        <p className="text-white font-bold text-2xl">RRJ Rider</p>
+        <p className="text-white/60 text-xs mt-1 uppercase tracking-widest">Delivery App</p>
+      </div>
+      <button
+        onClick={onNext}
+        className="mt-4 w-full py-3 rounded-xl bg-white text-primary font-bold text-sm hover:bg-primary/5"
+      >
+        Get Started
+      </button>
+      <p className="text-white/40 text-[9px] absolute bottom-6">v1.0.0 · RRJ Food-House</p>
+    </div>
+  );
+}
+
+// ── Login ────────────────────────────────────────────────────────
+function LoginScreen({ onNext }: { onNext: () => void }) {
+  const [email, setEmail]   = useState("ramil.abad@rrj.com");
+  const [password, setPassword] = useState("password");
+  return (
+    <>
+      <div className="bg-primary px-5 pt-7 pb-10 flex-shrink-0">
+        <div className="flex items-center gap-2.5 mb-5">
+          <div className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center">
+            <Bike className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <div className="text-white font-bold text-sm">RRJ Rider</div>
+            <div className="text-white/60 text-[9px] font-semibold uppercase tracking-widest mt-0.5">Delivery App</div>
+          </div>
+        </div>
+        <h2 className="text-white text-xl font-bold">Sign in to manage<br />your deliveries</h2>
+        <p className="text-white/60 text-[10px] mt-1">Authorized delivery partners only.</p>
+      </div>
+      <div className="bg-card -mt-5 rounded-t-3xl flex-1 px-5 pt-5 pb-4 overflow-y-auto">
+        <div className="flex flex-col gap-3.5">
+          <div className="flex flex-col gap-1"><label className="text-xs font-semibold">Email</label><input value={email} onChange={(e) => setEmail(e.target.value)} className="px-3 py-2.5 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:border-primary/50" /></div>
+          <div className="flex flex-col gap-1"><label className="text-xs font-semibold">Password</label><input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="px-3 py-2.5 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:border-primary/50" /></div>
+          <div className="flex justify-end"><button className="text-xs font-semibold text-primary">Forgot password?</button></div>
+          <button onClick={onNext} style={{ minHeight: 44 }} className="w-full flex items-center justify-center rounded-xl bg-primary text-white font-bold text-sm hover:bg-amber-800">Sign In</button>
+        </div>
+        <p className="text-center text-[10px] text-muted-foreground mt-5">Need access? Please contact RRJ Food-House management.</p>
+      </div>
+    </>
+  );
+}
+
+// ── Home Tab ─────────────────────────────────────────────────────
+function HomeTab({ onNav }: { onNav: (s: RiderScreen) => void }) {
+  const [available, setAvailable] = useState(true);
+  return (
+    <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="bg-primary px-4 pt-4 pb-8 flex-shrink-0">
+        <div className="flex items-center justify-between mb-4">
+          <div><p className="text-white/60 text-[8px] font-semibold uppercase tracking-wide">Good morning,</p><p className="text-white font-bold text-sm">Ramil Abad</p></div>
+          <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center"><span className="text-white font-bold text-sm">R</span></div>
+        </div>
+        <div className="flex items-center justify-between bg-white/15 rounded-xl px-4 py-3">
+          <div><p className="text-white text-xs font-bold">Availability</p><p className="text-white/60 text-[9px]">{available ? "Accepting deliveries" : "Not accepting"}</p></div>
+          <button onClick={() => setAvailable(!available)} className={`w-12 h-6 rounded-full transition-all relative ${available ? "bg-green-400" : "bg-white/30"}`}>
+            <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${available ? "left-6" : "left-0.5"}`} />
+          </button>
+        </div>
+      </div>
+      <div className="-mt-4 rounded-t-2xl bg-background flex-1 overflow-y-auto px-4 pt-4">
+        <div className="grid grid-cols-2 gap-2 mb-4">
+          {[{ l: "Deliveries Today", v: "5", c: "text-primary" }, { l: "Completed", v: "3", c: "text-green-600" }].map((s) => (
+            <div key={s.l} className="bg-card rounded-xl border border-border p-3"><p className="text-[9px] text-muted-foreground mb-0.5">{s.l}</p><p className={`text-xl font-bold ${s.c}`}>{s.v}</p></div>
+          ))}
+        </div>
+        <p className="text-xs font-bold text-foreground mb-2">Active Delivery</p>
+        <button onClick={() => onNav("delivery-detail")} className="w-full bg-card rounded-xl border border-border p-3 text-left mb-4 hover:border-primary/40 transition-colors">
+          <div className="flex justify-between mb-1.5"><span className="font-mono text-[9px] font-bold text-primary">ORD-1046</span><span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-blue-100 text-blue-700">Out for Delivery</span></div>
+          <p className="text-xs font-semibold mb-1">Juan dela Cruz</p>
+          <div className="flex items-start gap-1 text-[9px] text-muted-foreground mb-2"><MapPin className="w-3 h-3 mt-0.5 text-primary flex-shrink-0" /><span>23 Katipunan Ave., QC</span></div>
+          <div className="w-full py-1.5 rounded-lg bg-primary text-white text-[10px] font-bold text-center">View Delivery</div>
+        </button>
+        {available && (
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
+            <p className="text-[10px] font-bold text-amber-800 mb-1">1 new delivery request</p>
+            <button onClick={() => onNav("requests")} className="text-[10px] font-semibold text-primary">View Request →</button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Delivery Requests ─────────────────────────────────────────────
+function DeliveryRequestsTab({ onNav }: { onNav: (s: RiderScreen) => void }) {
+  return (
+    <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="bg-primary px-4 py-4 flex-shrink-0"><p className="text-white font-bold">Delivery Request</p><p className="text-white/60 text-[9px]">New delivery available near you</p></div>
+      <div className="-mt-3 rounded-t-2xl bg-background flex-1 px-4 pt-4 overflow-y-auto">
+        <div className="bg-card rounded-xl border border-border p-3 mb-3">
+          <div className="flex justify-between mb-2"><span className="font-mono text-[9px] font-bold text-primary">ORD-1052</span><span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-blue-100 text-blue-700">Confirmed</span></div>
+          <p className="text-xs font-bold mb-2">Grace Villanueva · 09282345678</p>
+          <div className="flex flex-col gap-1.5 mb-2.5">
+            <div className="flex items-start gap-1.5 text-[9px] text-muted-foreground"><MapPin className="w-3 h-3 mt-0.5 text-primary flex-shrink-0" /><span><span className="font-semibold text-foreground">Pickup:</span> RRJ Food-House, Manila</span></div>
+            <div className="flex items-start gap-1.5 text-[9px] text-muted-foreground"><MapPin className="w-3 h-3 mt-0.5 text-green-500 flex-shrink-0" /><span><span className="font-semibold text-foreground">Deliver to:</span> 12 Mabini Ave., Makati</span></div>
+            <div className="flex items-start gap-1.5 text-[9px] text-muted-foreground"><Navigation className="w-3 h-3 mt-0.5 flex-shrink-0" /><span>Landmark: Near BPI Bank</span></div>
+          </div>
+          <div className="bg-muted/60 rounded-lg p-2 mb-3"><p className="text-[8px] font-bold text-muted-foreground mb-0.5">ORDER ITEMS</p><p className="text-[9px]">Sinigang na Baka, White Rice · ₱190</p></div>
+          <div className="flex items-center justify-between text-[9px] text-muted-foreground mb-3">
+            <div className="flex items-center gap-1"><Clock className="w-3 h-3" /> Est. 15–20 min</div>
+            <span>Delivery fee: ₱50</span>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <button onClick={() => onNav("delivery-detail")} className="py-2.5 rounded-xl bg-primary text-white text-[10px] font-bold flex items-center justify-center gap-1"><Check className="w-3 h-3" />Accept</button>
+            <button className="py-2.5 rounded-xl border border-border bg-white text-[10px] font-bold text-muted-foreground flex items-center justify-center gap-1"><X className="w-3 h-3" />Reject</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Delivery Detail ───────────────────────────────────────────────
+function DeliveryDetailScreen({ onNav }: { onNav: (s: RiderScreen) => void }) {
+  return (
+    <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="bg-primary px-4 py-4 flex items-center gap-3 flex-shrink-0">
+        <button onClick={() => onNav("home")} className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center"><ArrowLeft className="w-4 h-4 text-white" /></button>
+        <p className="text-white font-bold text-sm">Delivery Detail</p>
+      </div>
+      <div className="flex-1 bg-background overflow-y-auto px-4 py-3">
+        <div className="flex items-center gap-2 mb-3"><span className="font-mono text-[9px] font-bold text-primary">ORD-1046</span><span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-blue-100 text-blue-700">Out for Delivery</span></div>
+        <div className="bg-card rounded-xl border border-border p-3 mb-2"><p className="text-[8px] font-bold text-muted-foreground uppercase mb-1">Customer</p><p className="text-xs font-bold">Juan dela Cruz</p><div className="flex items-center gap-1 text-[9px] text-muted-foreground mt-0.5"><Phone className="w-3 h-3" /><span>09283456789</span></div></div>
+        <div className="bg-card rounded-xl border border-border p-3 mb-2">
+          <p className="text-[8px] font-bold text-muted-foreground uppercase mb-1">Delivery Address</p>
+          <div className="flex items-start gap-1.5 text-[9px]"><MapPin className="w-3 h-3 mt-0.5 text-primary flex-shrink-0" /><p className="font-semibold">23 Katipunan Ave., QC</p></div>
+          <p className="text-[9px] text-muted-foreground mt-0.5 ml-4">Landmark: Near Mercury Drug</p>
+          <button onClick={() => onNav("nav-assist")} className="mt-2 w-full h-14 bg-blue-50 rounded-lg border border-blue-200 flex items-center justify-center gap-2 text-[10px] text-blue-600 font-semibold">
+            <Navigation className="w-4 h-4" /> Open Navigation Assistance
+          </button>
+        </div>
+        <div className="bg-card rounded-xl border border-border p-3 mb-3">
+          <p className="text-[8px] font-bold text-muted-foreground uppercase mb-1">Items</p>
+          <div className="flex justify-between text-[9px] mb-0.5"><span>Adobong Manok</span><span className="font-bold">×1</span></div>
+          <div className="flex justify-between text-[9px] mb-1.5"><span>White Rice</span><span className="font-bold">×1</span></div>
+          <div className="flex justify-between font-bold text-xs border-t border-border pt-1.5"><span>Total</span><span className="text-primary">₱155</span></div>
+        </div>
+        <button onClick={() => onNav("update-status")} className="w-full py-3 rounded-xl bg-primary text-white font-bold text-[11px] flex items-center justify-center gap-1.5 mb-2">
+          Update Delivery Status
+        </button>
+        <button onClick={() => onNav("upload-proof")} className="w-full py-2.5 rounded-xl border border-border bg-white text-[10px] font-semibold flex items-center justify-center gap-1.5">
+          <Upload className="w-3.5 h-3.5" /> Upload Proof of Delivery
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Navigation Assistance ─────────────────────────────────────────
+function NavAssistScreen({ onNav }: { onNav: (s: RiderScreen) => void }) {
+  return (
+    <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="bg-primary px-4 py-4 flex items-center gap-3 flex-shrink-0">
+        <button onClick={() => onNav("delivery-detail")} className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center"><ArrowLeft className="w-4 h-4 text-white" /></button>
+        <p className="text-white font-bold text-sm">Navigation</p>
+      </div>
+      <div className="flex-1 bg-background overflow-y-auto px-4 py-3">
+        {/* Map placeholder */}
+        <div className="h-52 bg-blue-50 rounded-2xl border border-blue-200 flex flex-col items-center justify-center gap-2 mb-4 overflow-hidden relative">
+          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "repeating-linear-gradient(0deg, #3b82f6 0, #3b82f6 1px, transparent 1px, transparent 40px), repeating-linear-gradient(90deg, #3b82f6 0, #3b82f6 1px, transparent 1px, transparent 40px)" }} />
+          <Navigation className="w-10 h-10 text-blue-500" />
+          <p className="text-sm font-bold text-blue-700">Navigation Map</p>
+          <p className="text-xs text-blue-500">23 Katipunan Ave., QC</p>
+        </div>
+        <div className="bg-card rounded-xl border border-border p-3 mb-3">
+          <div className="flex items-start gap-2 mb-2"><div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0 mt-0.5"><span className="text-white text-[8px] font-bold">A</span></div><div><p className="text-[10px] font-semibold">RRJ Food-House</p><p className="text-[9px] text-muted-foreground">Pickup point</p></div></div>
+          <div className="w-px h-4 bg-border ml-2.5 mb-2" />
+          <div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0 mt-0.5"><span className="text-white text-[8px] font-bold">B</span></div><div><p className="text-[10px] font-semibold">23 Katipunan Ave., QC</p><p className="text-[9px] text-muted-foreground">Near Mercury Drug · Est. 12 min</p></div></div>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="bg-card rounded-xl border border-border p-3 text-center"><p className="text-[9px] text-muted-foreground">Distance</p><p className="text-sm font-bold">4.2 km</p></div>
+          <div className="bg-card rounded-xl border border-border p-3 text-center"><p className="text-[9px] text-muted-foreground">Est. Time</p><p className="text-sm font-bold">12 min</p></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Update Status ─────────────────────────────────────────────────
+function UpdateStatusScreen({ onNav }: { onNav: (s: RiderScreen) => void }) {
+  const [current, setCurrent] = useState("Picked Up");
+  const statuses = ["Rider Accepted", "Picked Up", "Out for Delivery", "Delivered"];
+  return (
+    <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="bg-primary px-4 py-4 flex items-center gap-3 flex-shrink-0">
+        <button onClick={() => onNav("delivery-detail")} className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center"><ArrowLeft className="w-4 h-4 text-white" /></button>
+        <p className="text-white font-bold text-sm">Update Status</p>
+      </div>
+      <div className="flex-1 bg-background px-4 py-4 overflow-y-auto">
+        <p className="font-mono text-[9px] font-bold text-primary mb-3">ORD-1046</p>
+        {statuses.map((s, i) => {
+          const isDone = statuses.indexOf(current) > i;
+          const isActive = current === s;
+          return (
+            <button key={s} onClick={() => setCurrent(s)} className={`w-full flex items-center gap-2.5 p-3 mb-2 rounded-xl border text-left transition-all ${isActive ? "border-primary bg-red-50/60" : isDone ? "border-green-300 bg-green-50" : "border-border bg-card"}`}>
+              <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${isActive ? "border-primary bg-primary" : isDone ? "border-green-500 bg-green-500" : "border-border"}`}>
+                {(isActive || isDone) && <Check className="w-2.5 h-2.5 text-white" />}
+              </div>
+              <span className={`text-[10px] font-semibold ${isActive ? "text-primary" : isDone ? "text-green-700" : "text-muted-foreground"}`}>{s}</span>
+            </button>
+          );
+        })}
+        <button onClick={() => current === "Delivered" ? onNav("upload-proof") : onNav("delivery-detail")} className="w-full mt-3 py-3 rounded-xl bg-primary text-white font-bold text-[11px]">
+          {current === "Delivered" ? "Upload Proof of Delivery" : "Confirm Status"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Upload Proof ──────────────────────────────────────────────────
+function UploadProofScreen({ onNav }: { onNav: (s: RiderScreen) => void }) {
+  const [uploaded, setUploaded] = useState(false);
+  return (
+    <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="bg-primary px-4 py-4 flex items-center gap-3 flex-shrink-0">
+        <button onClick={() => onNav("delivery-detail")} className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center"><ArrowLeft className="w-4 h-4 text-white" /></button>
+        <p className="text-white font-bold text-sm">Proof of Delivery</p>
+      </div>
+      <div className="flex-1 bg-background px-4 py-4 overflow-y-auto">
+        <p className="text-xs font-bold mb-1">Upload Delivery Photo</p>
+        <p className="text-[9px] text-muted-foreground mb-4">Take a photo as proof the order was delivered.</p>
+        {!uploaded ? (
+          <>
+            <button onClick={() => setUploaded(true)} className="w-full h-44 bg-muted/60 border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center gap-2 mb-4 hover:border-primary/40 cursor-pointer transition-colors">
+              <Camera className="w-8 h-8 text-muted-foreground/50" />
+              <p className="text-[10px] font-semibold text-muted-foreground">Tap to take photo</p>
+            </button>
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              <button className="py-2.5 rounded-xl border border-border bg-card text-[10px] font-semibold flex items-center justify-center gap-1.5"><Camera className="w-3.5 h-3.5" />Camera</button>
+              <button className="py-2.5 rounded-xl border border-border bg-card text-[10px] font-semibold flex items-center justify-center gap-1.5"><ImageIcon className="w-3.5 h-3.5" />Gallery</button>
+            </div>
+          </>
+        ) : (
+          <div className="h-44 bg-green-50 border-2 border-green-300 rounded-xl flex flex-col items-center justify-center gap-2 mb-4">
+            <Check className="w-8 h-8 text-green-500" />
+            <p className="text-[10px] font-semibold text-green-700">Photo uploaded</p>
+          </div>
+        )}
+        <button onClick={() => { setUploaded(false); onNav("home"); }} disabled={!uploaded} className="w-full py-3 rounded-xl bg-primary text-white font-bold text-[11px] flex items-center justify-center gap-1.5 disabled:opacity-50">
+          <Upload className="w-3.5 h-3.5" /> Submit & Complete Delivery
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── History Tab ───────────────────────────────────────────────────
+function HistoryTab() {
+  const records = [
+    { id: "ORD-1046", addr: "23 Katipunan Ave., QC",      amt: "₱155", time: "10:35 AM" },
+    { id: "ORD-1043", addr: "34 Shaw Blvd., Mandaluyong", amt: "₱175", time: "9:52 AM" },
+    { id: "ORD-1041", addr: "78 Quezon Blvd., QC",        amt: "₱220", time: "8:30 AM" },
+    { id: "ORD-1039", addr: "12 Mabini Ave., Makati",     amt: "₱190", time: "8:05 AM" },
+  ];
+  return (
+    <div className="flex-1 bg-background overflow-y-auto px-4 pt-4">
+      <p className="text-xs font-bold text-foreground mb-3">Today's Deliveries</p>
+      {records.map((d) => (
+        <div key={d.id} className="flex items-center justify-between py-3 border-b border-border last:border-0">
+          <div><span className="font-mono text-[9px] font-bold text-primary">{d.id}</span><p className="text-[9px] text-muted-foreground">{d.addr} · {d.time}</p></div>
+          <div className="flex items-center gap-2"><span className="text-xs font-bold">{d.amt}</span><span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-green-100 text-green-700">Done</span></div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── Profile Tab ───────────────────────────────────────────────────
+function ProfileTab() {
+  return (
+    <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="bg-primary px-4 py-5 flex flex-col items-center gap-2 flex-shrink-0">
+        <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center"><span className="text-white font-bold text-xl">R</span></div>
+        <p className="text-white font-bold text-sm">Ramil Abad</p>
+        <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-green-400/30 text-green-100">Available</span>
+      </div>
+      <div className="flex-1 bg-background px-4 py-4 overflow-y-auto">
+        {[{ l: "Contact", v: "09172345678" }, { l: "License", v: "LIC-2021-001234" }, { l: "Plate", v: "ABD-1234" }, { l: "Motor", v: "Honda TMX 125" }].map((f) => (
+          <div key={f.l} className="flex justify-between py-2.5 border-b border-border last:border-0 text-[10px]">
+            <span className="text-muted-foreground">{f.l}</span>
+            <span className="font-semibold text-foreground">{f.v}</span>
+          </div>
+        ))}
+        <div className="grid grid-cols-2 gap-2 mt-3">
+          <div className="bg-card rounded-xl border border-border p-2.5 text-center"><p className="text-[8px] text-muted-foreground mb-0.5">Total Deliveries</p><p className="text-lg font-bold">128</p></div>
+          <div className="bg-card rounded-xl border border-border p-2.5 text-center"><p className="text-[8px] text-muted-foreground mb-0.5">Today</p><p className="text-lg font-bold text-primary">5</p></div>
+        </div>
+        <button className="w-full mt-4 py-2.5 rounded-xl border border-border bg-white text-[10px] font-bold text-muted-foreground flex items-center justify-center gap-1.5"><LogOut className="w-3 h-3" />Sign Out</button>
+      </div>
+    </div>
+  );
+}
+
+// ── Root Rider App ────────────────────────────────────────────────
+export function RiderApp() {
+  const [screen, setScreen] = useState<RiderScreen>("splash");
+  const [activeTab, setActiveTab] = useState<BottomTab>("home");
+
+  // Screens that show bottom navigation
+  const MAIN_SCREENS: RiderScreen[] = ["home", "requests", "history", "profile"];
+  const showBottomNav = MAIN_SCREENS.includes(screen);
+
+  const handleTabSelect = (tab: BottomTab) => {
+    setActiveTab(tab);
+    const tabToScreen: Record<BottomTab, RiderScreen> = {
+      home: "home", deliveries: "requests", history: "history", profile: "profile",
+    };
+    setScreen(tabToScreen[tab]);
+  };
+
+  return (
+    <PhoneShell>
+      {screen === "splash" && <SplashScreen onNext={() => setScreen("login")} />}
+      {screen === "login"  && <LoginScreen  onNext={() => setScreen("home")} />}
+
+      {showBottomNav && (
+        <>
+          {activeTab === "home"       && <HomeTab        onNav={setScreen} />}
+          {activeTab === "deliveries" && <DeliveryRequestsTab onNav={setScreen} />}
+          {activeTab === "history"    && <HistoryTab />}
+          {activeTab === "profile"    && <ProfileTab />}
+          <BottomNav active={activeTab} onSelect={handleTabSelect} />
+        </>
+      )}
+
+      {screen === "delivery-detail" && <DeliveryDetailScreen onNav={setScreen} />}
+      {screen === "nav-assist"      && <NavAssistScreen      onNav={setScreen} />}
+      {screen === "update-status"   && <UpdateStatusScreen   onNav={setScreen} />}
+      {screen === "upload-proof"    && <UploadProofScreen    onNav={setScreen} />}
+    </PhoneShell>
+  );
+}

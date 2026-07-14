@@ -1,0 +1,180 @@
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Download, Printer } from "lucide-react";
+import { toast } from "sonner";
+import { useCashierStore } from "../hooks/CashierStore";
+import type { CashierNavigationIntent, Order, Transaction } from "../types";
+import { CashierButton, PageHeading } from "../components/CashierUI";
+import { OrderDetailsDrawer } from "../orders/OrderDetailsDrawer";
+import { ReceiptDialog } from "../pos/ReceiptDialog";
+import {
+  TransactionFilters,
+  type TransactionFilterValue,
+} from "./TransactionFilters";
+import { TransactionSummary } from "./TransactionSummary";
+import { TransactionTable } from "./TransactionTable";
+
+const defaults: TransactionFilterValue = {
+  search: "",
+  method: "All",
+  status: "All",
+  from: "",
+  to: "",
+  cashier: "All",
+  shift: "All",
+};
+
+export function TransactionHistoryPage({
+  intent,
+}: {
+  intent?: CashierNavigationIntent;
+}) {
+  const { state } = useCashierStore();
+  const [filters, setFilters] = useState(defaults);
+  const [selectedOrder, setSelectedOrder] = useState<Order>();
+  const [receiptOrder, setReceiptOrder] = useState<Order>();
+  const openedRecent = useRef(false);
+  const filtered = useMemo(
+    () =>
+      state.transactions
+        .filter((transaction) => {
+          const query = filters.search.toLowerCase();
+          const created = transaction.createdAt.slice(0, 10);
+          return (
+            (!query ||
+              `${transaction.id} ${transaction.orderId} ${transaction.customerName}`
+                .toLowerCase()
+                .includes(query)) &&
+            (filters.method === "All" ||
+              transaction.method === filters.method) &&
+            (filters.status === "All" ||
+              transaction.status === filters.status) &&
+            (!filters.from || created >= filters.from) &&
+            (!filters.to || created <= filters.to) &&
+            (filters.cashier === "All" ||
+              transaction.cashierName === filters.cashier) &&
+            (filters.shift === "All" || transaction.shiftId === filters.shift)
+          );
+        })
+        .sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        ),
+    [state.transactions, filters],
+  );
+  useEffect(() => {
+    if (intent?.openMostRecentReceipt && !openedRecent.current) {
+      const recent = state.transactions.find(
+        (entry) => entry.status === "Completed",
+      );
+      const order = state.orders.find((entry) => entry.id === recent?.orderId);
+      if (order) setReceiptOrder(order);
+      openedRecent.current = true;
+    }
+  }, [intent, state]);
+  const openOrder = (transaction: Transaction, receipt = false) => {
+    const order = state.orders.find(
+      (entry) => entry.id === transaction.orderId,
+    );
+    if (receipt) setReceiptOrder(order);
+    else setSelectedOrder(order);
+  };
+  const exportCsv = () => {
+    const rows = [
+      [
+        "Transaction ID",
+        "Order ID",
+        "Customer",
+        "Amount",
+        "Method",
+        "Status",
+        "Cashier",
+        "Shift",
+        "Date",
+      ],
+      ...filtered.map((entry) => [
+        entry.id,
+        entry.orderId,
+        entry.customerName,
+        entry.amount,
+        entry.method,
+        entry.status,
+        entry.cashierName,
+        entry.shiftId,
+        entry.createdAt,
+      ]),
+    ];
+    const csv = rows
+      .map((row) =>
+        row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(","),
+      )
+      .join("\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = "rrj-cashier-transactions.csv";
+    anchor.click();
+    URL.revokeObjectURL(url);
+    toast.success("Filtered transactions exported.");
+  };
+  const payment = state.payments.find(
+    (entry) => entry.orderId === receiptOrder?.id,
+  );
+  return (
+    <div className="cashier-page">
+      <PageHeading
+        title="Transaction History"
+        description="Filtered summaries, receipt actions, and shift-linked payment records"
+        actions={
+          <>
+            <CashierButton variant="secondary" onClick={exportCsv}>
+              <Download className="h-4 w-4" />
+              Export CSV
+            </CashierButton>
+            <CashierButton variant="secondary" onClick={() => window.print()}>
+              <Printer className="h-4 w-4" />
+              Print report
+            </CashierButton>
+          </>
+        }
+      />
+      <TransactionSummary transactions={filtered} />
+      <TransactionFilters
+        value={filters}
+        shifts={state.shifts}
+        cashiers={[
+          ...new Set(state.transactions.map((entry) => entry.cashierName)),
+        ]}
+        onChange={setFilters}
+      />
+      <section className="rrj-card overflow-hidden">
+        <TransactionTable
+          transactions={filtered}
+          onView={(transaction) => openOrder(transaction)}
+          onPrint={(transaction) => {
+            openOrder(transaction, true);
+            toast.success("Receipt preview opened.");
+          }}
+        />
+        <div className="flex items-center justify-between border-t border-border bg-muted/20 px-4 py-3 text-[10px] text-muted-foreground">
+          <span>{filtered.length} filtered records</span>
+          <strong className="text-foreground">
+            Summary totals use these results
+          </strong>
+        </div>
+      </section>
+      <OrderDetailsDrawer
+        order={selectedOrder}
+        open={Boolean(selectedOrder)}
+        onOpenChange={(open) => {
+          if (!open) setSelectedOrder(undefined);
+        }}
+      />
+      <ReceiptDialog
+        order={receiptOrder}
+        payment={payment}
+        open={Boolean(receiptOrder)}
+        onClose={() => setReceiptOrder(undefined)}
+      />
+    </div>
+  );
+}
