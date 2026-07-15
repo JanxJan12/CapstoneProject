@@ -19,6 +19,7 @@ import { WalkInPOSPage } from "./pos/WalkInPOSPage";
 import { CashierOrderListPage } from "./orders/CashierOrderListPage";
 import { TransactionHistoryPage } from "./transactions/TransactionHistoryPage";
 import { ShiftSettlementPage } from "./shifts/ShiftSettlementPage";
+import { CashierConfirmDialog } from "./components/CashierUI";
 
 export function CashierApp() {
   return <CashierModule />;
@@ -31,44 +32,76 @@ function CashierModule() {
   const [page, setPage] = useState<CashierPageId>("dashboard");
   const [intent, setIntent] = useState<CashierNavigationIntent>();
   const [posDirty, setPosDirty] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState<{
+    page: CashierPageId;
+    intent?: CashierNavigationIntent;
+  }>();
   const groups = useMemo<NavGroup<CashierPageId>[]>(
     () => [
       {
         label: "Operations",
         items: [
-          { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+          {
+            id: "dashboard",
+            label: "Dashboard",
+            icon: LayoutDashboard,
+            shortcut: "F1",
+          },
           {
             id: "pending-payments",
             label: "Pending Payments",
             icon: CreditCard,
+            shortcut: "F3",
             badge: state.payments.filter((entry) => entry.status === "Pending")
               .length,
           },
-          { id: "walkin-pos", label: "Walk-in POS", icon: ShoppingCart },
-          { id: "order-list", label: "Order List", icon: ClipboardList },
-          { id: "transactions", label: "Transaction History", icon: History },
-          { id: "shift-settlement", label: "Shift Settlement", icon: Banknote },
+          {
+            id: "walkin-pos",
+            label: "Walk-in POS",
+            icon: ShoppingCart,
+            shortcut: "F2",
+          },
+          {
+            id: "order-list",
+            label: "Order List",
+            icon: ClipboardList,
+            shortcut: "F4",
+          },
+          {
+            id: "transactions",
+            label: "Transaction History",
+            icon: History,
+            shortcut: "F6",
+          },
+          {
+            id: "shift-settlement",
+            label: "Shift Settlement",
+            icon: Banknote,
+            shortcut: "F7",
+          },
         ],
       },
     ],
     [state.payments],
   );
 
-  const navigate = useCallback(
+  const commitNavigation = useCallback(
     (nextPage: CashierPageId, nextIntent?: CashierNavigationIntent) => {
-      if (
-        page === "walkin-pos" &&
-        nextPage !== "walkin-pos" &&
-        posDirty &&
-        !window.confirm(
-          "Leave Walk-in POS? The active cart has unsaved changes.",
-        )
-      )
-        return;
       setPage(nextPage);
       setIntent(nextIntent);
     },
-    [page, posDirty],
+    [],
+  );
+
+  const navigate = useCallback(
+    (nextPage: CashierPageId, nextIntent?: CashierNavigationIntent) => {
+      if (page === "walkin-pos" && nextPage !== "walkin-pos" && posDirty) {
+        setPendingNavigation({ page: nextPage, intent: nextIntent });
+        return;
+      }
+      commitNavigation(nextPage, nextIntent);
+    },
+    [commitNavigation, page, posDirty],
   );
 
   const openNotification = useCallback(
@@ -91,13 +124,21 @@ function CashierModule() {
         target.tagName === "TEXTAREA" ||
         target.tagName === "SELECT" ||
         target.isContentEditable;
-      if (event.key === "F2") {
+      if (editing) return;
+      if (page === "walkin-pos" && ["F2", "F3"].includes(event.key)) return;
+      const shortcutPages: Partial<Record<string, CashierPageId>> = {
+        F1: "dashboard",
+        F2: "walkin-pos",
+        F3: "pending-payments",
+        F4: "order-list",
+        F6: "transactions",
+        F7: "shift-settlement",
+      };
+      const shortcutPage = shortcutPages[event.key];
+      if (shortcutPage) {
         event.preventDefault();
-        navigate("walkin-pos");
-      }
-      if (event.key === "F3") {
-        event.preventDefault();
-        navigate("pending-payments");
+        navigate(shortcutPage);
+        return;
       }
       if (
         (event.ctrlKey || event.metaKey) &&
@@ -110,7 +151,7 @@ function CashierModule() {
     };
     window.addEventListener("keydown", shortcuts);
     return () => window.removeEventListener("keydown", shortcuts);
-  }, [navigate]);
+  }, [navigate, page]);
 
   const content =
     page === "dashboard" ? (
@@ -141,7 +182,38 @@ function CashierModule() {
       >
         {content}
       </AppShell>
-      <Toaster richColors position="top-right" closeButton />
+      <CashierConfirmDialog
+        open={Boolean(pendingNavigation)}
+        onOpenChange={(open) => {
+          if (!open) setPendingNavigation(undefined);
+        }}
+        title="Leave the active order?"
+        description="Your cart is saved on this device, but leaving the POS interrupts the current checkout flow."
+        confirmLabel="Leave POS"
+        cancelLabel="Stay here"
+        danger
+        onConfirm={() => {
+          if (pendingNavigation) {
+            commitNavigation(pendingNavigation.page, pendingNavigation.intent);
+          }
+          setPendingNavigation(undefined);
+        }}
+      />
+      <Toaster
+        richColors
+        closeButton
+        expand
+        visibleToasts={4}
+        position="top-right"
+        toastOptions={{
+          duration: 3600,
+          classNames: {
+            toast: "rounded-xl border-border font-medium shadow-xl",
+            title: "text-xs font-black",
+            description: "text-[11px] leading-4",
+          },
+        }}
+      />
     </>
   );
 }

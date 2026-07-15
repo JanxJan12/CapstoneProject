@@ -48,12 +48,25 @@ export function CashierOrderListPage({
   const [selected, setSelected] = useState<Order>();
   const [cancelTarget, setCancelTarget] = useState<Order>();
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
   const hasOpenedReady = useRef(false);
   useEffect(() => {
     if (intent?.focusSearch)
       window.setTimeout(() => searchRef.current?.focus(), 100);
   }, [intent]);
+  useEffect(() => {
+    const focusSearch = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement;
+      const editing = ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName);
+      if (event.key === "/" && !editing && !target.isContentEditable) {
+        event.preventDefault();
+        searchRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", focusSearch);
+    return () => window.removeEventListener("keydown", focusSearch);
+  }, []);
   useEffect(() => {
     if (intent?.openFirstReady && !hasOpenedReady.current) {
       const ready = state.orders.find((entry) => entry.status === "Ready");
@@ -124,7 +137,10 @@ export function CashierOrderListPage({
         title="Order List"
         description={`${filtered.length} matching orders from the shared cashier records`}
         actions={
-          <div className="flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-emerald-700">
+          <div
+            className="flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-emerald-700"
+            role="status"
+          >
             <Radio className="h-3 w-3 animate-pulse" />
             Auto-refresh active
           </div>
@@ -134,12 +150,15 @@ export function CashierOrderListPage({
       <OrderFilters
         value={filters}
         searchRef={searchRef}
+        refreshing={refreshing}
         onChange={setFilters}
-        onRefresh={() =>
-          toast.success("Order list refreshed", {
-            description: "All shared records are current.",
-          })
-        }
+        onRefresh={() => {
+          setRefreshing(true);
+          window.setTimeout(() => {
+            setRefreshing(false);
+            toast.success("Order list is up to date");
+          }, 350);
+        }}
       />
       <section className="rrj-card overflow-hidden">
         <OrderTable
@@ -155,7 +174,7 @@ export function CashierOrderListPage({
           }}
           onCancel={setCancelTarget}
         />
-        <div className="flex flex-col gap-2 border-t border-border bg-muted/20 px-4 py-3 text-[10px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+        <div className="cashier-table-footer flex flex-col gap-2 px-4 py-3 text-[10px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <span>
             Showing {visible.length ? (page - 1) * PAGE_SIZE + 1 : 0}–
             {Math.min(page * PAGE_SIZE, filtered.length)} of {filtered.length}
@@ -163,7 +182,7 @@ export function CashierOrderListPage({
           <div className="flex items-center gap-2">
             <CashierButton
               variant="secondary"
-              className="min-h-9 px-3"
+              size="sm"
               disabled={page === 1}
               onClick={() => setPage((value) => value - 1)}
             >
@@ -175,7 +194,7 @@ export function CashierOrderListPage({
             </strong>
             <CashierButton
               variant="secondary"
-              className="min-h-9 px-3"
+              size="sm"
               disabled={page === pages}
               onClick={() => setPage((value) => value + 1)}
             >

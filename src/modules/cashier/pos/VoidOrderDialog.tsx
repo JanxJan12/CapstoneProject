@@ -2,7 +2,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import {
   Dialog,
-  DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
@@ -11,6 +10,7 @@ import {
 import { voidSchema, type VoidForm } from "../schemas";
 import {
   CashierButton,
+  CashierDialogContent,
   CashierTextarea,
   FieldError,
   Label,
@@ -46,7 +46,7 @@ export function VoidOrderDialog({
         }
       }}
     >
-      <DialogContent>
+      <CashierDialogContent>
         <DialogHeader>
           <DialogTitle>Void current order?</DialogTitle>
           <DialogDescription>
@@ -66,6 +66,7 @@ export function VoidOrderDialog({
             <CashierTextarea
               id="void-reason"
               autoFocus
+              aria-invalid={Boolean(errors.reason)}
               placeholder="Why is this order being voided?"
               {...register("reason")}
             />
@@ -85,7 +86,7 @@ export function VoidOrderDialog({
             </CashierButton>
           </DialogFooter>
         </form>
-      </DialogContent>
+      </CashierDialogContent>
     </Dialog>
   );
 }

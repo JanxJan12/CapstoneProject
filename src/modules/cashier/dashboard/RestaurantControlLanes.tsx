@@ -1,7 +1,14 @@
-import { ArrowUpRight, Banknote, Bike, ChefHat, CreditCard } from "lucide-react";
+import {
+  ArrowUpRight,
+  Banknote,
+  Bike,
+  ChefHat,
+  CreditCard,
+} from "lucide-react";
 import { formatMoney } from "../constants";
 import { useCashierMetrics } from "../hooks/useCashierMetrics";
 import type { CashierNavigationIntent, CashierPageId } from "../types";
+import { SectionHeading } from "../components/CashierUI";
 
 export function RestaurantControlLanes({
   onNavigate,
@@ -80,53 +87,62 @@ export function RestaurantControlLanes({
 
   return (
     <section className="rrj-card p-4 sm:p-5">
-      <div className="mb-4">
-        <h2 className="text-sm font-black">Restaurant Control Lanes</h2>
-        <p className="text-[11px] font-semibold text-muted-foreground">
-          Measurable operational counts from current records
-        </p>
-      </div>
+      <SectionHeading
+        title="Restaurant Control Lanes"
+        description="Measurable operational counts from current records"
+        className="mb-4"
+      />
       <div className="grid gap-2 sm:grid-cols-2">
-        {lanes.map(({ label, icon: Icon, action, facts, progress, progressLabel }) => (
-          <button
-            key={label}
-            type="button"
-            onClick={action}
-            className="group min-h-[136px] rounded-xl border border-border bg-white/90 p-3.5 text-left transition hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-          >
-            <div className="flex items-center gap-3">
-              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-50 text-primary">
-                <Icon className="h-4 w-4" />
-              </span>
-              <strong className="flex-1 text-xs font-black">{label}</strong>
-              <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary" />
-            </div>
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              {facts.map(([factLabel, value]) => (
-                <span
-                  key={factLabel}
-                  className="rounded-lg border border-border/80 bg-muted/30 px-2 py-1 text-[9px] font-semibold text-muted-foreground"
-                >
-                  {factLabel} <strong className="text-foreground">{value}</strong>
+        {lanes.map(
+          ({ label, icon: Icon, action, facts, progress, progressLabel }) => (
+            <button
+              key={label}
+              type="button"
+              onClick={action}
+              className="group min-h-[136px] rounded-xl border border-border bg-white/90 p-3.5 text-left transition hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            >
+              <div className="flex items-center gap-3">
+                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-50 text-primary">
+                  <Icon className="h-4 w-4" />
                 </span>
-              ))}
-            </div>
-            {progress !== undefined && (
-              <div className="mt-3">
-                <div className="mb-1 flex justify-between text-[8px] font-bold uppercase tracking-wider text-muted-foreground">
-                  <span>{progressLabel}</span>
-                  <span>{progress}%</span>
-                </div>
-                <div className="h-1.5 overflow-hidden rounded-full bg-muted">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-primary to-orange-400"
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
+                <strong className="flex-1 text-xs font-black">{label}</strong>
+                <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary" />
               </div>
-            )}
-          </button>
-        ))}
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {facts.map(([factLabel, value]) => (
+                  <span
+                    key={factLabel}
+                    className="rounded-lg border border-border/80 bg-muted/30 px-2 py-1 text-[9px] font-semibold text-muted-foreground"
+                  >
+                    {factLabel}{" "}
+                    <strong className="text-foreground">{value}</strong>
+                  </span>
+                ))}
+              </div>
+              {progress !== undefined && (
+                <div className="mt-3">
+                  <div className="mb-1 flex justify-between text-[8px] font-bold uppercase tracking-wider text-muted-foreground">
+                    <span>{progressLabel}</span>
+                    <span>{progress}%</span>
+                  </div>
+                  <div
+                    className="h-1.5 overflow-hidden rounded-full bg-muted"
+                    role="progressbar"
+                    aria-label={progressLabel}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={progress}
+                  >
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-primary to-orange-400"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+            </button>
+          ),
+        )}
       </div>
     </section>
   );

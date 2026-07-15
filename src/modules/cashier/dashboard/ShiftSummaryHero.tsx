@@ -21,11 +21,7 @@ const shiftDuration = (startedAt?: string) => {
   return `${Math.floor(minutes / 60)}h ${String(minutes % 60).padStart(2, "0")}m`;
 };
 
-export function ShiftSummaryHero({
-  onEndShift,
-}: {
-  onEndShift: () => void;
-}) {
+export function ShiftSummaryHero({ onEndShift }: { onEndShift: () => void }) {
   const { state, activeShift, shiftTotals } = useCashierStore();
   const [now, setNow] = useState(() => new Date());
 
@@ -36,7 +32,9 @@ export function ShiftSummaryHero({
 
   const actualCash = activeShift?.actualCash;
   const variance =
-    actualCash === undefined ? undefined : actualCash - shiftTotals.expectedCash;
+    actualCash === undefined
+      ? undefined
+      : actualCash - shiftTotals.expectedCash;
   const drawerStatus = !activeShift
     ? "Shift not started"
     : variance === undefined

@@ -47,7 +47,9 @@ export function useCashierMetrics() {
     );
     const actualCash = activeShift?.actualCash;
     const variance =
-      actualCash === undefined ? undefined : actualCash - shiftTotals.expectedCash;
+      actualCash === undefined
+        ? undefined
+        : actualCash - shiftTotals.expectedCash;
 
     return {
       pendingPayments: pendingPayments.length,
@@ -56,7 +58,9 @@ export function useCashierMetrics() {
         0,
       ),
       oldestPendingMinutes: pendingPayments.length
-        ? Math.max(...pendingPayments.map((entry) => minutesSince(entry.uploadedAt)))
+        ? Math.max(
+            ...pendingPayments.map((entry) => minutesSince(entry.uploadedAt)),
+          )
         : 0,
       paymentVerificationPercent: digitalPayments.length
         ? Math.round((verifiedDigitalPayments / digitalPayments.length) * 100)

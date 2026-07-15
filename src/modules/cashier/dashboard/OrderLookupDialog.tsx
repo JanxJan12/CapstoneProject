@@ -2,12 +2,16 @@ import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import {
   Dialog,
-  DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "../../../app/components/ui/dialog";
-import { CashierInput, CashierStatusBadge, EmptyState } from "../components/CashierUI";
+import {
+  CashierDialogContent,
+  CashierInput,
+  CashierStatusBadge,
+  EmptyState,
+} from "../components/CashierUI";
 import { formatMoney } from "../constants";
 import { useCashierStore } from "../hooks/CashierStore";
 import type { Order } from "../types";
@@ -43,7 +47,7 @@ export function OrderLookupDialog({
         if (!value) setQuery("");
       }}
     >
-      <DialogContent className="max-w-2xl">
+      <CashierDialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Search all orders</DialogTitle>
           <DialogDescription>
@@ -89,12 +93,13 @@ export function OrderLookupDialog({
             ))
           ) : (
             <EmptyState
+              icon={Search}
               title="No matching order"
               description="Check the order ID, name, or contact number and try again."
             />
           )}
         </div>
-      </DialogContent>
+      </CashierDialogContent>
     </Dialog>
   );
 }

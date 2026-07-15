@@ -35,12 +35,11 @@ export function TransactionHistoryPage({
   intent?: CashierNavigationIntent;
 }) {
   const { state, recordReceiptReprint } = useCashierStore();
+  const searchRef = useRef<HTMLInputElement>(null);
   const [filters, setFilters] = useState<TransactionFilterValue>(() => ({
     ...defaults,
     method:
-      intent?.paymentMethods?.length === 1
-        ? intent.paymentMethods[0]
-        : "All",
+      intent?.paymentMethods?.length === 1 ? intent.paymentMethods[0] : "All",
     status:
       intent?.transactionStatuses?.length === 1
         ? intent.transactionStatuses[0]
@@ -97,6 +96,18 @@ export function TransactionHistoryPage({
       openedRecent.current = true;
     }
   }, [intent, state]);
+  useEffect(() => {
+    const focusSearch = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement;
+      const editing = ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName);
+      if (event.key === "/" && !editing && !target.isContentEditable) {
+        event.preventDefault();
+        searchRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", focusSearch);
+    return () => window.removeEventListener("keydown", focusSearch);
+  }, []);
   const openOrder = (transaction: Transaction, receipt = false) => {
     const order = state.orders.find(
       (entry) => entry.id === transaction.orderId,
@@ -152,11 +163,19 @@ export function TransactionHistoryPage({
         description="Filtered summaries, receipt actions, and shift-linked payment records"
         actions={
           <>
-            <CashierButton variant="secondary" onClick={exportCsv}>
+            <CashierButton
+              variant="secondary"
+              disabled={!filtered.length}
+              onClick={exportCsv}
+            >
               <Download className="h-4 w-4" />
               Export CSV
             </CashierButton>
-            <CashierButton variant="secondary" onClick={() => window.print()}>
+            <CashierButton
+              variant="secondary"
+              disabled={!filtered.length}
+              onClick={() => window.print()}
+            >
               <Printer className="h-4 w-4" />
               Print report
             </CashierButton>
@@ -166,6 +185,7 @@ export function TransactionHistoryPage({
       <TransactionSummary transactions={filtered} />
       <TransactionFilters
         value={filters}
+        searchRef={searchRef}
         shifts={state.shifts}
         cashiers={[
           ...new Set(state.transactions.map((entry) => entry.cashierName)),
@@ -181,7 +201,7 @@ export function TransactionHistoryPage({
             toast.success("Receipt preview opened.");
           }}
         />
-        <div className="flex items-center justify-between border-t border-border bg-muted/20 px-4 py-3 text-[10px] text-muted-foreground">
+        <div className="cashier-table-footer flex flex-col gap-1 px-4 py-3 text-[10px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <span>{filtered.length} filtered records</span>
           <strong className="text-foreground">
             Summary totals use these results

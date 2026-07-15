@@ -2,7 +2,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import {
   Dialog,
-  DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
@@ -11,6 +10,7 @@ import {
 import { startShiftSchema, type StartShiftForm } from "../schemas";
 import {
   CashierButton,
+  CashierDialogContent,
   CashierInput,
   FieldError,
   Label,
@@ -50,7 +50,7 @@ export function StartShiftDialog({
         }
       }}
     >
-      <DialogContent>
+      <CashierDialogContent>
         <DialogHeader>
           <DialogTitle>Start cashier shift</DialogTitle>
           <DialogDescription>
@@ -72,13 +72,18 @@ export function StartShiftDialog({
               min="0"
               step="0.01"
               autoFocus
+              aria-invalid={Boolean(errors.openingCash)}
               {...register("openingCash", { valueAsNumber: true })}
             />
             <FieldError>{errors.openingCash?.message}</FieldError>
           </div>
           <div>
             <Label htmlFor="terminal">Terminal</Label>
-            <CashierInput id="terminal" {...register("terminal")} />
+            <CashierInput
+              id="terminal"
+              aria-invalid={Boolean(errors.terminal)}
+              {...register("terminal")}
+            />
             <FieldError>{errors.terminal?.message}</FieldError>
           </div>
           <DialogFooter>
@@ -95,7 +100,7 @@ export function StartShiftDialog({
             </CashierButton>
           </DialogFooter>
         </form>
-      </DialogContent>
+      </CashierDialogContent>
     </Dialog>
   );
 }

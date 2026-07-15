@@ -40,6 +40,20 @@ export interface MenuItem {
   price: number;
   available: boolean;
   preparationMinutes?: number;
+  inventoryRemaining?: number;
+}
+
+export interface OrderItemModifier {
+  id: string;
+  name: string;
+  price: number;
+}
+
+export interface MenuModifierGroup {
+  id: string;
+  name: string;
+  selection: "single" | "multiple";
+  options: OrderItemModifier[];
 }
 
 export interface OrderItem {
@@ -49,6 +63,7 @@ export interface OrderItem {
   unitPrice: number;
   quantity: number;
   note?: string;
+  modifiers?: OrderItemModifier[];
 }
 
 export interface OrderTimelineEvent {
@@ -71,6 +86,7 @@ export interface Order {
   discountType: DiscountType;
   discountReference?: string;
   discountAmount: number;
+  taxAmount?: number;
   total: number;
   orderInstructions?: string;
   paymentId?: string;
@@ -224,7 +240,10 @@ export interface WalkInOrderInput {
   type: Exclude<OrderType, "Delivery">;
   tableNumber?: string;
   items: Array<
-    Pick<OrderItem, "menuItemId" | "name" | "unitPrice" | "quantity" | "note">
+    Pick<
+      OrderItem,
+      "menuItemId" | "name" | "unitPrice" | "quantity" | "note" | "modifiers"
+    >
   >;
   discountType: DiscountType;
   discountReference?: string;

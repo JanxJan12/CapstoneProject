@@ -14,11 +14,13 @@ export interface TransactionFilterValue {
 
 export function TransactionFilters({
   value,
+  searchRef,
   shifts,
   cashiers,
   onChange,
 }: {
   value: TransactionFilterValue;
+  searchRef: React.RefObject<HTMLInputElement | null>;
   shifts: CashierShift[];
   cashiers: string[];
   onChange: (value: TransactionFilterValue) => void;
@@ -28,14 +30,19 @@ export function TransactionFilters({
     next: TransactionFilterValue[K],
   ) => onChange({ ...value, [key]: next });
   return (
-    <section className="rrj-card bg-gradient-to-r from-white to-amber-50/25 p-4">
+    <section
+      className="cashier-filter-bar rrj-card p-4"
+      aria-label="Transaction filters"
+    >
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[1.5fr_0.7fr_0.8fr_0.8fr_0.8fr_0.9fr_1fr]">
         <div>
           <Label htmlFor="txn-search">Search</Label>
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <CashierInput
+              ref={searchRef}
               id="txn-search"
+              aria-keyshortcuts="/"
               value={value.search}
               onChange={(event) => set("search", event.target.value)}
               placeholder="Transaction, order, customer"

@@ -17,18 +17,22 @@ export function PaymentQueue({
   if (!payments.length)
     return (
       <EmptyState
+        compact
+        icon={CreditCard}
         title="No pending payments"
         description="New customer GCash submissions will appear here automatically."
       />
     );
   return (
-    <div className="divide-y divide-border">
+    <div className="divide-y divide-border" aria-label="Pending payments">
       {payments.map((payment) => {
         const order = orders.find((entry) => entry.id === payment.orderId);
         if (!order) return null;
         return (
           <button
             key={payment.id}
+            type="button"
+            aria-pressed={selectedId === payment.id}
             onClick={() => onSelect(payment.id)}
             className={`group min-h-[116px] w-full p-4 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary ${selectedId === payment.id ? "border-l-4 border-l-primary bg-gradient-to-r from-amber-50 to-white shadow-[inset_0_0_0_1px_rgba(184,79,10,0.05)]" : "hover:bg-white hover:shadow-[inset_3px_0_0_rgba(184,79,10,0.18)]"}`}
           >

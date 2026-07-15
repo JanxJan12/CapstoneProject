@@ -56,9 +56,7 @@ export function CashierDashboardPage({
   return (
     <div className="cashier-page">
       <ShiftSummaryHero onEndShift={() => setSettlementOpen(true)} />
-      <PendingPaymentBanner
-        onVerify={() => onNavigate("pending-payments")}
-      />
+      <PendingPaymentBanner onVerify={() => onNavigate("pending-payments")} />
       <CashierMetrics onNavigate={onNavigate} />
       <div className="grid gap-4 2xl:grid-cols-[1.3fr_0.7fr]">
         <div className="space-y-4">

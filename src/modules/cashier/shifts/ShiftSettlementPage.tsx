@@ -18,8 +18,10 @@ import { useCashierStore } from "../hooks/CashierStore";
 import {
   CashierButton,
   CashierStatusBadge,
+  EmptyState,
   ErrorBanner,
   PageHeading,
+  SectionHeading,
 } from "../components/CashierUI";
 import { EndShiftDialog } from "./EndShiftDialog";
 import { StartShiftDialog } from "./StartShiftDialog";
@@ -210,19 +212,24 @@ export function ShiftSettlementPage() {
           )}
         </>
       ) : (
-        <section className="rounded-xl border border-dashed border-border bg-card p-10 text-center">
-          <p className="text-sm font-black">No shift records yet</p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Start a shift to open the cash drawer.
-          </p>
-        </section>
+        <EmptyState
+          icon={Banknote}
+          title="No shift records yet"
+          description="Start a shift to open the cash drawer and begin recording transactions."
+        />
       )}
       <section className="rrj-card overflow-hidden">
-        <div className="border-b border-border px-4 py-3">
-          <h2 className="text-sm font-black">Settlement history</h2>
+        <div className="border-b border-border px-4 py-4 sm:px-5">
+          <SectionHeading
+            title="Settlement history"
+            description="Auditable drawer sessions, counts, and variance outcomes"
+          />
         </div>
         <div className="overflow-x-auto">
-          <table className="rrj-table w-full min-w-[720px]">
+          <table
+            className="rrj-table w-full min-w-[720px]"
+            aria-label="Cashier settlement history"
+          >
             <thead>
               <tr className="bg-gradient-to-r from-[#f7f1ea] to-[#fbf8f4]">
                 {[
@@ -237,6 +244,7 @@ export function ShiftSettlementPage() {
                 ].map((header) => (
                   <th
                     key={header}
+                    scope="col"
                     className="px-3 py-3 text-left text-[9px] font-black uppercase tracking-widest text-muted-foreground"
                   >
                     {header}

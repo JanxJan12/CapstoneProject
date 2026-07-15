@@ -13,7 +13,6 @@ import {
 import { toast } from "sonner";
 import {
   Dialog,
-  DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
@@ -29,6 +28,7 @@ import { useCashierStore } from "../hooks/CashierStore";
 import type { Order } from "../types";
 import {
   CashierButton,
+  CashierDialogContent,
   CashierStatusBadge,
   ErrorBanner,
 } from "../components/CashierUI";
@@ -43,12 +43,8 @@ export function OrderDetailsDrawer({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const {
-    state,
-    cancelOrder,
-    releaseReadyOrder,
-    recordReceiptReprint,
-  } = useCashierStore();
+  const { state, cancelOrder, releaseReadyOrder, recordReceiptReprint } =
+    useCashierStore();
   const [cancelOpen, setCancelOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -107,7 +103,7 @@ export function OrderDetailsDrawer({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="left-auto right-0 top-0 h-screen max-h-screen w-full max-w-xl translate-x-0 translate-y-0 overflow-y-auto rounded-none bg-[#f8f4ef] p-0 shadow-[-18px_0_50px_rgba(36,26,19,0.16)] sm:max-w-xl">
+        <CashierDialogContent className="left-auto right-0 top-0 h-dvh max-h-dvh w-full max-w-xl translate-x-0 translate-y-0 overflow-y-auto rounded-none bg-[#f8f4ef] p-0 shadow-[-18px_0_50px_rgba(36,26,19,0.16)] sm:max-w-xl">
           <DialogHeader className="sticky top-0 z-10 border-b border-border bg-white/95 p-5 pr-14 shadow-sm backdrop-blur-xl">
             <div className="flex flex-wrap items-center gap-2">
               <DialogTitle className="font-mono text-lg font-black text-primary">
@@ -128,7 +124,7 @@ export function OrderDetailsDrawer({
           </DialogHeader>
           <div className="space-y-5 p-5">
             {error && <ErrorBanner message={error} />}
-            <section className="grid gap-4 rounded-2xl border border-border bg-card p-4 shadow-[0_8px_24px_rgba(67,42,23,0.04)] sm:grid-cols-2">
+            <section className="rrj-card grid gap-4 p-4 sm:grid-cols-2">
               <Info
                 icon={UserRound}
                 label="Customer"
@@ -160,7 +156,7 @@ export function OrderDetailsDrawer({
               <h3 className="mb-2 text-xs font-black uppercase tracking-widest text-muted-foreground">
                 Order items
               </h3>
-              <div className="overflow-hidden rounded-2xl border border-border bg-white shadow-[0_8px_24px_rgba(67,42,23,0.04)]">
+              <div className="rrj-card overflow-hidden">
                 {currentOrder.items.map((item) => (
                   <div
                     key={item.id}
@@ -203,7 +199,7 @@ export function OrderDetailsDrawer({
             </section>
 
             <section className="grid gap-3 sm:grid-cols-2">
-              <div className="rounded-2xl border border-border bg-white p-4 shadow-[0_8px_24px_rgba(67,42,23,0.04)]">
+              <div className="rrj-card p-4">
                 <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                   Payment
                 </p>
@@ -228,7 +224,7 @@ export function OrderDetailsDrawer({
                   </p>
                 )}
               </div>
-              <div className="rounded-2xl border border-border bg-white p-4 shadow-[0_8px_24px_rgba(67,42,23,0.04)]">
+              <div className="rrj-card p-4">
                 <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                   Kitchen & rider
                 </p>
@@ -294,7 +290,7 @@ export function OrderDetailsDrawer({
               )}
             </div>
           </div>
-        </DialogContent>
+        </CashierDialogContent>
       </Dialog>
       <CancelOrderDialog
         open={cancelOpen}

@@ -170,6 +170,7 @@ export interface NavItem<T extends string> {
   label: string;
   icon: React.ElementType;
   badge?: number;
+  shortcut?: string;
 }
 
 export interface NavGroup<T extends string> {

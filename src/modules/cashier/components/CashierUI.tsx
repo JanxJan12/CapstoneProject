@@ -1,4 +1,6 @@
 import {
+  type ComponentProps,
+  type ElementType,
   forwardRef,
   type ButtonHTMLAttributes,
   type InputHTMLAttributes,
@@ -12,8 +14,20 @@ import {
   Clock3,
   Loader2,
   PackageOpen,
+  XCircle,
 } from "lucide-react";
 import { cn } from "../../../app/components/ui/utils";
+import { DialogContent } from "../../../app/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../../../app/components/ui/alert-dialog";
 import type {
   OrderStatus,
   PaymentStatus,
@@ -52,8 +66,18 @@ export function CashierStatusBadge({
   status: Status;
   delayed?: boolean;
 }) {
+  const Icon = delayed
+    ? AlertCircle
+    : ["Completed", "Verified", "Closed", "Delivered", "Open"].includes(status)
+      ? CheckCircle2
+      : ["Cancelled", "Rejected", "Voided"].includes(status)
+        ? XCircle
+        : ["Awaiting Payment", "Pending", "Pending Review"].includes(status)
+          ? AlertCircle
+          : Clock3;
   return (
     <span
+      aria-label={delayed ? `Delayed ${status}` : status}
       className={cn(
         "inline-flex min-h-6 items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.08em] shadow-[0_1px_2px_rgba(36,26,19,0.03)]",
         delayed
@@ -61,15 +85,7 @@ export function CashierStatusBadge({
           : STATUS_STYLE[status],
       )}
     >
-      {delayed ? (
-        <AlertCircle className="h-3 w-3" aria-hidden="true" />
-      ) : status === "Completed" ||
-        status === "Verified" ||
-        status === "Closed" ? (
-        <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
-      ) : (
-        <Clock3 className="h-3 w-3" aria-hidden="true" />
-      )}
+      <Icon className="h-3 w-3" aria-hidden="true" />
       {delayed ? "Delayed" : status}
     </span>
   );
@@ -78,13 +94,16 @@ export function CashierStatusBadge({
 export function CashierButton({
   variant = "primary",
   loading,
+  size = "md",
   className,
   children,
   disabled,
+  type = "button",
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: "primary" | "secondary" | "danger" | "ghost";
   loading?: boolean;
+  size?: "sm" | "md" | "lg";
 }) {
   const variants = {
     primary:
@@ -95,20 +114,58 @@ export function CashierButton({
       "border border-red-600 bg-gradient-to-r from-red-600 to-red-500 text-white shadow-sm hover:-translate-y-0.5 hover:from-red-700 hover:to-red-600 hover:shadow-md",
     ghost: "text-muted-foreground hover:bg-muted hover:text-foreground",
   };
+  const sizes = {
+    sm: "min-h-9 rounded-[10px] px-3 text-[11px]",
+    md: "min-h-11 rounded-[11px] px-4 text-xs",
+    lg: "min-h-12 rounded-xl px-5 text-sm",
+  };
   return (
     <button
+      type={type}
+      aria-busy={loading || undefined}
       className={cn(
-        "inline-flex min-h-11 items-center justify-center gap-2 rounded-[11px] px-4 text-xs font-black transition-all duration-200 active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-50 disabled:shadow-none",
+        "inline-flex select-none items-center justify-center gap-2 whitespace-nowrap font-black transition-all duration-200 active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-50 disabled:shadow-none [&>svg]:h-4 [&>svg]:w-4 [&>svg]:shrink-0",
+        sizes[size],
         variants[variant],
         className,
       )}
       disabled={disabled || loading}
       {...props}
     >
-      {loading && (
-        <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+      {loading ? (
+        <>
+          <Loader2 className="animate-spin" aria-hidden="true" />
+          <span>Please wait…</span>
+        </>
+      ) : (
+        children
       )}
-      {children}
+    </button>
+  );
+}
+
+export function CashierIconButton({
+  label,
+  icon: Icon,
+  className,
+  type = "button",
+  ...props
+}: ButtonHTMLAttributes<HTMLButtonElement> & {
+  label: string;
+  icon: ElementType;
+}) {
+  return (
+    <button
+      type={type}
+      aria-label={label}
+      title={label}
+      className={cn(
+        "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[11px] border border-border bg-white text-muted-foreground shadow-sm transition-all hover:border-primary/25 hover:bg-amber-50/50 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 active:scale-95 disabled:cursor-not-allowed disabled:opacity-45",
+        className,
+      )}
+      {...props}
+    >
+      <Icon className="h-4 w-4" aria-hidden="true" />
     </button>
   );
 }
@@ -139,14 +196,49 @@ export function PageHeading({
         </p>
       </div>
       {actions && (
-        <div className="flex flex-wrap items-center gap-2">{actions}</div>
+        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end [&>button]:flex-1 sm:[&>button]:flex-none">
+          {actions}
+        </div>
       )}
     </header>
   );
 }
 
+export function SectionHeading({
+  title,
+  description,
+  action,
+  className,
+}: {
+  title: string;
+  description?: string;
+  action?: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between",
+        className,
+      )}
+    >
+      <div className="min-w-0">
+        <h2 className="text-sm font-black tracking-[-0.01em] text-foreground">
+          {title}
+        </h2>
+        {description && (
+          <p className="mt-1 text-[11px] font-medium leading-4 text-muted-foreground">
+            {description}
+          </p>
+        )}
+      </div>
+      {action && <div className="shrink-0">{action}</div>}
+    </div>
+  );
+}
+
 export const fieldClass =
-  "min-h-11 w-full rounded-[11px] border border-border bg-white/90 px-3 text-sm text-foreground shadow-[0_1px_2px_rgba(36,26,19,0.03)] outline-none transition-all placeholder:text-muted-foreground/55 hover:border-primary/25 focus:border-primary/55 focus:bg-white focus:ring-4 focus:ring-primary/10 disabled:bg-muted disabled:text-muted-foreground";
+  "min-h-11 w-full rounded-[11px] border border-border bg-white/90 px-3 text-sm text-foreground shadow-[0_1px_2px_rgba(36,26,19,0.03)] outline-none transition-all placeholder:text-muted-foreground/55 hover:border-primary/25 focus:border-primary/55 focus:bg-white focus:ring-4 focus:ring-primary/10 aria-[invalid=true]:border-red-400 aria-[invalid=true]:ring-4 aria-[invalid=true]:ring-red-100 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground";
 
 export function FieldError({ children }: { children?: ReactNode }) {
   if (!children) return null;
@@ -155,7 +247,7 @@ export function FieldError({ children }: { children?: ReactNode }) {
       role="alert"
       className="mt-1 flex items-center gap-1 text-[11px] font-semibold text-red-600"
     >
-      <AlertCircle className="h-3 w-3" />
+      <AlertCircle className="h-3 w-3" aria-hidden="true" />
       {children}
     </p>
   );
@@ -206,15 +298,24 @@ export function EmptyState({
   title,
   description,
   action,
+  icon: Icon = PackageOpen,
+  compact = false,
 }: {
   title: string;
   description: string;
   action?: ReactNode;
+  icon?: ElementType;
+  compact?: boolean;
 }) {
   return (
-    <div className="flex min-h-52 flex-col items-center justify-center rounded-2xl border border-dashed border-primary/20 bg-gradient-to-b from-amber-50/40 to-white p-6 text-center">
+    <div
+      className={cn(
+        "flex flex-col items-center justify-center rounded-2xl border border-dashed border-primary/20 bg-gradient-to-b from-amber-50/40 to-white p-6 text-center",
+        compact ? "min-h-40" : "min-h-52",
+      )}
+    >
       <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-primary shadow-sm ring-1 ring-border">
-        <PackageOpen className="h-5 w-5 text-muted-foreground" />
+        <Icon className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
       </div>
       <p className="text-sm font-black tracking-tight text-foreground">
         {title}
@@ -224,6 +325,72 @@ export function EmptyState({
       </p>
       {action && <div className="mt-4">{action}</div>}
     </div>
+  );
+}
+
+export function CashierDialogContent({
+  className,
+  ...props
+}: ComponentProps<typeof DialogContent>) {
+  return (
+    <DialogContent
+      className={cn(
+        "max-h-[calc(100dvh-2rem)] gap-5 overflow-y-auto rounded-[20px] border-border/80 bg-[#fffdf9] p-5 shadow-[0_24px_70px_rgba(36,26,19,0.22)] sm:p-6 [&_[data-slot=dialog-title]]:text-lg [&_[data-slot=dialog-title]]:font-black [&_[data-slot=dialog-title]]:tracking-tight [&_[data-slot=dialog-description]]:text-xs [&_[data-slot=dialog-description]]:font-medium [&_[data-slot=dialog-description]]:leading-5 [&_[data-slot=dialog-close]]:rounded-lg [&_[data-slot=dialog-close]]:p-1.5",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+export function CashierConfirmDialog({
+  open,
+  onOpenChange,
+  title,
+  description,
+  confirmLabel,
+  cancelLabel = "Go back",
+  danger = false,
+  onConfirm,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title: string;
+  description: string;
+  confirmLabel: string;
+  cancelLabel?: string;
+  danger?: boolean;
+  onConfirm: () => void;
+}) {
+  return (
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent className="max-w-md rounded-[20px] border-border/80 bg-[#fffdf9] p-5 shadow-[0_24px_70px_rgba(36,26,19,0.22)] sm:p-6">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="text-lg font-black tracking-tight text-foreground">
+            {title}
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-xs font-medium leading-5">
+            {description}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel className="min-h-11 rounded-[11px] border border-border bg-white px-4 text-xs font-black text-foreground shadow-sm transition-all hover:border-primary/25 hover:bg-amber-50/40 focus-visible:ring-primary">
+            {cancelLabel}
+          </AlertDialogCancel>
+          <AlertDialogAction
+            className={cn(
+              "min-h-11 rounded-[11px] px-4 text-xs font-black text-white shadow-sm transition-all focus-visible:ring-primary",
+              danger
+                ? "bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600"
+                : "bg-gradient-to-r from-primary to-orange-600 hover:shadow-md",
+            )}
+            onClick={onConfirm}
+          >
+            {confirmLabel}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
 

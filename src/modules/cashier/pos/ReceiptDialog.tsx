@@ -2,7 +2,6 @@ import { Printer } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
-  DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
@@ -10,7 +9,7 @@ import {
 } from "../../../app/components/ui/dialog";
 import { formatDateTime, formatMoney } from "../constants";
 import type { Order, Payment } from "../types";
-import { CashierButton } from "../components/CashierUI";
+import { CashierButton, CashierDialogContent } from "../components/CashierUI";
 
 export function ReceiptDialog({
   order,
@@ -39,7 +38,7 @@ export function ReceiptDialog({
         if (!value) onClose();
       }}
     >
-      <DialogContent className="max-w-md rounded-[20px] border-border bg-[#fbf8f4] shadow-[0_24px_70px_rgba(36,26,19,0.24)]">
+      <CashierDialogContent className="max-w-md bg-[#fbf8f4]">
         <DialogHeader className="text-center sm:text-center">
           <DialogTitle className="text-emerald-700">
             {placed ? "Order placed successfully" : "Receipt preview"}
@@ -126,7 +125,7 @@ export function ReceiptDialog({
           </CashierButton>
           <CashierButton onClick={onClose}>Close receipt</CashierButton>
         </DialogFooter>
-      </DialogContent>
+      </CashierDialogContent>
     </Dialog>
   );
 }

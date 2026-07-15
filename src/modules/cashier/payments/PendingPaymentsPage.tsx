@@ -29,6 +29,7 @@ export function PendingPaymentsPage() {
   const [verifyOpen, setVerifyOpen] = useState(false);
   const [rejectOpen, setRejectOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
   useEffect(() => {
     if (!selectedId || !pending.some((entry) => entry.id === selectedId))
@@ -36,6 +37,14 @@ export function PendingPaymentsPage() {
   }, [pending, selectedId]);
   const payment = pending.find((entry) => entry.id === selectedId);
   const order = state.orders.find((entry) => entry.id === payment?.orderId);
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    window.setTimeout(() => {
+      setRefreshing(false);
+      toast.success("Payment queue is up to date");
+    }, 350);
+  };
 
   const handleVerify = async (override: boolean) => {
     if (!order) return;
@@ -86,11 +95,8 @@ export function PendingPaymentsPage() {
         actions={
           <CashierButton
             variant="secondary"
-            onClick={() =>
-              toast.success("Payment queue refreshed", {
-                description: "Shared cashier records are up to date.",
-              })
-            }
+            loading={refreshing}
+            onClick={handleRefresh}
           >
             <RefreshCw className="h-4 w-4" />
             Refresh
@@ -98,7 +104,10 @@ export function PendingPaymentsPage() {
         }
       />
       {error && <ErrorBanner message={error} onRetry={() => setError("")} />}
-      <div className="payment-review-shell rrj-card grid min-h-[590px] overflow-hidden lg:grid-cols-[310px_1fr]">
+      <div
+        className="payment-review-shell rrj-card grid min-h-[590px] overflow-hidden lg:grid-cols-[320px_1fr]"
+        aria-label="Payment review workspace"
+      >
         <aside className="border-b border-border bg-[#fffaf5]/70 lg:border-b-0 lg:border-r">
           <div className="border-b border-border bg-gradient-to-r from-amber-50 to-orange-50/40 px-4 py-4">
             <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">

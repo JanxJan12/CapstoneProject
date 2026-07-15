@@ -2,7 +2,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import {
   Dialog,
-  DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
@@ -12,6 +11,7 @@ import { PAYMENT_REJECTION_REASONS } from "../constants";
 import { rejectionSchema, type RejectionForm } from "../schemas";
 import {
   CashierButton,
+  CashierDialogContent,
   CashierSelect,
   CashierTextarea,
   FieldError,
@@ -54,7 +54,7 @@ export function RejectPaymentDialog({
         }
       }}
     >
-      <DialogContent>
+      <CashierDialogContent>
         <DialogHeader>
           <DialogTitle>Reject payment for {orderId}?</DialogTitle>
           <DialogDescription>
@@ -68,6 +68,7 @@ export function RejectPaymentDialog({
             <CashierSelect
               id="rejection-reason"
               autoFocus
+              aria-invalid={Boolean(errors.reason)}
               {...register("reason")}
             >
               <option value="">Select a reason</option>
@@ -81,6 +82,7 @@ export function RejectPaymentDialog({
             <Label htmlFor="rejection-notes">Notes (optional)</Label>
             <CashierTextarea
               id="rejection-notes"
+              aria-invalid={Boolean(errors.notes)}
               placeholder="Add details that will help the customer resubmit"
               {...register("notes")}
             />
@@ -100,7 +102,7 @@ export function RejectPaymentDialog({
             </CashierButton>
           </DialogFooter>
         </form>
-      </DialogContent>
+      </CashierDialogContent>
     </Dialog>
   );
 }

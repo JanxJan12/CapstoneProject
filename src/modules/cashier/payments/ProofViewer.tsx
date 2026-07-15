@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Maximize2,
   RotateCcw,
@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { formatDateTime, formatMoney } from "../constants";
 import type { Payment } from "../types";
+import { CashierIconButton } from "../components/CashierUI";
 
 export function ProofViewer({ payment }: { payment: Payment }) {
   const [zoom, setZoom] = useState(1);
@@ -18,8 +19,22 @@ export function ProofViewer({ payment }: { payment: Payment }) {
     setZoom(1);
     setRotation(0);
   };
+  useEffect(() => {
+    reset();
+  }, [payment.id]);
+  useEffect(() => {
+    if (!fullscreen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setFullscreen(false);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [fullscreen]);
   return (
     <div
+      role={fullscreen ? "dialog" : undefined}
+      aria-modal={fullscreen || undefined}
+      aria-label={fullscreen ? "Fullscreen payment proof" : undefined}
       className={
         fullscreen
           ? "fixed inset-0 z-[70] flex flex-col bg-[#17110e] p-4"
@@ -106,14 +121,11 @@ function Tool({
   onClick: () => void;
 }) {
   return (
-    <button
-      type="button"
-      aria-label={label}
-      title={label}
+    <CashierIconButton
+      label={label}
+      icon={Icon}
       onClick={onClick}
-      className="flex h-11 w-11 items-center justify-center rounded-lg border border-border bg-white text-zinc-700 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-    >
-      <Icon className="h-4 w-4" />
-    </button>
+      className="border-white/10 bg-white text-zinc-700 hover:bg-zinc-100"
+    />
   );
 }

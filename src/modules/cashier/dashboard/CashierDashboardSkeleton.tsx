@@ -2,7 +2,13 @@ import { Skeleton } from "../../../app/components/ui/skeleton";
 
 export function CashierDashboardSkeleton() {
   return (
-    <div className="cashier-page" aria-label="Loading cashier dashboard">
+    <div
+      className="cashier-page"
+      role="status"
+      aria-label="Loading cashier dashboard"
+      aria-live="polite"
+    >
+      <span className="sr-only">Loading cashier dashboard…</span>
       <Skeleton className="h-56 w-full rounded-[20px]" />
       <Skeleton className="h-20 w-full rounded-2xl" />
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">

@@ -7,7 +7,11 @@ import {
 } from "../../../app/components/ui/dropdown-menu";
 import { formatDateTime, formatMoney } from "../constants";
 import type { Transaction } from "../types";
-import { CashierStatusBadge, EmptyState } from "../components/CashierUI";
+import {
+  CashierIconButton,
+  CashierStatusBadge,
+  EmptyState,
+} from "../components/CashierUI";
 
 export function TransactionTable({
   transactions,
@@ -29,7 +33,10 @@ export function TransactionTable({
     );
   return (
     <div className="overflow-x-auto">
-      <table className="rrj-table w-full min-w-[1050px]">
+      <table
+        className="rrj-table w-full min-w-[1050px]"
+        aria-label="Filtered cashier transactions"
+      >
         <thead>
           <tr className="border-b border-border bg-gradient-to-r from-[#f7f1ea] to-[#fbf8f4]">
             {[
@@ -45,6 +52,7 @@ export function TransactionTable({
             ].map((header) => (
               <th
                 key={header}
+                scope="col"
                 className="px-3 py-3 text-left text-[9px] font-black uppercase tracking-widest text-muted-foreground"
               >
                 {header}
@@ -80,26 +88,22 @@ export function TransactionTable({
               <td className="px-3 py-3">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button
-                      aria-label={`Actions for ${transaction.id}`}
-                      className="flex h-11 w-11 items-center justify-center rounded-lg border border-border bg-white hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                    >
-                      <MoreHorizontal className="h-4 w-4" />
-                    </button>
+                    <CashierIconButton
+                      label={`Actions for ${transaction.id}`}
+                      icon={MoreHorizontal}
+                    />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-44">
                     <DropdownMenuItem onSelect={() => onView(transaction)}>
                       <Eye className="h-4 w-4" />
                       View details
                     </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => onPrint(transaction)}>
-                      <Printer className="h-4 w-4" />
-                      Print receipt
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => onPrint(transaction)}>
-                      <Printer className="h-4 w-4" />
-                      Reprint receipt
-                    </DropdownMenuItem>
+                    {transaction.status === "Completed" && (
+                      <DropdownMenuItem onSelect={() => onPrint(transaction)}>
+                        <Printer className="h-4 w-4" />
+                        Reprint receipt
+                      </DropdownMenuItem>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </td>

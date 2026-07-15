@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Printer } from "lucide-react";
 import {
   Dialog,
-  DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
@@ -10,7 +9,7 @@ import {
 import { formatDateTime, formatMoney } from "../constants";
 import { useCashierStore } from "../hooks/CashierStore";
 import type { Order } from "../types";
-import { EmptyState } from "../components/CashierUI";
+import { CashierDialogContent, EmptyState } from "../components/CashierUI";
 import { ReceiptDialog } from "../pos/ReceiptDialog";
 
 export function RecentReceiptsDialog({
@@ -36,7 +35,7 @@ export function RecentReceiptsDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-xl">
+        <CashierDialogContent className="max-w-xl">
           <DialogHeader>
             <DialogTitle>Recent printable transactions</DialogTitle>
             <DialogDescription>
@@ -79,12 +78,13 @@ export function RecentReceiptsDialog({
               ))
             ) : (
               <EmptyState
+                icon={Printer}
                 title="No printable transactions"
                 description="Completed paid orders will appear here."
               />
             )}
           </div>
-        </DialogContent>
+        </CashierDialogContent>
       </Dialog>
       <ReceiptDialog
         order={receiptOrder}

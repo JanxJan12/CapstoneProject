@@ -11,7 +11,7 @@ import {
 import { formatDateTime, formatElapsed } from "../constants";
 import { useCashierStore } from "../hooks/CashierStore";
 import type { Order } from "../types";
-import { EmptyState } from "../components/CashierUI";
+import { EmptyState, SectionHeading } from "../components/CashierUI";
 
 const ICONS = {
   payment_verified: CreditCard,
@@ -36,12 +36,11 @@ export function RecentActivityFeed({
 
   return (
     <section className="rrj-card p-4 sm:p-5">
-      <div className="mb-4">
-        <h2 className="text-sm font-black">Recent Activity</h2>
-        <p className="text-[11px] font-semibold text-muted-foreground">
-          Latest operational events from the shared records
-        </p>
-      </div>
+      <SectionHeading
+        title="Recent Activity"
+        description="Latest operational events from the shared records"
+        className="mb-4"
+      />
       {activities.length === 0 ? (
         <EmptyState
           title="No recent activity"

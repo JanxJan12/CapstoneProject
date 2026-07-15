@@ -20,11 +20,13 @@ export interface OrderFilterValue {
 export function OrderFilters({
   value,
   searchRef,
+  refreshing,
   onChange,
   onRefresh,
 }: {
   value: OrderFilterValue;
   searchRef: React.RefObject<HTMLInputElement | null>;
+  refreshing: boolean;
   onChange: (value: OrderFilterValue) => void;
   onRefresh: () => void;
 }) {
@@ -33,7 +35,10 @@ export function OrderFilters({
     next: OrderFilterValue[K],
   ) => onChange({ ...value, [key]: next });
   return (
-    <section className="rrj-card bg-gradient-to-r from-white to-amber-50/25 p-4">
+    <section
+      className="cashier-filter-bar rrj-card p-4"
+      aria-label="Order filters"
+    >
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[1.5fr_0.8fr_1fr_0.8fr_0.8fr_0.9fr_auto]">
         <div>
           <Label htmlFor="order-search">Search</Label>
@@ -42,6 +47,7 @@ export function OrderFilters({
             <CashierInput
               ref={searchRef}
               id="order-search"
+              aria-keyshortcuts="/ Control+F Meta+F"
               value={value.search}
               onChange={(event) => set("search", event.target.value)}
               placeholder="Order ID or customer"
@@ -113,7 +119,11 @@ export function OrderFilters({
           </CashierSelect>
         </div>
         <div className="flex items-end">
-          <CashierButton variant="secondary" onClick={onRefresh}>
+          <CashierButton
+            variant="secondary"
+            loading={refreshing}
+            onClick={onRefresh}
+          >
             <RefreshCw className="h-4 w-4" />
             Refresh
           </CashierButton>

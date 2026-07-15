@@ -1,12 +1,15 @@
 import type { OrderStatus } from "../types";
 
 export const CASHIER_STORAGE_KEY = "rrj_cashier_state_v4";
-export const POS_DRAFT_STORAGE_KEY = "rrj_cashier_pos_draft_v2";
-export const CASHIER_STATE_VERSION = 4;
+export const POS_DRAFT_STORAGE_KEY = "rrj_cashier_pos_draft_v3";
+export const POS_FAVORITES_STORAGE_KEY = "rrj_cashier_pos_favorites_v1";
+export const CASHIER_STATE_VERSION = 5;
 export const CASHIER_ID = "USR-CASHIER-001";
 export const CASHIER_NAME = "Juan Santos";
 export const CASHIER_TERMINAL = "Counter Terminal 01";
 export const DISCOUNT_RATE = 0.2;
+export const POS_TAX_ENABLED = false;
+export const POS_TAX_RATE = 0.12;
 export const DEFAULT_DELAY_THRESHOLD_MINUTES = 20;
 export const PAGE_SIZE = 7;
 

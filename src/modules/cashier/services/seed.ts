@@ -74,7 +74,8 @@ const makeOrder = (input: {
     createdAt: timestamp,
     updatedAt: timestamp,
     cashierId: input.type === "Delivery" ? undefined : CASHIER_ID,
-    shiftId: input.paymentStatus === "Verified" ? "SHIFT-CURRENT-01" : undefined,
+    shiftId:
+      input.paymentStatus === "Verified" ? "SHIFT-CURRENT-01" : undefined,
     timeline: [
       {
         id: `EVT-${input.id}-1`,
@@ -261,6 +262,7 @@ export function createInitialCashierState(): CashierState {
         price: 185,
         available: true,
         preparationMinutes: 18,
+        inventoryRemaining: 14,
       },
       {
         id: "MENU-02",
@@ -270,6 +272,7 @@ export function createInitialCashierState(): CashierState {
         price: 120,
         available: true,
         preparationMinutes: 14,
+        inventoryRemaining: 22,
       },
       {
         id: "MENU-03",
@@ -279,6 +282,7 @@ export function createInitialCashierState(): CashierState {
         price: 155,
         available: true,
         preparationMinutes: 16,
+        inventoryRemaining: 8,
       },
       {
         id: "MENU-04",
@@ -288,6 +292,7 @@ export function createInitialCashierState(): CashierState {
         price: 130,
         available: false,
         preparationMinutes: 15,
+        inventoryRemaining: 0,
       },
       {
         id: "MENU-05",
@@ -297,6 +302,7 @@ export function createInitialCashierState(): CashierState {
         price: 175,
         available: true,
         preparationMinutes: 20,
+        inventoryRemaining: 5,
       },
       {
         id: "MENU-06",
@@ -306,6 +312,7 @@ export function createInitialCashierState(): CashierState {
         price: 110,
         available: true,
         preparationMinutes: 12,
+        inventoryRemaining: 9,
       },
       {
         id: "MENU-07",
@@ -315,6 +322,7 @@ export function createInitialCashierState(): CashierState {
         price: 45,
         available: true,
         preparationMinutes: 8,
+        inventoryRemaining: 18,
       },
       {
         id: "MENU-08",
@@ -324,6 +332,7 @@ export function createInitialCashierState(): CashierState {
         price: 35,
         available: true,
         preparationMinutes: 4,
+        inventoryRemaining: 6,
       },
       {
         id: "MENU-09",
@@ -332,6 +341,8 @@ export function createInitialCashierState(): CashierState {
         description: "Coke, Royal, or Sprite",
         price: 30,
         available: true,
+        preparationMinutes: 2,
+        inventoryRemaining: 24,
       },
       {
         id: "MENU-10",
@@ -340,6 +351,8 @@ export function createInitialCashierState(): CashierState {
         description: "Fresh coconut juice",
         price: 35,
         available: true,
+        preparationMinutes: 3,
+        inventoryRemaining: 4,
       },
     ],
     orders,

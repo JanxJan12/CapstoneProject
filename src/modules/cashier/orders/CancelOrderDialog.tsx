@@ -2,7 +2,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import {
   Dialog,
-  DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
@@ -11,6 +10,7 @@ import {
 import { cancellationSchema, type CancellationForm } from "../schemas";
 import {
   CashierButton,
+  CashierDialogContent,
   CashierTextarea,
   FieldError,
   Label,
@@ -52,7 +52,7 @@ export function CancelOrderDialog({
         }
       }}
     >
-      <DialogContent>
+      <CashierDialogContent>
         <DialogHeader>
           <DialogTitle>Cancel {orderId}?</DialogTitle>
           <DialogDescription>
@@ -66,6 +66,7 @@ export function CancelOrderDialog({
             <CashierTextarea
               id="cancel-reason"
               autoFocus
+              aria-invalid={Boolean(errors.reason)}
               placeholder="Explain why this order is being cancelled"
               {...register("reason")}
             />
@@ -85,7 +86,7 @@ export function CancelOrderDialog({
             </CashierButton>
           </DialogFooter>
         </form>
-      </DialogContent>
+      </CashierDialogContent>
     </Dialog>
   );
 }

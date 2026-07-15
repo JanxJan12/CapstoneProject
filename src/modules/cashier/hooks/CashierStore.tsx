@@ -77,9 +77,21 @@ function loadState(): CashierState {
     const raw = localStorage.getItem(CASHIER_STORAGE_KEY);
     if (!raw) return createInitialCashierState();
     const parsed = JSON.parse(raw) as CashierState;
-    if (parsed.version !== CASHIER_STATE_VERSION)
-      return createInitialCashierState();
-    return parsed;
+    if (parsed.version === CASHIER_STATE_VERSION) return parsed;
+    if (parsed.version === 4 && CASHIER_STATE_VERSION === 5) {
+      const initial = createInitialCashierState();
+      const catalog = new Map(initial.menuItems.map((item) => [item.id, item]));
+      return {
+        ...parsed,
+        version: CASHIER_STATE_VERSION,
+        menuItems: parsed.menuItems.map((item) => ({
+          ...item,
+          inventoryRemaining:
+            item.inventoryRemaining ?? catalog.get(item.id)?.inventoryRemaining,
+        })),
+      };
+    }
+    return createInitialCashierState();
   } catch {
     return createInitialCashierState();
   }

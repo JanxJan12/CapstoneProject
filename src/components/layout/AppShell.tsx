@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Bell,
   CheckCheck,
@@ -49,6 +49,8 @@ export function AppShell<T extends string>({
   onLogout?: () => void;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const navigationTriggerRef = useRef<HTMLButtonElement>(null);
+  const navigationCloseRef = useRef<HTMLButtonElement>(null);
   const [now, setNow] = useState(() => new Date());
   const roleSlug = user.role.toLowerCase().replace(/\s+/g, "-");
   const isCashier = roleSlug === "cashier";
@@ -57,6 +59,12 @@ export function AppShell<T extends string>({
     groups.flatMap((group) => group.items).find((item) => item.id === active)
       ?.label ?? "Workspace";
   const unreadCount = notifications.filter((entry) => !entry.read).length;
+  const closeNavigation = (returnFocus = true) => {
+    setSidebarOpen(false);
+    if (returnFocus) {
+      window.requestAnimationFrame(() => navigationTriggerRef.current?.focus());
+    }
+  };
 
   useEffect(() => {
     if (!isCashierPOS) return;
@@ -64,6 +72,15 @@ export function AppShell<T extends string>({
     const timer = window.setInterval(() => setNow(new Date()), 30_000);
     return () => window.clearInterval(timer);
   }, [isCashierPOS]);
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    window.requestAnimationFrame(() => navigationCloseRef.current?.focus());
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") closeNavigation();
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [sidebarOpen]);
 
   const SidebarContent = () => (
     <>
@@ -86,10 +103,11 @@ export function AppShell<T extends string>({
             </div>
           </div>
         </div>
-        {/* Close button — mobile only */}
+        {/* Close drawer */}
         <button
-          onClick={() => setSidebarOpen(false)}
-          className={`flex h-12 w-12 items-center justify-center rounded-xl text-white/60 hover:bg-white/[0.08] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${isCashier ? "xl:hidden" : "md:hidden"}`}
+          ref={navigationCloseRef}
+          onClick={() => closeNavigation()}
+          className="flex h-12 w-12 items-center justify-center rounded-xl text-white/60 hover:bg-white/[0.08] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
           aria-label="Close navigation"
         >
           <X className="w-4 h-4" />
@@ -110,7 +128,7 @@ export function AppShell<T extends string>({
                   key={item.id}
                   onClick={() => {
                     onSelect(item.id);
-                    setSidebarOpen(false);
+                    closeNavigation(false);
                   }}
                   aria-current={active === item.id ? "page" : undefined}
                   className={`rrj-shell-nav-item mb-1 flex min-h-11 w-full items-center gap-3 rounded-xl border px-3 py-2 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-1 focus-visible:ring-offset-[#1d1713] ${active === item.id ? "is-active border-amber-300/20 bg-gradient-to-r from-[#bd5417] to-[#df7c2d] text-white shadow-[0_10px_24px_rgba(0,0,0,0.22)]" : "border-transparent text-white/55 hover:border-white/[0.08] hover:bg-white/[0.07] hover:text-white"}`}
@@ -129,6 +147,11 @@ export function AppShell<T extends string>({
                       {item.badge}
                     </span>
                   ) : null}
+                  {item.shortcut && (
+                    <kbd className="hidden rounded-md border border-white/10 bg-white/[0.06] px-1.5 py-0.5 font-mono text-[8px] font-bold text-white/35 sm:inline-flex">
+                      {item.shortcut}
+                    </kbd>
+                  )}
                 </button>
               );
             })}
@@ -176,23 +199,23 @@ export function AppShell<T extends string>({
       {/* Mobile overlay backdrop */}
       {sidebarOpen && (
         <div
-          className={`fixed inset-0 z-30 bg-black/45 backdrop-blur-[2px] ${isCashier ? "xl:hidden" : "md:hidden"}`}
-          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 z-30 bg-black/45 backdrop-blur-[2px]"
+          aria-hidden="true"
+          onClick={() => closeNavigation()}
         />
       )}
 
-      {/* Sidebar — drawer on mobile, fixed on desktop */}
+      {/* Navigation drawer */}
       <aside
+        id="app-shell-navigation"
+        aria-label={`${user.role} navigation`}
+        aria-hidden={!sidebarOpen}
+        inert={!sidebarOpen}
         className={[
-          "app-shell-sidebar relative flex h-full flex-col overflow-hidden border-r border-white/[0.06] bg-[#1d1713] shadow-[12px_0_45px_rgba(31,20,13,0.14)] z-40 transition-transform duration-200",
-          isCashier ? "fixed xl:relative" : "fixed md:relative",
-          isCashier ? "w-72 xl:w-[15rem]" : "w-64 md:w-[15rem]",
+          "app-shell-sidebar z-40 flex h-full flex-col overflow-hidden border-r border-white/[0.06] bg-[#1d1713] shadow-[12px_0_45px_rgba(31,20,13,0.14)] transition-transform duration-200",
+          "fixed inset-y-0 left-0 w-72 max-w-[calc(100vw-2rem)]",
           "flex-shrink-0",
-          sidebarOpen
-            ? "translate-x-0"
-            : isCashier
-              ? "-translate-x-full xl:translate-x-0"
-              : "-translate-x-full md:translate-x-0",
+          sidebarOpen ? "translate-x-0" : "-translate-x-full",
         ].join(" ")}
       >
         <SidebarContent />
@@ -201,12 +224,15 @@ export function AppShell<T extends string>({
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         <header
-          className={`app-shell-topbar flex flex-shrink-0 items-center gap-3 border-b border-border/70 bg-card/80 px-3 shadow-[0_1px_18px_rgba(65,42,26,0.035)] backdrop-blur-xl sm:px-4 lg:px-6 ${isCashier ? "h-16" : "h-[72px]"}`}
+          className={`app-shell-topbar flex flex-shrink-0 items-center gap-3 border-b border-border/70 bg-card/80 px-3 shadow-[0_1px_18px_rgba(65,42,26,0.035)] backdrop-blur-xl sm:px-4 lg:px-6 ${isCashierPOS ? "h-14" : isCashier ? "h-16" : "h-[72px]"}`}
         >
-          {/* Hamburger — mobile only */}
+          {/* Open navigation */}
           <button
+            ref={navigationTriggerRef}
             onClick={() => setSidebarOpen(true)}
-            className={`h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl border border-border/70 bg-white/75 text-muted-foreground shadow-sm hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${isCashier ? "flex xl:hidden" : "flex md:hidden"}`}
+            aria-controls="app-shell-navigation"
+            aria-expanded={sidebarOpen}
+            className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl border border-border/70 bg-white/75 text-muted-foreground shadow-sm hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             aria-label="Open navigation"
           >
             <Menu className="w-4 h-4" />
@@ -393,7 +419,7 @@ export function AppShell<T extends string>({
         </header>
 
         <main
-          className={`app-shell-main rrj-main-canvas flex-1 ${isCashierPOS ? "overflow-hidden p-2 sm:p-3 xl:p-4" : "overflow-y-auto p-4 sm:p-5 lg:p-6 xl:p-8"}`}
+          className={`app-shell-main rrj-main-canvas min-h-0 flex-1 ${isCashierPOS ? "overflow-hidden p-0" : "overflow-y-auto p-4 sm:p-5 lg:p-6 xl:p-8"}`}
         >
           {children}
         </main>

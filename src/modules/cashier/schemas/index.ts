@@ -56,7 +56,7 @@ export const posSchema = z
       ctx.addIssue({
         code: "custom",
         path: ["tableNumber"],
-        message: "Table number is required for dine-in.",
+        message: "Select a table for dine-in orders.",
       });
     }
     if (value.paymentMethod === "GCash" && !value.gcashReference?.trim()) {

@@ -13,7 +13,11 @@ import {
   minutesSince,
 } from "../constants";
 import type { Order } from "../types";
-import { CashierStatusBadge, EmptyState } from "../components/CashierUI";
+import {
+  CashierIconButton,
+  CashierStatusBadge,
+  EmptyState,
+} from "../components/CashierUI";
 
 export function OrderTable({
   orders,
@@ -39,7 +43,10 @@ export function OrderTable({
     );
   return (
     <div className="overflow-x-auto">
-      <table className="rrj-table w-full min-w-[1100px]">
+      <table
+        className="rrj-table w-full min-w-[1100px]"
+        aria-label="Filtered cashier orders"
+      >
         <thead>
           <tr className="border-b border-border bg-gradient-to-r from-[#f7f1ea] to-[#fbf8f4]">
             {[
@@ -55,6 +62,7 @@ export function OrderTable({
             ].map((header) => (
               <th
                 key={header}
+                scope="col"
                 className="px-3 py-3 text-left text-[9px] font-black uppercase tracking-widest text-muted-foreground"
               >
                 {header}
@@ -118,12 +126,10 @@ export function OrderTable({
                 <td className="px-3 py-3">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <button
-                        aria-label={`Actions for ${order.id}`}
-                        className="flex h-11 w-11 items-center justify-center rounded-lg border border-border bg-white hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                      >
-                        <MoreHorizontal className="h-4 w-4" />
-                      </button>
+                      <CashierIconButton
+                        label={`Actions for ${order.id}`}
+                        icon={MoreHorizontal}
+                      />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-48">
                       <DropdownMenuItem onSelect={() => onView(order)}>

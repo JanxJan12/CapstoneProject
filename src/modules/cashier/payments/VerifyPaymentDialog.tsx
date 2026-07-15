@@ -2,7 +2,6 @@ import { useState } from "react";
 import { AlertTriangle, CheckCircle2 } from "lucide-react";
 import {
   Dialog,
-  DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
@@ -10,7 +9,7 @@ import {
 } from "../../../app/components/ui/dialog";
 import { formatMoney } from "../constants";
 import type { Order, Payment } from "../types";
-import { CashierButton } from "../components/CashierUI";
+import { CashierButton, CashierDialogContent } from "../components/CashierUI";
 
 export function VerifyPaymentDialog({
   open,
@@ -40,7 +39,7 @@ export function VerifyPaymentDialog({
         }
       }}
     >
-      <DialogContent>
+      <CashierDialogContent>
         <DialogHeader>
           <DialogTitle>Verify {order.id}?</DialogTitle>
           <DialogDescription>
@@ -99,7 +98,7 @@ export function VerifyPaymentDialog({
             {loading ? "Verifying..." : "Confirm verification"}
           </CashierButton>
         </DialogFooter>
-      </DialogContent>
+      </CashierDialogContent>
     </Dialog>
   );
 }

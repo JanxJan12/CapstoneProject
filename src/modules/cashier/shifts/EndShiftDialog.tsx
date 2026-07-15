@@ -3,7 +3,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import {
   Dialog,
-  DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
@@ -14,6 +13,7 @@ import { endShiftSchema, type EndShiftForm } from "../schemas";
 import type { ShiftTotals } from "../types";
 import {
   CashierButton,
+  CashierDialogContent,
   CashierInput,
   CashierTextarea,
   FieldError,
@@ -74,7 +74,7 @@ export function EndShiftDialog({
         }
       }}
     >
-      <DialogContent>
+      <CashierDialogContent>
         <DialogHeader>
           <DialogTitle>End and settle shift</DialogTitle>
           <DialogDescription>
@@ -109,6 +109,7 @@ export function EndShiftDialog({
               min="0"
               step="0.01"
               autoFocus
+              aria-invalid={Boolean(errors.actualCash)}
               {...register("actualCash", { valueAsNumber: true })}
             />
             <FieldError>{errors.actualCash?.message}</FieldError>
@@ -128,6 +129,7 @@ export function EndShiftDialog({
               placeholder={
                 variance !== 0 ? "Explain the cash variance" : "Add shift notes"
               }
+              aria-invalid={Boolean(errors.notes)}
               {...register("notes")}
             />
             <FieldError>{errors.notes?.message}</FieldError>
@@ -163,7 +165,7 @@ export function EndShiftDialog({
             </CashierButton>
           </DialogFooter>
         </form>
-      </DialogContent>
+      </CashierDialogContent>
     </Dialog>
   );
 }

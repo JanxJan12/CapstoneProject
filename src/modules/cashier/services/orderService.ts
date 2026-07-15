@@ -1,4 +1,9 @@
-import { DISCOUNT_RATE } from "../constants";
+import {
+  DISCOUNT_RATE,
+  POS_TAX_ENABLED,
+  POS_TAX_RATE,
+} from "../constants";
+import { validateMenuModifiers } from "../constants/modifiers";
 import type {
   CashierState,
   HeldOrder,
@@ -30,7 +35,7 @@ export function createWalkInOrder(
   const tableNumber =
     input.type === "Dine-in" ? normalizeTable(input.tableNumber) : undefined;
   if (input.type === "Dine-in" && !tableNumber)
-    throw new Error("Table number is required for dine-in.");
+    throw new Error("Select a table for this dine-in order.");
   if (
     tableNumber &&
     state.orders.some(
@@ -43,7 +48,6 @@ export function createWalkInOrder(
     throw new Error(`Table ${tableNumber} already has an active order.`);
   if (input.discountType && !input.discountReference?.trim())
     throw new Error("ID or reference is required for this discount.");
-  const seenMenuItems = new Set<string>();
   const validatedItems = input.items.map((entry) => {
     if (
       !Number.isInteger(entry.quantity) ||
@@ -51,23 +55,42 @@ export function createWalkInOrder(
       entry.quantity > 99
     )
       throw new Error("Item quantities must be whole numbers from 1 to 99.");
-    if (seenMenuItems.has(entry.menuItemId))
-      throw new Error("Duplicate menu lines are not allowed.");
-    seenMenuItems.add(entry.menuItemId);
     const menuItem = state.menuItems.find(
       (item) => item.id === entry.menuItemId,
     );
     if (!menuItem) throw new Error(`${entry.name} is no longer on the menu.`);
     if (!menuItem.available)
       throw new Error(`${menuItem.name} is currently unavailable.`);
+    const modifiers = validateMenuModifiers(menuItem, entry.modifiers);
     return {
       menuItemId: menuItem.id,
       name: menuItem.name,
-      unitPrice: menuItem.price,
+      unitPrice:
+        menuItem.price +
+        modifiers.reduce((sum, modifier) => sum + modifier.price, 0),
       quantity: entry.quantity,
       note: entry.note?.trim().slice(0, 120) || undefined,
+      modifiers: modifiers.length ? modifiers : undefined,
     };
   });
+  const requestedInventory = new Map<string, number>();
+  for (const item of validatedItems) {
+    requestedInventory.set(
+      item.menuItemId,
+      (requestedInventory.get(item.menuItemId) ?? 0) + item.quantity,
+    );
+  }
+  for (const [menuItemId, quantity] of requestedInventory) {
+    const menuItem = state.menuItems.find((item) => item.id === menuItemId);
+    if (
+      menuItem?.inventoryRemaining !== undefined &&
+      quantity > menuItem.inventoryRemaining
+    ) {
+      throw new Error(
+        `Only ${menuItem.inventoryRemaining} ${menuItem.name} remaining. Adjust the quantity to continue.`,
+      );
+    }
+  }
   const subtotal = validatedItems.reduce(
     (sum, entry) => sum + entry.unitPrice * entry.quantity,
     0,
@@ -75,7 +98,10 @@ export function createWalkInOrder(
   const discountAmount = input.discountType
     ? Math.round(subtotal * DISCOUNT_RATE * 100) / 100
     : 0;
-  const total = subtotal - discountAmount;
+  const taxAmount = POS_TAX_ENABLED
+    ? Math.round((subtotal - discountAmount) * POS_TAX_RATE * 100) / 100
+    : 0;
+  const total = subtotal - discountAmount + taxAmount;
   if (input.paymentMethod === "Cash" && (input.amountTendered ?? 0) < total)
     throw new Error("Cash tendered is insufficient.");
   if (input.paymentMethod === "GCash" && !input.gcashReference?.trim())
@@ -109,6 +135,7 @@ export function createWalkInOrder(
     discountType: input.discountType,
     discountReference: input.discountReference?.trim() || undefined,
     discountAmount,
+    taxAmount,
     total,
     orderInstructions: input.orderInstructions?.trim() || undefined,
     paymentId,
@@ -131,6 +158,15 @@ export function createWalkInOrder(
     ],
   };
   state.orders.unshift(order);
+  for (const [menuItemId, quantity] of requestedInventory) {
+    const menuItem = state.menuItems.find((item) => item.id === menuItemId);
+    if (menuItem?.inventoryRemaining === undefined) continue;
+    menuItem.inventoryRemaining = Math.max(
+      0,
+      menuItem.inventoryRemaining - quantity,
+    );
+    if (menuItem.inventoryRemaining === 0) menuItem.available = false;
+  }
   state.payments.unshift({
     id: paymentId,
     orderId,
@@ -331,7 +367,9 @@ export function recordReceiptReprint(
   const state = cloneState(current);
   const order = state.orders.find((entry) => entry.id === orderId);
   if (!order?.transactionId)
-    throw new Error("A completed transaction is required to reprint a receipt.");
+    throw new Error(
+      "A completed transaction is required to reprint a receipt.",
+    );
   addActivity(
     state,
     "receipt_reprinted",
@@ -382,6 +420,9 @@ export function voidDraftOrder(
   const discountAmount = input.discountType
     ? Math.round(subtotal * DISCOUNT_RATE * 100) / 100
     : 0;
+  const taxAmount = POS_TAX_ENABLED
+    ? Math.round((subtotal - discountAmount) * POS_TAX_RATE * 100) / 100
+    : 0;
   const customerName = input.customerName?.trim() || "Walk-in Customer";
   const items = input.items.map((entry, index) => ({
     ...entry,
@@ -398,7 +439,8 @@ export function voidDraftOrder(
     discountType: input.discountType,
     discountReference: input.discountReference,
     discountAmount,
-    total: subtotal - discountAmount,
+    taxAmount,
+    total: subtotal - discountAmount + taxAmount,
     orderInstructions: input.orderInstructions,
     paymentMethod: "Cash",
     paymentStatus: "Rejected",
@@ -437,7 +479,7 @@ export function voidDraftOrder(
     id: nextRecordId("TXN", state.transactions),
     orderId,
     customerName,
-    amount: subtotal - discountAmount,
+    amount: subtotal - discountAmount + taxAmount,
     discountAmount,
     method: "Cash",
     status: "Voided",
