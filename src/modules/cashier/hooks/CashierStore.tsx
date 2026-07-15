@@ -11,9 +11,11 @@ import {
 import { CASHIER_STATE_VERSION, CASHIER_STORAGE_KEY } from "../constants";
 import {
   calculateShiftTotals,
+  assignOrderRider as assignOrderRiderTransition,
   cancelOrder as cancelOrderTransition,
   createWalkInOrder as createWalkInOrderTransition,
   endShift as endShiftTransition,
+  duplicateOrder as duplicateOrderTransition,
   holdOrder as holdOrderTransition,
   markNotificationsRead as markNotificationsReadTransition,
   markNotificationRead as markNotificationReadTransition,
@@ -23,6 +25,7 @@ import {
   removeHeldOrder as removeHeldOrderTransition,
   startShift as startShiftTransition,
   updateKitchenStatus as updateKitchenStatusTransition,
+  updateOrderDetails as updateOrderDetailsTransition,
   verifyOnlinePayment,
   voidDraftOrder as voidDraftOrderTransition,
 } from "../services/cashierService";
@@ -31,6 +34,7 @@ import type {
   CashierState,
   HeldOrder,
   Order,
+  OrderOperationalEditInput,
   OrderStatus,
   ShiftTotals,
   WalkInOrderInput,
@@ -44,7 +48,10 @@ interface CashierStoreValue {
   isHydrating: boolean;
   activeShift: CashierState["shifts"][number] | undefined;
   shiftTotals: ShiftTotals;
-  verifyPayment: (paymentId: string, overrideMismatch: boolean) => Promise<void>;
+  verifyPayment: (
+    paymentId: string,
+    overrideMismatch: boolean,
+  ) => Promise<void>;
   rejectPayment: (
     paymentId: string,
     reason: string,
@@ -52,6 +59,12 @@ interface CashierStoreValue {
   ) => Promise<void>;
   createWalkInOrder: (input: WalkInOrderInput) => Promise<Order>;
   cancelOrder: (orderId: string, reason: string) => Promise<void>;
+  updateOrder: (
+    orderId: string,
+    input: OrderOperationalEditInput,
+  ) => Promise<void>;
+  assignRider: (orderId: string, riderId: string) => Promise<void>;
+  duplicateOrder: (orderId: string) => Promise<Order>;
   releaseReadyOrder: (orderId: string) => Promise<void>;
   updateKitchenStatus: (
     orderId: string,
@@ -120,7 +133,9 @@ export function CashierProvider({ children }: { children: ReactNode }) {
   const verifyPayment = useCallback(
     async (paymentId: string, overrideMismatch: boolean) => {
       await pause();
-      commit(verifyOnlinePayment(stateRef.current, paymentId, overrideMismatch));
+      commit(
+        verifyOnlinePayment(stateRef.current, paymentId, overrideMismatch),
+      );
     },
     [commit],
   );
@@ -147,6 +162,32 @@ export function CashierProvider({ children }: { children: ReactNode }) {
     async (orderId: string, reason: string) => {
       await pause(450);
       commit(cancelOrderTransition(stateRef.current, orderId, reason));
+    },
+    [commit],
+  );
+
+  const updateOrder = useCallback(
+    async (orderId: string, input: OrderOperationalEditInput) => {
+      await pause(400);
+      commit(updateOrderDetailsTransition(stateRef.current, orderId, input));
+    },
+    [commit],
+  );
+
+  const assignRider = useCallback(
+    async (orderId: string, riderId: string) => {
+      await pause(400);
+      commit(assignOrderRiderTransition(stateRef.current, orderId, riderId));
+    },
+    [commit],
+  );
+
+  const duplicateOrder = useCallback(
+    async (orderId: string) => {
+      await pause(450);
+      const result = duplicateOrderTransition(stateRef.current, orderId);
+      commit(result.state);
+      return result.order;
     },
     [commit],
   );
@@ -257,6 +298,9 @@ export function CashierProvider({ children }: { children: ReactNode }) {
       rejectPayment,
       createWalkInOrder,
       cancelOrder,
+      updateOrder,
+      assignRider,
+      duplicateOrder,
       releaseReadyOrder,
       updateKitchenStatus,
       holdOrder,
@@ -277,6 +321,9 @@ export function CashierProvider({ children }: { children: ReactNode }) {
       rejectPayment,
       createWalkInOrder,
       cancelOrder,
+      updateOrder,
+      assignRider,
+      duplicateOrder,
       releaseReadyOrder,
       updateKitchenStatus,
       holdOrder,

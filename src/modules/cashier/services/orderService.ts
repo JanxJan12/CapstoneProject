@@ -1,14 +1,11 @@
-import {
-  DISCOUNT_RATE,
-  POS_TAX_ENABLED,
-  POS_TAX_RATE,
-} from "../constants";
+import { DISCOUNT_RATE, POS_TAX_ENABLED, POS_TAX_RATE } from "../constants";
 import { validateMenuModifiers } from "../constants/modifiers";
 import type {
   CashierState,
   HeldOrder,
   Order,
   OrderItem,
+  OrderOperationalEditInput,
   OrderStatus,
   WalkInOrderInput,
 } from "../types";
@@ -236,7 +233,17 @@ export function cancelOrder(
   )
     throw new Error("This order can no longer be cancelled.");
   const timestamp = timestampNow();
+  const assignedRider = state.riders.find(
+    (rider) => rider.name === order.assignedRider,
+  );
+  if (assignedRider?.currentOrderId === order.id) {
+    assignedRider.currentOrderId = undefined;
+    assignedRider.availability = "Available";
+  }
   order.status = "Cancelled";
+  order.riderStatus = order.assignedRider
+    ? "Assignment released"
+    : order.riderStatus;
   order.cancelledBy = state.cashier.id;
   order.cancelledAt = timestamp;
   order.cancellationReason = reason;
@@ -273,6 +280,172 @@ export function cancelOrder(
     orderId: order.id,
   });
   return state;
+}
+
+export function updateOrderDetails(
+  current: CashierState,
+  orderId: string,
+  input: OrderOperationalEditInput,
+): CashierState {
+  const state = cloneState(current);
+  const order = state.orders.find((entry) => entry.id === orderId);
+  if (!order) throw new Error("Order could not be found.");
+  const customerName = input.customerName.trim();
+  const contactNumber = input.contactNumber.trim();
+  if (!customerName) throw new Error("Customer name is required.");
+  if (customerName.length > 80)
+    throw new Error("Customer name must be 80 characters or fewer.");
+  if (!contactNumber) throw new Error("Contact number is required.");
+  if (contactNumber.length > 30)
+    throw new Error("Contact number must be 30 characters or fewer.");
+
+  order.customerName = customerName;
+  order.contactNumber = contactNumber;
+  order.tableNumber = input.tableNumber?.trim() || undefined;
+  order.deliveryAddress = input.deliveryAddress?.trim() || undefined;
+  order.orderInstructions = input.orderInstructions?.trim() || undefined;
+  const timestamp = timestampNow();
+  addTimeline(
+    order,
+    order.status,
+    "Operational order details updated",
+    state.cashier.name,
+    timestamp,
+  );
+  state.notifications.unshift({
+    id: nextEventId(),
+    title: "Order details updated",
+    message: `${order.id} customer and fulfillment details were updated.`,
+    createdAt: timestamp,
+    read: false,
+    customerVisible: false,
+    kind: "record_updated",
+    page: "order-list",
+    intent: { search: order.id },
+    orderId: order.id,
+  });
+  return state;
+}
+
+export function assignOrderRider(
+  current: CashierState,
+  orderId: string,
+  riderId: string,
+): CashierState {
+  const state = cloneState(current);
+  const order = state.orders.find((entry) => entry.id === orderId);
+  const rider = state.riders.find((entry) => entry.id === riderId);
+  if (!order) throw new Error("Order could not be found.");
+  if (order.type !== "Delivery")
+    throw new Error("Riders can only be assigned to delivery orders.");
+  if (["Delivered", "Completed", "Cancelled"].includes(order.status))
+    throw new Error("This order no longer accepts rider assignments.");
+  if (!rider) throw new Error("Select a valid rider.");
+  if (rider.currentOrderId && rider.currentOrderId !== order.id)
+    throw new Error(`${rider.name} is already assigned to another order.`);
+
+  const previousRider = state.riders.find(
+    (entry) => entry.name === order.assignedRider,
+  );
+  if (previousRider && previousRider.id !== rider.id) {
+    previousRider.currentOrderId = undefined;
+    previousRider.availability = "Available";
+  }
+  rider.currentOrderId = order.id;
+  rider.availability = "Assigned";
+  order.assignedRider = rider.name;
+  order.riderStatus = "Assigned";
+  const timestamp = timestampNow();
+  addTimeline(
+    order,
+    order.status,
+    `${rider.name} assigned for delivery`,
+    state.cashier.name,
+    timestamp,
+  );
+  addActivity(
+    state,
+    "rider_accepted",
+    `${rider.name} assigned to ${order.id}`,
+    order.id,
+    undefined,
+    state.cashier.name,
+  );
+  state.notifications.unshift({
+    id: nextEventId(),
+    title: "Rider assigned",
+    message: `${rider.name} was assigned to ${order.id}.`,
+    createdAt: timestamp,
+    read: false,
+    customerVisible: true,
+    kind: "record_updated",
+    page: "order-list",
+    intent: { search: order.id },
+    orderId: order.id,
+  });
+  return state;
+}
+
+export function duplicateOrder(
+  current: CashierState,
+  orderId: string,
+): { state: CashierState; order: Order } {
+  const state = cloneState(current);
+  const shift = requireOpenShift(state);
+  const source = state.orders.find((entry) => entry.id === orderId);
+  if (!source) throw new Error("Order could not be found.");
+  const timestamp = timestampNow();
+  const duplicatedId = nextRecordId("ORD", state.orders);
+  const order: Order = {
+    ...source,
+    id: duplicatedId,
+    items: source.items.map((item, index) => ({
+      ...item,
+      id: `${duplicatedId}-ITEM-${index + 1}`,
+    })),
+    paymentId: undefined,
+    transactionId: undefined,
+    paymentStatus: "Pending",
+    status: "Awaiting Payment",
+    assignedRider: undefined,
+    riderStatus: undefined,
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    cashierId: state.cashier.id,
+    shiftId: shift.id,
+    cancelledBy: undefined,
+    cancelledAt: undefined,
+    cancellationReason: undefined,
+    timeline: [
+      {
+        id: nextEventId(),
+        status: "Awaiting Payment",
+        label: `Order duplicated from ${source.id}; awaiting payment`,
+        timestamp,
+        actor: state.cashier.name,
+      },
+    ],
+  };
+  state.orders.unshift(order);
+  addActivity(
+    state,
+    "walkin_created",
+    `${state.cashier.name} duplicated ${source.id} as ${duplicatedId}`,
+    duplicatedId,
+  );
+  state.notifications.unshift({
+    id: nextEventId(),
+    title: "Order duplicated",
+    message: `${duplicatedId} was created from ${source.id} and requires payment.`,
+    createdAt: timestamp,
+    read: false,
+    customerVisible: false,
+    kind: "record_updated",
+    page: "order-list",
+    intent: { search: duplicatedId },
+    orderId: duplicatedId,
+  });
+  return { state, order };
 }
 
 export function releaseReadyOrder(

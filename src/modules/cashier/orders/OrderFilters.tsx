@@ -1,6 +1,7 @@
 import { RefreshCw, Search } from "lucide-react";
 import { ORDER_STATUSES } from "../constants";
 import type { OrderStatus, OrderType } from "../types";
+import type { BaseOrderSort } from "./orderOperations";
 import {
   CashierButton,
   CashierInput,
@@ -10,12 +11,28 @@ import {
 
 export interface OrderFilterValue {
   search: string;
+  quick:
+    | "All"
+    | "Delayed"
+    | "Needs Payment"
+    | "Kitchen Active"
+    | "Needs Rider"
+    | "Ready";
   type: "All" | OrderType;
   status: "All" | OrderStatus;
   from: string;
   to: string;
-  sort: "newest" | "oldest" | "total-high" | "total-low";
+  sort: BaseOrderSort;
 }
+
+const QUICK_FILTERS: OrderFilterValue["quick"][] = [
+  "All",
+  "Delayed",
+  "Needs Payment",
+  "Kitchen Active",
+  "Needs Rider",
+  "Ready",
+];
 
 export function OrderFilters({
   value,
@@ -39,6 +56,29 @@ export function OrderFilters({
       className="cashier-filter-bar rrj-card p-4"
       aria-label="Order filters"
     >
+      <div
+        className="mb-4 flex flex-wrap items-center gap-2"
+        aria-label="Quick filters"
+      >
+        <span className="mr-1 text-[9px] font-black uppercase tracking-widest text-muted-foreground">
+          Quick filter
+        </span>
+        {QUICK_FILTERS.map((filter) => (
+          <button
+            key={filter}
+            type="button"
+            aria-pressed={value.quick === filter}
+            onClick={() => set("quick", filter)}
+            className={`min-h-9 rounded-full border px-3 text-[10px] font-black transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+              value.quick === filter
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-border bg-white text-muted-foreground hover:border-primary/30 hover:text-primary"
+            }`}
+          >
+            {filter}
+          </button>
+        ))}
+      </div>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[1.5fr_0.8fr_1fr_0.8fr_0.8fr_0.9fr_auto]">
         <div>
           <Label htmlFor="order-search">Search</Label>
@@ -50,7 +90,7 @@ export function OrderFilters({
               aria-keyshortcuts="/ Control+F Meta+F"
               value={value.search}
               onChange={(event) => set("search", event.target.value)}
-              placeholder="Order ID or customer"
+              placeholder="Order, customer, phone, or item"
               className="pl-9"
             />
           </div>
@@ -104,7 +144,7 @@ export function OrderFilters({
           />
         </div>
         <div>
-          <Label htmlFor="order-sort">Sort</Label>
+          <Label htmlFor="order-sort">Base sort</Label>
           <CashierSelect
             id="order-sort"
             value={value.sort}
@@ -112,6 +152,7 @@ export function OrderFilters({
               set("sort", event.target.value as OrderFilterValue["sort"])
             }
           >
+            <option value="operations">Operations priority</option>
             <option value="newest">Newest</option>
             <option value="oldest">Oldest</option>
             <option value="total-high">Total: high</option>

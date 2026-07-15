@@ -23,6 +23,22 @@ export const cancellationSchema = z.object({
   reason: z.string().trim().min(3, "Enter a cancellation reason.").max(200),
 });
 
+export const orderOperationalEditSchema = z.object({
+  customerName: z
+    .string()
+    .trim()
+    .min(1, "Customer name is required.")
+    .max(80, "Customer name must be 80 characters or fewer."),
+  contactNumber: z
+    .string()
+    .trim()
+    .min(1, "Phone number is required.")
+    .max(30, "Phone number must be 30 characters or fewer."),
+  tableNumber: z.string().trim().max(30).optional(),
+  deliveryAddress: z.string().trim().max(200).optional(),
+  orderInstructions: z.string().trim().max(300).optional(),
+});
+
 export const voidSchema = z.object({
   reason: z.string().trim().min(3, "Enter a void reason.").max(200),
 });
@@ -88,6 +104,9 @@ export const posSchema = z
 
 export type RejectionForm = z.infer<typeof rejectionSchema>;
 export type CancellationForm = z.infer<typeof cancellationSchema>;
+export type OrderOperationalEditForm = z.infer<
+  typeof orderOperationalEditSchema
+>;
 export type VoidForm = z.infer<typeof voidSchema>;
 export type StartShiftForm = z.infer<typeof startShiftSchema>;
 export type EndShiftForm = z.infer<typeof endShiftSchema>;

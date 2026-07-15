@@ -257,6 +257,14 @@ export interface WalkInOrderInput {
   gcashReference?: string;
 }
 
+export interface OrderOperationalEditInput {
+  customerName: string;
+  contactNumber: string;
+  tableNumber?: string;
+  deliveryAddress?: string;
+  orderInstructions?: string;
+}
+
 export interface CashierNavigationIntent {
   statuses?: OrderStatus[];
   orderTypes?: OrderType[];
