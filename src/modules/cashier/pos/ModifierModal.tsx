@@ -20,17 +20,16 @@ import {
   CashierTextarea,
   Label,
 } from "../components";
-import { formatMoney } from "../constants";
+import {
+  MAX_POS_ITEM_QUANTITY,
+  POS_ITEM_NOTE_MAX_LENGTH,
+  formatMoney,
+} from "../constants";
 import { modifierGroupsFor } from "../constants/modifiers";
 import type { MenuItem, OrderItemModifier } from "../types";
-import { menuImageFor } from "./MenuItemCard";
+import { productImageFor } from "./ProductCard";
 
-export function MenuItemDialog({
-  item,
-  currentQuantity,
-  onClose,
-  onAdd,
-}: {
+export interface ModifierModalProps {
   item?: MenuItem;
   currentQuantity: number;
   onClose: () => void;
@@ -40,7 +39,14 @@ export function MenuItemDialog({
     note: string,
     modifiers: OrderItemModifier[],
   ) => void;
-}) {
+}
+
+export function ModifierModal({
+  item,
+  currentQuantity,
+  onClose,
+  onAdd,
+}: ModifierModalProps) {
   const [quantity, setQuantity] = useState(1);
   const [note, setNote] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -48,8 +54,8 @@ export function MenuItemDialog({
   const remaining = Math.max(
     0,
     Math.min(
-      99 - currentQuantity,
-      (item?.inventoryRemaining ?? 99) - currentQuantity,
+      MAX_POS_ITEM_QUANTITY - currentQuantity,
+      (item?.inventoryRemaining ?? MAX_POS_ITEM_QUANTITY) - currentQuantity,
     ),
   );
 
@@ -58,9 +64,11 @@ export function MenuItemDialog({
     setQuantity(1);
     setNote("");
     setSelectedIds(
-      modifierGroupsFor(item)
-        .filter((group) => group.selection === "single")
-        .flatMap((group) => group.options[0]?.id ?? []),
+      modifierGroupsFor(item).flatMap((group) =>
+        group.required && group.selection === "single"
+          ? (group.options[0]?.id ?? [])
+          : [],
+      ),
     );
   }, [item]);
 
@@ -68,6 +76,11 @@ export function MenuItemDialog({
 
   const selectedModifiers = groups.flatMap((group) =>
     group.options.filter((option) => selectedIds.includes(option.id)),
+  );
+  const missingRequired = groups.some(
+    (group) =>
+      group.required &&
+      !group.options.some((option) => selectedIds.includes(option.id)),
   );
   const unitPrice =
     item.price +
@@ -79,6 +92,10 @@ export function MenuItemDialog({
     setSelectedIds((current) => {
       if (group.selection === "single") {
         const groupIds = new Set(group.options.map((option) => option.id));
+        const alreadySelected = current.includes(optionId);
+        if (alreadySelected && !group.required) {
+          return current.filter((id) => id !== optionId);
+        }
         return [...current.filter((id) => !groupIds.has(id)), optionId];
       }
       return current.includes(optionId)
@@ -92,13 +109,14 @@ export function MenuItemDialog({
       <CashierDialogContent className="max-w-xl overflow-hidden p-0">
         <div className="relative h-44 overflow-hidden bg-[#f1e3d4] sm:h-48">
           <img
-            src={menuImageFor(item.id)}
+            src={item.imageUrl ?? productImageFor(item.id)}
             alt={item.name}
+            decoding="async"
             className="h-full w-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
           <div className="absolute bottom-3 left-4 flex items-center gap-2 text-xs font-bold text-white">
-            <Clock3 className="h-4 w-4" />
+            <Clock3 className="h-4 w-4" aria-hidden="true" />
             {item.preparationMinutes ?? 5} min preparation
           </div>
         </div>
@@ -118,19 +136,26 @@ export function MenuItemDialog({
             <DialogDescription>{item.description}</DialogDescription>
           </DialogHeader>
 
-          {groups.length > 0 && (
+          {groups.length ? (
             <div className="space-y-4" aria-label="Item modifiers">
               <div className="flex items-center gap-2 text-xs font-black">
-                <SlidersHorizontal className="h-4 w-4 text-primary" />
+                <SlidersHorizontal
+                  className="h-4 w-4 text-primary"
+                  aria-hidden="true"
+                />
                 Customize item
               </div>
               {groups.map((group) => (
                 <fieldset key={group.id}>
-                  <legend className="mb-2 text-[10px] font-black uppercase tracking-wider text-muted-foreground">
+                  <legend className="mb-2 flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-muted-foreground">
                     {group.name}
-                    <span className="ml-1 normal-case tracking-normal">
-                      ·{" "}
-                      {group.selection === "single" ? "Choose one" : "Optional"}
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-[8px] ${group.required ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}
+                    >
+                      {group.required ? "Required" : "Optional"} ·{" "}
+                      {group.selection === "single"
+                        ? "Single select"
+                        : "Multi select"}
                     </span>
                   </legend>
                   <div className="grid grid-cols-2 gap-2">
@@ -145,7 +170,9 @@ export function MenuItemDialog({
                           className={`pos-modifier-option flex min-h-12 items-center gap-2 rounded-xl border px-3 text-left text-xs font-bold transition ${selected ? "is-selected" : ""}`}
                         >
                           <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border">
-                            {selected && <Check className="h-3 w-3" />}
+                            {selected ? (
+                              <Check className="h-3 w-3" aria-hidden="true" />
+                            ) : null}
                           </span>
                           <span className="min-w-0 flex-1">{option.name}</span>
                           <span className="text-[10px] text-muted-foreground">
@@ -160,20 +187,20 @@ export function MenuItemDialog({
                 </fieldset>
               ))}
             </div>
-          )}
+          ) : null}
 
           <div>
             <Label htmlFor="item-note">Special request</Label>
             <CashierTextarea
               id="item-note"
               value={note}
-              maxLength={120}
+              maxLength={POS_ITEM_NOTE_MAX_LENGTH}
               onChange={(event) => setNote(event.target.value)}
               placeholder="Example: sauce on the side or allergy note"
               className="text-xs"
             />
             <p className="mt-1 text-right text-[9px] text-muted-foreground">
-              {note.length}/120
+              {note.length}/{POS_ITEM_NOTE_MAX_LENGTH}
             </p>
           </div>
 
@@ -186,7 +213,7 @@ export function MenuItemDialog({
                 onClick={() => setQuantity((value) => Math.max(1, value - 1))}
                 className="flex h-10 w-10 items-center justify-center rounded-lg hover:bg-muted disabled:opacity-30"
               >
-                <Minus className="h-4 w-4" />
+                <Minus className="h-4 w-4" aria-hidden="true" />
               </button>
               <span className="w-9 text-center text-sm font-black">
                 {quantity}
@@ -200,21 +227,23 @@ export function MenuItemDialog({
                 }
                 className="flex h-10 w-10 items-center justify-center rounded-lg hover:bg-muted disabled:opacity-30"
               >
-                <Plus className="h-4 w-4" />
+                <Plus className="h-4 w-4" aria-hidden="true" />
               </button>
             </div>
             <CashierButton
               size="lg"
-              disabled={!item.available || remaining === 0}
+              disabled={!item.available || remaining === 0 || missingRequired}
               onClick={() => {
                 onAdd(item, quantity, note, selectedModifiers);
                 onClose();
               }}
             >
-              <ShoppingCart className="h-4 w-4" />
+              <ShoppingCart className="h-4 w-4" aria-hidden="true" />
               {remaining === 0
                 ? "Maximum in cart"
-                : `Add ${quantity} · ${formatMoney(unitPrice * quantity)}`}
+                : missingRequired
+                  ? "Choose required option"
+                  : `Add ${quantity} · ${formatMoney(unitPrice * quantity)}`}
             </CashierButton>
           </DialogFooter>
         </div>

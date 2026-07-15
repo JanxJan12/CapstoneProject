@@ -1,4 +1,5 @@
 import {
+  CASH_TENDER_ROUNDING_STEPS,
   DISCOUNT_RATE,
   MAX_POS_ITEM_QUANTITY,
   POS_PRODUCT_HISTORY_LIMIT,
@@ -14,6 +15,55 @@ export interface CartUpdateResult {
   cart: POSCartLine[];
   error?: string;
   warning?: { title: string; description: string };
+}
+
+export interface CashTenderSuggestion {
+  label: string;
+  amount: number;
+}
+
+export function getCashTenderSuggestions(
+  total: number,
+): CashTenderSuggestion[] {
+  return [
+    { label: "Exact", amount: total },
+    ...CASH_TENDER_ROUNDING_STEPS.map((step) => {
+      const rounded = Math.ceil(total / step) * step;
+      return {
+        label: `Next ₱${step}`,
+        amount: rounded > total ? rounded : rounded + step,
+      };
+    }),
+  ];
+}
+
+export function filterMenuItems(
+  items: MenuItem[],
+  category: string,
+  search: string,
+  recentIds: ReadonlySet<string>,
+  bestSellerIds: ReadonlySet<string>,
+  favoriteIds: ReadonlySet<string>,
+) {
+  const terms = search.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
+  return items.filter((item) => {
+    const inView =
+      category === "All" ||
+      item.category === category ||
+      (category === "Recently ordered" && recentIds.has(item.id)) ||
+      (category === "Best sellers" && bestSellerIds.has(item.id)) ||
+      (category === "Favorites" && favoriteIds.has(item.id));
+    if (!inView) return false;
+    const searchable = [
+      item.name,
+      item.category,
+      item.description,
+      ...(item.aliases ?? []),
+    ]
+      .join(" ")
+      .toLocaleLowerCase();
+    return terms.every((term) => searchable.includes(term));
+  });
 }
 
 export function getOccupiedTables(orders: Order[]) {
@@ -251,6 +301,55 @@ export function setCartLineQuantity(
       quantity: Math.min(maximum, Math.max(1, Math.round(quantity))),
     };
   });
+}
+
+export function duplicateCartLine(
+  current: POSCartLine[],
+  lineId: string,
+  menuItems: MenuItem[],
+): CartUpdateResult {
+  const sourceIndex = current.findIndex((entry) => entry.lineId === lineId);
+  const source = current[sourceIndex];
+  if (!source) return { cart: current };
+  const menuItem = menuItems.find((item) => item.id === source.menuItemId);
+  if (!menuItem?.available) {
+    return { cart: current, error: `${source.name} is unavailable.` };
+  }
+  const currentQuantity = current
+    .filter((entry) => entry.menuItemId === source.menuItemId)
+    .reduce((sum, entry) => sum + entry.quantity, 0);
+  const capacity = Math.max(
+    0,
+    Math.min(
+      MAX_POS_ITEM_QUANTITY - currentQuantity,
+      (menuItem.inventoryRemaining ?? MAX_POS_ITEM_QUANTITY) - currentQuantity,
+    ),
+  );
+  if (!capacity) {
+    return {
+      cart: current,
+      error: `No additional ${source.name} inventory is available.`,
+    };
+  }
+  const quantity = Math.min(source.quantity, capacity);
+  const duplicate: POSCartLine = {
+    ...source,
+    lineId: createLineId(),
+    quantity,
+    modifiers: source.modifiers?.map((modifier) => ({ ...modifier })),
+  };
+  const cart = [...current];
+  cart.splice(sourceIndex + 1, 0, duplicate);
+  return {
+    cart,
+    warning:
+      quantity < source.quantity
+        ? {
+            title: `Duplicated ${quantity} only`,
+            description: "The duplicate was limited by available inventory.",
+          }
+        : undefined,
+  };
 }
 
 export function reorderCart(

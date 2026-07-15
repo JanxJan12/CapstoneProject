@@ -1,4 +1,4 @@
-import { Eye, ReceiptText } from "lucide-react";
+import { Eye, Printer, ReceiptText } from "lucide-react";
 import {
   Dialog,
   DialogDescription,
@@ -26,6 +26,7 @@ export function ReceiptPreviewDialog({
   paymentMethod,
   onOpenChange,
   onCheckout,
+  onPrint,
 }: {
   open: boolean;
   orderNumber: string;
@@ -41,6 +42,7 @@ export function ReceiptPreviewDialog({
   paymentMethod: POSForm["paymentMethod"];
   onOpenChange: (open: boolean) => void;
   onCheckout: () => void;
+  onPrint: () => void;
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -143,6 +145,9 @@ export function ReceiptPreviewDialog({
         </div>
 
         <DialogFooter>
+          <CashierButton variant="secondary" onClick={onPrint}>
+            <Printer className="h-4 w-4" /> Print
+          </CashierButton>
           <CashierButton
             variant="secondary"
             onClick={() => onOpenChange(false)}

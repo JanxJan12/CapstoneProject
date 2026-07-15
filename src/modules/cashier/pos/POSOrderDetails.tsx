@@ -15,6 +15,8 @@ export function POSOrderDetails({
   orderType,
   discountType,
   occupiedTables,
+  optionsOpen,
+  onOptionsOpenChange,
   register,
   errors,
 }: {
@@ -22,6 +24,8 @@ export function POSOrderDetails({
   orderType: POSForm["orderType"];
   discountType: POSForm["discountType"];
   occupiedTables: string[];
+  optionsOpen: boolean;
+  onOptionsOpenChange: (open: boolean) => void;
   register: UseFormRegister<POSForm>;
   errors: FieldErrors<POSForm>;
 }) {
@@ -88,7 +92,12 @@ export function POSOrderDetails({
         </div>
       </div>
 
-      <details className="pos-order-options mt-2">
+      <details
+        id="pos-order-options"
+        open={optionsOpen}
+        onToggle={(event) => onOptionsOpenChange(event.currentTarget.open)}
+        className="pos-order-options mt-2"
+      >
         <summary className="flex min-h-10 cursor-pointer items-center justify-between rounded-lg px-2 text-[10px] font-black">
           Discount and special instructions
           <span className="normal-case text-primary">

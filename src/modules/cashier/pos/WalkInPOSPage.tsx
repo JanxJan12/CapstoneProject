@@ -2,12 +2,12 @@ import { LayoutGrid, ShoppingBasket } from "lucide-react";
 import { ConfirmationDialog, ErrorBanner, Toast } from "../components";
 import { formatMoney } from "../constants";
 import { MenuGrid } from "./MenuGrid";
-import { MenuItemDialog } from "./MenuItemDialog";
+import { ModifierModal } from "./ModifierModal";
 import { PaymentPanel } from "./PaymentPanel";
-import { PlaceOrderDialog } from "./PlaceOrderDialog";
 import { POSCart } from "./POSCart";
 import { POSOrderDetails } from "./POSOrderDetails";
 import { POSOrderHeader } from "./POSOrderHeader";
+import { POSQuickActions } from "./POSQuickActions";
 import { ReceiptDialog } from "./ReceiptDialog";
 import { ReceiptPreviewDialog } from "./ReceiptPreviewDialog";
 import { useWalkInPOSController } from "./useWalkInPOSController";
@@ -22,14 +22,12 @@ export function WalkInPOSPage({
   const confirmation = getConfirmationCopy(pos.pendingAction?.type);
 
   return (
-    <div className="tablet-pos flex h-full min-h-0 flex-col overflow-hidden border">
+    <div className="tablet-pos relative flex h-full min-h-0 flex-col overflow-hidden border">
       <POSOrderHeader
         orderType={pos.values.orderType}
         busy={pos.loading}
         register={pos.register}
         heldOrders={pos.state.heldOrders}
-        onNew={pos.guardedReset}
-        onHold={pos.handleHold}
         onVoid={() =>
           pos.cart.length
             ? pos.setVoidOpen(true)
@@ -87,10 +85,12 @@ export function WalkInPOSPage({
             category={pos.category}
             search={pos.search}
             recentIds={pos.recentIds}
+            recentSearches={pos.recentSearches}
             bestSellerIds={pos.bestSellerIds}
             favoriteIds={pos.favoriteIds}
             onCategoryChange={pos.setCategory}
             onSearchChange={pos.setSearch}
+            onCommitSearch={pos.commitSearch}
             onSelect={pos.setSelectedItem}
             onQuickAdd={pos.addItem}
             onToggleFavorite={pos.toggleFavorite}
@@ -100,13 +100,15 @@ export function WalkInPOSPage({
           id="pos-panel-order"
           role="tabpanel"
           aria-labelledby="pos-tab-order"
-          className={`pos-pane pos-order-pane w-full shrink-0 flex-col overflow-hidden border-t lg:flex lg:w-[390px] lg:border-t-0 ${pos.tabletPane === "order" ? "is-active flex" : "hidden"}`}
+          className={`pos-pane pos-order-pane w-full shrink-0 flex-col overflow-hidden border-t lg:flex lg:w-[430px] lg:border-t-0 ${pos.tabletPane === "order" ? "is-active flex" : "hidden"}`}
         >
           <POSOrderDetails
             orderNumber={pos.orderNumber}
             orderType={pos.values.orderType}
             discountType={pos.values.discountType}
             occupiedTables={pos.occupiedTables}
+            optionsOpen={pos.optionsOpen}
+            onOptionsOpenChange={pos.setOptionsOpen}
             register={pos.register}
             errors={pos.errors}
           />
@@ -117,6 +119,7 @@ export function WalkInPOSPage({
             onAdjust={pos.adjust}
             onQuantityChange={pos.setLineQuantity}
             onRemove={pos.remove}
+            onDuplicate={pos.duplicate}
             onNoteChange={pos.note}
             onReorder={pos.reorder}
             onClear={() => pos.setPendingAction({ type: "clear" })}
@@ -134,22 +137,18 @@ export function WalkInPOSPage({
             canPlace={pos.canPlace}
             disabledReason={pos.disabledReason}
             shiftOpen={Boolean(pos.activeShift)}
+            loading={pos.loading}
             checkoutRef={pos.checkoutRef}
             onTenderedChange={pos.setTendered}
-            onPreview={() => pos.setPreviewOpen(true)}
-            onConfirm={pos.openConfirmation}
+            onPreview={pos.previewReceipt}
+            onConfirm={pos.submitOrder}
           />
         </aside>
       </div>
-      <PlaceOrderDialog
-        open={pos.confirmOpen}
-        loading={pos.loading}
-        itemCount={pos.itemCount}
-        orderType={pos.values.orderType}
-        total={pos.total}
-        paymentMethod={pos.values.paymentMethod}
-        onOpenChange={pos.setConfirmOpen}
-        onConfirm={pos.placeOrder}
+      <POSQuickActions
+        busy={pos.loading}
+        hasItems={pos.cart.length > 0}
+        onAction={pos.runQuickAction}
       />
       <ReceiptPreviewDialog
         open={pos.previewOpen}
@@ -169,6 +168,7 @@ export function WalkInPOSPage({
         total={pos.total}
         paymentMethod={pos.values.paymentMethod}
         onOpenChange={pos.setPreviewOpen}
+        onPrint={() => window.print()}
         onCheckout={() => {
           pos.setPreviewOpen(false);
           window.requestAnimationFrame(() => pos.checkoutRef.current?.click());
@@ -185,9 +185,12 @@ export function WalkInPOSPage({
         payment={pos.receiptPayment}
         open={Boolean(pos.receiptOrder)}
         placed
-        onClose={() => pos.setReceiptOrder(undefined)}
+        onClose={() => {
+          pos.setReceiptOrder(undefined);
+          pos.focusSearch();
+        }}
       />
-      <MenuItemDialog
+      <ModifierModal
         item={pos.selectedItem}
         currentQuantity={pos.currentSelectedQuantity}
         onClose={() => pos.setSelectedItem(undefined)}

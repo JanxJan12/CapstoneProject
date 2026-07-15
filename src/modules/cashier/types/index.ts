@@ -35,6 +35,8 @@ export interface CashierUser {
 export interface MenuItem {
   id: string;
   name: string;
+  aliases?: string[];
+  imageUrl?: string;
   category: string;
   description: string;
   price: number;
@@ -53,6 +55,7 @@ export interface MenuModifierGroup {
   id: string;
   name: string;
   selection: "single" | "multiple";
+  required: boolean;
   options: OrderItemModifier[];
 }
 

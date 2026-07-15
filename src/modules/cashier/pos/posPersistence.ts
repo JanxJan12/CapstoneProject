@@ -1,4 +1,9 @@
-import { POS_DRAFT_STORAGE_KEY, POS_FAVORITES_STORAGE_KEY } from "../constants";
+import {
+  POS_DRAFT_STORAGE_KEY,
+  POS_FAVORITES_STORAGE_KEY,
+  POS_RECENT_SEARCHES_STORAGE_KEY,
+  POS_RECENT_SEARCH_LIMIT,
+} from "../constants";
 import type { POSForm } from "../schemas";
 import type { OrderItem } from "../types";
 import type { POSCartLine } from "./types";
@@ -46,15 +51,26 @@ export function loadPOSDraft(): { cart: POSCartLine[]; form: POSForm } {
 }
 
 export function savePOSDraft(cart: POSCartLine[], form: POSForm) {
-  if (cart.length) {
-    localStorage.setItem(POS_DRAFT_STORAGE_KEY, JSON.stringify({ cart, form }));
-  } else {
-    localStorage.removeItem(POS_DRAFT_STORAGE_KEY);
+  try {
+    if (cart.length) {
+      localStorage.setItem(
+        POS_DRAFT_STORAGE_KEY,
+        JSON.stringify({ cart, form }),
+      );
+    } else {
+      localStorage.removeItem(POS_DRAFT_STORAGE_KEY);
+    }
+  } catch {
+    // Draft persistence is best-effort; the active in-memory order remains usable.
   }
 }
 
 export function clearPOSDraft() {
-  localStorage.removeItem(POS_DRAFT_STORAGE_KEY);
+  try {
+    localStorage.removeItem(POS_DRAFT_STORAGE_KEY);
+  } catch {
+    // Ignore restricted storage environments.
+  }
 }
 
 export function loadPOSFavorites(): string[] {
@@ -71,5 +87,35 @@ export function loadPOSFavorites(): string[] {
 }
 
 export function savePOSFavorites(ids: string[]) {
-  localStorage.setItem(POS_FAVORITES_STORAGE_KEY, JSON.stringify(ids));
+  try {
+    localStorage.setItem(POS_FAVORITES_STORAGE_KEY, JSON.stringify(ids));
+  } catch {
+    // Favorites remain available for the active session.
+  }
+}
+
+export function loadPOSRecentSearches(): string[] {
+  try {
+    const saved = JSON.parse(
+      localStorage.getItem(POS_RECENT_SEARCHES_STORAGE_KEY) ?? "[]",
+    ) as unknown;
+    return Array.isArray(saved)
+      ? saved
+          .filter((entry): entry is string => typeof entry === "string")
+          .slice(0, POS_RECENT_SEARCH_LIMIT)
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+export function savePOSRecentSearches(searches: string[]) {
+  try {
+    localStorage.setItem(
+      POS_RECENT_SEARCHES_STORAGE_KEY,
+      JSON.stringify(searches.slice(0, POS_RECENT_SEARCH_LIMIT)),
+    );
+  } catch {
+    // Recent searches remain available for the active session.
+  }
 }

@@ -1,4 +1,4 @@
-import { Printer } from "lucide-react";
+import { CheckCircle2, Printer } from "lucide-react";
 import {
   Dialog,
   DialogDescription,
@@ -42,6 +42,11 @@ export function ReceiptDialog({
     >
       <CashierDialogContent className="max-w-md bg-[#fbf8f4]">
         <DialogHeader className="text-center sm:text-center">
+          {placed ? (
+            <div className="pos-receipt-ready mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+              <CheckCircle2 className="h-7 w-7" aria-hidden="true" />
+            </div>
+          ) : null}
           <DialogTitle className="text-emerald-700">
             {placed ? "Order placed successfully" : "Receipt preview"}
           </DialogTitle>

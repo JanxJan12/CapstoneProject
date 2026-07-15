@@ -1,7 +1,7 @@
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { MENU_GRID_OVERSCAN_ROWS, MENU_GRID_ROW_HEIGHT_PX } from "../constants";
 import type { MenuItem } from "../types";
-import { MenuItemCard } from "./MenuItemCard";
+import { ProductCard } from "./ProductCard";
 import type { POSCartLine } from "./types";
 
 export interface VirtualizedProductGridProps {
@@ -10,6 +10,7 @@ export interface VirtualizedProductGridProps {
   recentIds: string[];
   bestSellerIds: string[];
   favoriteIds: string[];
+  activeItemId?: string;
   onSelect: (item: MenuItem) => void;
   onQuickAdd: (item: MenuItem) => void;
   onToggleFavorite: (itemId: string) => void;
@@ -21,11 +22,13 @@ export const VirtualizedProductGrid = memo(function VirtualizedProductGrid({
   recentIds,
   bestSellerIds,
   favoriteIds,
+  activeItemId,
   onSelect,
   onQuickAdd,
   onToggleFavorite,
 }: VirtualizedProductGridProps) {
   const viewportRef = useRef<HTMLDivElement>(null);
+  const scrollFrame = useRef<number | undefined>(undefined);
   const [scrollTop, setScrollTop] = useState(0);
   const [viewport, setViewport] = useState({ width: 760, height: 600 });
 
@@ -33,7 +36,15 @@ export const VirtualizedProductGrid = memo(function VirtualizedProductGrid({
     const element = viewportRef.current;
     if (!element) return;
     const update = () =>
-      setViewport({ width: element.clientWidth, height: element.clientHeight });
+      setViewport((current) => {
+        const next = {
+          width: element.clientWidth,
+          height: element.clientHeight,
+        };
+        return current.width === next.width && current.height === next.height
+          ? current
+          : next;
+      });
     update();
     const observer = new ResizeObserver(update);
     observer.observe(element);
@@ -45,7 +56,25 @@ export const VirtualizedProductGrid = memo(function VirtualizedProductGrid({
     setScrollTop(0);
   }, [items]);
 
-  const columns = viewport.width >= 720 ? 3 : viewport.width >= 360 ? 2 : 1;
+  useEffect(
+    () => () => {
+      if (scrollFrame.current !== undefined) {
+        window.cancelAnimationFrame(scrollFrame.current);
+      }
+    },
+    [],
+  );
+
+  const columns =
+    viewport.width >= 1350
+      ? 5
+      : viewport.width >= 1040
+        ? 4
+        : viewport.width >= 720
+          ? 3
+          : viewport.width >= 360
+            ? 2
+            : 1;
   const totalRows = Math.ceil(items.length / columns);
   const startRow = Math.max(
     0,
@@ -70,12 +99,36 @@ export const VirtualizedProductGrid = memo(function VirtualizedProductGrid({
     return result;
   }, [cart]);
 
+  useEffect(() => {
+    if (!activeItemId) return;
+    const index = items.findIndex((item) => item.id === activeItemId);
+    if (index < 0) return;
+    const row = Math.floor(index / columns);
+    const top = row * MENU_GRID_ROW_HEIGHT_PX;
+    const bottom = top + MENU_GRID_ROW_HEIGHT_PX;
+    const element = viewportRef.current;
+    if (!element) return;
+    if (top < element.scrollTop) element.scrollTo({ top });
+    else if (bottom > element.scrollTop + element.clientHeight) {
+      element.scrollTo({ top: bottom - element.clientHeight });
+    }
+  }, [activeItemId, columns, items]);
+
   return (
     <div
       ref={viewportRef}
-      onScroll={(event) => setScrollTop(event.currentTarget.scrollTop)}
+      onScroll={(event) => {
+        const nextScrollTop = event.currentTarget.scrollTop;
+        if (scrollFrame.current !== undefined) return;
+        scrollFrame.current = window.requestAnimationFrame(() => {
+          setScrollTop(nextScrollTop);
+          scrollFrame.current = undefined;
+        });
+      }}
       className="pos-product-viewport min-h-0 flex-1 overflow-y-auto px-3 pb-3"
       aria-label="Menu products"
+      id="pos-product-results"
+      role="listbox"
     >
       <div
         className="relative"
@@ -90,12 +143,13 @@ export const VirtualizedProductGrid = memo(function VirtualizedProductGrid({
         >
           {visibleItems.map((item) => (
             <div key={item.id} style={{ height: MENU_GRID_ROW_HEIGHT_PX - 12 }}>
-              <MenuItemCard
+              <ProductCard
                 item={item}
                 quantity={quantities.get(item.id) ?? 0}
                 favorite={favorites.has(item.id)}
                 bestSeller={bestSellers.has(item.id)}
                 recentlyOrdered={recent.has(item.id)}
+                keyboardActive={activeItemId === item.id}
                 onSelect={() => onSelect(item)}
                 onQuickAdd={() => onQuickAdd(item)}
                 onToggleFavorite={() => onToggleFavorite(item.id)}

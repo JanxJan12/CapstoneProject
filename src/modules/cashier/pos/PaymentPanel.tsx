@@ -1,13 +1,12 @@
+import { useMemo } from "react";
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
 import type { RefObject } from "react";
-import { ArrowRight, Banknote, Eye, Smartphone } from "lucide-react";
+import { ArrowRight, Banknote, Eye, Loader2, Smartphone } from "lucide-react";
 import type { POSForm } from "../schemas";
-import {
-  CASH_TENDER_SUGGESTIONS,
-  formatCompactMoney,
-  formatMoney,
-} from "../constants";
+import { formatCompactMoney, formatMoney } from "../constants";
 import { CashierInput, FieldError, Label } from "../components";
+import { NumericKeypad } from "./NumericKeypad";
+import { getCashTenderSuggestions } from "./posOperations";
 
 export function PaymentPanel({
   subtotal,
@@ -22,6 +21,7 @@ export function PaymentPanel({
   canPlace,
   disabledReason,
   shiftOpen,
+  loading,
   checkoutRef,
   onTenderedChange,
   onPreview,
@@ -39,12 +39,17 @@ export function PaymentPanel({
   canPlace: boolean;
   disabledReason?: string;
   shiftOpen: boolean;
+  loading: boolean;
   checkoutRef?: RefObject<HTMLButtonElement | null>;
   onTenderedChange: (amount: number) => void;
   onPreview: () => void;
   onConfirm: () => void;
 }) {
   const change = Math.max(0, tendered - total);
+  const cashSuggestions = useMemo(
+    () => getCashTenderSuggestions(total),
+    [total],
+  );
 
   return (
     <section className="pos-payment-panel shrink-0 border-t">
@@ -101,9 +106,14 @@ export function PaymentPanel({
 
       {paymentMethod === "Cash" ? (
         <div className="pos-tendered border-t px-4 py-3">
-          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-2">
+          <div>
+            <div className="flex items-center justify-between gap-3">
+              <Label htmlFor="amount-tendered">Cash tendered</Label>
+              <span className="text-[9px] font-bold text-muted-foreground">
+                Touch keypad or type
+              </span>
+            </div>
             <div>
-              <Label htmlFor="amount-tendered">Custom cash amount</Label>
               <CashierInput
                 id="amount-tendered"
                 type="number"
@@ -118,31 +128,27 @@ export function PaymentPanel({
                 {...register("amountTendered", { valueAsNumber: true })}
               />
             </div>
-            <button
-              type="button"
-              onClick={() => onTenderedChange(total)}
-              className="pos-cash-exact min-h-12 rounded-lg border px-3 text-[10px] font-black"
-            >
-              Exact
-            </button>
           </div>
           <FieldError>{errors.amountTendered?.message}</FieldError>
           {tendered > 0 && tendered < total && (
             <FieldError>Cash tendered is insufficient.</FieldError>
           )}
           <div className="pos-cash-suggestions mt-2 grid grid-cols-4 gap-1.5">
-            {CASH_TENDER_SUGGESTIONS.map((amount) => (
+            {cashSuggestions.map(({ label, amount }) => (
               <button
-                key={amount}
+                key={label}
                 type="button"
-                disabled={amount < total}
                 onClick={() => onTenderedChange(amount)}
-                className="min-h-10 rounded-lg border px-2 text-[10px] font-black disabled:cursor-not-allowed disabled:opacity-30"
+                className="min-h-11 rounded-lg border px-1.5 py-1 text-[9px] font-black"
               >
-                {formatCompactMoney(amount)}
+                <span className="block truncate">{label}</span>
+                <strong className="mt-0.5 block text-[10px]">
+                  {formatCompactMoney(amount)}
+                </strong>
               </button>
             ))}
           </div>
+          <NumericKeypad value={tendered} onChange={onTenderedChange} />
           <div
             className={`pos-change mt-2 flex justify-between rounded-lg border px-3 py-2 text-[11px] font-black ${change > 0 ? "has-change" : ""}`}
           >
@@ -161,7 +167,7 @@ export function PaymentPanel({
           />
           <FieldError>{errors.gcashReference?.message}</FieldError>
           <p className="mt-2 text-[9px] font-semibold">
-            Cashier-confirmed in-person payment; no proof upload required.
+            No cash entry needed. Enter the reference, then place the order.
           </p>
         </div>
       )}
@@ -197,12 +203,18 @@ export function PaymentPanel({
         <button
           ref={checkoutRef}
           type="button"
-          disabled={!canPlace || !shiftOpen}
+          disabled={!canPlace || !shiftOpen || loading}
           onClick={onConfirm}
+          aria-busy={loading || undefined}
           aria-keyshortcuts="F3 Control+Enter"
           className="pos-place-order flex min-h-14 w-full items-center rounded-xl px-4 text-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-35"
         >
-          <span className="text-sm font-black">Place Order</span>
+          {loading ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+          ) : null}
+          <span className="text-sm font-black">
+            {loading ? "Placing Order…" : "Place Order"}
+          </span>
           <strong className="ml-auto text-sm">{formatMoney(total)}</strong>
           <ArrowRight className="ml-2 h-5 w-5" />
         </button>

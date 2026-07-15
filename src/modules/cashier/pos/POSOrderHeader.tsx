@@ -1,5 +1,5 @@
 import type { UseFormRegister } from "react-hook-form";
-import { PauseCircle, RotateCcw, XCircle } from "lucide-react";
+import { XCircle } from "lucide-react";
 import type { POSForm } from "../schemas";
 import type { HeldOrder } from "../types";
 import { CashierSelect } from "../components";
@@ -9,8 +9,6 @@ export function POSOrderHeader({
   busy,
   register,
   heldOrders,
-  onNew,
-  onHold,
   onVoid,
   onReopen,
 }: {
@@ -18,8 +16,6 @@ export function POSOrderHeader({
   busy: boolean;
   register: UseFormRegister<POSForm>;
   heldOrders: HeldOrder[];
-  onNew: () => void;
-  onHold: () => void;
   onVoid: () => void;
   onReopen: (id: string) => void;
 }) {
@@ -75,18 +71,6 @@ export function POSOrderHeader({
           </div>
         )}
         <div className="pos-order-actions ml-auto flex flex-wrap gap-1.5">
-          <Action
-            label="New"
-            icon={RotateCcw}
-            onClick={onNew}
-            disabled={busy}
-          />
-          <Action
-            label="Hold"
-            icon={PauseCircle}
-            onClick={onHold}
-            disabled={busy}
-          />
           <Action
             label="Void"
             icon={XCircle}

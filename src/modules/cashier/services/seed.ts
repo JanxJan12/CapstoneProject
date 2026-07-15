@@ -257,6 +257,7 @@ export function createInitialCashierState(): CashierState {
       {
         id: "MENU-01",
         name: "Crispy Beef Tadyang",
+        aliases: ["Tadyang", "Beef ribs", "Crispy beef"],
         category: "Viands",
         description: "Crispy beef ribs with garlic and spices",
         price: 185,
@@ -267,6 +268,7 @@ export function createInitialCashierState(): CashierState {
       {
         id: "MENU-02",
         name: "Adobong Manok",
+        aliases: ["Adobo", "Chicken adobo", "Manok"],
         category: "Viands",
         description: "Classic chicken adobo",
         price: 120,
@@ -277,6 +279,7 @@ export function createInitialCashierState(): CashierState {
       {
         id: "MENU-03",
         name: "Sinigang na Baka",
+        aliases: ["Sinigang", "Beef soup", "Baka soup"],
         category: "Soups",
         description: "Tamarind beef soup with vegetables",
         price: 155,
@@ -287,6 +290,7 @@ export function createInitialCashierState(): CashierState {
       {
         id: "MENU-04",
         name: "Chicken Bicol Express",
+        aliases: ["Bicol express", "Spicy chicken"],
         category: "Viands",
         description: "Spicy chicken in coconut milk",
         price: 130,
@@ -297,6 +301,7 @@ export function createInitialCashierState(): CashierState {
       {
         id: "MENU-05",
         name: "Kare-Kare",
+        aliases: ["Kare kare", "Peanut stew"],
         category: "Viands",
         description: "Peanut stew with vegetables",
         price: 175,
@@ -307,6 +312,7 @@ export function createInitialCashierState(): CashierState {
       {
         id: "MENU-06",
         name: "Pinakbet",
+        aliases: ["Pakbet", "Mixed vegetables"],
         category: "Vegetables",
         description: "Mixed vegetables in shrimp paste",
         price: 110,
@@ -317,6 +323,7 @@ export function createInitialCashierState(): CashierState {
       {
         id: "MENU-07",
         name: "Fried Rice",
+        aliases: ["Sinangag", "Garlic rice"],
         category: "Rice",
         description: "Garlic fried rice",
         price: 45,
@@ -327,6 +334,7 @@ export function createInitialCashierState(): CashierState {
       {
         id: "MENU-08",
         name: "White Rice",
+        aliases: ["Plain rice", "Steamed rice", "Kanin"],
         category: "Rice",
         description: "Steamed white rice",
         price: 35,
@@ -337,6 +345,7 @@ export function createInitialCashierState(): CashierState {
       {
         id: "MENU-09",
         name: "Softdrinks",
+        aliases: ["Soda", "Coke", "Royal", "Sprite"],
         category: "Beverages",
         description: "Coke, Royal, or Sprite",
         price: 30,
@@ -347,6 +356,7 @@ export function createInitialCashierState(): CashierState {
       {
         id: "MENU-10",
         name: "Buko Juice",
+        aliases: ["Coconut juice", "Buko"],
         category: "Beverages",
         description: "Fresh coconut juice",
         price: 35,

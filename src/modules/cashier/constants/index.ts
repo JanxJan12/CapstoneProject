@@ -3,7 +3,9 @@ import type { OrderStatus } from "../types";
 export const CASHIER_STORAGE_KEY = "rrj_cashier_state_v4";
 export const POS_DRAFT_STORAGE_KEY = "rrj_cashier_pos_draft_v3";
 export const POS_FAVORITES_STORAGE_KEY = "rrj_cashier_pos_favorites_v1";
-export const CASHIER_STATE_VERSION = 5;
+export const POS_RECENT_SEARCHES_STORAGE_KEY =
+  "rrj_cashier_pos_recent_searches_v1";
+export const CASHIER_STATE_VERSION = 6;
 export const CASHIER_ID = "USR-CASHIER-001";
 export const CASHIER_NAME = "Juan Santos";
 export const CASHIER_TERMINAL = "Counter Terminal 01";
@@ -18,12 +20,19 @@ export const ORDER_REFRESH_INTERVAL_MS = 15_000;
 export const DASHBOARD_CLOCK_REFRESH_MS = 30_000;
 export const SEARCH_FOCUS_DELAY_MS = 100;
 export const DATA_REFRESH_FEEDBACK_MS = 200;
-export const CASH_TENDER_SUGGESTIONS = [100, 200, 500, 1000] as const;
+export const CASH_TENDER_ROUNDING_STEPS = [100, 500, 1000] as const;
 export const MAX_POS_ITEM_QUANTITY = 99;
+export const POS_MAX_CASH_DIGITS = 7;
 export const POS_PRODUCT_HISTORY_LIMIT = 8;
+export const POS_RECENT_SEARCH_LIMIT = 6;
+export const POS_LOW_INVENTORY_THRESHOLD = 5;
+export const POS_ITEM_NOTE_MAX_LENGTH = 120;
 export const MAX_ACTIVITY_RECORDS = 40;
 export const MENU_GRID_ROW_HEIGHT_PX = 300;
 export const MENU_GRID_OVERSCAN_ROWS = 2;
+export const POS_SWIPE_DELETE_THRESHOLD_PX = 72;
+export const POS_SWIPE_MAX_OFFSET_PX = 96;
+export const POS_PRINT_PREVIEW_DELAY_MS = 100;
 export const OPTIMISTIC_DELAY_MS = {
   fast: 160,
   default: 180,
@@ -94,6 +103,13 @@ export const MENU_CATEGORIES = [
   "Rice",
   "Beverages",
 ];
+
+export const POPULAR_MENU_SEARCHES = [
+  "Beef",
+  "Chicken",
+  "Rice",
+  "Beverages",
+] as const;
 
 export const DINING_TABLES = Array.from({ length: 12 }, (_, index) =>
   String(index + 1),
