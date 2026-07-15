@@ -158,7 +158,11 @@ export interface CashierShift {
   actualCash?: number;
   expectedCash?: number;
   variance?: number;
+  varianceReason?: string;
   notes?: string;
+  managerApprovedBy?: string;
+  managerApprovedAt?: string;
+  pendingPaymentCountAtClose?: number;
   status: ShiftStatus;
 }
 
@@ -282,9 +286,18 @@ export interface ShiftTotals {
   cashSales: number;
   gcashSales: number;
   refunds: number;
+  cashRefunds: number;
   voids: number;
   discounts: number;
   transactionCount: number;
   ordersProcessed: number;
   expectedCash: number;
+}
+
+export interface ShiftClosureInput {
+  actualCash: number;
+  varianceReason?: string;
+  notes?: string;
+  managerName: string;
+  managerApproved: boolean;
 }

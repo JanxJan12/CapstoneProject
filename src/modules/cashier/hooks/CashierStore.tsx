@@ -36,6 +36,7 @@ import type {
   Order,
   OrderOperationalEditInput,
   OrderStatus,
+  ShiftClosureInput,
   ShiftTotals,
   WalkInOrderInput,
 } from "../types";
@@ -77,7 +78,7 @@ interface CashierStoreValue {
     reason: string,
   ) => Promise<void>;
   startShift: (openingCash: number, terminal: string) => Promise<void>;
-  endShift: (actualCash: number, notes?: string) => Promise<void>;
+  endShift: (input: ShiftClosureInput) => Promise<void>;
   recordReceiptReprint: (orderId: string) => Promise<void>;
   markNotificationRead: (notificationId: string) => void;
   markNotificationsRead: () => void;
@@ -245,9 +246,9 @@ export function CashierProvider({ children }: { children: ReactNode }) {
   );
 
   const endShift = useCallback(
-    async (actualCash: number, notes?: string) => {
+    async (input: ShiftClosureInput) => {
       await pause(650);
-      commit(endShiftTransition(stateRef.current, actualCash, notes));
+      commit(endShiftTransition(stateRef.current, input));
     },
     [commit],
   );
@@ -279,6 +280,7 @@ export function CashierProvider({ children }: { children: ReactNode }) {
             cashSales: 0,
             gcashSales: 0,
             refunds: 0,
+            cashRefunds: 0,
             voids: 0,
             discounts: 0,
             transactionCount: 0,

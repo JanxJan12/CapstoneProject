@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import type { CashierNavigationIntent, CashierPageId, Order } from "../types";
+import type {
+  CashierNavigationIntent,
+  CashierPageId,
+  Order,
+  ShiftClosureInput,
+} from "../types";
 import { useCashierStore } from "../hooks/CashierStore";
 import { OrderDetailsDrawer } from "../orders/OrderDetailsDrawer";
 import { EndShiftDialog } from "../shifts/EndShiftDialog";
@@ -20,7 +25,8 @@ export function CashierDashboardPage({
 }: {
   onNavigate: (page: CashierPageId, intent?: CashierNavigationIntent) => void;
 }) {
-  const { isHydrating, activeShift, shiftTotals, endShift } = useCashierStore();
+  const { state, isHydrating, activeShift, shiftTotals, endShift } =
+    useCashierStore();
   const [selectedOrder, setSelectedOrder] = useState<Order>();
   const [lookupOpen, setLookupOpen] = useState(false);
   const [receiptsOpen, setReceiptsOpen] = useState(false);
@@ -29,15 +35,15 @@ export function CashierDashboardPage({
 
   if (isHydrating) return <CashierDashboardSkeleton />;
 
-  const handleEndShift = async (actualCash: number, notes?: string) => {
+  const handleEndShift = async (input: ShiftClosureInput) => {
     setSettling(true);
     try {
-      await endShift(actualCash, notes);
+      await endShift(input);
       toast.success("Shift closed and settlement recorded", {
         description:
-          actualCash === shiftTotals.expectedCash
+          input.actualCash === shiftTotals.expectedCash
             ? "The drawer is balanced."
-            : "The variance was saved for review.",
+            : "The approved variance and reason were recorded.",
       });
       setSettlementOpen(false);
       onNavigate("shift-settlement");
@@ -95,6 +101,10 @@ export function CashierDashboardPage({
           open={settlementOpen}
           loading={settling}
           totals={shiftTotals}
+          pendingPaymentCount={
+            state.payments.filter((payment) => payment.status === "Pending")
+              .length
+          }
           onOpenChange={setSettlementOpen}
           onConfirm={handleEndShift}
         />

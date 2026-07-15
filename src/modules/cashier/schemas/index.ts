@@ -53,10 +53,20 @@ export const startShiftSchema = z.object({
 
 export const endShiftSchema = z.object({
   actualCash: z.number().min(0, "Actual cash cannot be negative."),
+  varianceReason: z.string().trim().max(120).optional(),
   notes: z
     .string()
+    .trim()
     .max(500, "Notes must be 500 characters or fewer.")
     .optional(),
+  managerName: z
+    .string()
+    .trim()
+    .min(2, "Manager name is required for approval.")
+    .max(80),
+  managerApproved: z
+    .boolean()
+    .refine((approved) => approved, "Manager approval is required."),
 });
 
 export const posSchema = z
