@@ -5,8 +5,12 @@ export {
   holdOrder,
   releaseReadyOrder,
   removeHeldOrder,
+  recordReceiptReprint,
   updateKitchenStatus,
   voidDraftOrder,
 } from "./orderService";
 export { calculateShiftTotals, endShift, startShift } from "./shiftService";
-export { markNotificationsRead } from "./notificationService";
+export {
+  markNotificationRead,
+  markNotificationsRead,
+} from "./notificationService";

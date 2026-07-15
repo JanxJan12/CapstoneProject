@@ -164,6 +164,8 @@ export function createWalkInOrder(
       kind: "walkin_created",
       message: `${input.type} order ${orderId} created`,
       orderId,
+      transactionId,
+      actor: state.cashier.name,
       timestamp,
     },
     {
@@ -171,6 +173,8 @@ export function createWalkInOrder(
       kind: "transaction_completed",
       message: `${input.paymentMethod} transaction completed for ${orderId}`,
       orderId,
+      transactionId,
+      actor: state.cashier.name,
       timestamp,
     },
   );
@@ -227,6 +231,10 @@ export function cancelOrder(
     createdAt: timestamp,
     read: false,
     customerVisible: true,
+    kind: "record_updated",
+    page: "order-list",
+    intent: { search: order.id },
+    orderId: order.id,
   });
   return state;
 }
@@ -254,6 +262,22 @@ export function releaseReadyOrder(
     `${order.id} released by ${state.cashier.name}`,
     order.id,
   );
+  if (
+    order.type === "Delivery" &&
+    !state.riders.some((rider) => rider.availability === "Available")
+  ) {
+    state.notifications.unshift({
+      id: nextEventId(),
+      title: "No rider available",
+      message: `${order.id} is ready but no rider is currently available.`,
+      createdAt: timestampNow(),
+      read: false,
+      kind: "no_rider",
+      page: "order-list",
+      intent: { statuses: ["Waiting for Rider"], search: order.id },
+      orderId: order.id,
+    });
+  }
   return state;
 }
 
@@ -285,6 +309,10 @@ export function updateKitchenStatus(
       message: `${order.id} is ready for cashier handoff.`,
       createdAt: timestampNow(),
       read: false,
+      kind: "kitchen_ready",
+      page: "order-list",
+      intent: { statuses: ["Ready"], search: order.id },
+      orderId: order.id,
     });
     addActivity(
       state,
@@ -293,6 +321,24 @@ export function updateKitchenStatus(
       order.id,
     );
   }
+  return state;
+}
+
+export function recordReceiptReprint(
+  current: CashierState,
+  orderId: string,
+): CashierState {
+  const state = cloneState(current);
+  const order = state.orders.find((entry) => entry.id === orderId);
+  if (!order?.transactionId)
+    throw new Error("A completed transaction is required to reprint a receipt.");
+  addActivity(
+    state,
+    "receipt_reprinted",
+    `Receipt reprinted for ${order.id}`,
+    order.id,
+    order.transactionId,
+  );
   return state;
 }
 

@@ -1,77 +1,125 @@
-import { CreditCard, DollarSign, Package, Users } from "lucide-react";
-import { formatMoney } from "../constants";
+import {
+  Banknote,
+  CheckCheck,
+  CreditCard,
+  HandCoins,
+  Package,
+  PackageCheck,
+  Users,
+  WalletCards,
+} from "lucide-react";
+import { ACTIVE_ORDER_STATUSES, formatMoney } from "../constants";
 import { useCashierMetrics } from "../hooks/useCashierMetrics";
+import type { CashierNavigationIntent, CashierPageId } from "../types";
+import { CashierMetricCard } from "./CashierMetricCard";
 
-export function CashierMetrics() {
-  const metrics = useCashierMetrics();
-  return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-      <Metric
-        label="Pending Payments"
-        value={String(metrics.pendingPayments)}
-        detail="Requires cashier verification"
-        icon={CreditCard}
-        tone="bg-amber-100 text-amber-700"
-      />
-      <Metric
-        label="Open Tickets"
-        value={String(metrics.openTickets)}
-        detail="Across counter, kitchen, and delivery"
-        icon={Package}
-        tone="bg-blue-100 text-blue-700"
-      />
-      <Metric
-        label="Sales Today"
-        value={formatMoney(metrics.salesToday)}
-        detail={`${metrics.shiftTotals.transactionCount} transactions this shift`}
-        icon={DollarSign}
-        tone="bg-emerald-100 text-emerald-700"
-      />
-      <Metric
-        label="Walk-in Orders"
-        value={String(metrics.walkInOrders)}
-        detail="Dine-in and take-out only"
-        icon={Users}
-        tone="bg-violet-100 text-violet-700"
-      />
-    </div>
-  );
-}
-
-function Metric({
-  label,
-  value,
-  detail,
-  icon: Icon,
-  tone,
+export function CashierMetrics({
+  onNavigate,
 }: {
-  label: string;
-  value: string;
-  detail: string;
-  icon: React.ElementType;
-  tone: string;
+  onNavigate: (page: CashierPageId, intent?: CashierNavigationIntent) => void;
 }) {
+  const metrics = useCashierMetrics();
+  const cards = [
+    {
+      label: "Pending Payments",
+      value: String(metrics.pendingPayments),
+      detail: "Awaiting cashier verification",
+      icon: CreditCard,
+      tone: "bg-amber-100 text-amber-700",
+      action: () => onNavigate("pending-payments"),
+    },
+    {
+      label: "Open Tickets",
+      value: String(metrics.openTickets),
+      detail: `${metrics.delayedOrders.length} currently delayed`,
+      icon: Package,
+      tone: "bg-blue-100 text-blue-700",
+      action: () =>
+        onNavigate("order-list", { statuses: ACTIVE_ORDER_STATUSES }),
+    },
+    {
+      label: "Sales Today",
+      value: formatMoney(metrics.salesToday),
+      detail: `${metrics.completedTransactions} completed transactions`,
+      icon: HandCoins,
+      tone: "bg-emerald-100 text-emerald-700",
+      action: () =>
+        onNavigate("transactions", {
+          transactionStatuses: ["Completed"],
+          today: true,
+        }),
+    },
+    {
+      label: "Walk-in Orders",
+      value: String(metrics.walkInOrders),
+      detail: "Dine-in and take-out today",
+      icon: Users,
+      tone: "bg-violet-100 text-violet-700",
+      action: () =>
+        onNavigate("order-list", {
+          orderTypes: ["Dine-in", "Take-out"],
+          today: true,
+        }),
+    },
+    {
+      label: "Ready for Handoff",
+      value: String(metrics.readyOrders),
+      detail: "Kitchen-complete orders",
+      icon: PackageCheck,
+      tone: "bg-orange-100 text-orange-700",
+      action: () =>
+        onNavigate("order-list", {
+          statuses: ["Ready"],
+          openFirstReady: true,
+        }),
+    },
+    {
+      label: "Completed Transactions",
+      value: String(metrics.completedTransactions),
+      detail: "Recorded today",
+      icon: CheckCheck,
+      tone: "bg-teal-100 text-teal-700",
+      action: () =>
+        onNavigate("transactions", {
+          transactionStatuses: ["Completed"],
+          today: true,
+        }),
+    },
+    {
+      label: "Cash Sales",
+      value: formatMoney(metrics.cashSales),
+      detail: "Completed today",
+      icon: Banknote,
+      tone: "bg-lime-100 text-lime-700",
+      action: () =>
+        onNavigate("transactions", {
+          transactionStatuses: ["Completed"],
+          paymentMethods: ["Cash"],
+          today: true,
+        }),
+    },
+    {
+      label: "GCash Sales",
+      value: formatMoney(metrics.gcashSales),
+      detail: "Verified today",
+      icon: WalletCards,
+      tone: "bg-sky-100 text-sky-700",
+      action: () =>
+        onNavigate("transactions", {
+          transactionStatuses: ["Completed"],
+          paymentMethods: ["GCash"],
+          today: true,
+        }),
+    },
+  ];
+
   return (
-    <div className="rrj-card rrj-card-hover group relative min-h-[118px] overflow-hidden p-4">
-      <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-primary/70 via-orange-400/40 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-            {label}
-          </p>
-          <p className="mt-2 truncate text-2xl font-black tracking-[-0.025em] text-foreground">
-            {value}
-          </p>
-        </div>
-        <span
-          className={`flex h-11 w-11 items-center justify-center rounded-xl ring-1 ring-black/[0.03] transition-transform group-hover:scale-105 ${tone}`}
-        >
-          <Icon className="h-5 w-5" />
-        </span>
+    <section aria-label="Cashier summary metrics">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {cards.map((card) => (
+          <CashierMetricCard key={card.label} {...card} onClick={card.action} />
+        ))}
       </div>
-      <p className="mt-2 text-[11px] font-semibold text-muted-foreground">
-        {detail}
-      </p>
-    </div>
+    </section>
   );
 }

@@ -29,6 +29,7 @@ export function AppShell<T extends string>({
   children,
   notifications = [],
   onNotificationsRead,
+  onNotificationSelect,
   onLogout,
 }: {
   groups: NavGroup<T>[];
@@ -41,8 +42,10 @@ export function AppShell<T extends string>({
     title: string;
     message: string;
     read: boolean;
+    createdAt?: string;
   }>;
   onNotificationsRead?: () => void;
+  onNotificationSelect?: (notificationId: string) => void;
   onLogout?: () => void;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -53,6 +56,7 @@ export function AppShell<T extends string>({
   const activeLabel =
     groups.flatMap((group) => group.items).find((item) => item.id === active)
       ?.label ?? "Workspace";
+  const unreadCount = notifications.filter((entry) => !entry.read).length;
 
   useEffect(() => {
     if (!isCashierPOS) return;
@@ -279,20 +283,17 @@ export function AppShell<T extends string>({
                 </span>
               </div>
             )}
-            <DropdownMenu
-              onOpenChange={(open) => {
-                if (open && notifications.some((entry) => !entry.read))
-                  onNotificationsRead?.();
-              }}
-            >
+            <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
-                  aria-label="Notifications"
+                  aria-label={`${unreadCount} unread notifications`}
                   className="relative flex h-11 w-11 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 >
                   <Bell className="w-4 h-4" />
-                  {notifications.some((entry) => !entry.read) && (
-                    <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-primary ring-2 ring-white" />
+                  {unreadCount > 0 && (
+                    <span className="absolute right-1.5 top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[8px] font-black text-white ring-2 ring-white">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
                   )}
                 </button>
               </DropdownMenuTrigger>
@@ -302,7 +303,9 @@ export function AppShell<T extends string>({
               >
                 <DropdownMenuLabel className="flex items-center justify-between">
                   <span>Notifications</span>
-                  <CheckCheck className="h-4 w-4 text-primary" />
+                  <span className="text-[9px] font-bold text-muted-foreground">
+                    {unreadCount} unread
+                  </span>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {notifications.length === 0 ? (
@@ -314,6 +317,7 @@ export function AppShell<T extends string>({
                     <DropdownMenuItem
                       key={entry.id}
                       className="items-start py-3"
+                      onSelect={() => onNotificationSelect?.(entry.id)}
                     >
                       <span
                         className={`mt-1 h-2 w-2 shrink-0 rounded-full ${entry.read ? "bg-zinc-300" : "bg-primary"}`}
@@ -323,9 +327,30 @@ export function AppShell<T extends string>({
                         <span className="mt-0.5 block text-[10px] leading-4 text-muted-foreground">
                           {entry.message}
                         </span>
+                        {entry.createdAt && (
+                          <span className="mt-1 block text-[9px] font-semibold text-muted-foreground/75">
+                            {new Date(entry.createdAt).toLocaleString("en-PH", {
+                              month: "short",
+                              day: "numeric",
+                              hour: "numeric",
+                              minute: "2-digit",
+                            })}
+                          </span>
+                        )}
                       </span>
                     </DropdownMenuItem>
                   ))
+                )}
+                {unreadCount > 0 && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onSelect={onNotificationsRead}
+                      className="justify-center text-[10px] font-bold text-primary"
+                    >
+                      <CheckCheck className="h-4 w-4" /> Mark all as read
+                    </DropdownMenuItem>
+                  </>
                 )}
               </DropdownMenuContent>
             </DropdownMenu>

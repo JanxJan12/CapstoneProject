@@ -523,6 +523,7 @@ export function WalkInPOSPage({
         order={receiptOrder}
         payment={receiptPayment}
         open={Boolean(receiptOrder)}
+        placed
         onClose={() => setReceiptOrder(undefined)}
       />
       <MenuItemDialog

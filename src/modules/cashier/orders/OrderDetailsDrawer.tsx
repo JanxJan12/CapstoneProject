@@ -1,5 +1,6 @@
 import { useState } from "react";
 import {
+  AlertTriangle,
   Banknote,
   Bike,
   MapPin,
@@ -20,7 +21,9 @@ import {
 import {
   CANCELLABLE_STATUSES,
   formatDateTime,
+  formatElapsed,
   formatMoney,
+  minutesSince,
 } from "../constants";
 import { useCashierStore } from "../hooks/CashierStore";
 import type { Order } from "../types";
@@ -40,7 +43,12 @@ export function OrderDetailsDrawer({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const { state, cancelOrder, releaseReadyOrder } = useCashierStore();
+  const {
+    state,
+    cancelOrder,
+    releaseReadyOrder,
+    recordReceiptReprint,
+  } = useCashierStore();
   const [cancelOpen, setCancelOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -50,6 +58,9 @@ export function OrderDetailsDrawer({
   const payment = state.payments.find(
     (entry) => entry.orderId === currentOrder.id,
   );
+  const delayed =
+    minutesSince(currentOrder.createdAt) > state.delayedThresholdMinutes &&
+    !["Completed", "Cancelled"].includes(currentOrder.status);
 
   const handleCancel = async (reason: string) => {
     setLoading(true);
@@ -103,6 +114,12 @@ export function OrderDetailsDrawer({
                 {currentOrder.id}
               </DialogTitle>
               <CashierStatusBadge status={currentOrder.status} />
+              {delayed && (
+                <span className="inline-flex items-center gap-1 rounded-full border border-red-200 bg-red-50 px-2 py-1 text-[9px] font-black uppercase tracking-wider text-red-700">
+                  <AlertTriangle className="h-3 w-3" /> Delayed ·{" "}
+                  {formatElapsed(currentOrder.createdAt)}
+                </span>
+              )}
             </div>
             <DialogDescription>
               Created {formatDateTime(currentOrder.createdAt)} ·{" "}
@@ -252,8 +269,10 @@ export function OrderDetailsDrawer({
                 variant="secondary"
                 onClick={() => {
                   window.print();
+                  void recordReceiptReprint(currentOrder.id);
                   toast.success("Receipt sent to the print dialog.");
                 }}
+                disabled={!currentOrder.transactionId}
               >
                 <Printer className="h-4 w-4" />
                 Print receipt

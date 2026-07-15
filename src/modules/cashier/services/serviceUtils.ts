@@ -46,12 +46,16 @@ export const addActivity = (
   kind: ActivityKind,
   message: string,
   orderId?: string,
+  transactionId?: string,
+  actor = state.cashier.name,
 ) => {
   state.activities.unshift({
     id: nextEventId(),
     kind,
     message,
     orderId,
+    transactionId,
+    actor,
     timestamp: timestampNow(),
   });
   state.activities = state.activities.slice(0, 40);

@@ -66,12 +66,17 @@ export function verifyOnlinePayment(
     createdAt: timestamp,
     read: false,
     customerVisible: true,
+    kind: "record_updated",
+    page: "order-list",
+    intent: { search: order.id },
+    orderId: order.id,
   });
   addActivity(
     state,
     "payment_verified",
     `${state.cashier.name} verified payment for ${order.id}`,
     order.id,
+    transactionId,
   );
   return state;
 }
@@ -109,6 +114,9 @@ export function rejectOnlinePayment(
     createdAt: timestamp,
     read: false,
     customerVisible: true,
+    kind: "payment_submitted",
+    page: "pending-payments",
+    orderId: order.id,
   });
   addActivity(
     state,

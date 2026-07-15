@@ -23,17 +23,26 @@ const defaultFilters: OrderFilterValue = {
   sort: "newest",
 };
 
+const todayInputValue = () => {
+  const date = new Date();
+  const offset = date.getTimezoneOffset() * 60_000;
+  return new Date(date.getTime() - offset).toISOString().slice(0, 10);
+};
+
 export function CashierOrderListPage({
   intent,
 }: {
   intent?: CashierNavigationIntent;
 }) {
-  const { state, cancelOrder } = useCashierStore();
+  const { state, cancelOrder, recordReceiptReprint } = useCashierStore();
   const searchRef = useRef<HTMLInputElement>(null);
   const [filters, setFilters] = useState<OrderFilterValue>(() => ({
     ...defaultFilters,
     search: intent?.search ?? "",
+    type: intent?.orderTypes?.length === 1 ? intent.orderTypes[0] : "All",
     status: intent?.statuses?.length === 1 ? intent.statuses[0] : "All",
+    from: intent?.today ? todayInputValue() : "",
+    to: intent?.today ? todayInputValue() : "",
   }));
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<Order>();
@@ -58,8 +67,11 @@ export function CashierOrderListPage({
       const created = order.createdAt.slice(0, 10);
       const matchesIntent =
         !intent?.statuses?.length || intent.statuses.includes(order.status);
+      const matchesIntentType =
+        !intent?.orderTypes?.length || intent.orderTypes.includes(order.type);
       return (
         matchesIntent &&
+        matchesIntentType &&
         (!query ||
           `${order.id} ${order.customerName}`.toLowerCase().includes(query)) &&
         (filters.type === "All" || order.type === filters.type) &&
@@ -136,6 +148,7 @@ export function CashierOrderListPage({
           onView={setSelected}
           onPrint={(order) => {
             window.print();
+            if (order.transactionId) void recordReceiptReprint(order.id);
             toast.success(
               `${order.transactionId ? "Receipt" : "Order ticket"} sent to the print dialog.`,
             );

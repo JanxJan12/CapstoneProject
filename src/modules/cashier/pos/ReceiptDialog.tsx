@@ -17,11 +17,15 @@ export function ReceiptDialog({
   payment,
   open,
   onClose,
+  placed = false,
+  onPrint,
 }: {
   order?: Order;
   payment?: Payment;
   open: boolean;
   onClose: () => void;
+  placed?: boolean;
+  onPrint?: () => void | Promise<void>;
 }) {
   if (!order) return null;
   const change =
@@ -38,10 +42,12 @@ export function ReceiptDialog({
       <DialogContent className="max-w-md rounded-[20px] border-border bg-[#fbf8f4] shadow-[0_24px_70px_rgba(36,26,19,0.24)]">
         <DialogHeader className="text-center sm:text-center">
           <DialogTitle className="text-emerald-700">
-            Order placed successfully
+            {placed ? "Order placed successfully" : "Receipt preview"}
           </DialogTitle>
           <DialogDescription>
-            {order.id} was sent to the kitchen and recorded in this shift.
+            {placed
+              ? `${order.id} was sent to the kitchen and recorded in this shift.`
+              : `${order.id} is ready to print from the recorded transaction.`}
           </DialogDescription>
         </DialogHeader>
         <div className="overflow-hidden rounded-2xl border border-border bg-white shadow-[0_14px_35px_rgba(67,42,23,0.1)]">
@@ -111,6 +117,7 @@ export function ReceiptDialog({
             variant="secondary"
             onClick={() => {
               window.print();
+              void onPrint?.();
               toast.success("Receipt sent to the print dialog.");
             }}
           >

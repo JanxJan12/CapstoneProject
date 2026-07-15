@@ -16,8 +16,10 @@ import {
   endShift as endShiftTransition,
   holdOrder as holdOrderTransition,
   markNotificationsRead as markNotificationsReadTransition,
+  markNotificationRead as markNotificationReadTransition,
   rejectOnlinePayment,
   releaseReadyOrder as releaseReadyOrderTransition,
+  recordReceiptReprint as recordReceiptReprintTransition,
   removeHeldOrder as removeHeldOrderTransition,
   startShift as startShiftTransition,
   updateKitchenStatus as updateKitchenStatusTransition,
@@ -39,6 +41,7 @@ const pause = (milliseconds = 650) =>
 
 interface CashierStoreValue {
   state: CashierState;
+  isHydrating: boolean;
   activeShift: CashierState["shifts"][number] | undefined;
   shiftTotals: ShiftTotals;
   verifyPayment: (orderId: string, overrideMismatch: boolean) => Promise<void>;
@@ -62,6 +65,8 @@ interface CashierStoreValue {
   ) => Promise<void>;
   startShift: (openingCash: number, terminal: string) => Promise<void>;
   endShift: (actualCash: number, notes?: string) => Promise<void>;
+  recordReceiptReprint: (orderId: string) => Promise<void>;
+  markNotificationRead: (notificationId: string) => void;
   markNotificationsRead: () => void;
 }
 
@@ -82,6 +87,7 @@ function loadState(): CashierState {
 
 export function CashierProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<CashierState>(loadState);
+  const [isHydrating, setIsHydrating] = useState(true);
   const stateRef = useRef(state);
 
   const commit = useCallback((next: CashierState) => {
@@ -93,6 +99,11 @@ export function CashierProvider({ children }: { children: ReactNode }) {
     stateRef.current = state;
     localStorage.setItem(CASHIER_STORAGE_KEY, JSON.stringify(state));
   }, [state]);
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => setIsHydrating(false));
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
 
   const verifyPayment = useCallback(
     async (orderId: string, overrideMismatch: boolean) => {
@@ -188,6 +199,20 @@ export function CashierProvider({ children }: { children: ReactNode }) {
     [commit],
   );
 
+  const recordReceiptReprint = useCallback(
+    async (orderId: string) => {
+      await pause(250);
+      commit(recordReceiptReprintTransition(stateRef.current, orderId));
+    },
+    [commit],
+  );
+
+  const markNotificationRead = useCallback(
+    (notificationId: string) =>
+      commit(markNotificationReadTransition(stateRef.current, notificationId)),
+    [commit],
+  );
+
   const markNotificationsRead = useCallback(
     () => commit(markNotificationsReadTransition(stateRef.current)),
     [commit],
@@ -213,6 +238,7 @@ export function CashierProvider({ children }: { children: ReactNode }) {
   const value = useMemo<CashierStoreValue>(
     () => ({
       state,
+      isHydrating,
       activeShift,
       shiftTotals,
       verifyPayment,
@@ -226,10 +252,13 @@ export function CashierProvider({ children }: { children: ReactNode }) {
       voidDraftOrder,
       startShift,
       endShift,
+      recordReceiptReprint,
+      markNotificationRead,
       markNotificationsRead,
     }),
     [
       state,
+      isHydrating,
       activeShift,
       shiftTotals,
       verifyPayment,
@@ -243,6 +272,8 @@ export function CashierProvider({ children }: { children: ReactNode }) {
       voidDraftOrder,
       startShift,
       endShift,
+      recordReceiptReprint,
+      markNotificationRead,
       markNotificationsRead,
     ],
   );

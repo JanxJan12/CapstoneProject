@@ -23,13 +23,31 @@ const defaults: TransactionFilterValue = {
   shift: "All",
 };
 
+const todayInputValue = () => {
+  const date = new Date();
+  const offset = date.getTimezoneOffset() * 60_000;
+  return new Date(date.getTime() - offset).toISOString().slice(0, 10);
+};
+
 export function TransactionHistoryPage({
   intent,
 }: {
   intent?: CashierNavigationIntent;
 }) {
-  const { state } = useCashierStore();
-  const [filters, setFilters] = useState(defaults);
+  const { state, recordReceiptReprint } = useCashierStore();
+  const [filters, setFilters] = useState<TransactionFilterValue>(() => ({
+    ...defaults,
+    method:
+      intent?.paymentMethods?.length === 1
+        ? intent.paymentMethods[0]
+        : "All",
+    status:
+      intent?.transactionStatuses?.length === 1
+        ? intent.transactionStatuses[0]
+        : "All",
+    from: intent?.today ? todayInputValue() : "",
+    to: intent?.today ? todayInputValue() : "",
+  }));
   const [selectedOrder, setSelectedOrder] = useState<Order>();
   const [receiptOrder, setReceiptOrder] = useState<Order>();
   const openedRecent = useRef(false);
@@ -39,7 +57,15 @@ export function TransactionHistoryPage({
         .filter((transaction) => {
           const query = filters.search.toLowerCase();
           const created = transaction.createdAt.slice(0, 10);
+          const matchesIntentStatus =
+            !intent?.transactionStatuses?.length ||
+            intent.transactionStatuses.includes(transaction.status);
+          const matchesIntentMethod =
+            !intent?.paymentMethods?.length ||
+            intent.paymentMethods.includes(transaction.method);
           return (
+            matchesIntentStatus &&
+            matchesIntentMethod &&
             (!query ||
               `${transaction.id} ${transaction.orderId} ${transaction.customerName}`
                 .toLowerCase()
@@ -59,7 +85,7 @@ export function TransactionHistoryPage({
           (a, b) =>
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
         ),
-    [state.transactions, filters],
+    [state.transactions, filters, intent],
   );
   useEffect(() => {
     if (intent?.openMostRecentReceipt && !openedRecent.current) {
@@ -174,6 +200,9 @@ export function TransactionHistoryPage({
         payment={payment}
         open={Boolean(receiptOrder)}
         onClose={() => setReceiptOrder(undefined)}
+        onPrint={() =>
+          receiptOrder ? recordReceiptReprint(receiptOrder.id) : undefined
+        }
       />
     </div>
   );

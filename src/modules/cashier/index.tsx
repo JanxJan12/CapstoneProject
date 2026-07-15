@@ -25,7 +25,8 @@ export function CashierApp() {
 }
 
 function CashierModule() {
-  const { state, markNotificationsRead } = useCashierStore();
+  const { state, markNotificationRead, markNotificationsRead } =
+    useCashierStore();
   const { logout } = useAuth();
   const [page, setPage] = useState<CashierPageId>("dashboard");
   const [intent, setIntent] = useState<CashierNavigationIntent>();
@@ -68,6 +69,18 @@ function CashierModule() {
       setIntent(nextIntent);
     },
     [page, posDirty],
+  );
+
+  const openNotification = useCallback(
+    (notificationId: string) => {
+      const notification = state.notifications.find(
+        (entry) => entry.id === notificationId,
+      );
+      if (!notification) return;
+      markNotificationRead(notificationId);
+      navigate(notification.page, notification.intent);
+    },
+    [markNotificationRead, navigate, state.notifications],
   );
 
   useEffect(() => {
@@ -123,6 +136,7 @@ function CashierModule() {
         user={{ name: state.cashier.name, role: "Cashier" }}
         notifications={state.notifications}
         onNotificationsRead={markNotificationsRead}
+        onNotificationSelect={openNotification}
         onLogout={logout}
       >
         {content}

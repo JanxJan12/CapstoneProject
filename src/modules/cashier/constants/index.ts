@@ -1,8 +1,8 @@
 import type { OrderStatus } from "../types";
 
-export const CASHIER_STORAGE_KEY = "rrj_cashier_state_v3";
+export const CASHIER_STORAGE_KEY = "rrj_cashier_state_v4";
 export const POS_DRAFT_STORAGE_KEY = "rrj_cashier_pos_draft_v2";
-export const CASHIER_STATE_VERSION = 3;
+export const CASHIER_STATE_VERSION = 4;
 export const CASHIER_ID = "USR-CASHIER-001";
 export const CASHIER_NAME = "Juan Santos";
 export const CASHIER_TERMINAL = "Counter Terminal 01";

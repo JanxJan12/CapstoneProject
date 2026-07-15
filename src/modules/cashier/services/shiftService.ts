@@ -106,5 +106,16 @@ export function endShift(
     "shift_closed",
     `${state.cashier.name} ended the shift with ${variance === 0 ? "no variance" : "a recorded variance"}`,
   );
+  if (variance !== 0) {
+    state.notifications.unshift({
+      id: `NOTE-${Date.now()}`,
+      title: "Shift variance detected",
+      message: `${shift.id} closed with a recorded cash variance.`,
+      createdAt: shift.endedAt,
+      read: false,
+      kind: "shift_variance",
+      page: "shift-settlement",
+    });
+  }
   return state;
 }

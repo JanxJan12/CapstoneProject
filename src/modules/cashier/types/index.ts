@@ -24,6 +24,7 @@ export type PaymentStatus = "Pending" | "Verified" | "Rejected";
 export type TransactionStatus = "Completed" | "Refunded" | "Voided";
 export type ShiftStatus = "Open" | "Pending Review" | "Closed";
 export type DiscountType = "Senior Citizen" | "PWD" | null;
+export type RiderAvailability = "Available" | "Assigned" | "Offline";
 
 export interface CashierUser {
   id: string;
@@ -140,6 +141,22 @@ export interface CashierShift {
   status: ShiftStatus;
 }
 
+export interface Rider {
+  id: string;
+  name: string;
+  availability: RiderAvailability;
+  currentOrderId?: string;
+}
+
+export type NotificationKind =
+  | "payment_submitted"
+  | "kitchen_ready"
+  | "order_delayed"
+  | "no_rider"
+  | "rider_accepted"
+  | "shift_variance"
+  | "record_updated";
+
 export interface CashierNotification {
   id: string;
   title: string;
@@ -147,6 +164,10 @@ export interface CashierNotification {
   createdAt: string;
   read: boolean;
   customerVisible?: boolean;
+  kind: NotificationKind;
+  page: CashierPageId;
+  intent?: CashierNavigationIntent;
+  orderId?: string;
 }
 
 export type ActivityKind =
@@ -157,6 +178,7 @@ export type ActivityKind =
   | "rider_accepted"
   | "transaction_completed"
   | "order_cancelled"
+  | "receipt_reprinted"
   | "shift_started"
   | "shift_closed";
 
@@ -165,6 +187,8 @@ export interface ActivityEvent {
   kind: ActivityKind;
   message: string;
   orderId?: string;
+  transactionId?: string;
+  actor: string;
   timestamp: string;
 }
 
@@ -188,6 +212,7 @@ export interface CashierState {
   payments: Payment[];
   transactions: Transaction[];
   shifts: CashierShift[];
+  riders: Rider[];
   notifications: CashierNotification[];
   activities: ActivityEvent[];
   heldOrders: HeldOrder[];
@@ -211,6 +236,10 @@ export interface WalkInOrderInput {
 
 export interface CashierNavigationIntent {
   statuses?: OrderStatus[];
+  orderTypes?: OrderType[];
+  transactionStatuses?: TransactionStatus[];
+  paymentMethods?: PaymentMethod[];
+  today?: boolean;
   focusSearch?: boolean;
   openFirstReady?: boolean;
   openMostRecentReceipt?: boolean;
