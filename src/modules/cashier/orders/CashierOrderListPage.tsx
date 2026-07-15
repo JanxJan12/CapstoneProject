@@ -402,7 +402,7 @@ export function CashierOrderListPage({
           window.setTimeout(() => {
             setRefreshing(false);
             toast.success("Order operations are up to date");
-          }, 350);
+          }, 200);
         }}
       />
       <section className="rrj-card overflow-hidden">

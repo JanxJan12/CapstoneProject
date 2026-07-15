@@ -3,7 +3,7 @@ import { Skeleton } from "../../../app/components/ui/skeleton";
 export function CashierDashboardSkeleton() {
   return (
     <div
-      className="cashier-page"
+      className="cashier-page cashier-loading-skeleton"
       role="status"
       aria-label="Loading cashier dashboard"
       aria-live="polite"

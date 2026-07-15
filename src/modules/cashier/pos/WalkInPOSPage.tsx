@@ -13,10 +13,7 @@ import {
 import { useCashierStore } from "../hooks/CashierStore";
 import { posSchema, type POSForm } from "../schemas";
 import type { MenuItem, Order, OrderItem, OrderItemModifier } from "../types";
-import {
-  CashierConfirmDialog,
-  ErrorBanner,
-} from "../components/CashierUI";
+import { CashierConfirmDialog, ErrorBanner } from "../components/CashierUI";
 import { MenuGrid } from "./MenuGrid";
 import { MenuItemDialog } from "./MenuItemDialog";
 import { PaymentPanel } from "./PaymentPanel";
@@ -343,7 +340,7 @@ export function WalkInPOSPage({
       }
       const amountToAdd = Math.min(capacity, Math.max(1, quantity));
       if (amountToAdd < quantity) {
-        toast.info(`Quantity limited to ${currentQuantity + amountToAdd}`, {
+        toast.warning(`Quantity limited to ${currentQuantity + amountToAdd}`, {
           description: `The cart now contains the maximum available ${menuItem.name}.`,
         });
       }
@@ -419,17 +416,13 @@ export function WalkInPOSPage({
     const line = cart.find((entry) => entry.lineId === lineId);
     if (!line) return;
     if (line.quantity + delta <= 0) {
-      setCart((current) =>
-        current.filter((entry) => entry.lineId !== lineId),
-      );
+      setCart((current) => current.filter((entry) => entry.lineId !== lineId));
       return;
     }
     setLineQuantity(lineId, line.quantity + delta);
   };
   const remove = (lineId: string) =>
-    setCart((current) =>
-      current.filter((entry) => entry.lineId !== lineId),
-    );
+    setCart((current) => current.filter((entry) => entry.lineId !== lineId));
   const note = (lineId: string, value: string) =>
     setCart((current) =>
       current.map((entry) =>

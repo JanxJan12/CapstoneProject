@@ -58,7 +58,9 @@ export function MenuItemCard({
         type="button"
         onClick={onToggleFavorite}
         aria-label={
-          favorite ? `Remove ${item.name} from favorites` : `Favorite ${item.name}`
+          favorite
+            ? `Remove ${item.name} from favorites`
+            : `Favorite ${item.name}`
         }
         aria-pressed={favorite}
         className="pos-menu-favorite absolute right-2 top-2 z-30 flex h-10 w-10 items-center justify-center rounded-lg"
@@ -87,7 +89,7 @@ export function MenuItemCard({
             src={menuImageFor(item.id)}
             alt=""
             loading="lazy"
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+            className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.03]"
           />
           <span className="pos-menu-item-category absolute bottom-2 left-2 rounded-md px-2 py-1 text-[8px] font-black uppercase tracking-wider">
             {item.category}
@@ -136,7 +138,8 @@ export function MenuItemCard({
             )}
             {lowInventory && item.available && (
               <span className="pos-product-signal is-warning">
-                <AlertTriangle className="h-3 w-3" /> Only {item.inventoryRemaining}
+                <AlertTriangle className="h-3 w-3" /> Only{" "}
+                {item.inventoryRemaining}
               </span>
             )}
           </div>

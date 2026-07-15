@@ -41,7 +41,7 @@ import type {
   WalkInOrderInput,
 } from "../types";
 
-const pause = (milliseconds = 650) =>
+const pause = (milliseconds = 180) =>
   new Promise((resolve) => window.setTimeout(resolve, milliseconds));
 
 interface CashierStoreValue {
@@ -121,6 +121,19 @@ export function CashierProvider({ children }: { children: ReactNode }) {
     setState(next);
   }, []);
 
+  const commitOptimistically = useCallback(
+    async (next: CashierState, previous: CashierState, milliseconds = 180) => {
+      commit(next);
+      try {
+        await pause(milliseconds);
+      } catch (error) {
+        if (stateRef.current === next) commit(previous);
+        throw error;
+      }
+    },
+    [commit],
+  );
+
   useEffect(() => {
     stateRef.current = state;
     localStorage.setItem(CASHIER_STORAGE_KEY, JSON.stringify(state));
@@ -133,72 +146,76 @@ export function CashierProvider({ children }: { children: ReactNode }) {
 
   const verifyPayment = useCallback(
     async (paymentId: string, overrideMismatch: boolean) => {
-      await pause();
-      commit(
-        verifyOnlinePayment(stateRef.current, paymentId, overrideMismatch),
-      );
+      const previous = stateRef.current;
+      const next = verifyOnlinePayment(previous, paymentId, overrideMismatch);
+      await commitOptimistically(next, previous, 200);
     },
-    [commit],
+    [commitOptimistically],
   );
 
   const rejectPayment = useCallback(
     async (paymentId: string, reason: string, notes?: string) => {
-      await pause(500);
-      commit(rejectOnlinePayment(stateRef.current, paymentId, reason, notes));
+      const previous = stateRef.current;
+      const next = rejectOnlinePayment(previous, paymentId, reason, notes);
+      await commitOptimistically(next, previous, 200);
     },
-    [commit],
+    [commitOptimistically],
   );
 
   const createWalkInOrder = useCallback(
     async (input: WalkInOrderInput) => {
-      await pause(700);
-      const result = createWalkInOrderTransition(stateRef.current, input);
-      commit(result.state);
+      const previous = stateRef.current;
+      const result = createWalkInOrderTransition(previous, input);
+      await commitOptimistically(result.state, previous, 220);
       return result.order;
     },
-    [commit],
+    [commitOptimistically],
   );
 
   const cancelOrder = useCallback(
     async (orderId: string, reason: string) => {
-      await pause(450);
-      commit(cancelOrderTransition(stateRef.current, orderId, reason));
+      const previous = stateRef.current;
+      const next = cancelOrderTransition(previous, orderId, reason);
+      await commitOptimistically(next, previous);
     },
-    [commit],
+    [commitOptimistically],
   );
 
   const updateOrder = useCallback(
     async (orderId: string, input: OrderOperationalEditInput) => {
-      await pause(400);
-      commit(updateOrderDetailsTransition(stateRef.current, orderId, input));
+      const previous = stateRef.current;
+      const next = updateOrderDetailsTransition(previous, orderId, input);
+      await commitOptimistically(next, previous);
     },
-    [commit],
+    [commitOptimistically],
   );
 
   const assignRider = useCallback(
     async (orderId: string, riderId: string) => {
-      await pause(400);
-      commit(assignOrderRiderTransition(stateRef.current, orderId, riderId));
+      const previous = stateRef.current;
+      const next = assignOrderRiderTransition(previous, orderId, riderId);
+      await commitOptimistically(next, previous);
     },
-    [commit],
+    [commitOptimistically],
   );
 
   const duplicateOrder = useCallback(
     async (orderId: string) => {
-      await pause(450);
-      const result = duplicateOrderTransition(stateRef.current, orderId);
-      commit(result.state);
+      const previous = stateRef.current;
+      const result = duplicateOrderTransition(previous, orderId);
+      await commitOptimistically(result.state, previous, 200);
       return result.order;
     },
-    [commit],
+    [commitOptimistically],
   );
 
   const releaseReadyOrder = useCallback(
     async (orderId: string) => {
-      await pause(350);
-      commit(releaseReadyOrderTransition(stateRef.current, orderId));
+      const previous = stateRef.current;
+      const next = releaseReadyOrderTransition(previous, orderId);
+      await commitOptimistically(next, previous);
     },
-    [commit],
+    [commitOptimistically],
   );
 
   const updateKitchenStatus = useCallback(
@@ -206,20 +223,21 @@ export function CashierProvider({ children }: { children: ReactNode }) {
       orderId: string,
       status: Extract<OrderStatus, "Preparing" | "Ready">,
     ) => {
-      await pause(350);
-      commit(updateKitchenStatusTransition(stateRef.current, orderId, status));
+      const previous = stateRef.current;
+      const next = updateKitchenStatusTransition(previous, orderId, status);
+      await commitOptimistically(next, previous);
     },
-    [commit],
+    [commitOptimistically],
   );
 
   const holdOrder = useCallback(
     async (held: Omit<HeldOrder, "id" | "heldAt">) => {
-      await pause(300);
-      const result = holdOrderTransition(stateRef.current, held);
-      commit(result.state);
+      const previous = stateRef.current;
+      const result = holdOrderTransition(previous, held);
+      await commitOptimistically(result.state, previous);
       return result.held;
     },
-    [commit],
+    [commitOptimistically],
   );
 
   const removeHeldOrder = useCallback(
@@ -231,34 +249,38 @@ export function CashierProvider({ children }: { children: ReactNode }) {
 
   const voidDraftOrder = useCallback(
     async (input: Omit<WalkInOrderInput, "paymentMethod">, reason: string) => {
-      await pause(400);
-      commit(voidDraftOrderTransition(stateRef.current, input, reason));
+      const previous = stateRef.current;
+      const next = voidDraftOrderTransition(previous, input, reason);
+      await commitOptimistically(next, previous, 200);
     },
-    [commit],
+    [commitOptimistically],
   );
 
   const startShift = useCallback(
     async (openingCash: number, terminal: string) => {
-      await pause(500);
-      commit(startShiftTransition(stateRef.current, openingCash, terminal));
+      const previous = stateRef.current;
+      const next = startShiftTransition(previous, openingCash, terminal);
+      await commitOptimistically(next, previous, 200);
     },
-    [commit],
+    [commitOptimistically],
   );
 
   const endShift = useCallback(
     async (input: ShiftClosureInput) => {
-      await pause(650);
-      commit(endShiftTransition(stateRef.current, input));
+      const previous = stateRef.current;
+      const next = endShiftTransition(previous, input);
+      await commitOptimistically(next, previous, 220);
     },
-    [commit],
+    [commitOptimistically],
   );
 
   const recordReceiptReprint = useCallback(
     async (orderId: string) => {
-      await pause(250);
-      commit(recordReceiptReprintTransition(stateRef.current, orderId));
+      const previous = stateRef.current;
+      const next = recordReceiptReprintTransition(previous, orderId);
+      await commitOptimistically(next, previous, 160);
     },
-    [commit],
+    [commitOptimistically],
   );
 
   const markNotificationRead = useCallback(

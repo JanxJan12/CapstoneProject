@@ -125,7 +125,7 @@ export function TransactionDetailDrawer({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <CashierDialogContent className="left-auto right-0 top-0 h-dvh max-h-dvh w-full max-w-2xl translate-x-0 translate-y-0 overflow-y-auto rounded-none bg-[#f8f4ef] p-0 shadow-[-18px_0_50px_rgba(36,26,19,0.16)] sm:max-w-2xl">
+      <CashierDialogContent className="cashier-drawer left-auto right-0 top-0 h-dvh max-h-dvh w-full max-w-2xl translate-x-0 translate-y-0 overflow-y-auto rounded-none bg-[#f8f4ef] p-0 shadow-[-18px_0_50px_rgba(36,26,19,0.16)] sm:max-w-2xl">
         <DialogHeader className="sticky top-0 z-10 border-b border-border bg-white/95 p-5 pr-14 shadow-sm backdrop-blur-xl">
           <div className="flex flex-wrap items-center gap-2">
             <DialogTitle className="font-mono text-lg font-black text-primary">

@@ -120,13 +120,19 @@ export function ShiftSettlementPage() {
           activeShift ? (
             <CashierButton
               variant="danger"
-              disabled={pendingPayments.length > 0}
               title={
                 pendingPayments.length
                   ? "Resolve all pending payments before ending the shift"
                   : undefined
               }
-              onClick={() => setEndOpen(true)}
+              onClick={() => {
+                if (pendingPayments.length) {
+                  toast.warning("Shift closure is blocked", {
+                    description: `Resolve ${pendingPayments.length} pending payment${pendingPayments.length === 1 ? "" : "s"} before closing the drawer.`,
+                  });
+                }
+                setEndOpen(true);
+              }}
             >
               <StopCircle className="h-4 w-4" />
               End shift

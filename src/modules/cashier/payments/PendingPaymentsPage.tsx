@@ -52,27 +52,29 @@ export function PendingPaymentsPage() {
     window.setTimeout(() => {
       setRefreshing(false);
       toast.success("Payment queue is up to date");
-    }, 350);
+    }, 200);
   };
 
   const handleVerify = async (override: boolean) => {
     if (!order || !payment) return;
+    const currentPaymentId = payment.id;
     const nextPaymentId = nextPendingPaymentId(payment.id);
     setLoading(true);
     setError("");
+    setVerifyOpen(false);
+    setSelectedId(nextPaymentId);
     try {
       await verifyPayment(payment.id, override);
-      setVerifyOpen(false);
-      setSelectedId(nextPaymentId);
       toast.success(`Payment verified for ${order.id}`, {
-        description:
-          nextPaymentId
-            ? "Order, kitchen, dashboard, reports, and transaction records updated. Next payment opened."
-            : "Order, kitchen, dashboard, reports, and transaction records updated. Queue complete.",
+        description: nextPaymentId
+          ? "Order, kitchen, dashboard, reports, and transaction records updated. Next payment opened."
+          : "Order, kitchen, dashboard, reports, and transaction records updated. Queue complete.",
       });
     } catch (caught) {
       const message =
         caught instanceof Error ? caught.message : "Unable to verify payment.";
+      setSelectedId(currentPaymentId);
+      setVerifyOpen(true);
       setError(message);
       toast.error("Verification failed", { description: message });
     } finally {
@@ -81,13 +83,14 @@ export function PendingPaymentsPage() {
   };
   const handleReject = async (reason: string, notes?: string) => {
     if (!order || !payment) return;
+    const currentPaymentId = payment.id;
     const nextPaymentId = nextPendingPaymentId(payment.id);
     setLoading(true);
     setError("");
+    setRejectOpen(false);
+    setSelectedId(nextPaymentId);
     try {
       await rejectPayment(payment.id, reason, notes);
-      setRejectOpen(false);
-      setSelectedId(nextPaymentId);
       toast.success(`Payment rejected for ${order.id}`, {
         description:
           "The customer was notified and the order stayed out of the kitchen queue.",
@@ -95,6 +98,8 @@ export function PendingPaymentsPage() {
     } catch (caught) {
       const message =
         caught instanceof Error ? caught.message : "Unable to reject payment.";
+      setSelectedId(currentPaymentId);
+      setRejectOpen(true);
       setError(message);
       toast.error("Rejection failed", { description: message });
     } finally {

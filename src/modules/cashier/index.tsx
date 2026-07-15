@@ -208,7 +208,11 @@ function CashierModule() {
         toastOptions={{
           duration: 3600,
           classNames: {
-            toast: "rounded-xl border-border font-medium shadow-xl",
+            toast:
+              "cashier-toast rounded-xl border-border font-medium shadow-xl",
+            success: "cashier-toast-success",
+            warning: "cashier-toast-warning",
+            error: "cashier-toast-error",
             title: "text-xs font-black",
             description: "text-[11px] leading-4",
           },

@@ -77,9 +77,10 @@ export function CashierStatusBadge({
           : Clock3;
   return (
     <span
+      key={`${status}-${delayed ? "delayed" : "current"}`}
       aria-label={delayed ? `Delayed ${status}` : status}
       className={cn(
-        "inline-flex min-h-6 items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.08em] shadow-[0_1px_2px_rgba(36,26,19,0.03)]",
+        "cashier-status-badge inline-flex min-h-6 items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.08em] shadow-[0_1px_2px_rgba(36,26,19,0.03)]",
         delayed
           ? "border-red-200 bg-red-50 text-red-800"
           : STATUS_STYLE[status],
@@ -124,7 +125,7 @@ export function CashierButton({
       type={type}
       aria-busy={loading || undefined}
       className={cn(
-        "inline-flex select-none items-center justify-center gap-2 whitespace-nowrap font-black transition-all duration-200 active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-50 disabled:shadow-none [&>svg]:h-4 [&>svg]:w-4 [&>svg]:shrink-0",
+        "cashier-action inline-flex select-none items-center justify-center gap-2 whitespace-nowrap font-black transition-all duration-200 active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-50 disabled:shadow-none [&>svg]:h-4 [&>svg]:w-4 [&>svg]:shrink-0",
         sizes[size],
         variants[variant],
         className,
@@ -160,7 +161,7 @@ export function CashierIconButton({
       aria-label={label}
       title={label}
       className={cn(
-        "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[11px] border border-border bg-white text-muted-foreground shadow-sm transition-all hover:border-primary/25 hover:bg-amber-50/50 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 active:scale-95 disabled:cursor-not-allowed disabled:opacity-45",
+        "cashier-action inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[11px] border border-border bg-white text-muted-foreground shadow-sm transition-all hover:border-primary/25 hover:bg-amber-50/50 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 active:scale-95 disabled:cursor-not-allowed disabled:opacity-45",
         className,
       )}
       {...props}
@@ -238,7 +239,7 @@ export function SectionHeading({
 }
 
 export const fieldClass =
-  "min-h-11 w-full rounded-[11px] border border-border bg-white/90 px-3 text-sm text-foreground shadow-[0_1px_2px_rgba(36,26,19,0.03)] outline-none transition-all placeholder:text-muted-foreground/55 hover:border-primary/25 focus:border-primary/55 focus:bg-white focus:ring-4 focus:ring-primary/10 aria-[invalid=true]:border-red-400 aria-[invalid=true]:ring-4 aria-[invalid=true]:ring-red-100 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground";
+  "cashier-field min-h-11 w-full rounded-[11px] border border-border bg-white/90 px-3 text-sm text-foreground shadow-[0_1px_2px_rgba(36,26,19,0.03)] outline-none transition-all placeholder:text-muted-foreground/55 hover:border-primary/25 focus:border-primary/55 focus:bg-white focus:ring-4 focus:ring-primary/10 aria-[invalid=true]:border-red-400 aria-[invalid=true]:ring-4 aria-[invalid=true]:ring-red-100 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground";
 
 export function FieldError({ children }: { children?: ReactNode }) {
   if (!children) return null;
@@ -335,7 +336,7 @@ export function CashierDialogContent({
   return (
     <DialogContent
       className={cn(
-        "max-h-[calc(100dvh-2rem)] gap-5 overflow-y-auto rounded-[20px] border-border/80 bg-[#fffdf9] p-5 shadow-[0_24px_70px_rgba(36,26,19,0.22)] sm:p-6 [&_[data-slot=dialog-title]]:text-lg [&_[data-slot=dialog-title]]:font-black [&_[data-slot=dialog-title]]:tracking-tight [&_[data-slot=dialog-description]]:text-xs [&_[data-slot=dialog-description]]:font-medium [&_[data-slot=dialog-description]]:leading-5 [&_[data-slot=dialog-close]]:rounded-lg [&_[data-slot=dialog-close]]:p-1.5",
+        "cashier-modal max-h-[calc(100dvh-2rem)] gap-5 overflow-y-auto rounded-[20px] border-border/80 bg-[#fffdf9] p-5 shadow-[0_24px_70px_rgba(36,26,19,0.22)] sm:p-6 [&_[data-slot=dialog-title]]:text-lg [&_[data-slot=dialog-title]]:font-black [&_[data-slot=dialog-title]]:tracking-tight [&_[data-slot=dialog-description]]:text-xs [&_[data-slot=dialog-description]]:font-medium [&_[data-slot=dialog-description]]:leading-5 [&_[data-slot=dialog-close]]:rounded-lg [&_[data-slot=dialog-close]]:p-1.5",
         className,
       )}
       {...props}
@@ -364,7 +365,7 @@ export function CashierConfirmDialog({
 }) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="max-w-md rounded-[20px] border-border/80 bg-[#fffdf9] p-5 shadow-[0_24px_70px_rgba(36,26,19,0.22)] sm:p-6">
+      <AlertDialogContent className="cashier-confirm-dialog max-w-md rounded-[20px] border-border/80 bg-[#fffdf9] p-5 shadow-[0_24px_70px_rgba(36,26,19,0.22)] sm:p-6">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-lg font-black tracking-tight text-foreground">
             {title}
@@ -374,12 +375,12 @@ export function CashierConfirmDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel className="min-h-11 rounded-[11px] border border-border bg-white px-4 text-xs font-black text-foreground shadow-sm transition-all hover:border-primary/25 hover:bg-amber-50/40 focus-visible:ring-primary">
+          <AlertDialogCancel className="cashier-action min-h-11 rounded-[11px] border border-border bg-white px-4 text-xs font-black text-foreground shadow-sm transition-all hover:border-primary/25 hover:bg-amber-50/40 focus-visible:ring-primary">
             {cancelLabel}
           </AlertDialogCancel>
           <AlertDialogAction
             className={cn(
-              "min-h-11 rounded-[11px] px-4 text-xs font-black text-white shadow-sm transition-all focus-visible:ring-primary",
+              "cashier-action min-h-11 rounded-[11px] px-4 text-xs font-black text-white shadow-sm transition-all focus-visible:ring-primary",
               danger
                 ? "bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600"
                 : "bg-gradient-to-r from-primary to-orange-600 hover:shadow-md",
@@ -404,7 +405,7 @@ export function ErrorBanner({
   return (
     <div
       role="alert"
-      className="flex items-center justify-between gap-3 rounded-xl border border-red-200 bg-gradient-to-r from-red-50 to-white px-4 py-3 text-xs font-semibold text-red-800 shadow-sm"
+      className="cashier-alert cashier-alert-error flex items-center justify-between gap-3 rounded-xl border border-red-200 bg-gradient-to-r from-red-50 to-white px-4 py-3 text-xs font-semibold text-red-800 shadow-sm"
     >
       <span className="flex items-center gap-2">
         <AlertCircle className="h-4 w-4" />
