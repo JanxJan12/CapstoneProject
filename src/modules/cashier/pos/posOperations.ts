@@ -22,6 +22,18 @@ export interface CashTenderSuggestion {
   amount: number;
 }
 
+export type POSOrderInformationField =
+  | "tableNumber"
+  | "customerName"
+  | "contactNumber"
+  | "deliveryAddress"
+  | "discountReference";
+
+export interface CheckoutEntryIssue {
+  field?: POSOrderInformationField;
+  message: string;
+}
+
 export function getCashTenderSuggestions(
   total: number,
 ): CashTenderSuggestion[] {
@@ -149,6 +161,66 @@ export function getInventoryIssue(cart: POSCartLine[], menuItems: MenuItem[]) {
   return undefined;
 }
 
+export function getCheckoutEntryIssue(
+  form: POSForm,
+  occupiedTables: string[],
+  hasActiveShift: boolean,
+  unavailableItemName?: string,
+  inventoryIssue?: string,
+): CheckoutEntryIssue | undefined {
+  if (!hasActiveShift) {
+    return { message: "Start a cashier shift before proceeding to checkout." };
+  }
+  if (unavailableItemName) {
+    return {
+      message: `${unavailableItemName} is no longer available. Remove it to continue.`,
+    };
+  }
+  if (inventoryIssue) {
+    return { message: `${inventoryIssue} Adjust the quantity to continue.` };
+  }
+  if (form.orderType === "Dine-in" && !form.tableNumber?.trim()) {
+    return {
+      field: "tableNumber",
+      message: "Select an available table for this dine-in order.",
+    };
+  }
+  if (
+    form.orderType === "Dine-in" &&
+    occupiedTables.includes(String(Number(form.tableNumber)))
+  ) {
+    return {
+      field: "tableNumber",
+      message: `Table ${form.tableNumber} already has an active order.`,
+    };
+  }
+  if (form.orderType === "Delivery" && !form.customerName?.trim()) {
+    return {
+      field: "customerName",
+      message: "Enter the delivery customer name.",
+    };
+  }
+  if (form.orderType === "Delivery" && !form.contactNumber?.trim()) {
+    return {
+      field: "contactNumber",
+      message: "Enter the delivery contact number.",
+    };
+  }
+  if (form.orderType === "Delivery" && !form.deliveryAddress?.trim()) {
+    return {
+      field: "deliveryAddress",
+      message: "Enter the delivery address.",
+    };
+  }
+  if (form.discountType !== "None" && !form.discountReference?.trim()) {
+    return {
+      field: "discountReference",
+      message: "Enter the Senior/PWD ID or reference.",
+    };
+  }
+  return undefined;
+}
+
 export function getPlaceOrderAvailability(
   cart: POSCartLine[],
   form: POSForm,
@@ -169,6 +241,12 @@ export function getPlaceOrderAvailability(
   const canPlace =
     cart.length > 0 &&
     (form.orderType !== "Dine-in" || Boolean(form.tableNumber?.trim())) &&
+    (form.orderType !== "Delivery" ||
+      Boolean(
+        form.customerName?.trim() &&
+        form.contactNumber?.trim() &&
+        form.deliveryAddress?.trim(),
+      )) &&
     !selectedTableOccupied &&
     !unavailableItem &&
     !inventoryIssue &&
@@ -184,15 +262,23 @@ export function getPlaceOrderAvailability(
         ? `${inventoryIssue} Adjust the quantity to continue.`
         : form.orderType === "Dine-in" && !form.tableNumber?.trim()
           ? "Select an available table for this dine-in order."
-          : selectedTableOccupied
-            ? `Table ${form.tableNumber} already has an active order.`
-            : form.discountType !== "None" && !form.discountReference?.trim()
-              ? "Enter the Senior/PWD ID or reference."
-              : form.paymentMethod === "Cash" && tendered < total
-                ? "Enter enough cash tendered to cover the total."
-                : form.paymentMethod === "GCash" && !form.gcashReference?.trim()
-                  ? "Enter the customer's GCash reference number."
-                  : undefined;
+          : form.orderType === "Delivery" && !form.customerName?.trim()
+            ? "Enter the delivery customer name."
+            : form.orderType === "Delivery" && !form.contactNumber?.trim()
+              ? "Enter the delivery contact number."
+              : form.orderType === "Delivery" && !form.deliveryAddress?.trim()
+                ? "Enter the delivery address."
+                : selectedTableOccupied
+                  ? `Table ${form.tableNumber} already has an active order.`
+                  : form.discountType !== "None" &&
+                      !form.discountReference?.trim()
+                    ? "Enter the Senior/PWD ID or reference."
+                    : form.paymentMethod === "Cash" && tendered < total
+                      ? "Enter enough cash tendered to cover the total."
+                      : form.paymentMethod === "GCash" &&
+                          !form.gcashReference?.trim()
+                        ? "Enter the customer's GCash reference number."
+                        : undefined;
   return { unavailableItem, selectedTableOccupied, canPlace, disabledReason };
 }
 

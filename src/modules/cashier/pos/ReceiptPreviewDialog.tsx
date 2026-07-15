@@ -18,6 +18,8 @@ export function ReceiptPreviewDialog({
   orderType,
   tableNumber,
   customerName,
+  contactNumber,
+  deliveryAddress,
   instructions,
   subtotal,
   discountAmount,
@@ -34,6 +36,8 @@ export function ReceiptPreviewDialog({
   orderType: POSForm["orderType"];
   tableNumber?: string;
   customerName?: string;
+  contactNumber?: string;
+  deliveryAddress?: string;
   instructions?: string;
   subtotal: number;
   discountAmount: number;
@@ -84,6 +88,20 @@ export function ReceiptPreviewDialog({
                 {customerName?.trim() || "Walk-in Customer"}
               </strong>
             </div>
+            {orderType === "Delivery" ? (
+              <>
+                <div className="flex justify-between gap-3">
+                  <span>Contact</span>
+                  <strong>{contactNumber}</strong>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <span>Address</span>
+                  <strong className="max-w-52 text-right">
+                    {deliveryAddress}
+                  </strong>
+                </div>
+              </>
+            ) : null}
           </div>
           <div className="my-4 border-t border-dashed border-[#cdbba9]" />
           <div className="space-y-3">

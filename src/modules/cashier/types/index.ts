@@ -223,7 +223,9 @@ export interface ActivityEvent {
 export interface HeldOrder {
   id: string;
   customerName?: string;
-  type: Exclude<OrderType, "Delivery">;
+  contactNumber?: string;
+  deliveryAddress?: string;
+  type: OrderType;
   tableNumber?: string;
   items: OrderItem[];
   discountType: DiscountType;
@@ -249,7 +251,9 @@ export interface CashierState {
 
 export interface WalkInOrderInput {
   customerName?: string;
-  type: Exclude<OrderType, "Delivery">;
+  contactNumber?: string;
+  deliveryAddress?: string;
+  type: OrderType;
   tableNumber?: string;
   items: Array<
     Pick<

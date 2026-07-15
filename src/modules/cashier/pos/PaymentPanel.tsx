@@ -23,6 +23,7 @@ export function PaymentPanel({
   shiftOpen,
   loading,
   checkoutRef,
+  submitLabel = "Place Order",
   onTenderedChange,
   onPreview,
   onConfirm,
@@ -41,6 +42,7 @@ export function PaymentPanel({
   shiftOpen: boolean;
   loading: boolean;
   checkoutRef?: RefObject<HTMLButtonElement | null>;
+  submitLabel?: string;
   onTenderedChange: (amount: number) => void;
   onPreview: () => void;
   onConfirm: () => void;
@@ -213,7 +215,7 @@ export function PaymentPanel({
             <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
           ) : null}
           <span className="text-sm font-black">
-            {loading ? "Placing Order…" : "Place Order"}
+            {loading ? "Confirming Order…" : submitLabel}
           </span>
           <strong className="ml-auto text-sm">{formatMoney(total)}</strong>
           <ArrowRight className="ml-2 h-5 w-5" />

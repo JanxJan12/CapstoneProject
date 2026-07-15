@@ -2,11 +2,12 @@ import { useRef } from "react";
 import { UtensilsCrossed } from "lucide-react";
 import { OrderItem } from "./OrderItem";
 import type { POSCartLine } from "./types";
+import type { OrderType } from "../types";
 
 export interface POSCartProps {
   items: POSCartLine[];
   orderNumber: string;
-  orderType: "Dine-in" | "Take-out";
+  orderType: OrderType;
   onAdjust: (lineId: string, delta: number) => void;
   onQuantityChange: (lineId: string, quantity: number) => void;
   onRemove: (lineId: string) => void;
@@ -36,14 +37,18 @@ export function POSCart({
       <div className="pos-cart-header flex items-center justify-between border-b px-4 py-3">
         <div>
           <div className="flex items-center gap-2">
-            <p className="text-sm font-black">Current Order</p>
+            <p className="text-sm font-black">
+              {items.length ? "Current Order" : "Current Cart"}
+            </p>
             <span className="pos-cart-service-chip rounded-md border px-2 py-1 text-[9px] font-black">
               {orderType}
             </span>
           </div>
-          <p className="mt-1 text-[9px] font-bold uppercase tracking-wider">
-            {orderNumber} · {itemCount} {itemCount === 1 ? "item" : "items"}
-          </p>
+          {items.length ? (
+            <p className="mt-1 text-[9px] font-bold uppercase tracking-wider">
+              {orderNumber} · {itemCount} {itemCount === 1 ? "item" : "items"}
+            </p>
+          ) : null}
         </div>
         {items.length ? (
           <button
@@ -62,10 +67,9 @@ export function POSCart({
             <span className="flex h-14 w-14 items-center justify-center rounded-2xl border">
               <UtensilsCrossed className="h-6 w-6" aria-hidden="true" />
             </span>
-            <p className="text-xs font-black">Ready for the first item</p>
+            <p className="text-xs font-black">No items yet.</p>
             <p className="max-w-52 text-[10px] leading-4">
-              Quick Add uses defaults. Open a product only when modifiers are
-              needed.
+              Select products to begin.
             </p>
           </div>
         ) : (

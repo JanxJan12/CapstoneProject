@@ -1,4 +1,9 @@
-import { DISCOUNT_RATE, POS_TAX_ENABLED, POS_TAX_RATE } from "../constants";
+import {
+  DISCOUNT_RATE,
+  POS_ITEM_NOTE_MAX_LENGTH,
+  POS_TAX_ENABLED,
+  POS_TAX_RATE,
+} from "../constants";
 import { validateMenuModifiers } from "../constants/modifiers";
 import type {
   CashierState,
@@ -26,9 +31,22 @@ export function createWalkInOrder(
   const state = cloneState(current);
   const shift = requireOpenShift(state);
   if (!input.items.length) throw new Error("Add at least one menu item.");
-  const customerName = input.customerName?.trim() || "Walk-in Customer";
+  const submittedCustomerName = input.customerName?.trim();
+  if (input.type === "Delivery" && !submittedCustomerName)
+    throw new Error("Customer name is required for delivery.");
+  const customerName = submittedCustomerName || "Walk-in Customer";
   if (customerName.length > 80)
     throw new Error("Customer name must be 80 characters or fewer.");
+  const contactNumber = input.contactNumber?.trim();
+  const deliveryAddress = input.deliveryAddress?.trim();
+  if (input.type === "Delivery" && !contactNumber)
+    throw new Error("Contact number is required for delivery.");
+  if (input.type === "Delivery" && !deliveryAddress)
+    throw new Error("Delivery address is required.");
+  if (contactNumber && contactNumber.length > 30)
+    throw new Error("Contact number must be 30 characters or fewer.");
+  if (deliveryAddress && deliveryAddress.length > 200)
+    throw new Error("Delivery address must be 200 characters or fewer.");
   const tableNumber =
     input.type === "Dine-in" ? normalizeTable(input.tableNumber) : undefined;
   if (input.type === "Dine-in" && !tableNumber)
@@ -66,7 +84,7 @@ export function createWalkInOrder(
         menuItem.price +
         modifiers.reduce((sum, modifier) => sum + modifier.price, 0),
       quantity: entry.quantity,
-      note: entry.note?.trim().slice(0, 120) || undefined,
+      note: entry.note?.trim().slice(0, POS_ITEM_NOTE_MAX_LENGTH) || undefined,
       modifiers: modifiers.length ? modifiers : undefined,
     };
   });
@@ -124,7 +142,8 @@ export function createWalkInOrder(
   const order: Order = {
     id: orderId,
     customerName,
-    contactNumber: "—",
+    contactNumber: contactNumber || "—",
+    deliveryAddress: input.type === "Delivery" ? deliveryAddress : undefined,
     type: input.type,
     tableNumber,
     items,
@@ -140,6 +159,7 @@ export function createWalkInOrder(
     paymentMethod: input.paymentMethod,
     paymentStatus: "Verified",
     status: "Confirmed",
+    riderStatus: input.type === "Delivery" ? "Waiting assignment" : undefined,
     createdAt: timestamp,
     updatedAt: timestamp,
     cashierId: state.cashier.id,
@@ -148,7 +168,7 @@ export function createWalkInOrder(
       {
         id: nextEventId(),
         status: "Confirmed",
-        label: "Walk-in payment completed; order sent to kitchen",
+        label: `${input.type} payment completed; order sent to kitchen`,
         timestamp,
         actor: state.cashier.name,
       },
@@ -605,7 +625,11 @@ export function voidDraftOrder(
   state.orders.unshift({
     id: orderId,
     customerName,
-    contactNumber: "—",
+    contactNumber: input.contactNumber?.trim() || "—",
+    deliveryAddress:
+      input.type === "Delivery"
+        ? input.deliveryAddress?.trim() || undefined
+        : undefined,
     type: input.type,
     tableNumber: input.tableNumber,
     items,

@@ -94,6 +94,20 @@ export function ReceiptDialog({
                   {order.tableNumber ? ` · Table ${order.tableNumber}` : ""}
                 </strong>
               </div>
+              {order.type === "Delivery" ? (
+                <>
+                  <div className="mt-1 flex justify-between gap-3">
+                    <span className="text-muted-foreground">Contact</span>
+                    <strong>{order.contactNumber}</strong>
+                  </div>
+                  <div className="mt-1 flex justify-between gap-3">
+                    <span className="text-muted-foreground">Address</span>
+                    <strong className="max-w-56 text-right">
+                      {order.deliveryAddress}
+                    </strong>
+                  </div>
+                </>
+              ) : null}
             </div>
             {order.items.map((item) => (
               <div key={item.id} className="flex justify-between py-1 text-xs">

@@ -76,7 +76,17 @@ export const posSchema = z
       .trim()
       .max(80, "Customer name must be 80 characters or fewer.")
       .optional(),
-    orderType: z.enum(["Dine-in", "Take-out"]),
+    contactNumber: z
+      .string()
+      .trim()
+      .max(30, "Contact number must be 30 characters or fewer.")
+      .optional(),
+    deliveryAddress: z
+      .string()
+      .trim()
+      .max(200, "Delivery address must be 200 characters or fewer.")
+      .optional(),
+    orderType: z.enum(["Dine-in", "Take-out", "Delivery"]),
     tableNumber: z.string().optional(),
     paymentMethod: z.enum(["Cash", "GCash"]),
     amountTendered: z.number().optional(),
@@ -95,6 +105,29 @@ export const posSchema = z
         path: ["tableNumber"],
         message: "Select a table for dine-in orders.",
       });
+    }
+    if (value.orderType === "Delivery") {
+      if (!value.customerName?.trim()) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["customerName"],
+          message: "Customer name is required for delivery.",
+        });
+      }
+      if (!value.contactNumber?.trim()) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["contactNumber"],
+          message: "Contact number is required for delivery.",
+        });
+      }
+      if (!value.deliveryAddress?.trim()) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["deliveryAddress"],
+          message: "Delivery address is required.",
+        });
+      }
     }
     if (value.paymentMethod === "GCash" && !value.gcashReference?.trim()) {
       ctx.addIssue({

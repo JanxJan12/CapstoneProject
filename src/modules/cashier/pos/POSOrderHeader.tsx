@@ -1,4 +1,3 @@
-import type { UseFormRegister } from "react-hook-form";
 import { XCircle } from "lucide-react";
 import type { POSForm } from "../schemas";
 import type { HeldOrder } from "../types";
@@ -7,15 +6,15 @@ import { CashierSelect } from "../components";
 export function POSOrderHeader({
   orderType,
   busy,
-  register,
   heldOrders,
+  onOrderTypeChange,
   onVoid,
   onReopen,
 }: {
   orderType: POSForm["orderType"];
   busy: boolean;
-  register: UseFormRegister<POSForm>;
   heldOrders: HeldOrder[];
+  onOrderTypeChange: (type: POSForm["orderType"]) => void;
   onVoid: () => void;
   onReopen: (id: string) => void;
 }) {
@@ -31,19 +30,18 @@ export function POSOrderHeader({
             role="radiogroup"
             aria-label="Order type"
           >
-            {(["Dine-in", "Take-out"] as const).map((type) => (
-              <label
+            {(["Dine-in", "Take-out", "Delivery"] as const).map((type) => (
+              <button
+                type="button"
                 key={type}
+                role="radio"
+                aria-checked={orderType === type}
+                onClick={() => onOrderTypeChange(type)}
+                disabled={busy}
                 className={`flex min-h-8 cursor-pointer items-center rounded-lg px-4 text-xs font-black transition has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary ${orderType === type ? "bg-white text-primary shadow-sm ring-1 ring-border/60" : "text-muted-foreground hover:text-foreground"}`}
               >
-                <input
-                  type="radio"
-                  value={type}
-                  className="sr-only"
-                  {...register("orderType")}
-                />
                 {type}
-              </label>
+              </button>
             ))}
           </div>
         </div>

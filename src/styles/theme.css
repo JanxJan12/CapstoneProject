@@ -1523,6 +1523,44 @@
   color: var(--pos-text);
 }
 
+.tablet-pos .pos-order-type-gate {
+  background:
+    radial-gradient(
+      circle at 50% 12%,
+      rgba(237, 116, 28, 0.12),
+      transparent 34%
+    ),
+    var(--pos-bg);
+}
+
+.tablet-pos .pos-order-type-choice {
+  border-color: var(--pos-line);
+  background: linear-gradient(145deg, #24201b, #1b1713);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
+  color: var(--pos-text);
+}
+
+.tablet-pos .pos-order-type-choice > span:first-child {
+  border-color: rgba(247, 156, 58, 0.28);
+  background: rgba(237, 116, 28, 0.08);
+  color: var(--pos-orange-soft);
+}
+
+.tablet-pos .pos-order-type-choice:hover,
+.tablet-pos .pos-order-type-choice:focus-visible {
+  transform: translateY(-2px);
+  border-color: rgba(247, 156, 58, 0.52);
+  background: linear-gradient(145deg, #2b251f, #211a15);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.3);
+  outline: none;
+}
+
+.tablet-pos .pos-order-type-choice:focus-visible {
+  box-shadow:
+    0 0 0 3px rgba(237, 116, 28, 0.22),
+    0 18px 36px rgba(0, 0, 0, 0.3);
+}
+
 .tablet-pos .pos-order-header {
   border-color: var(--pos-line);
   background:
@@ -1576,6 +1614,12 @@
 }
 
 .tablet-pos .pos-order-header label:has(input[type="radio"]:checked) {
+  background: linear-gradient(135deg, #a8430e, #e36a18);
+  color: white;
+  box-shadow: 0 5px 14px rgba(154, 63, 10, 0.22);
+}
+
+.tablet-pos .pos-order-header button[aria-checked="true"] {
   background: linear-gradient(135deg, #a8430e, #e36a18);
   color: white;
   box-shadow: 0 5px 14px rgba(154, 63, 10, 0.22);
@@ -1924,6 +1968,44 @@
   border-color: var(--pos-line-soft);
   background: rgba(255, 255, 255, 0.025);
   color: #6e6257;
+}
+
+.tablet-pos .pos-order-details {
+  border-color: var(--pos-line);
+  background: #181511;
+}
+
+.tablet-pos .pos-cart-checkout {
+  border-color: var(--pos-line);
+  background: linear-gradient(180deg, #1c1814, #17130f);
+  box-shadow: 0 -12px 28px rgba(0, 0, 0, 0.18);
+}
+
+.tablet-pos .pos-proceed-checkout {
+  background: linear-gradient(100deg, #c84d08, #ed741c 62%, #df6112);
+  box-shadow: 0 12px 25px rgba(177, 65, 7, 0.3);
+}
+
+.tablet-pos .pos-proceed-checkout:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(100deg, #d9570b, #f27f27 62%, #ec6b19);
+  box-shadow: 0 16px 30px rgba(177, 65, 7, 0.38);
+}
+
+.tablet-pos.pos-checkout-content {
+  border-color: var(--pos-line);
+  background: var(--pos-panel);
+  color: var(--pos-text);
+}
+
+.tablet-pos .pos-checkout-summary {
+  background:
+    radial-gradient(circle at 0 0, rgba(237, 116, 28, 0.06), transparent 34%),
+    #171410;
+}
+
+.tablet-pos .pos-checkout-fulfillment {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
 }
 
 .tablet-pos .pos-cart-list,

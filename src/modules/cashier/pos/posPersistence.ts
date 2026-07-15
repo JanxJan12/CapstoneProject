@@ -10,6 +10,8 @@ import type { POSCartLine } from "./types";
 
 export const DEFAULT_POS_FORM: POSForm = {
   customerName: "",
+  contactNumber: "",
+  deliveryAddress: "",
   orderType: "Dine-in",
   tableNumber: "",
   paymentMethod: "Cash",
@@ -40,6 +42,8 @@ export function loadPOSDraft(): { cart: POSCartLine[]; form: POSForm } {
         ...DEFAULT_POS_FORM,
         ...saved?.form,
         customerName: "",
+        contactNumber: "",
+        deliveryAddress: "",
         tableNumber: "",
         discountType: "None",
         discountReference: "",

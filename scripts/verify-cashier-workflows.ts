@@ -35,7 +35,7 @@ function expectFailure(run: () => unknown, message: string) {
 let state: CashierState = createInitialCashierState();
 const initialTransactionCount = state.transactions.length;
 
-state = verifyOnlinePayment(state, "ORD-2044", false);
+state = verifyOnlinePayment(state, "PAY-9104", false);
 assert(
   state.orders.find((order) => order.id === "ORD-2044")?.status === "Confirmed",
   "Verification must confirm the order.",
@@ -63,14 +63,14 @@ assert(
   "Kitchen-ready events must flow back to cashier activity.",
 );
 expectFailure(
-  () => verifyOnlinePayment(state, "ORD-2044", false),
+  () => verifyOnlinePayment(state, "PAY-9104", false),
   "Duplicate verification must be blocked.",
 );
 expectFailure(
-  () => verifyOnlinePayment(state, "ORD-2043", false),
+  () => verifyOnlinePayment(state, "PAY-9103", false),
   "Mismatched payments must require an override.",
 );
-state = verifyOnlinePayment(state, "ORD-2043", true);
+state = verifyOnlinePayment(state, "PAY-9103", true);
 assert(
   state.payments.find((payment) => payment.orderId === "ORD-2043")
     ?.overrideMismatch,
@@ -80,8 +80,8 @@ assert(
 const beforeRejectionTransactions = state.transactions.length;
 state = rejectOnlinePayment(
   state,
-  "ORD-2042",
-  "Unreadable proof",
+  "PAY-9102",
+  "Unreadable Proof",
   "Customer should upload a clearer screenshot.",
 );
 assert(
@@ -190,6 +190,42 @@ expectFailure(
   "A reused GCash reference must be rejected.",
 );
 
+const deliveryResult = createWalkInOrder(state, {
+  customerName: "Alex Santos",
+  contactNumber: "09181234567",
+  deliveryAddress: "18 Narra Street, Barangay Central, Quezon City",
+  type: "Delivery",
+  items: [
+    {
+      menuItemId: "MENU-06",
+      name: "Tampered delivery item",
+      unitPrice: 1,
+      quantity: 1,
+    },
+  ],
+  discountType: null,
+  orderInstructions: "Call when outside the gate.",
+  paymentMethod: "Cash",
+  amountTendered: 500,
+});
+state = deliveryResult.state;
+assert(
+  deliveryResult.order.contactNumber === "09181234567" &&
+    deliveryResult.order.deliveryAddress ===
+      "18 Narra Street, Barangay Central, Quezon City" &&
+    deliveryResult.order.riderStatus === "Waiting assignment",
+  "Delivery checkout must preserve fulfillment details and create a rider-ready order.",
+);
+assert(
+  state.payments.some(
+    (payment) => payment.id === deliveryResult.order.paymentId,
+  ) &&
+    state.transactions.some(
+      (transaction) => transaction.id === deliveryResult.order.transactionId,
+    ),
+  "Delivery checkout must create linked payment and transaction records.",
+);
+
 state = cancelOrder(
   state,
   walkIn.id,
@@ -255,7 +291,11 @@ assert(
 const activeShift = state.shifts.find((shift) => shift.status === "Open");
 assert(activeShift, "An active shift is required for settlement verification.");
 const totals = calculateShiftTotals(state, activeShift.id);
-state = endShift(state, totals.expectedCash);
+state = endShift(state, {
+  actualCash: totals.expectedCash,
+  managerName: "Maria Reyes",
+  managerApproved: true,
+});
 assert(
   !state.shifts.some((shift) => shift.status === "Open"),
   "End shift must close the active shift.",
