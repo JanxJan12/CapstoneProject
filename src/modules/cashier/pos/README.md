@@ -15,13 +15,15 @@ speed-critical behavior as a separate layer from presentation.
 - `ModifierDrawer` supports required/optional and single/multi-select groups
   without covering the menu.
 - `MealRecommendations` derives non-blocking, one-tap meal completion options.
-- `CheckoutPanel` replaces the right-side cart only after Checkout is pressed
-  and composes order information with `PaymentPanel`.
+- `CartPanel`, `OrderSummaryPanel`, `PaymentPanel`, and `ReceiptPanel` are the
+  four independent states of the fixed right-side workstation.
+- `ReceiptContent` keeps printed receipt details consistent between the POS
+  receipt panel and transaction-history receipt dialogs.
 
 ## Business and state boundaries
 
-- `useWalkInPOSController` coordinates the draft workflow and exposes stable
-  actions to the page.
+- `useWalkInPOSController` coordinates the draft and controls the typed
+  `RightPanelState` finite state machine without changing routes.
 - `posOperations` contains pure filtering, totals, inventory, tender, cart, and
   duplication rules.
 - `posPersistence` contains defensive browser-storage access for drafts,
@@ -30,5 +32,6 @@ speed-critical behavior as a separate layer from presentation.
   indexed for catalogs with 1,000 or more items.
 
 The default fast path is: search or category → Quick Add → continue browsing →
-Checkout → Confirm Order. Products receive a safe default configuration on the
-fast path, while explicit customization uses the compact right-side drawer.
+Order Summary → Payment → Receipt. Products receive a safe default
+configuration on the fast path, while explicit customization uses the compact
+right-side drawer without unmounting the menu.

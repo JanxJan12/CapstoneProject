@@ -3,10 +3,14 @@ import {
   addCartItem,
   calculatePOSTotals,
   getMealRecommendations,
-  getPOSWorkflowState,
+  getOrderSummaryAvailability,
+  transitionRightPanel,
 } from "../src/modules/cashier/pos/posOperations";
 import { DEFAULT_POS_FORM } from "../src/modules/cashier/pos/posPersistence";
-import type { POSCartLine } from "../src/modules/cashier/pos/types";
+import {
+  RightPanelState,
+  type POSCartLine,
+} from "../src/modules/cashier/pos/types";
 import {
   createWalkInOrder,
   holdOrder,
@@ -33,13 +37,15 @@ const add = (id: string) => {
 };
 
 assert(
-  getPOSWorkflowState("reset", false) === "selectingItems",
+  transitionRightPanel(RightPanelState.CART, "reset", false) ===
+    RightPanelState.CART,
   "A new POS order must open directly in item selection.",
 );
 add("MENU-02");
 assert(
-  getPOSWorkflowState("addItem", true) === "reviewingCart",
-  "Adding a product must keep the cashier in the continuous cart workflow.",
+  transitionRightPanel(RightPanelState.CART, "backToCart", true) ===
+    RightPanelState.CART,
+  "Adding a product must keep the cashier in the persistent cart panel.",
 );
 const afterViand = getMealRecommendations(cart, state.menuItems);
 assert(
@@ -52,7 +58,7 @@ assert(
 add("MENU-08");
 const afterRice = getMealRecommendations(cart, state.menuItems);
 assert(
-  afterRice.title === "Add a drink" &&
+  afterRice.title === "Add a drink or dessert" &&
     afterRice.items.every((item) => item.category === "Beverages"),
   "A viand and rice must prioritize beverage recommendations.",
 );
@@ -76,10 +82,36 @@ assert(totals.total === 190, "The multi-category cart total is incorrect.");
 
 const cartSnapshot = JSON.stringify(cart);
 assert(
-  getPOSWorkflowState("checkout", true) === "checkout" &&
-    getPOSWorkflowState("backToCart", true) === "reviewingCart" &&
+  transitionRightPanel(RightPanelState.CART, "openSummary", true) ===
+    RightPanelState.SUMMARY &&
+    transitionRightPanel(RightPanelState.SUMMARY, "continueToPayment", true) ===
+      RightPanelState.PAYMENT &&
+    transitionRightPanel(RightPanelState.PAYMENT, "backToSummary", true) ===
+      RightPanelState.SUMMARY &&
+    transitionRightPanel(RightPanelState.SUMMARY, "backToCart", true) ===
+      RightPanelState.CART &&
     JSON.stringify(cart) === cartSnapshot,
-  "Back to Cart must preserve the complete draft.",
+  "Cart, summary, and payment panel transitions must preserve the draft.",
+);
+const summaryCheck = getOrderSummaryAvailability(
+  cart,
+  { ...DEFAULT_POS_FORM, orderType: "Take-out" },
+  state.menuItems,
+  [],
+);
+assert(
+  summaryCheck.canContinue,
+  "A valid take-out order must continue from summary to payment.",
+);
+const missingTable = getOrderSummaryAvailability(
+  cart,
+  { ...DEFAULT_POS_FORM, orderType: "Dine-in", tableNumber: "" },
+  state.menuItems,
+  [],
+);
+assert(
+  !missingTable.canContinue && missingTable.disabledReason?.includes("table"),
+  "Dine-in summary must require an available table before payment.",
 );
 
 const heldResult = holdOrder(state, {
@@ -107,7 +139,8 @@ const orderCountBeforeDraftCancel = state.orders.length;
 cart = [];
 assert(
   state.orders.length === orderCountBeforeDraftCancel &&
-    getPOSWorkflowState("reset", false) === "selectingItems",
+    transitionRightPanel(RightPanelState.CART, "reset", false) ===
+      RightPanelState.CART,
   "Cancelling an unsubmitted draft must not create a voided order record.",
 );
 
@@ -131,9 +164,9 @@ assert(
   "Confirm Order must create connected kitchen, payment, and transaction records.",
 );
 assert(
-  getPOSWorkflowState("process", true) === "processing" &&
-    getPOSWorkflowState("showReceipt", false) === "receipt",
-  "Successful confirmation must progress from processing to receipt.",
+  transitionRightPanel(RightPanelState.PAYMENT, "showReceipt", false) ===
+    RightPanelState.RECEIPT,
+  "Successful confirmation must transform the right panel into receipt.",
 );
 
 console.log(

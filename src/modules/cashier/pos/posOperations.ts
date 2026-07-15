@@ -9,7 +9,8 @@ import {
 import type { POSForm } from "../schemas";
 import type { MenuItem, Order, OrderItemModifier } from "../types";
 import { createLineId } from "./posPersistence";
-import type { POSCartLine, POSWorkflowState } from "./types";
+import type { POSCartLine } from "./types";
+import { RightPanelState } from "./types";
 
 export interface CartUpdateResult {
   cart: POSCartLine[];
@@ -27,26 +28,72 @@ export interface MealRecommendations {
   items: MenuItem[];
 }
 
-export type POSWorkflowEvent =
-  | "addItem"
-  | "customize"
-  | "closeCustomization"
-  | "checkout"
+export type RightPanelEvent =
+  | "openSummary"
+  | "continueToPayment"
+  | "backToSummary"
   | "backToCart"
-  | "process"
   | "showReceipt"
   | "reset";
 
-export function getPOSWorkflowState(
-  event: POSWorkflowEvent,
+export function transitionRightPanel(
+  current: RightPanelState,
+  event: RightPanelEvent,
   hasItems: boolean,
-): POSWorkflowState {
-  if (event === "customize") return "customizingItem";
-  if (event === "checkout") return "checkout";
-  if (event === "process") return "processing";
-  if (event === "showReceipt") return "receipt";
-  if (event === "reset") return "selectingItems";
-  return hasItems ? "reviewingCart" : "selectingItems";
+): RightPanelState {
+  if (event === "showReceipt") return RightPanelState.RECEIPT;
+  if (event === "reset" || event === "backToCart") {
+    return RightPanelState.CART;
+  }
+  if (!hasItems) return RightPanelState.CART;
+  if (event === "openSummary" || event === "backToSummary") {
+    return RightPanelState.SUMMARY;
+  }
+  if (event === "continueToPayment") return RightPanelState.PAYMENT;
+  return current;
+}
+
+export function getOrderSummaryAvailability(
+  cart: POSCartLine[],
+  form: POSForm,
+  menuItems: MenuItem[],
+  occupiedTables: string[],
+  inventoryIssue?: string,
+) {
+  const unavailableItem = cart.find(
+    (entry) =>
+      !menuItems.find((menuItem) => menuItem.id === entry.menuItemId)
+        ?.available,
+  );
+  const selectedTableOccupied =
+    form.orderType === "Dine-in" &&
+    occupiedTables.includes(String(Number(form.tableNumber)));
+  const missingTable =
+    form.orderType === "Dine-in" && !form.tableNumber?.trim();
+  const missingDiscountReference =
+    form.discountType !== "None" && !form.discountReference?.trim();
+  const canContinue =
+    cart.length > 0 &&
+    !unavailableItem &&
+    !inventoryIssue &&
+    !missingTable &&
+    !selectedTableOccupied &&
+    !missingDiscountReference;
+  const disabledReason = !cart.length
+    ? "Add at least one menu item to continue."
+    : unavailableItem
+      ? `${unavailableItem.name} is no longer available. Remove it to continue.`
+      : inventoryIssue
+        ? `${inventoryIssue} Adjust the quantity to continue.`
+        : missingTable
+          ? "Select an available table for this dine-in order."
+          : selectedTableOccupied
+            ? `Table ${form.tableNumber} already has an active order.`
+            : missingDiscountReference
+              ? "Enter the Senior/PWD ID or reference."
+              : undefined;
+
+  return { canContinue, disabledReason };
 }
 
 export function getCashTenderSuggestions(
@@ -149,15 +196,28 @@ export function getMealRecommendations(
 
   let title = "Frequently paired items";
   let preferredCategories: string[];
+  let preferredNames: string[] = [];
   if (hasMainDish && !hasRice) {
     title = "Complete the meal";
     preferredCategories = ["Rice", "Beverages"];
+    preferredNames = [
+      "White Rice",
+      "Fried Rice",
+      "Softdrinks",
+      "Bottled Water",
+    ];
   } else if (hasMainDish && hasRice && !hasBeverage) {
-    title = "Add a drink";
-    preferredCategories = ["Beverages", "Desserts", "Sides"];
-  } else if (hasBeverage && !hasRice) {
-    title = "Add rice";
-    preferredCategories = ["Rice", "Viands", "Vegetables"];
+    title = "Add a drink or dessert";
+    preferredCategories = ["Beverages", "Desserts"];
+    preferredNames = ["Softdrinks", "Bottled Water", "Halo-Halo", "Ice Cream"];
+  } else if (hasBeverage) {
+    title = "Add a side";
+    preferredCategories = ["Sides", "Add-ons", "Desserts"];
+    preferredNames = ["Fries", "Extra Gravy", "Halo-Halo", "Ice Cream"];
+  } else if (hasRice) {
+    title = "Add dessert";
+    preferredCategories = ["Desserts", "Beverages", "Sides"];
+    preferredNames = ["Halo-Halo", "Ice Cream", "Softdrinks"];
   } else {
     preferredCategories = [
       "Desserts",
@@ -169,13 +229,21 @@ export function getMealRecommendations(
   }
 
   const items = preferredCategories.flatMap((category) =>
-    menuItems.filter(
-      (item) =>
-        item.category === category &&
-        item.available &&
-        item.inventoryRemaining !== 0 &&
-        !cartItemIds.has(item.id),
-    ),
+    menuItems
+      .filter(
+        (item) =>
+          item.category === category &&
+          item.available &&
+          item.inventoryRemaining !== 0 &&
+          !cartItemIds.has(item.id),
+      )
+      .sort((left, right) => {
+        const leftRank = preferredNames.indexOf(left.name);
+        const rightRank = preferredNames.indexOf(right.name);
+        return (
+          (leftRank < 0 ? 999 : leftRank) - (rightRank < 0 ? 999 : rightRank)
+        );
+      }),
   );
   return { title, items: items.slice(0, 4) };
 }

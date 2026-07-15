@@ -1,16 +1,14 @@
-import { LayoutGrid, ShoppingBasket } from "lucide-react";
 import { ConfirmationDialog, ErrorBanner } from "../components";
-import { formatMoney } from "../constants";
-import { CartCheckoutBar } from "./CartCheckoutBar";
-import { CheckoutPanel } from "./CheckoutPanel";
-import { MealRecommendations } from "./MealRecommendations";
+import { CartPanel } from "./CartPanel";
 import { MenuGrid } from "./MenuGrid";
 import { ModifierDrawer } from "./ModifierDrawer";
 import { NewOrderDialog } from "./NewOrderDialog";
-import { POSCart } from "./POSCart";
+import { OrderSummaryPanel } from "./OrderSummaryPanel";
+import { PaymentPanel } from "./PaymentPanel";
 import { POSOrderHeader } from "./POSOrderHeader";
 import { POSQuickActions } from "./POSQuickActions";
-import { ReceiptDialog } from "./ReceiptDialog";
+import { ReceiptPanel } from "./ReceiptPanel";
+import { RightPanelState } from "./types";
 import { useWalkInPOSController } from "./useWalkInPOSController";
 
 export function WalkInPOSPage({
@@ -20,13 +18,93 @@ export function WalkInPOSPage({
 }) {
   const pos = useWalkInPOSController(onDirtyChange);
   const confirmation = getConfirmationCopy(pos.pendingAction?.type);
-  const checkoutActive = ["checkout", "processing"].includes(pos.workflowState);
+
+  const rightPanel = pos.selectedItem ? (
+    <ModifierDrawer
+      item={pos.selectedItem}
+      currentQuantity={pos.currentSelectedQuantity}
+      onCancel={pos.closeCustomize}
+      onAdd={pos.addCustomizedItem}
+    />
+  ) : pos.rightPanelState === RightPanelState.SUMMARY ? (
+    <OrderSummaryPanel
+      orderNumber={pos.orderNumber}
+      items={pos.cart}
+      values={pos.values}
+      occupiedTables={pos.occupiedTables}
+      optionsOpen={pos.optionsOpen}
+      subtotal={pos.subtotal}
+      discountAmount={pos.discountAmount}
+      taxAmount={pos.taxAmount}
+      taxEnabled={pos.taxEnabled}
+      total={pos.total}
+      canContinue={pos.canContinueToPayment}
+      disabledReason={pos.summaryDisabledReason}
+      register={pos.register}
+      errors={pos.errors}
+      onOptionsOpenChange={pos.setOptionsOpen}
+      onBack={pos.backToCart}
+      onContinue={pos.continueToPayment}
+    />
+  ) : pos.rightPanelState === RightPanelState.PAYMENT ? (
+    <PaymentPanel
+      orderNumber={pos.orderNumber}
+      subtotal={pos.subtotal}
+      discountAmount={pos.discountAmount}
+      taxAmount={pos.taxAmount}
+      taxEnabled={pos.taxEnabled}
+      total={pos.total}
+      paymentMethod={pos.values.paymentMethod}
+      tendered={pos.tendered}
+      register={pos.register}
+      errors={pos.errors}
+      canPlace={pos.canPlace}
+      disabledReason={pos.disabledReason}
+      shiftOpen={Boolean(pos.activeShift)}
+      loading={pos.loading}
+      confirmRef={pos.confirmOrderRef}
+      submitLabel="Confirm Order"
+      onTenderedChange={pos.setTendered}
+      onBackToSummary={pos.backToSummary}
+      onConfirm={pos.submitOrder}
+    />
+  ) : pos.rightPanelState === RightPanelState.RECEIPT && pos.receiptOrder ? (
+    <ReceiptPanel
+      order={pos.receiptOrder}
+      payment={pos.receiptPayment}
+      transaction={pos.receiptTransaction}
+      printed={pos.receiptPrinted}
+      onPrint={pos.printReceipt}
+      onNewOrder={pos.closeReceipt}
+    />
+  ) : (
+    <CartPanel
+      items={pos.cart}
+      orderNumber={pos.orderNumber}
+      orderType={pos.walkInOrderType}
+      subtotal={pos.subtotal}
+      discountAmount={pos.discountAmount}
+      total={pos.total}
+      itemCount={pos.itemCount}
+      recommendations={pos.mealRecommendations}
+      checkoutRef={pos.checkoutRef}
+      onAdjust={pos.adjust}
+      onQuantityChange={pos.setLineQuantity}
+      onRemove={pos.requestRemove}
+      onDuplicate={pos.duplicate}
+      onNoteChange={pos.note}
+      onReorder={pos.reorder}
+      onClear={() => pos.setPendingAction({ type: "clear" })}
+      onAddRecommendation={pos.addItem}
+      onCheckout={pos.openCheckout}
+    />
+  );
 
   return (
     <div className="tablet-pos relative flex h-full min-h-0 flex-col overflow-hidden border">
       <POSOrderHeader
         orderType={pos.walkInOrderType}
-        busy={pos.loading}
+        busy={pos.loading || pos.rightPanelState === RightPanelState.RECEIPT}
         canCancel={pos.cart.length > 0}
         heldOrders={pos.state.heldOrders}
         onOrderTypeChange={pos.selectOrderType}
@@ -40,43 +118,10 @@ export function WalkInPOSPage({
         </div>
       ) : null}
 
-      <div
-        className="pos-tablet-switch"
-        role="tablist"
-        aria-label="Point of sale view"
-      >
-        <button
-          type="button"
-          role="tab"
-          id="pos-tab-menu"
-          aria-controls="pos-panel-menu"
-          aria-selected={pos.tabletPane === "menu"}
-          onClick={() => pos.setTabletPane("menu")}
-          className={pos.tabletPane === "menu" ? "is-active" : ""}
-        >
-          <LayoutGrid className="h-4 w-4" aria-hidden="true" /> Menu
-        </button>
-        <button
-          type="button"
-          role="tab"
-          id="pos-tab-order"
-          aria-controls="pos-panel-order"
-          aria-selected={pos.tabletPane === "order"}
-          onClick={() => pos.setTabletPane("order")}
-          className={pos.tabletPane === "order" ? "is-active" : ""}
-        >
-          <ShoppingBasket className="h-4 w-4" aria-hidden="true" />
-          Current Cart <span>{pos.itemCount}</span>
-          <strong>{formatMoney(pos.total)}</strong>
-        </button>
-      </div>
-
       <div className="pos-workspace flex min-h-0 flex-1 flex-col lg:flex-row">
         <div
           id="pos-panel-menu"
-          role="tabpanel"
-          aria-labelledby="pos-tab-menu"
-          className={`pos-pane pos-menu-pane min-h-0 min-w-0 flex-1 ${pos.tabletPane === "menu" ? "is-active" : ""}`}
+          className="pos-pane pos-menu-pane min-h-0 min-w-0 flex-1"
         >
           <MenuGrid
             menuItems={pos.state.menuItems}
@@ -99,77 +144,21 @@ export function WalkInPOSPage({
 
         <aside
           id="pos-panel-order"
-          role="tabpanel"
-          aria-labelledby="pos-tab-order"
-          className={`pos-pane pos-order-pane w-full shrink-0 flex-col overflow-hidden border-t lg:flex lg:w-[430px] lg:border-t-0 ${pos.tabletPane === "order" ? "is-active flex" : "hidden"}`}
+          aria-label="Current order workspace"
+          data-state={pos.selectedItem ? "customize" : pos.rightPanelState}
+          className="pos-pane pos-order-pane flex w-full shrink-0 flex-col overflow-hidden border-t lg:w-[430px] lg:border-t-0"
         >
-          {pos.workflowState === "customizingItem" && pos.selectedItem ? (
-            <ModifierDrawer
-              item={pos.selectedItem}
-              currentQuantity={pos.currentSelectedQuantity}
-              onCancel={pos.closeCustomize}
-              onAdd={pos.addCustomizedItem}
-            />
-          ) : checkoutActive ? (
-            <CheckoutPanel
-              orderNumber={pos.orderNumber}
-              items={pos.cart}
-              values={pos.values}
-              occupiedTables={pos.occupiedTables}
-              optionsOpen={pos.optionsOpen}
-              subtotal={pos.subtotal}
-              discountAmount={pos.discountAmount}
-              taxAmount={pos.taxAmount}
-              taxEnabled={pos.taxEnabled}
-              total={pos.total}
-              tendered={pos.tendered}
-              register={pos.register}
-              errors={pos.errors}
-              canPlace={pos.canPlace}
-              disabledReason={pos.disabledReason}
-              shiftOpen={Boolean(pos.activeShift)}
-              loading={pos.loading}
-              confirmRef={pos.confirmOrderRef}
-              onOptionsOpenChange={pos.setOptionsOpen}
-              onTenderedChange={pos.setTendered}
-              onBack={pos.backToCart}
-              onConfirm={pos.submitOrder}
-            />
-          ) : (
-            <>
-              <POSCart
-                items={pos.cart}
-                orderNumber={pos.orderNumber}
-                orderType={pos.walkInOrderType}
-                onAdjust={pos.adjust}
-                onQuantityChange={pos.setLineQuantity}
-                onRemove={pos.requestRemove}
-                onDuplicate={pos.duplicate}
-                onNoteChange={pos.note}
-                onReorder={pos.reorder}
-                onClear={() => pos.setPendingAction({ type: "clear" })}
-              />
-              {pos.cart.length ? (
-                <MealRecommendations
-                  recommendations={pos.mealRecommendations}
-                  onAdd={pos.addItem}
-                />
-              ) : null}
-              <CartCheckoutBar
-                subtotal={pos.subtotal}
-                discountAmount={pos.discountAmount}
-                total={pos.total}
-                itemCount={pos.itemCount}
-                checkoutRef={pos.checkoutRef}
-                onCheckout={pos.openCheckout}
-              />
-            </>
-          )}
+          <div
+            key={pos.selectedItem ? "customize" : pos.rightPanelState}
+            className="pos-panel-stage flex min-h-0 flex-1 flex-col"
+          >
+            {rightPanel}
+          </div>
         </aside>
       </div>
 
       <POSQuickActions
-        busy={pos.loading}
+        busy={pos.loading || pos.rightPanelState === RightPanelState.RECEIPT}
         hasItems={pos.cart.length > 0}
         onAction={pos.runQuickAction}
       />
@@ -180,13 +169,6 @@ export function WalkInPOSPage({
         onOpenChange={pos.setNewOrderOpen}
         onHold={() => void pos.handleHold()}
         onDiscard={pos.resetPOS}
-      />
-      <ReceiptDialog
-        order={pos.receiptOrder}
-        payment={pos.receiptPayment}
-        open={Boolean(pos.receiptOrder)}
-        placed
-        onClose={pos.closeReceipt}
       />
       <ConfirmationDialog
         open={Boolean(pos.pendingAction)}

@@ -2008,13 +2008,16 @@
 }
 
 .tablet-pos .pos-side-drawer,
-.tablet-pos .pos-checkout-panel {
+.tablet-pos .pos-summary-panel,
+.tablet-pos .pos-payment-panel,
+.tablet-pos .pos-receipt-panel {
   background: #171410;
 }
 
 .tablet-pos .pos-side-drawer-header,
 .tablet-pos .pos-side-drawer-footer,
-.tablet-pos .pos-checkout-panel-header {
+.tablet-pos .pos-panel-header,
+.tablet-pos .pos-panel-footer {
   border-color: var(--pos-line);
   background: #1c1814;
 }
@@ -2026,12 +2029,12 @@
 }
 
 .tablet-pos .pos-side-drawer-header button,
-.tablet-pos .pos-checkout-panel-header button {
+.tablet-pos .pos-panel-header button {
   color: var(--pos-muted);
 }
 
 .tablet-pos .pos-side-drawer-header button:hover,
-.tablet-pos .pos-checkout-panel-header button:hover {
+.tablet-pos .pos-panel-header button:hover {
   background: rgba(255, 255, 255, 0.055);
   color: white;
 }
@@ -2063,14 +2066,61 @@
   color: #ffd0a0;
 }
 
-.tablet-pos .pos-checkout-panel-header {
+.tablet-pos .pos-panel-header {
   box-shadow: 0 8px 22px rgba(0, 0, 0, 0.2);
 }
 
-.tablet-pos .pos-checkout-review {
+.tablet-pos .pos-summary-review {
   background:
     radial-gradient(circle at 0 0, rgba(237, 116, 28, 0.06), transparent 36%),
     #171410;
+}
+
+.tablet-pos .pos-summary-totals {
+  border-color: var(--pos-line);
+  color: #a69889;
+  background: #191612;
+}
+
+.tablet-pos .pos-panel-stage {
+  animation: pos-panel-stage-in 180ms ease-out both;
+}
+
+.tablet-pos .pos-secondary-action {
+  border-color: var(--pos-line-soft);
+  background: #24201b;
+  color: #c3b5a6;
+  transition:
+    border-color 150ms ease,
+    background 150ms ease,
+    color 150ms ease,
+    transform 100ms ease;
+}
+
+.tablet-pos .pos-secondary-action:hover:not(:disabled) {
+  border-color: rgba(245, 153, 62, 0.4);
+  background: #2c251f;
+  color: white;
+}
+
+.tablet-pos .pos-secondary-action:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.tablet-pos .pos-receipt-paper {
+  border-color: rgba(239, 157, 76, 0.22);
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.28);
+}
+
+@keyframes pos-panel-stage-in {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .tablet-pos .pos-gcash-confirm {
@@ -2445,6 +2495,31 @@
   .rrj-app-shell[data-role="cashier"] button:hover,
   .rrj-app-shell[data-role="cashier"] .rrj-card-hover:hover {
     transform: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .tablet-pos .pos-tablet-switch {
+    display: none !important;
+  }
+
+  .tablet-pos .pos-workspace {
+    display: grid;
+    grid-template-columns: minmax(20rem, 1fr) minmax(23rem, 26rem);
+    min-width: 43rem;
+    overflow-x: auto;
+  }
+
+  .tablet-pos .pos-pane,
+  .tablet-pos .pos-pane.is-active {
+    display: flex !important;
+    width: auto !important;
+    min-width: 0;
+  }
+
+  .tablet-pos .pos-order-pane {
+    border-top: 0;
+    border-left: 1px solid var(--pos-line);
   }
 }
 

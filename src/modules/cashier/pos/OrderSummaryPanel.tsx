@@ -1,13 +1,11 @@
-import type { RefObject } from "react";
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
-import { ArrowLeft, ReceiptText } from "lucide-react";
+import { ArrowLeft, ArrowRight, ClipboardList } from "lucide-react";
 import { formatMoney } from "../constants";
 import type { POSForm } from "../schemas";
-import { PaymentPanel } from "./PaymentPanel";
 import { POSOrderDetails } from "./POSOrderDetails";
 import type { POSCartLine } from "./types";
 
-export interface CheckoutPanelProps {
+export interface OrderSummaryPanelProps {
   orderNumber: string;
   items: POSCartLine[];
   values: POSForm;
@@ -18,21 +16,16 @@ export interface CheckoutPanelProps {
   taxAmount: number;
   taxEnabled: boolean;
   total: number;
-  tendered: number;
+  canContinue: boolean;
+  disabledReason?: string;
   register: UseFormRegister<POSForm>;
   errors: FieldErrors<POSForm>;
-  canPlace: boolean;
-  disabledReason?: string;
-  shiftOpen: boolean;
-  loading: boolean;
-  confirmRef?: RefObject<HTMLButtonElement | null>;
   onOptionsOpenChange: (open: boolean) => void;
-  onTenderedChange: (amount: number) => void;
   onBack: () => void;
-  onConfirm: () => void;
+  onContinue: () => void;
 }
 
-export function CheckoutPanel({
+export function OrderSummaryPanel({
   orderNumber,
   items,
   values,
@@ -43,50 +36,43 @@ export function CheckoutPanel({
   taxAmount,
   taxEnabled,
   total,
-  tendered,
+  canContinue,
+  disabledReason,
   register,
   errors,
-  canPlace,
-  disabledReason,
-  shiftOpen,
-  loading,
-  confirmRef,
   onOptionsOpenChange,
-  onTenderedChange,
   onBack,
-  onConfirm,
-}: CheckoutPanelProps) {
+  onContinue,
+}: OrderSummaryPanelProps) {
+  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+
   return (
-    <section className="pos-checkout-panel flex min-h-0 flex-1 flex-col">
-      <header className="pos-checkout-panel-header sticky top-0 z-10 flex items-center gap-3 border-b p-3">
+    <section className="pos-summary-panel flex min-h-0 flex-1 flex-col">
+      <header className="pos-panel-header flex items-center gap-3 border-b p-3">
         <button
           type="button"
-          disabled={loading}
           onClick={onBack}
-          aria-label="Back to cart"
+          aria-label="Back to current cart"
           className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
         </button>
         <div className="min-w-0 flex-1">
           <p className="text-[9px] font-black uppercase tracking-wider text-[var(--pos-orange-soft)]">
-            Checkout
+            Order Summary · Step 1 of 2
           </p>
           <h2 className="truncate text-sm font-black">{orderNumber}</h2>
         </div>
-        <ReceiptText
-          className="h-5 w-5 text-[var(--pos-muted)]"
-          aria-hidden="true"
-        />
+        <ClipboardList className="h-5 w-5 text-[var(--pos-muted)]" />
       </header>
 
       <div className="min-h-0 flex-1 overflow-y-auto">
-        <section className="pos-checkout-review border-b border-[var(--pos-line)] p-4">
-          <div className="mb-3 flex items-center justify-between gap-3">
+        <section className="pos-summary-review border-b p-4">
+          <div className="mb-3 flex items-end justify-between gap-3">
             <div>
-              <p className="text-xs font-black">1. Order Review</p>
+              <p className="text-xs font-black">Order review</p>
               <p className="mt-1 text-[9px] text-[var(--pos-muted)]">
-                {items.reduce((sum, item) => sum + item.quantity, 0)} items ·{" "}
+                {itemCount} {itemCount === 1 ? "item" : "items"} ·{" "}
                 {values.orderType}
               </p>
             </div>
@@ -118,9 +104,6 @@ export function CheckoutPanel({
           </div>
         </section>
 
-        <div className="pos-checkout-section-heading px-4 pt-4">
-          <p className="text-xs font-black">2. Order Information</p>
-        </div>
         <POSOrderDetails
           orderType={values.orderType === "Take-out" ? "Take-out" : "Dine-in"}
           discountType={values.discountType}
@@ -131,30 +114,56 @@ export function CheckoutPanel({
           errors={errors}
         />
 
-        <div className="pos-checkout-section-heading border-t border-[var(--pos-line)] px-4 pt-4">
-          <p className="text-xs font-black">3. Payment</p>
-        </div>
-        <PaymentPanel
-          subtotal={subtotal}
-          discountAmount={discountAmount}
-          taxAmount={taxAmount}
-          taxEnabled={taxEnabled}
-          total={total}
-          paymentMethod={values.paymentMethod}
-          tendered={tendered}
-          register={register}
-          errors={errors}
-          canPlace={canPlace}
-          disabledReason={disabledReason}
-          shiftOpen={shiftOpen}
-          loading={loading}
-          confirmRef={confirmRef}
-          submitLabel="Confirm Order"
-          onTenderedChange={onTenderedChange}
-          onBack={onBack}
-          onConfirm={onConfirm}
-        />
+        <section className="pos-summary-totals space-y-1.5 border-t px-4 py-3 text-[11px]">
+          <div className="flex justify-between">
+            <span>Subtotal</span>
+            <span>{formatMoney(subtotal)}</span>
+          </div>
+          <div className="pos-discount-row flex justify-between font-semibold">
+            <span>Discount</span>
+            <span>−{formatMoney(discountAmount)}</span>
+          </div>
+          {taxEnabled ? (
+            <div className="flex justify-between">
+              <span>Tax</span>
+              <span>{formatMoney(taxAmount)}</span>
+            </div>
+          ) : null}
+          <div className="pos-total-row flex items-end justify-between border-t pt-2">
+            <span className="text-sm font-black">Running Total</span>
+            <span className="text-xl font-black">{formatMoney(total)}</span>
+          </div>
+        </section>
       </div>
+
+      <footer className="pos-panel-footer border-t p-3">
+        {disabledReason ? (
+          <p
+            className="pos-payment-message mb-2 rounded-lg px-3 py-2 text-[10px] font-bold"
+            role="status"
+          >
+            {disabledReason}
+          </p>
+        ) : null}
+        <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-2">
+          <button
+            type="button"
+            onClick={onBack}
+            className="pos-secondary-action flex min-h-14 items-center gap-2 rounded-xl border px-4 text-xs font-black"
+          >
+            <ArrowLeft className="h-4 w-4" /> Cart
+          </button>
+          <button
+            type="button"
+            disabled={!canContinue}
+            onClick={onContinue}
+            className="pos-place-order flex min-h-14 items-center rounded-xl px-4 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-35"
+          >
+            Continue to Payment
+            <ArrowRight className="ml-auto h-5 w-5" />
+          </button>
+        </div>
+      </footer>
     </section>
   );
 }

@@ -6,6 +6,7 @@ import {
   ArrowRight,
   Banknote,
   CheckCircle2,
+  CreditCard,
   Loader2,
   Smartphone,
 } from "lucide-react";
@@ -16,6 +17,7 @@ import { NumericKeypad } from "./NumericKeypad";
 import { getCashTenderSuggestions } from "./posOperations";
 
 export function PaymentPanel({
+  orderNumber,
   subtotal,
   discountAmount,
   taxAmount,
@@ -32,9 +34,10 @@ export function PaymentPanel({
   confirmRef,
   submitLabel = "Place Order",
   onTenderedChange,
-  onBack,
+  onBackToSummary,
   onConfirm,
 }: {
+  orderNumber: string;
   subtotal: number;
   discountAmount: number;
   taxAmount: number;
@@ -51,7 +54,7 @@ export function PaymentPanel({
   confirmRef?: RefObject<HTMLButtonElement | null>;
   submitLabel?: string;
   onTenderedChange: (amount: number) => void;
-  onBack: () => void;
+  onBackToSummary: () => void;
   onConfirm: () => void;
 }) {
   const change = Math.max(0, tendered - total);
@@ -61,160 +64,184 @@ export function PaymentPanel({
   );
 
   return (
-    <section className="pos-payment-panel shrink-0 border-t">
-      <div className="pos-payment-summary space-y-1.5 px-4 py-3 text-[11px]">
-        <div className="flex justify-between">
-          <span>Running subtotal</span>
-          <span>{formatMoney(subtotal)}</span>
-        </div>
-        <div className="pos-discount-row flex justify-between font-semibold">
-          <span>Discount</span>
-          <span>−{formatMoney(discountAmount)}</span>
-        </div>
-        {taxEnabled && (
-          <div className="flex justify-between">
-            <span>Tax</span>
-            <span>{formatMoney(taxAmount)}</span>
-          </div>
-        )}
-        <div className="pos-total-row flex items-end justify-between border-t pt-2">
-          <span className="text-sm font-black">Grand Total</span>
-          <span className="text-xl font-black">{formatMoney(total)}</span>
-        </div>
-      </div>
-
-      <div className="pos-payment-method border-t px-4 py-3">
-        <Label>Payment method</Label>
-        <div
-          className="grid grid-cols-2 gap-2"
-          role="radiogroup"
-          aria-label="Payment method"
-        >
-          {(["Cash", "GCash"] as const).map((method) => (
-            <label
-              key={method}
-              className={`pos-payment-option flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-lg border text-xs font-black transition-all has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-amber-400 ${paymentMethod === method ? "is-active" : ""}`}
-              data-method={method.toLowerCase()}
-            >
-              <input
-                type="radio"
-                value={method}
-                className="sr-only"
-                {...register("paymentMethod")}
-              />
-              {method === "Cash" ? (
-                <Banknote className="h-4 w-4" />
-              ) : (
-                <Smartphone className="h-4 w-4" />
-              )}
-              {method}
-            </label>
-          ))}
-        </div>
-      </div>
-
-      {paymentMethod === "Cash" ? (
-        <div className="pos-tendered border-t px-4 py-3">
-          <div>
-            <div className="flex items-center justify-between gap-3">
-              <Label htmlFor="amount-tendered">Cash tendered</Label>
-              <span className="text-[9px] font-bold text-muted-foreground">
-                Touch keypad or type
-              </span>
-            </div>
-            <div>
-              <CashierInput
-                id="amount-tendered"
-                type="number"
-                inputMode="decimal"
-                min="0"
-                step="0.01"
-                placeholder="0.00"
-                aria-invalid={
-                  Boolean(errors.amountTendered) ||
-                  (tendered > 0 && tendered < total)
-                }
-                {...register("amountTendered", { valueAsNumber: true })}
-              />
-            </div>
-          </div>
-          <FieldError>{errors.amountTendered?.message}</FieldError>
-          {tendered > 0 && tendered < total && (
-            <FieldError>Cash tendered is insufficient.</FieldError>
-          )}
-          <div className="pos-cash-suggestions mt-2 grid grid-cols-4 gap-1.5">
-            {cashSuggestions.map(({ label, amount }) => (
-              <button
-                key={label}
-                type="button"
-                onClick={() => onTenderedChange(amount)}
-                className="min-h-11 rounded-lg border px-1.5 py-1 text-[9px] font-black"
-              >
-                <span className="block truncate">{label}</span>
-                <strong className="mt-0.5 block text-[10px]">
-                  {formatCompactMoney(amount)}
-                </strong>
-              </button>
-            ))}
-          </div>
-          <NumericKeypad value={tendered} onChange={onTenderedChange} />
-          <div
-            className={`pos-change mt-2 flex justify-between rounded-lg border px-3 py-2 text-[11px] font-black ${change > 0 ? "has-change" : ""}`}
-          >
-            <span>Change</span>
-            <span>{formatMoney(change)}</span>
-          </div>
-        </div>
-      ) : (
-        <div className="pos-gcash border-t px-4 py-3">
-          <Label htmlFor="gcash-reference">GCash reference number</Label>
-          <CashierInput
-            id="gcash-reference"
-            placeholder="Enter in-person payment reference"
-            aria-invalid={Boolean(errors.gcashReference)}
-            {...register("gcashReference")}
-          />
-          <FieldError>{errors.gcashReference?.message}</FieldError>
-          <label className="pos-gcash-confirm mt-3 flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border px-3 text-[10px] font-bold">
-            <input
-              type="checkbox"
-              className="h-4 w-4 accent-orange-500"
-              {...register("gcashConfirmed")}
-            />
-            <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-            Cashier confirms the GCash payment was received
-          </label>
-          <FieldError>{errors.gcashConfirmed?.message}</FieldError>
-        </div>
-      )}
-
-      {!shiftOpen && (
-        <p
-          className="pos-payment-message mx-4 rounded-lg px-3 py-2 text-[10px] font-bold"
-          role="status"
-          aria-live="polite"
-        >
-          Start a shift before placing a new order.
-        </p>
-      )}
-      {shiftOpen && disabledReason && (
-        <p
-          className="pos-payment-message mx-4 rounded-lg px-3 py-2 text-[10px] font-bold"
-          role="status"
-          aria-live="polite"
-        >
-          {disabledReason}
-        </p>
-      )}
-
-      <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-2 p-4">
+    <section className="pos-payment-panel flex min-h-0 flex-1 flex-col">
+      <header className="pos-panel-header flex shrink-0 items-center gap-3 border-b p-3">
         <button
           type="button"
           disabled={loading}
-          onClick={onBack}
+          onClick={onBackToSummary}
+          aria-label="Back to order summary"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
+        >
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+        </button>
+        <div className="min-w-0 flex-1">
+          <p className="text-[9px] font-black uppercase tracking-wider text-[var(--pos-orange-soft)]">
+            Payment · Step 2 of 2
+          </p>
+          <h2 className="truncate text-sm font-black">{orderNumber}</h2>
+        </div>
+        <CreditCard
+          className="h-5 w-5 text-[var(--pos-muted)]"
+          aria-hidden="true"
+        />
+      </header>
+
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        <div className="pos-payment-summary space-y-1.5 px-4 py-3 text-[11px]">
+          <div className="flex justify-between">
+            <span>Running subtotal</span>
+            <span>{formatMoney(subtotal)}</span>
+          </div>
+          <div className="pos-discount-row flex justify-between font-semibold">
+            <span>Discount</span>
+            <span>−{formatMoney(discountAmount)}</span>
+          </div>
+          {taxEnabled && (
+            <div className="flex justify-between">
+              <span>Tax</span>
+              <span>{formatMoney(taxAmount)}</span>
+            </div>
+          )}
+          <div className="pos-total-row flex items-end justify-between border-t pt-2">
+            <span className="text-sm font-black">Grand Total</span>
+            <span className="text-xl font-black">{formatMoney(total)}</span>
+          </div>
+        </div>
+
+        <div className="pos-payment-method border-t px-4 py-3">
+          <Label>Payment method</Label>
+          <div
+            className="grid grid-cols-2 gap-2"
+            role="radiogroup"
+            aria-label="Payment method"
+          >
+            {(["Cash", "GCash"] as const).map((method) => (
+              <label
+                key={method}
+                className={`pos-payment-option flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-lg border text-xs font-black transition-all has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-amber-400 ${paymentMethod === method ? "is-active" : ""}`}
+                data-method={method.toLowerCase()}
+              >
+                <input
+                  type="radio"
+                  value={method}
+                  className="sr-only"
+                  {...register("paymentMethod")}
+                />
+                {method === "Cash" ? (
+                  <Banknote className="h-4 w-4" />
+                ) : (
+                  <Smartphone className="h-4 w-4" />
+                )}
+                {method}
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {paymentMethod === "Cash" ? (
+          <div className="pos-tendered border-t px-4 py-3">
+            <div>
+              <div className="flex items-center justify-between gap-3">
+                <Label htmlFor="amount-tendered">Cash tendered</Label>
+                <span className="text-[9px] font-bold text-muted-foreground">
+                  Touch keypad or type
+                </span>
+              </div>
+              <div>
+                <CashierInput
+                  id="amount-tendered"
+                  type="number"
+                  inputMode="decimal"
+                  min="0"
+                  step="0.01"
+                  placeholder="0.00"
+                  aria-invalid={
+                    Boolean(errors.amountTendered) ||
+                    (tendered > 0 && tendered < total)
+                  }
+                  {...register("amountTendered", { valueAsNumber: true })}
+                />
+              </div>
+            </div>
+            <FieldError>{errors.amountTendered?.message}</FieldError>
+            {tendered > 0 && tendered < total && (
+              <FieldError>Cash tendered is insufficient.</FieldError>
+            )}
+            <div className="pos-cash-suggestions mt-2 grid grid-cols-4 gap-1.5">
+              {cashSuggestions.map(({ label, amount }) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => onTenderedChange(amount)}
+                  className="min-h-11 rounded-lg border px-1.5 py-1 text-[9px] font-black"
+                >
+                  <span className="block truncate">{label}</span>
+                  <strong className="mt-0.5 block text-[10px]">
+                    {formatCompactMoney(amount)}
+                  </strong>
+                </button>
+              ))}
+            </div>
+            <NumericKeypad value={tendered} onChange={onTenderedChange} />
+            <div
+              className={`pos-change mt-2 flex justify-between rounded-lg border px-3 py-2 text-[11px] font-black ${change > 0 ? "has-change" : ""}`}
+            >
+              <span>Change</span>
+              <span>{formatMoney(change)}</span>
+            </div>
+          </div>
+        ) : (
+          <div className="pos-gcash border-t px-4 py-3">
+            <Label htmlFor="gcash-reference">GCash reference number</Label>
+            <CashierInput
+              id="gcash-reference"
+              placeholder="Enter in-person payment reference"
+              aria-invalid={Boolean(errors.gcashReference)}
+              {...register("gcashReference")}
+            />
+            <FieldError>{errors.gcashReference?.message}</FieldError>
+            <label className="pos-gcash-confirm mt-3 flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border px-3 text-[10px] font-bold">
+              <input
+                type="checkbox"
+                className="h-4 w-4 accent-orange-500"
+                {...register("gcashConfirmed")}
+              />
+              <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+              Cashier confirms the GCash payment was received
+            </label>
+            <FieldError>{errors.gcashConfirmed?.message}</FieldError>
+          </div>
+        )}
+
+        {!shiftOpen && (
+          <p
+            className="pos-payment-message mx-4 rounded-lg px-3 py-2 text-[10px] font-bold"
+            role="status"
+            aria-live="polite"
+          >
+            Start a shift before placing a new order.
+          </p>
+        )}
+        {shiftOpen && disabledReason && (
+          <p
+            className="pos-payment-message mx-4 rounded-lg px-3 py-2 text-[10px] font-bold"
+            role="status"
+            aria-live="polite"
+          >
+            {disabledReason}
+          </p>
+        )}
+      </div>
+
+      <footer className="pos-panel-footer grid shrink-0 grid-cols-[auto_minmax(0,1fr)] gap-2 border-t p-3">
+        <button
+          type="button"
+          disabled={loading}
+          onClick={onBackToSummary}
           className="pos-receipt-button flex min-h-14 items-center justify-center gap-2 rounded-xl border px-4 text-xs font-black disabled:cursor-not-allowed disabled:opacity-30"
         >
-          <ArrowLeft className="h-4 w-4" /> Back to Cart
+          <ArrowLeft className="h-4 w-4" /> Summary
         </button>
         <button
           ref={confirmRef}
@@ -235,9 +262,9 @@ export function PaymentPanel({
           <ArrowRight className="ml-2 h-5 w-5" />
         </button>
         <p className="col-span-2 text-center text-[9px] font-bold text-muted-foreground">
-          Esc Back to Cart · Ctrl+Enter Confirm
+          Esc Back to Summary · Ctrl+Enter Confirm
         </p>
-      </div>
+      </footer>
     </section>
   );
 }

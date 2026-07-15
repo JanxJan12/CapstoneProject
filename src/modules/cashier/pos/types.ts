@@ -6,10 +6,9 @@ export interface POSCartLine extends Omit<OrderItem, "id"> {
 
 export type WalkInOrderType = Extract<OrderType, "Dine-in" | "Take-out">;
 
-export type POSWorkflowState =
-  | "selectingItems"
-  | "customizingItem"
-  | "reviewingCart"
-  | "checkout"
-  | "processing"
-  | "receipt";
+export enum RightPanelState {
+  CART = "cart",
+  SUMMARY = "summary",
+  PAYMENT = "payment",
+  RECEIPT = "receipt",
+}
