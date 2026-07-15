@@ -10,11 +10,13 @@ import {
 import { formatMoney } from "../constants";
 import type { Order, Payment } from "../types";
 import { CashierButton, CashierDialogContent } from "../components/CashierUI";
+import { getPaymentVerificationIssues } from "./paymentVerification";
 
 export function VerifyPaymentDialog({
   open,
   order,
   payment,
+  payments,
   loading,
   onOpenChange,
   onConfirm,
@@ -22,13 +24,17 @@ export function VerifyPaymentDialog({
   open: boolean;
   order?: Order;
   payment?: Payment;
+  payments: Payment[];
   loading: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: (override: boolean) => Promise<void>;
 }) {
   const [override, setOverride] = useState(false);
   if (!order || !payment) return null;
-  const mismatch = payment.amount !== payment.submittedAmount;
+  const issues = getPaymentVerificationIssues(payment, order, payments);
+  const mismatch = issues.length > 0;
+  const difference = payment.submittedAmount - order.total;
+  const amountMismatch = Math.abs(difference) >= 0.01;
   return (
     <Dialog
       open={open}
@@ -55,9 +61,16 @@ export function VerifyPaymentDialog({
             </strong>
           </div>
           <div className="mt-2 flex justify-between text-xs text-muted-foreground">
-            <span>Submitted amount</span>
-            <strong className={mismatch ? "text-red-700" : "text-foreground"}>
+            <span>Proof amount</span>
+            <strong className={amountMismatch ? "text-red-700" : "text-foreground"}>
               {formatMoney(payment.submittedAmount)}
+            </strong>
+          </div>
+          <div className="mt-2 flex justify-between border-t border-border pt-2 text-xs text-muted-foreground">
+            <span>Difference</span>
+            <strong className={difference ? "text-red-700" : "text-emerald-700"}>
+              {difference > 0 ? "+" : difference < 0 ? "−" : ""}
+              {formatMoney(Math.abs(difference))}
             </strong>
           </div>
         </div>
@@ -72,11 +85,10 @@ export function VerifyPaymentDialog({
             <span>
               <span className="flex items-center gap-1 font-black">
                 <AlertTriangle className="h-4 w-4" />
-                Approve amount override
+                Approve verification override
               </span>
               <span className="mt-1 block font-medium">
-                I confirmed the discrepancy and take responsibility for
-                releasing this order.
+                I reviewed {issues.map((issue) => issue.label.toLowerCase()).join(", ")} and take responsibility for releasing this order.
               </span>
             </span>
           </label>

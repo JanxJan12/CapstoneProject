@@ -44,9 +44,9 @@ interface CashierStoreValue {
   isHydrating: boolean;
   activeShift: CashierState["shifts"][number] | undefined;
   shiftTotals: ShiftTotals;
-  verifyPayment: (orderId: string, overrideMismatch: boolean) => Promise<void>;
+  verifyPayment: (paymentId: string, overrideMismatch: boolean) => Promise<void>;
   rejectPayment: (
-    orderId: string,
+    paymentId: string,
     reason: string,
     notes?: string,
   ) => Promise<void>;
@@ -118,17 +118,17 @@ export function CashierProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const verifyPayment = useCallback(
-    async (orderId: string, overrideMismatch: boolean) => {
+    async (paymentId: string, overrideMismatch: boolean) => {
       await pause();
-      commit(verifyOnlinePayment(stateRef.current, orderId, overrideMismatch));
+      commit(verifyOnlinePayment(stateRef.current, paymentId, overrideMismatch));
     },
     [commit],
   );
 
   const rejectPayment = useCallback(
-    async (orderId: string, reason: string, notes?: string) => {
+    async (paymentId: string, reason: string, notes?: string) => {
       await pause(500);
-      commit(rejectOnlinePayment(stateRef.current, orderId, reason, notes));
+      commit(rejectOnlinePayment(stateRef.current, paymentId, reason, notes));
     },
     [commit],
   );

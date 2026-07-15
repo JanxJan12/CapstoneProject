@@ -115,6 +115,10 @@ export interface Payment {
   status: PaymentStatus;
   referenceNumber?: string;
   proofLabel?: string;
+  proofUrl?: string;
+  senderName?: string;
+  receiverName?: string;
+  uploadedBy?: string;
   uploadedAt: string;
   verifiedBy?: string;
   verifiedAt?: string;

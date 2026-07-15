@@ -51,11 +51,11 @@ export const CANCELLABLE_STATUSES: OrderStatus[] = [
 ];
 
 export const PAYMENT_REJECTION_REASONS = [
-  "Amount does not match",
-  "Unreadable proof",
-  "Duplicate proof",
-  "Invalid reference number",
-  "Wrong recipient",
+  "Wrong Amount",
+  "Unreadable Proof",
+  "Duplicate Payment",
+  "Fake Screenshot",
+  "Reference Not Found",
   "Other",
 ] as const;
 

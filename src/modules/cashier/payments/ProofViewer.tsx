@@ -1,6 +1,10 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  Download,
+  ExternalLink,
+  Focus,
   Maximize2,
+  Move,
   RotateCcw,
   RotateCw,
   ZoomIn,
@@ -10,26 +14,93 @@ import {
 import { formatDateTime, formatMoney } from "../constants";
 import type { Payment } from "../types";
 import { CashierIconButton } from "../components/CashierUI";
+import { EXPECTED_PAYMENT_RECEIVER } from "./paymentVerification";
+
+const PROOF_WIDTH = 238;
+const PROOF_HEIGHT = 398;
 
 export function ProofViewer({ payment }: { payment: Payment }) {
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
   const [fullscreen, setFullscreen] = useState(false);
-  const reset = () => {
+  const viewerRef = useRef<HTMLDivElement>(null);
+  const pointer = useRef<
+    | { pointerId: number; x: number; y: number; panX: number; panY: number }
+    | undefined
+  >(undefined);
+
+  const reset = useCallback(() => {
     setZoom(1);
     setRotation(0);
-  };
+    setPan({ x: 0, y: 0 });
+  }, []);
+
+  const fitToScreen = useCallback(() => {
+    const viewer = viewerRef.current;
+    if (!viewer) return;
+    const sideways = Math.abs(Math.round(rotation / 90)) % 2 === 1;
+    const proofWidth = sideways ? PROOF_HEIGHT : PROOF_WIDTH;
+    const proofHeight = sideways ? PROOF_WIDTH : PROOF_HEIGHT;
+    const fittedZoom = Math.min(
+      2.5,
+      Math.max(
+        0.5,
+        Math.min(
+          (viewer.clientWidth - 32) / proofWidth,
+          (viewer.clientHeight - 32) / proofHeight,
+        ),
+      ),
+    );
+    setZoom(Number(fittedZoom.toFixed(2)));
+    setPan({ x: 0, y: 0 });
+  }, [rotation]);
+
   useEffect(() => {
     reset();
-  }, [payment.id]);
+  }, [payment.id, reset]);
   useEffect(() => {
     if (!fullscreen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") setFullscreen(false);
     };
     window.addEventListener("keydown", closeOnEscape);
-    return () => window.removeEventListener("keydown", closeOnEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", closeOnEscape);
+    };
   }, [fullscreen]);
+
+  const proofUrl = () => payment.proofUrl ?? renderProofPng(payment);
+  const downloadProof = () => {
+    const link = document.createElement("a");
+    link.href = proofUrl();
+    link.download = `${payment.orderId}-${payment.id}-payment-proof.png`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  };
+  const openOriginal = () => {
+    if (payment.proofUrl) {
+      const opened = window.open(payment.proofUrl, "_blank");
+      if (opened) opened.opener = null;
+      return;
+    }
+    const opened = window.open("", "_blank");
+    if (!opened) return;
+    opened.opener = null;
+    opened.document.title = `${payment.orderId} payment proof`;
+    opened.document.body.style.cssText =
+      "margin:0;min-height:100vh;display:grid;place-items:center;background:#17110e;padding:24px;box-sizing:border-box";
+    const image = opened.document.createElement("img");
+    image.src = proofUrl();
+    image.alt = `${payment.orderId} original payment proof`;
+    image.style.cssText = "max-width:100%;max-height:calc(100vh - 48px);object-fit:contain";
+    opened.document.body.appendChild(image);
+  };
+
   return (
     <div
       role={fullscreen ? "dialog" : undefined}
@@ -46,23 +117,31 @@ export function ProofViewer({ payment }: { payment: Payment }) {
           <p className="text-xs font-black">Proof of payment</p>
           <p className="text-[10px] text-white/55">{payment.proofLabel}</p>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex flex-wrap items-center justify-end gap-1">
           <Tool
             label="Zoom out"
             icon={ZoomOut}
-            onClick={() => setZoom((value) => Math.max(0.6, value - 0.2))}
+            onClick={() => setZoom((value) => Math.max(0.5, value - 0.2))}
           />
           <Tool
             label="Zoom in"
             icon={ZoomIn}
-            onClick={() => setZoom((value) => Math.min(2.2, value + 0.2))}
+            onClick={() => setZoom((value) => Math.min(3, value + 0.2))}
           />
           <Tool
-            label="Rotate"
+            label="Rotate left"
+            icon={RotateCcw}
+            onClick={() => setRotation((value) => value - 90)}
+          />
+          <Tool
+            label="Rotate right"
             icon={RotateCw}
             onClick={() => setRotation((value) => value + 90)}
           />
-          <Tool label="Reset view" icon={RotateCcw} onClick={reset} />
+          <Tool label="Fit to screen" icon={Focus} onClick={fitToScreen} />
+          <Tool label="Reset view" icon={Move} onClick={reset} />
+          <Tool label="Download proof" icon={Download} onClick={downloadProof} />
+          <Tool label="Open original" icon={ExternalLink} onClick={openOriginal} />
           <Tool
             label={fullscreen ? "Exit fullscreen" : "Fullscreen"}
             icon={fullscreen ? X : Maximize2}
@@ -71,18 +150,51 @@ export function ProofViewer({ payment }: { payment: Payment }) {
         </div>
       </div>
       <div
-        className={`flex items-center justify-center overflow-auto rounded-xl bg-black/30 ring-1 ring-white/5 ${fullscreen ? "flex-1" : "h-[330px]"}`}
+        ref={viewerRef}
+        className={`relative flex select-none items-center justify-center overflow-hidden rounded-xl bg-black/30 ring-1 ring-white/5 ${fullscreen ? "flex-1" : "h-[330px]"} ${pointer.current ? "cursor-grabbing" : "cursor-grab"}`}
+        onWheel={(event) => {
+          event.preventDefault();
+          setZoom((value) =>
+            Math.min(3, Math.max(0.5, value + (event.deltaY < 0 ? 0.1 : -0.1))),
+          );
+        }}
+        onPointerDown={(event) => {
+          pointer.current = {
+            pointerId: event.pointerId,
+            x: event.clientX,
+            y: event.clientY,
+            panX: pan.x,
+            panY: pan.y,
+          };
+          event.currentTarget.setPointerCapture(event.pointerId);
+        }}
+        onPointerMove={(event) => {
+          if (pointer.current?.pointerId !== event.pointerId) return;
+          setPan({
+            x: pointer.current.panX + event.clientX - pointer.current.x,
+            y: pointer.current.panY + event.clientY - pointer.current.y,
+          });
+        }}
+        onPointerUp={(event) => {
+          if (pointer.current?.pointerId === event.pointerId)
+            pointer.current = undefined;
+        }}
+        onPointerCancel={() => {
+          pointer.current = undefined;
+        }}
+        style={{ touchAction: "none" }}
+        aria-label="Payment proof canvas. Drag to pan and use the toolbar to inspect the proof."
       >
         <div
-          className="w-[238px] shrink-0 overflow-hidden rounded-[28px] border-[7px] border-zinc-800 bg-[#eff8ff] shadow-2xl transition-transform duration-200"
-          style={{ transform: `scale(${zoom}) rotate(${rotation}deg)` }}
-          aria-label={`GCash proof showing ${formatMoney(payment.submittedAmount)} with reference ${payment.referenceNumber}`}
+          className="w-[238px] shrink-0 overflow-hidden rounded-[28px] border-[7px] border-zinc-800 bg-[#eff8ff] shadow-2xl transition-transform duration-150"
+          style={{
+            transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom}) rotate(${rotation}deg)`,
+          }}
+          aria-label={`GCash proof showing ${formatMoney(payment.submittedAmount)} with reference ${payment.referenceNumber ?? "not found"}`}
         >
           <div className="bg-[#0877e6] px-4 pb-5 pt-3 text-white">
             <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-white/60" />
-            <p className="text-center text-xs font-black tracking-wide">
-              GCash
-            </p>
+            <p className="text-center text-xs font-black tracking-wide">GCash</p>
           </div>
           <div className="p-5 text-center">
             <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-2xl font-black text-emerald-600">
@@ -95,17 +207,19 @@ export function ProofViewer({ payment }: { payment: Payment }) {
               {formatMoney(payment.submittedAmount)}
             </p>
             <p className="mt-4 rounded-lg bg-white p-3 text-left text-[9px] leading-5 text-zinc-600 shadow-sm">
-              To: <strong>RRJ Food-House</strong>
+              From: <strong>{payment.senderName ?? "GCash customer"}</strong>
               <br />
-              Reference: <strong>{payment.referenceNumber}</strong>
+              To: <strong>{payment.receiverName ?? EXPECTED_PAYMENT_RECEIVER}</strong>
+              <br />
+              Reference: <strong>{payment.referenceNumber ?? "Not found"}</strong>
               <br />
               Date: <strong>{formatDateTime(payment.uploadedAt)}</strong>
             </p>
-            <p className="mt-5 text-[8px] text-zinc-400">
-              This prototype proof is for cashier verification.
-            </p>
           </div>
         </div>
+        <span className="pointer-events-none absolute bottom-3 rounded-full bg-black/55 px-3 py-1 text-[9px] font-bold text-white/75">
+          Drag to pan · {Math.round(zoom * 100)}%
+        </span>
       </div>
     </div>
   );
@@ -128,4 +242,72 @@ function Tool({
       className="border-white/10 bg-white text-zinc-700 hover:bg-zinc-100"
     />
   );
+}
+
+function renderProofPng(payment: Payment) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 900;
+  canvas.height = 1400;
+  const context = canvas.getContext("2d");
+  if (!context) return "";
+
+  context.fillStyle = "#eff8ff";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.fillStyle = "#0877e6";
+  context.fillRect(0, 0, canvas.width, 250);
+  context.fillStyle = "#ffffff";
+  context.textAlign = "center";
+  context.font = "700 58px Arial";
+  context.fillText("GCash", 450, 145);
+  context.fillStyle = "#059669";
+  context.beginPath();
+  context.arc(450, 390, 82, 0, Math.PI * 2);
+  context.fill();
+  context.fillStyle = "#ffffff";
+  context.font = "700 70px Arial";
+  context.fillText("✓", 450, 415);
+  context.fillStyle = "#52525b";
+  context.font = "700 30px Arial";
+  context.fillText("PAYMENT SENT", 450, 535);
+  context.fillStyle = "#18181b";
+  context.font = "700 66px Arial";
+  context.fillText(formatMoney(payment.submittedAmount), 450, 630);
+
+  context.fillStyle = "#ffffff";
+  roundRect(context, 100, 720, 700, 430, 28);
+  context.fillStyle = "#52525b";
+  context.textAlign = "left";
+  context.font = "600 29px Arial";
+  const rows = [
+    ["From", payment.senderName ?? "GCash customer"],
+    ["To", payment.receiverName ?? EXPECTED_PAYMENT_RECEIVER],
+    ["Reference", payment.referenceNumber ?? "Not found"],
+    ["Date", formatDateTime(payment.uploadedAt)],
+  ];
+  rows.forEach(([label, value], index) => {
+    context.fillStyle = "#71717a";
+    context.fillText(label, 145, 805 + index * 88);
+    context.fillStyle = "#18181b";
+    context.font = "700 29px Arial";
+    context.fillText(value, 330, 805 + index * 88);
+    context.font = "600 29px Arial";
+  });
+  context.fillStyle = "#a1a1aa";
+  context.textAlign = "center";
+  context.font = "500 24px Arial";
+  context.fillText(payment.proofLabel ?? "Payment proof", 450, 1280);
+  return canvas.toDataURL("image/png");
+}
+
+function roundRect(
+  context: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number,
+) {
+  context.beginPath();
+  context.roundRect(x, y, width, height, radius);
+  context.fill();
 }

@@ -1,12 +1,15 @@
 import {
   AlertTriangle,
+  CalendarDays,
   Clock3,
   CreditCard,
-  Phone,
+  Hash,
   ReceiptText,
+  ShieldCheck,
+  Upload,
   UserRound,
 } from "lucide-react";
-import { formatDateTime, formatMoney } from "../constants";
+import { formatMoney } from "../constants";
 import type { Order, Payment } from "../types";
 import {
   CashierButton,
@@ -14,16 +17,19 @@ import {
   EmptyState,
 } from "../components/CashierUI";
 import { ProofViewer } from "./ProofViewer";
+import { getPaymentVerificationIssues } from "./paymentVerification";
 
 export function PaymentDetails({
   payment,
   order,
+  payments,
   shiftOpen,
   onVerify,
   onReject,
 }: {
   payment?: Payment;
   order?: Order;
+  payments: Payment[];
   shiftOpen: boolean;
   onVerify: () => void;
   onReject: () => void;
@@ -37,7 +43,13 @@ export function PaymentDetails({
         description="Choose a pending GCash submission from the queue to review its proof and order details."
       />
     );
-  const mismatch = payment.amount !== payment.submittedAmount;
+  const issues = getPaymentVerificationIssues(payment, order, payments);
+  const amountMismatch = Math.abs(payment.submittedAmount - order.total) >= 0.01;
+  const difference = payment.submittedAmount - order.total;
+  const mismatch = issues.length > 0;
+  const senderName = payment.senderName ?? order.customerName;
+  const receiverName = payment.receiverName ?? "RRJ Food-House";
+  const uploadedBy = payment.uploadedBy ?? senderName;
   return (
     <div className="space-y-5 p-4 sm:p-6">
       <div className="rrj-card flex flex-wrap items-start justify-between gap-3 bg-gradient-to-r from-white to-amber-50/45 p-4">
@@ -63,9 +75,10 @@ export function PaymentDetails({
         >
           <AlertTriangle className="h-4 w-4 shrink-0" />
           <span>
-            Amount mismatch: the order total is {formatMoney(payment.amount)},
-            but the submitted proof shows {formatMoney(payment.submittedAmount)}
-            .
+            <strong>Automatic review found {issues.length} mismatch{issues.length === 1 ? "" : "es"}.</strong>
+            <span className="mt-1 block">
+              {issues.map((issue) => issue.detail).join(" ")}
+            </span>
           </span>
         </div>
       )}
@@ -75,14 +88,15 @@ export function PaymentDetails({
         </div>
         <div className="min-w-0 space-y-4">
           <section
-            className={`grid grid-cols-2 gap-3 rounded-2xl border p-4 shadow-sm ${mismatch ? "border-red-200 bg-red-50/60" : "border-emerald-200 bg-emerald-50/55"}`}
+            className={`grid grid-cols-3 gap-3 rounded-2xl border p-4 shadow-sm ${mismatch ? "border-red-200 bg-red-50/60" : "border-emerald-200 bg-emerald-50/55"}`}
+            aria-label="Payment amount comparison"
           >
             <div>
               <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">
                 Order total
               </p>
               <p className="mt-1 text-xl font-black text-foreground">
-                {formatMoney(payment.amount)}
+                {formatMoney(order.total)}
               </p>
             </div>
             <div className="border-l border-current/10 pl-3">
@@ -90,39 +104,70 @@ export function PaymentDetails({
                 Proof amount
               </p>
               <p
-                className={`mt-1 text-xl font-black ${mismatch ? "text-red-700" : "text-emerald-700"}`}
+                className={`mt-1 text-xl font-black ${amountMismatch ? "text-red-700" : "text-emerald-700"}`}
               >
                 {formatMoney(payment.submittedAmount)}
               </p>
             </div>
+            <div className="border-l border-current/10 pl-3">
+              <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">
+                Difference
+              </p>
+              <p
+                className={`mt-1 text-xl font-black ${amountMismatch ? "text-red-700" : "text-emerald-700"}`}
+              >
+                {difference > 0 ? "+" : difference < 0 ? "−" : ""}
+                {formatMoney(Math.abs(difference))}
+              </p>
+            </div>
             <p
-              className={`col-span-2 text-[10px] font-black ${mismatch ? "text-red-700" : "text-emerald-700"}`}
+              className={`col-span-3 text-[10px] font-black ${mismatch ? "text-red-700" : "text-emerald-700"}`}
             >
               {mismatch
-                ? "Review required · amounts do not match"
+                ? `Review required · ${issues.map((issue) => issue.label).join(" · ")}`
                 : "Amounts match · ready for verification"}
             </p>
           </section>
           <section className="rrj-card grid gap-4 p-4 sm:grid-cols-2">
             <Detail
-              icon={UserRound}
-              label="Customer"
-              value={order.customerName}
+              icon={Hash}
+              label="Reference Number"
+              value={payment.referenceNumber ?? "Not found"}
             />
             <Detail
-              icon={Phone}
-              label="Contact number"
-              value={order.contactNumber}
+              icon={UserRound}
+              label="Sender Name"
+              value={senderName}
             />
             <Detail
               icon={ReceiptText}
-              label="GCash reference"
-              value={payment.referenceNumber ?? "Not provided"}
+              label="Receiver Name"
+              value={receiverName}
+            />
+            <Detail
+              icon={CreditCard}
+              label="Amount"
+              value={formatMoney(payment.submittedAmount)}
+            />
+            <Detail
+              icon={CalendarDays}
+              label="Date"
+              value={formatPaymentDate(payment.uploadedAt)}
             />
             <Detail
               icon={Clock3}
-              label="Uploaded"
-              value={formatDateTime(payment.uploadedAt)}
+              label="Time"
+              value={formatPaymentTime(payment.uploadedAt)}
+            />
+            <Detail
+              icon={Upload}
+              label="Uploaded By"
+              value={uploadedBy}
+            />
+            <Detail
+              icon={ShieldCheck}
+              label="Verification Status"
+              value={payment.status}
             />
           </section>
           <section>
@@ -195,3 +240,17 @@ function Detail({
     </div>
   );
 }
+
+const formatPaymentDate = (iso: string) =>
+  new Intl.DateTimeFormat("en-PH", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(iso));
+
+const formatPaymentTime = (iso: string) =>
+  new Intl.DateTimeFormat("en-PH", {
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+  }).format(new Date(iso));

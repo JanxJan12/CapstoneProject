@@ -1,15 +1,18 @@
-import { Clock3, CreditCard } from "lucide-react";
+import { AlertTriangle, Clock3, CreditCard } from "lucide-react";
 import { formatElapsed, formatMoney } from "../constants";
 import type { Order, Payment } from "../types";
 import { CashierStatusBadge, EmptyState } from "../components/CashierUI";
+import { getPaymentVerificationIssues } from "./paymentVerification";
 
 export function PaymentQueue({
   payments,
+  allPayments,
   orders,
   selectedId,
   onSelect,
 }: {
   payments: Payment[];
+  allPayments: Payment[];
   orders: Order[];
   selectedId?: string;
   onSelect: (paymentId: string) => void;
@@ -28,6 +31,11 @@ export function PaymentQueue({
       {payments.map((payment) => {
         const order = orders.find((entry) => entry.id === payment.orderId);
         if (!order) return null;
+        const issues = getPaymentVerificationIssues(
+          payment,
+          order,
+          allPayments,
+        );
         return (
           <button
             key={payment.id}
@@ -60,6 +68,12 @@ export function PaymentQueue({
               <Clock3 className="h-3 w-3" />
               Uploaded {formatElapsed(payment.uploadedAt)} ago
             </p>
+            {issues.length > 0 && (
+              <p className="mt-2 flex items-center gap-1 text-[9px] font-black text-red-700">
+                <AlertTriangle className="h-3 w-3" />
+                {issues.map((issue) => issue.label).join(" · ")}
+              </p>
+            )}
           </button>
         );
       })}

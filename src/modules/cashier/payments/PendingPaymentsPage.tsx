@@ -37,6 +37,15 @@ export function PendingPaymentsPage() {
   }, [pending, selectedId]);
   const payment = pending.find((entry) => entry.id === selectedId);
   const order = state.orders.find((entry) => entry.id === payment?.orderId);
+  const nextPendingPaymentId = (currentPaymentId: string) => {
+    const currentIndex = pending.findIndex(
+      (entry) => entry.id === currentPaymentId,
+    );
+    return (
+      pending[currentIndex + 1]?.id ??
+      pending.find((entry) => entry.id !== currentPaymentId)?.id
+    );
+  };
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -47,15 +56,19 @@ export function PendingPaymentsPage() {
   };
 
   const handleVerify = async (override: boolean) => {
-    if (!order) return;
+    if (!order || !payment) return;
+    const nextPaymentId = nextPendingPaymentId(payment.id);
     setLoading(true);
     setError("");
     try {
-      await verifyPayment(order.id, override);
+      await verifyPayment(payment.id, override);
       setVerifyOpen(false);
+      setSelectedId(nextPaymentId);
       toast.success(`Payment verified for ${order.id}`, {
         description:
-          "Order confirmed, transaction recorded, and ticket sent to kitchen.",
+          nextPaymentId
+            ? "Order, kitchen, dashboard, reports, and transaction records updated. Next payment opened."
+            : "Order, kitchen, dashboard, reports, and transaction records updated. Queue complete.",
       });
     } catch (caught) {
       const message =
@@ -67,12 +80,14 @@ export function PendingPaymentsPage() {
     }
   };
   const handleReject = async (reason: string, notes?: string) => {
-    if (!order) return;
+    if (!order || !payment) return;
+    const nextPaymentId = nextPendingPaymentId(payment.id);
     setLoading(true);
     setError("");
     try {
-      await rejectPayment(order.id, reason, notes);
+      await rejectPayment(payment.id, reason, notes);
       setRejectOpen(false);
+      setSelectedId(nextPaymentId);
       toast.success(`Payment rejected for ${order.id}`, {
         description:
           "The customer was notified and the order stayed out of the kitchen queue.",
@@ -119,6 +134,7 @@ export function PendingPaymentsPage() {
           </div>
           <PaymentQueue
             payments={pending}
+            allPayments={state.payments}
             orders={state.orders}
             selectedId={selectedId}
             onSelect={setSelectedId}
@@ -128,6 +144,7 @@ export function PendingPaymentsPage() {
           <PaymentDetails
             payment={payment}
             order={order}
+            payments={state.payments}
             shiftOpen={Boolean(activeShift)}
             onVerify={() => setVerifyOpen(true)}
             onReject={() => setRejectOpen(true)}
@@ -138,6 +155,7 @@ export function PendingPaymentsPage() {
         open={verifyOpen}
         order={order}
         payment={payment}
+        payments={state.payments}
         loading={loading}
         onOpenChange={setVerifyOpen}
         onConfirm={handleVerify}

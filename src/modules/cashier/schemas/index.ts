@@ -1,12 +1,23 @@
 import { z } from "zod";
 
-export const rejectionSchema = z.object({
-  reason: z.string().min(1, "Select a rejection reason."),
-  notes: z
-    .string()
-    .max(300, "Notes must be 300 characters or fewer.")
-    .optional(),
-});
+export const rejectionSchema = z
+  .object({
+    reason: z.string().trim().min(1, "Select a rejection reason."),
+    notes: z
+      .string()
+      .trim()
+      .max(300, "Notes must be 300 characters or fewer.")
+      .optional(),
+  })
+  .superRefine((value, ctx) => {
+    if (value.reason === "Other" && !value.notes) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["notes"],
+        message: "Explain the rejection reason when Other is selected.",
+      });
+    }
+  });
 
 export const cancellationSchema = z.object({
   reason: z.string().trim().min(3, "Enter a cancellation reason.").max(200),

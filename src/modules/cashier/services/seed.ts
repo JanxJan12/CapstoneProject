@@ -412,6 +412,9 @@ export function createInitialCashierState(): CashierState {
         status: "Pending",
         referenceNumber: "GC-882024",
         proofLabel: "GCash payment to RRJ Food-House",
+        senderName: "Roberto Lim",
+        receiverName: "RRJ Food-House",
+        uploadedBy: "Roberto Lim",
         uploadedAt: ago(16),
       },
       {
@@ -423,6 +426,9 @@ export function createInitialCashierState(): CashierState {
         status: "Pending",
         referenceNumber: "GC-882026",
         proofLabel: "GCash payment to RRJ Food-House",
+        senderName: "Grace Villanueva",
+        receiverName: "RRJ Food-House",
+        uploadedBy: "Grace Villanueva",
         uploadedAt: ago(9),
       },
       {
@@ -434,6 +440,9 @@ export function createInitialCashierState(): CashierState {
         status: "Pending",
         referenceNumber: "GC-882029",
         proofLabel: "GCash payment to RRJ Food-House",
+        senderName: "Mark Castillo",
+        receiverName: "RRJ Food-House",
+        uploadedBy: "Mark Castillo",
         uploadedAt: ago(5),
       },
       {

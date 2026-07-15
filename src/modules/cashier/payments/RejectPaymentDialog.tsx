@@ -35,11 +35,13 @@ export function RejectPaymentDialog({
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors },
   } = useForm<RejectionForm>({
     resolver: zodResolver(rejectionSchema),
     defaultValues: { reason: "", notes: "" },
   });
+  const selectedReason = watch("reason");
   const submit = handleSubmit(async (values) => {
     await onConfirm(values.reason, values.notes);
     reset();
@@ -79,9 +81,12 @@ export function RejectPaymentDialog({
             <FieldError>{errors.reason?.message}</FieldError>
           </div>
           <div>
-            <Label htmlFor="rejection-notes">Notes (optional)</Label>
+            <Label htmlFor="rejection-notes">
+              Notes {selectedReason === "Other" ? "(required)" : "(optional)"}
+            </Label>
             <CashierTextarea
               id="rejection-notes"
+              required={selectedReason === "Other"}
               aria-invalid={Boolean(errors.notes)}
               placeholder="Add details that will help the customer resubmit"
               {...register("notes")}
