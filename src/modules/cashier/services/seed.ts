@@ -461,6 +461,7 @@ export function createInitialCashierState(): CashierState {
     transactions: [
       {
         id: "TXN-4108",
+        receiptNumber: "RCP-4108",
         orderId: "ORD-2048",
         customerName: "Walk-in Customer",
         amount: 500,
@@ -475,6 +476,7 @@ export function createInitialCashierState(): CashierState {
       },
       {
         id: "TXN-4107",
+        receiptNumber: "RCP-4107",
         orderId: "ORD-2047",
         customerName: "Ana Reyes",
         amount: 225,
@@ -489,6 +491,7 @@ export function createInitialCashierState(): CashierState {
       },
       {
         id: "TXN-4106",
+        receiptNumber: "RCP-4106",
         orderId: "ORD-2046",
         customerName: "Walk-in Customer",
         amount: 210,
@@ -503,6 +506,7 @@ export function createInitialCashierState(): CashierState {
       },
       {
         id: "TXN-4105",
+        receiptNumber: "RCP-4105",
         orderId: "ORD-2045",
         customerName: "Maria Santos",
         amount: 255,
@@ -517,6 +521,7 @@ export function createInitialCashierState(): CashierState {
       },
       {
         id: "TXN-4101",
+        receiptNumber: "RCP-4101",
         orderId: "ORD-2041",
         customerName: "Carlos Mendoza",
         amount: 330,

@@ -8,12 +8,14 @@ import {
   DialogTitle,
 } from "../../../app/components/ui/dialog";
 import { formatDateTime, formatMoney } from "../constants";
-import type { Order, Payment } from "../types";
+import type { Order, Payment, Transaction } from "../types";
+import { getReceiptNumber } from "../transactions/transactionRecords";
 import { CashierButton, CashierDialogContent } from "../components/CashierUI";
 
 export function ReceiptDialog({
   order,
   payment,
+  transaction,
   open,
   onClose,
   placed = false,
@@ -21,6 +23,7 @@ export function ReceiptDialog({
 }: {
   order?: Order;
   payment?: Payment;
+  transaction?: Transaction;
   open: boolean;
   onClose: () => void;
   placed?: boolean;
@@ -59,9 +62,21 @@ export function ReceiptDialog({
             </p>
           </div>
           <div className="p-5">
+            <div className="mb-3 rounded-lg border border-dashed border-border bg-muted/30 px-3 py-2 text-center">
+              <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">
+                Receipt number
+              </p>
+              <p className="mt-1 font-mono text-sm font-black text-primary">
+                {transaction
+                  ? getReceiptNumber(transaction)
+                  : (order.transactionId?.replace(/^TXN-/, "RCP-") ?? order.id)}
+              </p>
+            </div>
             <div className="mb-3 flex justify-between text-[10px] text-muted-foreground">
-              <span>{order.id}</span>
-              <span>{formatDateTime(order.createdAt)}</span>
+              <span>{transaction?.id ?? order.transactionId ?? order.id}</span>
+              <span>
+                {formatDateTime(transaction?.createdAt ?? order.createdAt)}
+              </span>
             </div>
             <div className="mb-3 rounded-lg bg-muted/45 px-3 py-2 text-[10px]">
               <div className="flex justify-between gap-3">

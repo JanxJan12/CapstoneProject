@@ -131,6 +131,7 @@ export interface Payment {
 
 export interface Transaction {
   id: string;
+  receiptNumber?: string;
   orderId: string;
   customerName: string;
   amount: number;

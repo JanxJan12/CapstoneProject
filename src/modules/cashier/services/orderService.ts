@@ -179,6 +179,7 @@ export function createWalkInOrder(
   });
   state.transactions.unshift({
     id: transactionId,
+    receiptNumber: transactionId.replace(/^TXN-/, "RCP-"),
     orderId,
     customerName: order.customerName,
     amount: total,
@@ -648,8 +649,10 @@ export function voidDraftOrder(
     rejectedAt: timestamp,
     rejectionReason: reason,
   });
+  const transactionId = nextRecordId("TXN", state.transactions);
   state.transactions.unshift({
-    id: nextRecordId("TXN", state.transactions),
+    id: transactionId,
+    receiptNumber: transactionId.replace(/^TXN-/, "RCP-"),
     orderId,
     customerName,
     amount: subtotal - discountAmount + taxAmount,

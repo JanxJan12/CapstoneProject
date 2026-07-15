@@ -56,6 +56,7 @@ export function verifyOnlinePayment(
   order.transactionId = transactionId;
   state.transactions.unshift({
     id: transactionId,
+    receiptNumber: transactionId.replace(/^TXN-/, "RCP-"),
     orderId: order.id,
     customerName: order.customerName,
     amount: order.total,
