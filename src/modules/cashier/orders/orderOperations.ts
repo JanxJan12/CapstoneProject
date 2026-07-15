@@ -26,6 +26,12 @@ const TERMINAL_STATUSES = ["Delivered", "Completed", "Cancelled"];
 export const elapsedOrderMinutes = (order: Order, now = Date.now()) =>
   Math.max(0, Math.floor((now - new Date(order.createdAt).getTime()) / 60_000));
 
+export function formatElapsedMinutes(minutes: number) {
+  if (minutes < 1) return "Just now";
+  if (minutes < 60) return `${minutes} min`;
+  return `${Math.floor(minutes / 60)}h ${minutes % 60}m`;
+}
+
 export const isOrderDelayed = (
   order: Order,
   thresholdMinutes: number,

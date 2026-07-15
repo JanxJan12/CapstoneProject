@@ -1,8 +1,4 @@
-import type {
-  MenuItem,
-  MenuModifierGroup,
-  OrderItemModifier,
-} from "../types";
+import type { MenuItem, MenuModifierGroup, OrderItemModifier } from "../types";
 
 const FOOD_ADD_ONS: MenuModifierGroup = {
   id: "food-add-ons",
@@ -57,13 +53,18 @@ export function validateMenuModifiers(
 
   return selections.map((selection) => {
     const match = allowed.get(selection.id);
-    if (!match) throw new Error(`${selection.name} is not available for ${item.name}.`);
+    if (!match)
+      throw new Error(`${selection.name} is not available for ${item.name}.`);
     if (seen.has(selection.id))
-      throw new Error(`Duplicate modifier ${match.option.name} is not allowed.`);
+      throw new Error(
+        `Duplicate modifier ${match.option.name} is not allowed.`,
+      );
     seen.add(selection.id);
     if (match.group.selection === "single") {
       if (singleSelections.has(match.group.id))
-        throw new Error(`Choose only one ${match.group.name.toLowerCase()} option.`);
+        throw new Error(
+          `Choose only one ${match.group.name.toLowerCase()} option.`,
+        );
       singleSelections.add(match.group.id);
     }
     return { ...match.option };

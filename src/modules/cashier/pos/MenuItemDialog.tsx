@@ -19,7 +19,7 @@ import {
   CashierDialogContent,
   CashierTextarea,
   Label,
-} from "../components/CashierUI";
+} from "../components";
 import { formatMoney } from "../constants";
 import { modifierGroupsFor } from "../constants/modifiers";
 import type { MenuItem, OrderItemModifier } from "../types";
@@ -129,7 +129,8 @@ export function MenuItemDialog({
                   <legend className="mb-2 text-[10px] font-black uppercase tracking-wider text-muted-foreground">
                     {group.name}
                     <span className="ml-1 normal-case tracking-normal">
-                      · {group.selection === "single" ? "Choose one" : "Optional"}
+                      ·{" "}
+                      {group.selection === "single" ? "Choose one" : "Optional"}
                     </span>
                   </legend>
                   <div className="grid grid-cols-2 gap-2">
@@ -148,7 +149,9 @@ export function MenuItemDialog({
                           </span>
                           <span className="min-w-0 flex-1">{option.name}</span>
                           <span className="text-[10px] text-muted-foreground">
-                            {option.price ? `+${formatMoney(option.price)}` : "Free"}
+                            {option.price
+                              ? `+${formatMoney(option.price)}`
+                              : "Free"}
                           </span>
                         </button>
                       );

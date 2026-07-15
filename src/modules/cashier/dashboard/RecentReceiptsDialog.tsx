@@ -9,7 +9,7 @@ import {
 import { formatDateTime, formatMoney } from "../constants";
 import { useCashierStore } from "../hooks/CashierStore";
 import type { Order } from "../types";
-import { CashierDialogContent, EmptyState } from "../components/CashierUI";
+import { CashierDialogContent, EmptyState } from "../components";
 import { ReceiptDialog } from "../pos/ReceiptDialog";
 
 export function RecentReceiptsDialog({

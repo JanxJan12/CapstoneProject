@@ -9,10 +9,10 @@ import {
 import { toast } from "sonner";
 import {
   CashierButton,
-  CashierStatusBadge,
+  StatusBadge,
   EmptyState,
   ErrorBanner,
-} from "../../cashier/components/CashierUI";
+} from "../../cashier/components";
 import {
   formatElapsed,
   formatMoney,
@@ -60,16 +60,25 @@ export function KitchenQueue() {
         <div className="absolute -right-8 -top-10 h-32 w-32 rounded-full bg-orange-200/35 blur-2xl" />
         <div className="relative flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="mb-2 flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.2em] text-primary/75"><ChefHat className="h-3.5 w-3.5" /> Kitchen command board</p>
-            <h1 className="font-['Fraunces'] text-3xl font-bold tracking-[-0.035em]">Kitchen Queue</h1>
+            <p className="mb-2 flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.2em] text-primary/75">
+              <ChefHat className="h-3.5 w-3.5" /> Kitchen command board
+            </p>
+            <h1 className="font-['Fraunces'] text-3xl font-bold tracking-[-0.035em]">
+              Kitchen Queue
+            </h1>
             <p className="mt-1.5 max-w-2xl text-xs leading-5 text-muted-foreground">
-          Shared confirmed orders from cashier payment verification and Walk-in
-          POS
+              Shared confirmed orders from cashier payment verification and
+              Walk-in POS
             </p>
           </div>
           <div className="flex gap-2">
-            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[10px] font-black text-emerald-700"><span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.1)]" /> Kitchen online</span>
-            <span className="rounded-full border border-border bg-white/80 px-3 py-1.5 text-[10px] font-black text-foreground">{kitchenOrders.length} active</span>
+            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[10px] font-black text-emerald-700">
+              <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.1)]" />{" "}
+              Kitchen online
+            </span>
+            <span className="rounded-full border border-border bg-white/80 px-3 py-1.5 text-[10px] font-black text-foreground">
+              {kitchenOrders.length} active
+            </span>
           </div>
         </div>
       </header>
@@ -151,7 +160,7 @@ function KitchenTicket({
           </p>
         </div>
         <div className="flex flex-col items-end gap-1">
-          <CashierStatusBadge status={order.status} />
+          <StatusBadge status={order.status} />
           {delayed && (
             <span className="flex items-center gap-1 text-[10px] font-black text-red-700">
               <AlertTriangle className="h-3 w-3" />

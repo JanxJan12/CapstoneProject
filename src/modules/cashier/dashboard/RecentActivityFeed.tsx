@@ -11,7 +11,7 @@ import {
 import { formatDateTime, formatElapsed } from "../constants";
 import { useCashierStore } from "../hooks/CashierStore";
 import type { Order } from "../types";
-import { EmptyState, SectionHeading } from "../components/CashierUI";
+import { EmptyState, SectionHeading } from "../components";
 
 const ICONS = {
   payment_verified: CreditCard,

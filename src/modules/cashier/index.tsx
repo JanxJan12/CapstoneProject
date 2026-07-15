@@ -19,7 +19,7 @@ import { WalkInPOSPage } from "./pos/WalkInPOSPage";
 import { CashierOrderListPage } from "./orders/CashierOrderListPage";
 import { TransactionHistoryPage } from "./transactions/TransactionHistoryPage";
 import { ShiftSettlementPage } from "./shifts/ShiftSettlementPage";
-import { CashierConfirmDialog } from "./components/CashierUI";
+import { ConfirmationDialog } from "./components";
 
 export function CashierApp() {
   return <CashierModule />;
@@ -182,7 +182,7 @@ function CashierModule() {
       >
         {content}
       </AppShell>
-      <CashierConfirmDialog
+      <ConfirmationDialog
         open={Boolean(pendingNavigation)}
         onOpenChange={(open) => {
           if (!open) setPendingNavigation(undefined);

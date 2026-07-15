@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from "../../../app/components/ui/dialog";
 import { formatMoney } from "../constants";
-import { CashierButton, CashierDialogContent } from "../components/CashierUI";
+import { CashierButton, CashierDialogContent } from "../components";
 
 export function PlaceOrderDialog({
   open,

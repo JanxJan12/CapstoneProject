@@ -1,12 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { RefreshCw } from "lucide-react";
-import { toast } from "sonner";
 import { useCashierStore } from "../hooks/CashierStore";
-import {
-  CashierButton,
-  ErrorBanner,
-  PageHeading,
-} from "../components/CashierUI";
+import { CashierButton, ErrorBanner, PageHeader, Toast } from "../components";
+import { DATA_REFRESH_FEEDBACK_MS } from "../constants";
 import { PaymentDetails } from "./PaymentDetails";
 import { PaymentQueue } from "./PaymentQueue";
 import { RejectPaymentDialog } from "./RejectPaymentDialog";
@@ -51,8 +47,8 @@ export function PendingPaymentsPage() {
     setRefreshing(true);
     window.setTimeout(() => {
       setRefreshing(false);
-      toast.success("Payment queue is up to date");
-    }, 200);
+      Toast.success("Payment queue is up to date");
+    }, DATA_REFRESH_FEEDBACK_MS);
   };
 
   const handleVerify = async (override: boolean) => {
@@ -65,7 +61,7 @@ export function PendingPaymentsPage() {
     setSelectedId(nextPaymentId);
     try {
       await verifyPayment(payment.id, override);
-      toast.success(`Payment verified for ${order.id}`, {
+      Toast.success(`Payment verified for ${order.id}`, {
         description: nextPaymentId
           ? "Order, kitchen, dashboard, reports, and transaction records updated. Next payment opened."
           : "Order, kitchen, dashboard, reports, and transaction records updated. Queue complete.",
@@ -76,7 +72,7 @@ export function PendingPaymentsPage() {
       setSelectedId(currentPaymentId);
       setVerifyOpen(true);
       setError(message);
-      toast.error("Verification failed", { description: message });
+      Toast.error("Verification failed", { description: message });
     } finally {
       setLoading(false);
     }
@@ -91,7 +87,7 @@ export function PendingPaymentsPage() {
     setSelectedId(nextPaymentId);
     try {
       await rejectPayment(payment.id, reason, notes);
-      toast.success(`Payment rejected for ${order.id}`, {
+      Toast.success(`Payment rejected for ${order.id}`, {
         description:
           "The customer was notified and the order stayed out of the kitchen queue.",
       });
@@ -101,7 +97,7 @@ export function PendingPaymentsPage() {
       setSelectedId(currentPaymentId);
       setRejectOpen(true);
       setError(message);
-      toast.error("Rejection failed", { description: message });
+      Toast.error("Rejection failed", { description: message });
     } finally {
       setLoading(false);
     }
@@ -109,7 +105,7 @@ export function PendingPaymentsPage() {
 
   return (
     <div className="cashier-page">
-      <PageHeading
+      <PageHeader
         title="Pending Payments"
         description={`${pending.length} GCash ${pending.length === 1 ? "submission" : "submissions"} awaiting review`}
         actions={

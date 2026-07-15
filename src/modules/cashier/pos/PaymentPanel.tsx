@@ -1,17 +1,13 @@
-import type {
-  FieldErrors,
-  UseFormRegister,
-} from "react-hook-form";
+import type { FieldErrors, UseFormRegister } from "react-hook-form";
 import type { RefObject } from "react";
-import {
-  ArrowRight,
-  Banknote,
-  Eye,
-  Smartphone,
-} from "lucide-react";
+import { ArrowRight, Banknote, Eye, Smartphone } from "lucide-react";
 import type { POSForm } from "../schemas";
-import { formatMoney } from "../constants";
-import { CashierInput, FieldError, Label } from "../components/CashierUI";
+import {
+  CASH_TENDER_SUGGESTIONS,
+  formatCompactMoney,
+  formatMoney,
+} from "../constants";
+import { CashierInput, FieldError, Label } from "../components";
 
 export function PaymentPanel({
   subtotal,
@@ -49,7 +45,6 @@ export function PaymentPanel({
   onConfirm: () => void;
 }) {
   const change = Math.max(0, tendered - total);
-  const cashSuggestions = [100, 200, 500, 1000];
 
   return (
     <section className="pos-payment-panel shrink-0 border-t">
@@ -136,7 +131,7 @@ export function PaymentPanel({
             <FieldError>Cash tendered is insufficient.</FieldError>
           )}
           <div className="pos-cash-suggestions mt-2 grid grid-cols-4 gap-1.5">
-            {cashSuggestions.map((amount) => (
+            {CASH_TENDER_SUGGESTIONS.map((amount) => (
               <button
                 key={amount}
                 type="button"
@@ -144,7 +139,7 @@ export function PaymentPanel({
                 onClick={() => onTenderedChange(amount)}
                 className="min-h-10 rounded-lg border px-2 text-[10px] font-black disabled:cursor-not-allowed disabled:opacity-30"
               >
-                ₱{amount.toLocaleString("en-PH")}
+                {formatCompactMoney(amount)}
               </button>
             ))}
           </div>

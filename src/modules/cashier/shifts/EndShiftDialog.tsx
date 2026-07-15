@@ -1,11 +1,6 @@
 import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  AlertTriangle,
-  CheckCircle2,
-  TrendingDown,
-  TrendingUp,
-} from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import { useForm } from "react-hook-form";
 import {
   Dialog,
@@ -14,31 +9,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../../../app/components/ui/dialog";
-import { formatMoney } from "../constants";
+import { formatMoney, SHIFT_VARIANCE_REASONS } from "../constants";
 import { endShiftSchema, type EndShiftForm } from "../schemas";
 import type { ShiftClosureInput, ShiftTotals } from "../types";
 import {
   CashierButton,
-  CashierConfirmDialog,
+  ConfirmationDialog,
   CashierDialogContent,
   CashierInput,
   CashierSelect,
   CashierTextarea,
   FieldError,
   Label,
-} from "../components/CashierUI";
-
-const VARIANCE_REASONS = [
-  "Counting Error",
-  "Incorrect Change",
-  "Cash Payout",
-  "Missing Receipt",
-  "Unrecorded Refund",
-  "Other",
-];
-
-const varianceOutcome = (variance: number) =>
-  variance === 0 ? "Balanced" : variance > 0 ? "Over" : "Short";
+} from "../components";
+import { ShiftSummaryItem, VarianceIndicator } from "./ShiftDialogSummary";
+import { getVarianceOutcomeFromAmount } from "./shiftSettlementUtils";
 
 export function EndShiftDialog({
   open,
@@ -79,7 +64,7 @@ export function EndShiftDialog({
   const managerName = watch("managerName");
   const managerApproved = watch("managerApproved");
   const variance = actual - totals.expectedCash;
-  const outcome = varianceOutcome(variance);
+  const outcome = getVarianceOutcomeFromAmount(variance);
 
   useEffect(() => {
     if (variance === 0) {
@@ -148,18 +133,27 @@ export function EndShiftDialog({
             )}
 
             <div className="grid grid-cols-2 gap-3 rounded-xl border border-border bg-muted/30 p-4 text-xs sm:grid-cols-3">
-              <Summary
+              <ShiftSummaryItem
                 label="Expected cash"
                 value={formatMoney(totals.expectedCash)}
               />
-              <Summary label="GCash" value={formatMoney(totals.gcashSales)} />
-              <Summary label="Refunds" value={formatMoney(totals.refunds)} />
-              <Summary
+              <ShiftSummaryItem
+                label="GCash"
+                value={formatMoney(totals.gcashSales)}
+              />
+              <ShiftSummaryItem
+                label="Refunds"
+                value={formatMoney(totals.refunds)}
+              />
+              <ShiftSummaryItem
                 label="Discounts"
                 value={formatMoney(totals.discounts)}
               />
-              <Summary label="Voids" value={formatMoney(totals.voids)} />
-              <Summary
+              <ShiftSummaryItem
+                label="Voids"
+                value={formatMoney(totals.voids)}
+              />
+              <ShiftSummaryItem
                 label="Transactions"
                 value={String(totals.transactionCount)}
               />
@@ -190,7 +184,7 @@ export function EndShiftDialog({
                   {...register("varianceReason")}
                 >
                   <option value="">Select a reason</option>
-                  {VARIANCE_REASONS.map((reason) => (
+                  {SHIFT_VARIANCE_REASONS.map((reason) => (
                     <option key={reason}>{reason}</option>
                   ))}
                 </CashierSelect>
@@ -262,7 +256,7 @@ export function EndShiftDialog({
         </CashierDialogContent>
       </Dialog>
 
-      <CashierConfirmDialog
+      <ConfirmationDialog
         open={Boolean(reviewValues)}
         onOpenChange={(value) => {
           if (!value) setReviewValues(undefined);
@@ -284,42 +278,5 @@ export function EndShiftDialog({
         }}
       />
     </>
-  );
-}
-
-function Summary({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <p className="text-muted-foreground">{label}</p>
-      <p className="mt-1 font-black text-foreground">{value}</p>
-    </div>
-  );
-}
-
-function VarianceIndicator({
-  variance,
-  outcome,
-}: {
-  variance: number;
-  outcome: "Balanced" | "Over" | "Short";
-}) {
-  const Icon =
-    variance === 0 ? CheckCircle2 : variance > 0 ? TrendingUp : TrendingDown;
-  const tone =
-    variance === 0
-      ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-      : variance > 0
-        ? "border-blue-200 bg-blue-50 text-blue-800"
-        : "border-red-200 bg-red-50 text-red-800";
-  return (
-    <div
-      className={`flex items-center justify-between rounded-xl border px-4 py-3 ${tone}`}
-    >
-      <span className="flex items-center gap-2 text-sm font-black">
-        <Icon className="h-4 w-4" />
-        {outcome}
-      </span>
-      <span className="text-sm font-black">{formatMoney(variance)}</span>
-    </div>
   );
 }

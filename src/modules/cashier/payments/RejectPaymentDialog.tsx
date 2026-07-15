@@ -16,7 +16,7 @@ import {
   CashierTextarea,
   FieldError,
   Label,
-} from "../components/CashierUI";
+} from "../components";
 
 export function RejectPaymentDialog({
   open,

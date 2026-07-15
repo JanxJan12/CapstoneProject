@@ -7,7 +7,7 @@ import {
   UtensilsCrossed,
 } from "lucide-react";
 import { formatMoney } from "../constants";
-import { CashierInput } from "../components/CashierUI";
+import { CashierInput } from "../components";
 import type { POSCartLine } from "./types";
 
 export function POSCart({
@@ -89,7 +89,10 @@ export function POSCart({
                 className="pos-cart-swipe-shell relative overflow-hidden"
                 onDragOver={(event) => event.preventDefault()}
                 onDrop={() => {
-                  if (draggedLine.current && draggedLine.current !== item.lineId) {
+                  if (
+                    draggedLine.current &&
+                    draggedLine.current !== item.lineId
+                  ) {
                     onReorder(draggedLine.current, item.lineId);
                   }
                   draggedLine.current = undefined;
@@ -107,7 +110,8 @@ export function POSCart({
                   onPointerDown={(event) => {
                     if (event.pointerType !== "touch") return;
                     const target = event.target as HTMLElement;
-                    if (target.closest("button, input, textarea, summary")) return;
+                    if (target.closest("button, input, textarea, summary"))
+                      return;
                     pointer.current = {
                       lineId: item.lineId,
                       startX: event.clientX,
@@ -162,7 +166,10 @@ export function POSCart({
                         onChange={(event) =>
                           onQuantityChange(
                             item.lineId,
-                            Math.min(99, Math.max(1, Number(event.target.value) || 1)),
+                            Math.min(
+                              99,
+                              Math.max(1, Number(event.target.value) || 1),
+                            ),
                           )
                         }
                         className="h-9 w-8 border-0 bg-transparent p-0 text-center text-xs font-black outline-none"
@@ -198,9 +205,14 @@ export function POSCart({
                   {item.modifiers?.length ? (
                     <div className="pos-cart-modifiers ml-8 mt-2 flex flex-wrap gap-1">
                       {item.modifiers.map((modifier) => (
-                        <span key={modifier.id} className="rounded-md px-2 py-1 text-[9px] font-bold">
+                        <span
+                          key={modifier.id}
+                          className="rounded-md px-2 py-1 text-[9px] font-bold"
+                        >
                           {modifier.name}
-                          {modifier.price > 0 ? ` +${formatMoney(modifier.price)}` : ""}
+                          {modifier.price > 0
+                            ? ` +${formatMoney(modifier.price)}`
+                            : ""}
                         </span>
                       ))}
                     </div>
@@ -221,7 +233,9 @@ export function POSCart({
                       className="mt-2 min-h-10 rounded-lg text-[10px]"
                     />
                   </details>
-                  <span className="sr-only">Swipe left to remove this item.</span>
+                  <span className="sr-only">
+                    Swipe left to remove this item.
+                  </span>
                 </article>
               </div>
             ))}

@@ -2,7 +2,7 @@ import type { UseFormRegister } from "react-hook-form";
 import { PauseCircle, RotateCcw, XCircle } from "lucide-react";
 import type { POSForm } from "../schemas";
 import type { HeldOrder } from "../types";
-import { CashierSelect } from "../components/CashierUI";
+import { CashierSelect } from "../components";
 
 export function POSOrderHeader({
   orderType,

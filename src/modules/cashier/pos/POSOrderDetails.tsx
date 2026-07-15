@@ -6,7 +6,7 @@ import {
   CashierTextarea,
   FieldError,
   Label,
-} from "../components/CashierUI";
+} from "../components";
 import { DINING_TABLES } from "../constants";
 import type { POSForm } from "../schemas";
 
@@ -113,7 +113,9 @@ export function POSOrderDetails({
               <CashierInput
                 id="pos-discount-reference"
                 disabled={discountType === "None"}
-                placeholder={discountType === "None" ? "Not required" : "Required"}
+                placeholder={
+                  discountType === "None" ? "Not required" : "Required"
+                }
                 aria-invalid={Boolean(errors.discountReference)}
                 {...register("discountReference")}
               />

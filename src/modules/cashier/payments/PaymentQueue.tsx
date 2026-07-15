@@ -1,7 +1,7 @@
 import { AlertTriangle, Clock3, CreditCard } from "lucide-react";
 import { formatElapsed, formatMoney } from "../constants";
 import type { Order, Payment } from "../types";
-import { CashierStatusBadge, EmptyState } from "../components/CashierUI";
+import { StatusBadge, EmptyState } from "../components";
 import { getPaymentVerificationIssues } from "./paymentVerification";
 
 export function PaymentQueue({
@@ -53,7 +53,7 @@ export function PaymentQueue({
                   {order.customerName}
                 </p>
               </div>
-              <CashierStatusBadge status={payment.status} />
+              <StatusBadge status={payment.status} />
             </div>
             <div className="mt-3 flex items-center justify-between gap-3 text-[11px]">
               <span className="flex items-center gap-1.5 font-semibold text-muted-foreground">

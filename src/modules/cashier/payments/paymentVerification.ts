@@ -16,7 +16,10 @@ export interface PaymentVerificationIssue {
 }
 
 const normalize = (value?: string) =>
-  value?.trim().toLocaleLowerCase().replace(/[^a-z0-9]/g, "") ?? "";
+  value
+    ?.trim()
+    .toLocaleLowerCase()
+    .replace(/[^a-z0-9]/g, "") ?? "";
 
 export function getPaymentVerificationIssues(
   payment: Payment,

@@ -5,7 +5,8 @@ import {
   CashierInput,
   CashierSelect,
   Label,
-} from "../components/CashierUI";
+  SearchToolbar,
+} from "../components";
 
 export interface TransactionFilterValue {
   search: string;
@@ -44,25 +45,17 @@ export function TransactionFilters({
   ) => onChange({ ...value, [key]: next });
 
   return (
-    <section
-      className="cashier-filter-bar rrj-card p-4"
-      aria-label="Advanced transaction filters"
-    >
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <div>
-          <h2 className="text-xs font-black uppercase tracking-widest text-foreground">
-            Advanced filters
-          </h2>
-          <p className="mt-1 text-[10px] text-muted-foreground">
-            Filters use linked transaction, receipt, shift, payment, and order
-            records.
-          </p>
-        </div>
+    <SearchToolbar
+      label="Advanced transaction filters"
+      title="Advanced filters"
+      description="Filters use linked transaction, receipt, shift, payment, and order records."
+      actions={
         <CashierButton variant="ghost" size="sm" onClick={onReset}>
           <RotateCcw className="h-4 w-4" />
           Reset
         </CashierButton>
-      </div>
+      }
+    >
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <div className="sm:col-span-2 lg:col-span-1 xl:col-span-2">
           <Label htmlFor="txn-search">Search records</Label>
@@ -201,6 +194,6 @@ export function TransactionFilters({
           />
         </div>
       </div>
-    </section>
+    </SearchToolbar>
   );
 }

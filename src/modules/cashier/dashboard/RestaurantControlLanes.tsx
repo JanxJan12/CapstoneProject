@@ -8,7 +8,7 @@ import {
 import { formatMoney } from "../constants";
 import { useCashierMetrics } from "../hooks/useCashierMetrics";
 import type { CashierNavigationIntent, CashierPageId } from "../types";
-import { SectionHeading } from "../components/CashierUI";
+import { SectionHeading } from "../components";
 
 export function RestaurantControlLanes({
   onNavigate,

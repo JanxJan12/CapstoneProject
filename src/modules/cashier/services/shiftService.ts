@@ -1,3 +1,4 @@
+import { formatMoney } from "../constants";
 import type {
   CashierShift,
   CashierState,
@@ -148,8 +149,4 @@ export function endShift(
   return state;
 }
 
-const formatVariance = (variance: number) =>
-  new Intl.NumberFormat("en-PH", {
-    style: "currency",
-    currency: "PHP",
-  }).format(Math.abs(variance));
+const formatVariance = (variance: number) => formatMoney(Math.abs(variance));

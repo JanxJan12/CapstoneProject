@@ -9,13 +9,9 @@ import {
   Upload,
   UserRound,
 } from "lucide-react";
-import { formatMoney } from "../constants";
+import { formatDateOnly, formatMoney, formatTimeOnly } from "../constants";
 import type { Order, Payment } from "../types";
-import {
-  CashierButton,
-  CashierStatusBadge,
-  EmptyState,
-} from "../components/CashierUI";
+import { CashierButton, StatusBadge, EmptyState } from "../components";
 import { ProofViewer } from "./ProofViewer";
 import { getPaymentVerificationIssues } from "./paymentVerification";
 
@@ -44,7 +40,8 @@ export function PaymentDetails({
       />
     );
   const issues = getPaymentVerificationIssues(payment, order, payments);
-  const amountMismatch = Math.abs(payment.submittedAmount - order.total) >= 0.01;
+  const amountMismatch =
+    Math.abs(payment.submittedAmount - order.total) >= 0.01;
   const difference = payment.submittedAmount - order.total;
   const mismatch = issues.length > 0;
   const senderName = payment.senderName ?? order.customerName;
@@ -61,7 +58,7 @@ export function PaymentDetails({
             Payment verification
           </h2>
         </div>
-        <CashierStatusBadge status={payment.status} />
+        <StatusBadge status={payment.status} />
       </div>
       {!shiftOpen && (
         <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-bold text-amber-900">
@@ -75,7 +72,10 @@ export function PaymentDetails({
         >
           <AlertTriangle className="h-4 w-4 shrink-0" />
           <span>
-            <strong>Automatic review found {issues.length} mismatch{issues.length === 1 ? "" : "es"}.</strong>
+            <strong>
+              Automatic review found {issues.length} mismatch
+              {issues.length === 1 ? "" : "es"}.
+            </strong>
             <span className="mt-1 block">
               {issues.map((issue) => issue.detail).join(" ")}
             </span>
@@ -134,11 +134,7 @@ export function PaymentDetails({
               label="Reference Number"
               value={payment.referenceNumber ?? "Not found"}
             />
-            <Detail
-              icon={UserRound}
-              label="Sender Name"
-              value={senderName}
-            />
+            <Detail icon={UserRound} label="Sender Name" value={senderName} />
             <Detail
               icon={ReceiptText}
               label="Receiver Name"
@@ -159,11 +155,7 @@ export function PaymentDetails({
               label="Time"
               value={formatPaymentTime(payment.uploadedAt)}
             />
-            <Detail
-              icon={Upload}
-              label="Uploaded By"
-              value={uploadedBy}
-            />
+            <Detail icon={Upload} label="Uploaded By" value={uploadedBy} />
             <Detail
               icon={ShieldCheck}
               label="Verification Status"
@@ -241,16 +233,5 @@ function Detail({
   );
 }
 
-const formatPaymentDate = (iso: string) =>
-  new Intl.DateTimeFormat("en-PH", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(new Date(iso));
-
-const formatPaymentTime = (iso: string) =>
-  new Intl.DateTimeFormat("en-PH", {
-    hour: "numeric",
-    minute: "2-digit",
-    second: "2-digit",
-  }).format(new Date(iso));
+const formatPaymentDate = formatDateOnly;
+const formatPaymentTime = (iso: string) => formatTimeOnly(iso, true);

@@ -13,7 +13,7 @@ import {
   CashierSelect,
   FieldError,
   Label,
-} from "../components/CashierUI";
+} from "../components";
 
 export function AssignRiderDialog({
   order,

@@ -20,7 +20,7 @@ import {
   CashierTextarea,
   FieldError,
   Label,
-} from "../components/CashierUI";
+} from "../components";
 
 export function EditOrderDialog({
   order,

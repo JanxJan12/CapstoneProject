@@ -1,5 +1,4 @@
 import { Printer } from "lucide-react";
-import { toast } from "sonner";
 import {
   Dialog,
   DialogDescription,
@@ -10,7 +9,7 @@ import {
 import { formatDateTime, formatMoney } from "../constants";
 import type { Order, Payment, Transaction } from "../types";
 import { getReceiptNumber } from "../transactions/transactionRecords";
-import { CashierButton, CashierDialogContent } from "../components/CashierUI";
+import { CashierButton, CashierDialogContent, Toast } from "../components";
 
 export function ReceiptDialog({
   order,
@@ -132,7 +131,7 @@ export function ReceiptDialog({
             onClick={() => {
               window.print();
               void onPrint?.();
-              toast.success("Receipt sent to the print dialog.");
+              Toast.success("Receipt sent to the print dialog.");
             }}
           >
             <Printer className="h-4 w-4" />

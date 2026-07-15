@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { toast } from "sonner";
+import { Toast } from "../components";
 import type {
   CashierNavigationIntent,
   CashierPageId,
@@ -39,7 +39,7 @@ export function CashierDashboardPage({
     setSettling(true);
     try {
       await endShift(input);
-      toast.success("Shift closed and settlement recorded", {
+      Toast.success("Shift closed and settlement recorded", {
         description:
           input.actualCash === shiftTotals.expectedCash
             ? "The drawer is balanced."
@@ -48,7 +48,7 @@ export function CashierDashboardPage({
       setSettlementOpen(false);
       onNavigate("shift-settlement");
     } catch (caught) {
-      toast.error("Unable to close the shift", {
+      Toast.error("Unable to close the shift", {
         description:
           caught instanceof Error
             ? caught.message

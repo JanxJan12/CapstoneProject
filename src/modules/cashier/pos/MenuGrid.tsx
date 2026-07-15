@@ -11,18 +11,12 @@ import {
   Wheat,
   type LucideIcon,
 } from "lucide-react";
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type RefObject,
-} from "react";
+import { useMemo, type RefObject } from "react";
 import { MENU_CATEGORIES } from "../constants";
 import type { MenuItem } from "../types";
-import { CashierInput, EmptyState } from "../components/CashierUI";
+import { CashierInput, EmptyState } from "../components";
 import type { POSCartLine } from "./types";
-import { MenuItemCard } from "./MenuItemCard";
+import { VirtualizedProductGrid } from "./VirtualizedProductGrid";
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = {
   All: Grid2X2,
@@ -115,7 +109,10 @@ export function MenuGrid({
             F2
           </kbd>
         </div>
-        <span className="pos-menu-result-count hidden shrink-0 rounded-lg border px-3 py-2 text-[9px] font-black uppercase tracking-wider sm:block">
+        <span
+          className="pos-menu-result-count hidden shrink-0 rounded-lg border px-3 py-2 text-[9px] font-black uppercase tracking-wider sm:block"
+          aria-live="polite"
+        >
           {filtered.length} items
         </span>
       </div>
@@ -184,7 +181,9 @@ export function MenuGrid({
               <h2 className="mt-0.5 text-base font-black">{title}</h2>
             </div>
             {search && (
-              <span className="truncate text-[9px]">Results for “{search}”</span>
+              <span className="truncate text-[9px]">
+                Results for “{search}”
+              </span>
             )}
           </div>
 
@@ -216,102 +215,6 @@ export function MenuGrid({
               />
             </div>
           )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-const ROW_HEIGHT = 300;
-const OVERSCAN_ROWS = 2;
-
-function VirtualizedProductGrid({
-  items,
-  cart,
-  recentIds,
-  bestSellerIds,
-  favoriteIds,
-  onSelect,
-  onQuickAdd,
-  onToggleFavorite,
-}: {
-  items: MenuItem[];
-  cart: POSCartLine[];
-  recentIds: string[];
-  bestSellerIds: string[];
-  favoriteIds: string[];
-  onSelect: (item: MenuItem) => void;
-  onQuickAdd: (item: MenuItem) => void;
-  onToggleFavorite: (itemId: string) => void;
-}) {
-  const viewportRef = useRef<HTMLDivElement>(null);
-  const [scrollTop, setScrollTop] = useState(0);
-  const [viewport, setViewport] = useState({ width: 760, height: 600 });
-
-  useEffect(() => {
-    const element = viewportRef.current;
-    if (!element) return;
-    const update = () =>
-      setViewport({ width: element.clientWidth, height: element.clientHeight });
-    update();
-    const observer = new ResizeObserver(update);
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    viewportRef.current?.scrollTo({ top: 0 });
-    setScrollTop(0);
-  }, [items]);
-
-  const columns = viewport.width >= 720 ? 3 : viewport.width >= 360 ? 2 : 1;
-  const totalRows = Math.ceil(items.length / columns);
-  const startRow = Math.max(
-    0,
-    Math.floor(scrollTop / ROW_HEIGHT) - OVERSCAN_ROWS,
-  );
-  const visibleRows = Math.ceil(viewport.height / ROW_HEIGHT) + OVERSCAN_ROWS * 2;
-  const endRow = Math.min(totalRows, startRow + visibleRows);
-  const startIndex = startRow * columns;
-  const visibleItems = items.slice(startIndex, endRow * columns);
-  const recent = new Set(recentIds);
-  const bestSellers = new Set(bestSellerIds);
-  const favorites = new Set(favoriteIds);
-
-  return (
-    <div
-      ref={viewportRef}
-      onScroll={(event) => setScrollTop(event.currentTarget.scrollTop)}
-      className="pos-product-viewport min-h-0 flex-1 overflow-y-auto px-3 pb-3"
-      aria-label="Menu products"
-    >
-      <div
-        className="relative"
-        style={{ height: Math.max(1, totalRows * ROW_HEIGHT) }}
-      >
-        <div
-          className="pos-product-grid absolute inset-x-0 grid gap-3"
-          style={{
-            gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
-            transform: `translateY(${startRow * ROW_HEIGHT}px)`,
-          }}
-        >
-          {visibleItems.map((item) => (
-            <div key={item.id} style={{ height: ROW_HEIGHT - 12 }}>
-              <MenuItemCard
-                item={item}
-                quantity={cart
-                  .filter((entry) => entry.menuItemId === item.id)
-                  .reduce((sum, entry) => sum + entry.quantity, 0)}
-                favorite={favorites.has(item.id)}
-                bestSeller={bestSellers.has(item.id)}
-                recentlyOrdered={recent.has(item.id)}
-                onSelect={() => onSelect(item)}
-                onQuickAdd={() => onQuickAdd(item)}
-                onToggleFavorite={() => onToggleFavorite(item.id)}
-              />
-            </div>
-          ))}
         </div>
       </div>
     </div>

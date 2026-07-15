@@ -1,5 +1,4 @@
 import {
-  ArrowRight,
   CreditCard,
   LogOut,
   PackageCheck,
@@ -9,7 +8,7 @@ import {
 } from "lucide-react";
 import { useCashierMetrics } from "../hooks/useCashierMetrics";
 import type { CashierNavigationIntent, CashierPageId } from "../types";
-import { SectionHeading } from "../components/CashierUI";
+import { ActionCard, SectionHeading } from "../components";
 
 export function CashierWorkbench({
   onNavigate,
@@ -76,30 +75,15 @@ export function CashierWorkbench({
       <div className="grid gap-2 sm:grid-cols-2">
         {actions.map(
           ({ label, detail, icon: Icon, action, primary, disabled }) => (
-            <button
+            <ActionCard
               key={label}
-              type="button"
               onClick={action}
               disabled={disabled}
-              className={`group flex min-h-[76px] items-center gap-3 rounded-xl border px-3.5 text-left transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-45 ${primary ? "sm:col-span-2 border-primary bg-gradient-to-r from-primary to-orange-600 text-primary-foreground shadow-md shadow-orange-900/10 hover:-translate-y-0.5 hover:shadow-lg" : "border-border bg-white/90 hover:-translate-y-0.5 hover:border-primary/25 hover:bg-amber-50/30 hover:shadow-md"}`}
-            >
-              <span
-                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${primary ? "bg-white/15" : "bg-amber-50 text-primary"}`}
-              >
-                <Icon className="h-4 w-4 transition-transform group-hover:scale-110" />
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block text-[11px] font-black sm:text-xs">
-                  {label}
-                </span>
-                <span
-                  className={`mt-0.5 block line-clamp-1 text-[9px] font-semibold sm:text-[10px] ${primary ? "text-white/70" : "text-muted-foreground"}`}
-                >
-                  {detail}
-                </span>
-              </span>
-              <ArrowRight className="hidden h-4 w-4 shrink-0 opacity-35 transition-transform group-hover:translate-x-0.5 group-hover:opacity-70 sm:block" />
-            </button>
+              label={label}
+              detail={detail}
+              icon={Icon}
+              primary={primary}
+            />
           ),
         )}
       </div>

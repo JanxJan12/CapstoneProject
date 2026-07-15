@@ -14,7 +14,7 @@ import {
   CashierInput,
   FieldError,
   Label,
-} from "../components/CashierUI";
+} from "../components";
 
 export function StartShiftDialog({
   open,

@@ -8,25 +8,27 @@ import {
   MonitorSmartphone,
   UserRound,
 } from "lucide-react";
-import { formatDateTime, formatMoney } from "../constants";
-import { CashierButton } from "../components/CashierUI";
+import {
+  DASHBOARD_CLOCK_REFRESH_MS,
+  formatDateOnly,
+  formatDateTime,
+  formatMoney,
+  formatTimeOnly,
+} from "../constants";
+import { CashierButton } from "../components";
 import { useCashierStore } from "../hooks/CashierStore";
 
-const shiftDuration = (startedAt?: string) => {
-  if (!startedAt) return "—";
-  const minutes = Math.max(
-    0,
-    Math.floor((Date.now() - new Date(startedAt).getTime()) / 60_000),
-  );
-  return `${Math.floor(minutes / 60)}h ${String(minutes % 60).padStart(2, "0")}m`;
-};
+import { formatShiftDuration } from "../shifts/shiftSettlementUtils";
 
 export function ShiftSummaryHero({ onEndShift }: { onEndShift: () => void }) {
   const { state, activeShift, shiftTotals } = useCashierStore();
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
-    const timer = window.setInterval(() => setNow(new Date()), 30_000);
+    const timer = window.setInterval(
+      () => setNow(new Date()),
+      DASHBOARD_CLOCK_REFRESH_MS,
+    );
     return () => window.clearInterval(timer);
   }, []);
 
@@ -84,20 +86,15 @@ export function ShiftSummaryHero({ onEndShift }: { onEndShift: () => void }) {
           <HeroDatum
             icon={Clock3}
             label="Current time"
-            value={now.toLocaleTimeString("en-PH", {
-              hour: "numeric",
-              minute: "2-digit",
-            })}
-            detail={now.toLocaleDateString("en-PH", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            })}
+            value={formatTimeOnly(now)}
+            detail={formatDateOnly(now)}
           />
           <HeroDatum
             icon={Clock3}
             label="Shift duration"
-            value={shiftDuration(activeShift?.startedAt)}
+            value={
+              activeShift ? formatShiftDuration(activeShift.startedAt) : "—"
+            }
             detail={
               activeShift
                 ? `Started ${formatDateTime(activeShift.startedAt)}`

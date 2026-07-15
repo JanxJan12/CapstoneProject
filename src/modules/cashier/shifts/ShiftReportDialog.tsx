@@ -5,7 +5,6 @@ import {
   TrendingDown,
   TrendingUp,
 } from "lucide-react";
-import { toast } from "sonner";
 import {
   Dialog,
   DialogDescription,
@@ -18,8 +17,9 @@ import type { CashierShift, ShiftTotals } from "../types";
 import {
   CashierButton,
   CashierDialogContent,
-  CashierStatusBadge,
-} from "../components/CashierUI";
+  StatusBadge,
+  Toast,
+} from "../components";
 
 export function ShiftReportDialog({
   shift,
@@ -72,7 +72,7 @@ export function ShiftReportDialog({
                   Official cashier shift report
                 </p>
               </div>
-              <CashierStatusBadge status={shift.status} />
+              <StatusBadge status={shift.status} />
             </div>
           </header>
 
@@ -203,7 +203,7 @@ export function ShiftReportDialog({
             variant="secondary"
             onClick={() => {
               window.print();
-              toast.success("Shift report sent to the print dialog.");
+              Toast.success("Shift report sent to the print dialog.");
             }}
           >
             <Printer className="h-4 w-4" />

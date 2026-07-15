@@ -13,8 +13,9 @@ import {
 } from "lucide-react";
 import { formatDateTime, formatMoney } from "../constants";
 import type { Payment } from "../types";
-import { CashierIconButton } from "../components/CashierUI";
+import { CashierIconButton } from "../components";
 import { EXPECTED_PAYMENT_RECEIVER } from "./paymentVerification";
+import { renderProofPng } from "./proofImage";
 
 const PROOF_WIDTH = 238;
 const PROOF_HEIGHT = 398;
@@ -97,7 +98,8 @@ export function ProofViewer({ payment }: { payment: Payment }) {
     const image = opened.document.createElement("img");
     image.src = proofUrl();
     image.alt = `${payment.orderId} original payment proof`;
-    image.style.cssText = "max-width:100%;max-height:calc(100vh - 48px);object-fit:contain";
+    image.style.cssText =
+      "max-width:100%;max-height:calc(100vh - 48px);object-fit:contain";
     opened.document.body.appendChild(image);
   };
 
@@ -140,8 +142,16 @@ export function ProofViewer({ payment }: { payment: Payment }) {
           />
           <Tool label="Fit to screen" icon={Focus} onClick={fitToScreen} />
           <Tool label="Reset view" icon={Move} onClick={reset} />
-          <Tool label="Download proof" icon={Download} onClick={downloadProof} />
-          <Tool label="Open original" icon={ExternalLink} onClick={openOriginal} />
+          <Tool
+            label="Download proof"
+            icon={Download}
+            onClick={downloadProof}
+          />
+          <Tool
+            label="Open original"
+            icon={ExternalLink}
+            onClick={openOriginal}
+          />
           <Tool
             label={fullscreen ? "Exit fullscreen" : "Fullscreen"}
             icon={fullscreen ? X : Maximize2}
@@ -194,7 +204,9 @@ export function ProofViewer({ payment }: { payment: Payment }) {
         >
           <div className="bg-[#0877e6] px-4 pb-5 pt-3 text-white">
             <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-white/60" />
-            <p className="text-center text-xs font-black tracking-wide">GCash</p>
+            <p className="text-center text-xs font-black tracking-wide">
+              GCash
+            </p>
           </div>
           <div className="p-5 text-center">
             <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-2xl font-black text-emerald-600">
@@ -209,9 +221,13 @@ export function ProofViewer({ payment }: { payment: Payment }) {
             <p className="mt-4 rounded-lg bg-white p-3 text-left text-[9px] leading-5 text-zinc-600 shadow-sm">
               From: <strong>{payment.senderName ?? "GCash customer"}</strong>
               <br />
-              To: <strong>{payment.receiverName ?? EXPECTED_PAYMENT_RECEIVER}</strong>
+              To:{" "}
+              <strong>
+                {payment.receiverName ?? EXPECTED_PAYMENT_RECEIVER}
+              </strong>
               <br />
-              Reference: <strong>{payment.referenceNumber ?? "Not found"}</strong>
+              Reference:{" "}
+              <strong>{payment.referenceNumber ?? "Not found"}</strong>
               <br />
               Date: <strong>{formatDateTime(payment.uploadedAt)}</strong>
             </p>
@@ -242,72 +258,4 @@ function Tool({
       className="border-white/10 bg-white text-zinc-700 hover:bg-zinc-100"
     />
   );
-}
-
-function renderProofPng(payment: Payment) {
-  const canvas = document.createElement("canvas");
-  canvas.width = 900;
-  canvas.height = 1400;
-  const context = canvas.getContext("2d");
-  if (!context) return "";
-
-  context.fillStyle = "#eff8ff";
-  context.fillRect(0, 0, canvas.width, canvas.height);
-  context.fillStyle = "#0877e6";
-  context.fillRect(0, 0, canvas.width, 250);
-  context.fillStyle = "#ffffff";
-  context.textAlign = "center";
-  context.font = "700 58px Arial";
-  context.fillText("GCash", 450, 145);
-  context.fillStyle = "#059669";
-  context.beginPath();
-  context.arc(450, 390, 82, 0, Math.PI * 2);
-  context.fill();
-  context.fillStyle = "#ffffff";
-  context.font = "700 70px Arial";
-  context.fillText("✓", 450, 415);
-  context.fillStyle = "#52525b";
-  context.font = "700 30px Arial";
-  context.fillText("PAYMENT SENT", 450, 535);
-  context.fillStyle = "#18181b";
-  context.font = "700 66px Arial";
-  context.fillText(formatMoney(payment.submittedAmount), 450, 630);
-
-  context.fillStyle = "#ffffff";
-  roundRect(context, 100, 720, 700, 430, 28);
-  context.fillStyle = "#52525b";
-  context.textAlign = "left";
-  context.font = "600 29px Arial";
-  const rows = [
-    ["From", payment.senderName ?? "GCash customer"],
-    ["To", payment.receiverName ?? EXPECTED_PAYMENT_RECEIVER],
-    ["Reference", payment.referenceNumber ?? "Not found"],
-    ["Date", formatDateTime(payment.uploadedAt)],
-  ];
-  rows.forEach(([label, value], index) => {
-    context.fillStyle = "#71717a";
-    context.fillText(label, 145, 805 + index * 88);
-    context.fillStyle = "#18181b";
-    context.font = "700 29px Arial";
-    context.fillText(value, 330, 805 + index * 88);
-    context.font = "600 29px Arial";
-  });
-  context.fillStyle = "#a1a1aa";
-  context.textAlign = "center";
-  context.font = "500 24px Arial";
-  context.fillText(payment.proofLabel ?? "Payment proof", 450, 1280);
-  return canvas.toDataURL("image/png");
-}
-
-function roundRect(
-  context: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-  radius: number,
-) {
-  context.beginPath();
-  context.roundRect(x, y, width, height, radius);
-  context.fill();
 }

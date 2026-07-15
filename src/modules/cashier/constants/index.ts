@@ -7,11 +7,29 @@ export const CASHIER_STATE_VERSION = 5;
 export const CASHIER_ID = "USR-CASHIER-001";
 export const CASHIER_NAME = "Juan Santos";
 export const CASHIER_TERMINAL = "Counter Terminal 01";
+export const CASHIER_LOCALE = "en-PH";
+export const CASHIER_CURRENCY = "PHP";
 export const DISCOUNT_RATE = 0.2;
 export const POS_TAX_ENABLED = false;
 export const POS_TAX_RATE = 0.12;
 export const DEFAULT_DELAY_THRESHOLD_MINUTES = 20;
 export const PAGE_SIZE = 7;
+export const ORDER_REFRESH_INTERVAL_MS = 15_000;
+export const DASHBOARD_CLOCK_REFRESH_MS = 30_000;
+export const SEARCH_FOCUS_DELAY_MS = 100;
+export const DATA_REFRESH_FEEDBACK_MS = 200;
+export const CASH_TENDER_SUGGESTIONS = [100, 200, 500, 1000] as const;
+export const MAX_POS_ITEM_QUANTITY = 99;
+export const POS_PRODUCT_HISTORY_LIMIT = 8;
+export const MAX_ACTIVITY_RECORDS = 40;
+export const MENU_GRID_ROW_HEIGHT_PX = 300;
+export const MENU_GRID_OVERSCAN_ROWS = 2;
+export const OPTIMISTIC_DELAY_MS = {
+  fast: 160,
+  default: 180,
+  standard: 200,
+  extended: 220,
+} as const;
 
 export const ORDER_STATUSES: OrderStatus[] = [
   "Awaiting Payment",
@@ -59,6 +77,15 @@ export const PAYMENT_REJECTION_REASONS = [
   "Other",
 ] as const;
 
+export const SHIFT_VARIANCE_REASONS = [
+  "Counting Error",
+  "Incorrect Change",
+  "Cash Payout",
+  "Missing Receipt",
+  "Unrecorded Refund",
+  "Other",
+] as const;
+
 export const MENU_CATEGORIES = [
   "All",
   "Viands",
@@ -73,20 +100,41 @@ export const DINING_TABLES = Array.from({ length: 12 }, (_, index) =>
 );
 
 export const formatMoney = (amount: number) =>
-  new Intl.NumberFormat("en-PH", {
+  new Intl.NumberFormat(CASHIER_LOCALE, {
     style: "currency",
-    currency: "PHP",
+    currency: CASHIER_CURRENCY,
     minimumFractionDigits: 2,
   }).format(amount);
 
+export const formatCompactMoney = (amount: number) =>
+  new Intl.NumberFormat(CASHIER_LOCALE, {
+    style: "currency",
+    currency: CASHIER_CURRENCY,
+    maximumFractionDigits: 0,
+  }).format(amount);
+
 export const formatDateTime = (iso: string) =>
-  new Intl.DateTimeFormat("en-PH", {
+  new Intl.DateTimeFormat(CASHIER_LOCALE, {
     month: "short",
     day: "numeric",
     year: "numeric",
     hour: "numeric",
     minute: "2-digit",
   }).format(new Date(iso));
+
+export const formatDateOnly = (value: string | Date) =>
+  new Intl.DateTimeFormat(CASHIER_LOCALE, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(typeof value === "string" ? new Date(value) : value);
+
+export const formatTimeOnly = (value: string | Date, includeSeconds = false) =>
+  new Intl.DateTimeFormat(CASHIER_LOCALE, {
+    hour: "numeric",
+    minute: "2-digit",
+    second: includeSeconds ? "2-digit" : undefined,
+  }).format(typeof value === "string" ? new Date(value) : value);
 
 export const minutesSince = (iso: string) =>
   Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 60_000));

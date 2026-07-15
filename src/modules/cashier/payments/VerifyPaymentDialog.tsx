@@ -9,7 +9,7 @@ import {
 } from "../../../app/components/ui/dialog";
 import { formatMoney } from "../constants";
 import type { Order, Payment } from "../types";
-import { CashierButton, CashierDialogContent } from "../components/CashierUI";
+import { CashierButton, CashierDialogContent } from "../components";
 import { getPaymentVerificationIssues } from "./paymentVerification";
 
 export function VerifyPaymentDialog({
@@ -62,13 +62,17 @@ export function VerifyPaymentDialog({
           </div>
           <div className="mt-2 flex justify-between text-xs text-muted-foreground">
             <span>Proof amount</span>
-            <strong className={amountMismatch ? "text-red-700" : "text-foreground"}>
+            <strong
+              className={amountMismatch ? "text-red-700" : "text-foreground"}
+            >
               {formatMoney(payment.submittedAmount)}
             </strong>
           </div>
           <div className="mt-2 flex justify-between border-t border-border pt-2 text-xs text-muted-foreground">
             <span>Difference</span>
-            <strong className={difference ? "text-red-700" : "text-emerald-700"}>
+            <strong
+              className={difference ? "text-red-700" : "text-emerald-700"}
+            >
               {difference > 0 ? "+" : difference < 0 ? "−" : ""}
               {formatMoney(Math.abs(difference))}
             </strong>
@@ -88,7 +92,9 @@ export function VerifyPaymentDialog({
                 Approve verification override
               </span>
               <span className="mt-1 block font-medium">
-                I reviewed {issues.map((issue) => issue.label.toLowerCase()).join(", ")} and take responsibility for releasing this order.
+                I reviewed{" "}
+                {issues.map((issue) => issue.label.toLowerCase()).join(", ")}{" "}
+                and take responsibility for releasing this order.
               </span>
             </span>
           </label>

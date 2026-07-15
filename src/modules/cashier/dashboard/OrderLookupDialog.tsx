@@ -9,9 +9,9 @@ import {
 import {
   CashierDialogContent,
   CashierInput,
-  CashierStatusBadge,
+  StatusBadge,
   EmptyState,
-} from "../components/CashierUI";
+} from "../components";
 import { formatMoney } from "../constants";
 import { useCashierStore } from "../hooks/CashierStore";
 import type { Order } from "../types";
@@ -82,7 +82,7 @@ export function OrderLookupDialog({
                     <strong className="font-mono text-xs text-primary">
                       {order.id}
                     </strong>
-                    <CashierStatusBadge status={order.status} />
+                    <StatusBadge status={order.status} />
                   </span>
                   <span className="mt-1 block truncate text-[10px] font-semibold text-muted-foreground">
                     {order.customerName} · {order.type} · {order.contactNumber}

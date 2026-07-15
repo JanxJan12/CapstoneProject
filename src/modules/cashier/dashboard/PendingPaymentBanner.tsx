@@ -1,7 +1,7 @@
 import { AlertTriangle, CheckCircle2, Clock3, CreditCard } from "lucide-react";
 import { formatMoney } from "../constants";
 import { useCashierMetrics } from "../hooks/useCashierMetrics";
-import { CashierButton } from "../components/CashierUI";
+import { CashierButton } from "../components";
 
 export function PendingPaymentBanner({ onVerify }: { onVerify: () => void }) {
   const metrics = useCashierMetrics();

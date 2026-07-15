@@ -1,3 +1,4 @@
+import { MAX_ACTIVITY_RECORDS } from "../constants";
 import type {
   ActivityKind,
   CashierShift,
@@ -6,11 +7,9 @@ import type {
   OrderStatus,
 } from "../types";
 
-export const cloneState = <T>(value: T): T =>
-  JSON.parse(JSON.stringify(value)) as T;
+export const cloneState = <T>(value: T): T => structuredClone(value);
 export const timestampNow = () => new Date().toISOString();
-export const nextEventId = () =>
-  `EVT-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+export const nextEventId = () => `EVT-${crypto.randomUUID()}`;
 
 export const nextRecordId = (
   prefix: string,
@@ -58,5 +57,5 @@ export const addActivity = (
     actor,
     timestamp: timestampNow(),
   });
-  state.activities = state.activities.slice(0, 40);
+  state.activities = state.activities.slice(0, MAX_ACTIVITY_RECORDS);
 };

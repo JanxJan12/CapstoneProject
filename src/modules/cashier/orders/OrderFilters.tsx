@@ -7,7 +7,8 @@ import {
   CashierInput,
   CashierSelect,
   Label,
-} from "../components/CashierUI";
+  SearchToolbar,
+} from "../components";
 
 export interface OrderFilterValue {
   search: string;
@@ -52,10 +53,7 @@ export function OrderFilters({
     next: OrderFilterValue[K],
   ) => onChange({ ...value, [key]: next });
   return (
-    <section
-      className="cashier-filter-bar rrj-card p-4"
-      aria-label="Order filters"
-    >
+    <SearchToolbar label="Order filters">
       <div
         className="mb-4 flex flex-wrap items-center gap-2"
         aria-label="Quick filters"
@@ -170,6 +168,6 @@ export function OrderFilters({
           </CashierButton>
         </div>
       </div>
-    </section>
+    </SearchToolbar>
   );
 }

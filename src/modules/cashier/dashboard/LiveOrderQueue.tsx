@@ -10,24 +10,13 @@ import {
   ACTIVE_ORDER_STATUSES,
   formatElapsed,
   formatMoney,
+  formatTimeOnly,
   minutesSince,
 } from "../constants";
 import { useCashierStore } from "../hooks/CashierStore";
 import type { Order } from "../types";
-import {
-  CashierStatusBadge,
-  EmptyState,
-  SectionHeading,
-} from "../components/CashierUI";
-
-const kitchenStatus = (order: Order) => {
-  if (order.status === "Awaiting Payment") return "Not sent";
-  if (["Confirmed", "Preparing", "Ready"].includes(order.status))
-    return order.status;
-  if (order.status === "Cancelled") return "Cancelled";
-  if (order.status === "Completed") return "Completed";
-  return "Ready / released";
-};
+import { StatusBadge, EmptyState, SectionHeading } from "../components";
+import { getKitchenStatus } from "../orders/orderOperations";
 
 export function LiveOrderQueue({
   onSelect,
@@ -122,9 +111,12 @@ export function LiveOrderQueue({
                   </span>
                   <span className="mt-2.5 flex flex-wrap gap-1.5">
                     <QueueFact label="Payment">
-                      <CashierStatusBadge status={order.paymentStatus} />
+                      <StatusBadge status={order.paymentStatus} />
                     </QueueFact>
-                    <QueueFact label="Kitchen" value={kitchenStatus(order)} />
+                    <QueueFact
+                      label="Kitchen"
+                      value={getKitchenStatus(order)}
+                    />
                     <QueueFact
                       label="Rider"
                       value={
@@ -150,11 +142,7 @@ export function LiveOrderQueue({
                       {formatMoney(order.total)}
                     </strong>
                     <span className="mt-1 block text-[9px] font-semibold text-muted-foreground">
-                      Created{" "}
-                      {new Date(order.createdAt).toLocaleTimeString("en-PH", {
-                        hour: "numeric",
-                        minute: "2-digit",
-                      })}
+                      Created {formatTimeOnly(order.createdAt)}
                     </span>
                     <span
                       className={`mt-1 flex items-center justify-end gap-1 text-[9px] font-black ${delayed ? "text-red-700" : "text-muted-foreground"}`}

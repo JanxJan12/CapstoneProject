@@ -9,9 +9,9 @@ import {
   WalletCards,
 } from "lucide-react";
 import { ACTIVE_ORDER_STATUSES, formatMoney } from "../constants";
+import { MetricCard } from "../components";
 import { useCashierMetrics } from "../hooks/useCashierMetrics";
 import type { CashierNavigationIntent, CashierPageId } from "../types";
-import { CashierMetricCard } from "./CashierMetricCard";
 
 export function CashierMetrics({
   onNavigate,
@@ -117,7 +117,7 @@ export function CashierMetrics({
     <section aria-label="Cashier summary metrics">
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {cards.map((card) => (
-          <CashierMetricCard key={card.label} {...card} onClick={card.action} />
+          <MetricCard key={card.label} {...card} onClick={card.action} />
         ))}
       </div>
     </section>
