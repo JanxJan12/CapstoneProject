@@ -1614,18 +1614,35 @@
   background: #171410;
 }
 
+.tablet-pos .pos-menu-toolbar-reveal {
+  animation: pos-search-reveal 170ms ease-out both;
+}
+
 .tablet-pos .pos-menu-toolbar svg {
   color: #998b7c;
 }
 
 .tablet-pos .pos-search-clear,
+.tablet-pos .pos-search-close,
 .tablet-pos .pos-search-shortcut {
   color: #998b7c;
 }
 
-.tablet-pos .pos-search-clear:hover {
+.tablet-pos .pos-search-clear:hover,
+.tablet-pos .pos-search-close:hover {
   background: rgba(255, 255, 255, 0.06);
   color: #f7eee3;
+}
+
+@keyframes pos-search-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .tablet-pos .pos-search-suggestions {

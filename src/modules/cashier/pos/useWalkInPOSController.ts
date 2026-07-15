@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Toast } from "../components";
-import { POS_TAX_ENABLED } from "../constants";
+import { POS_RECENT_SEARCH_LIMIT, POS_TAX_ENABLED } from "../constants";
 import { useCashierStore } from "../hooks/CashierStore";
 import { posSchema, type POSForm } from "../schemas";
 import { defaultModifiersFor } from "../constants/modifiers";
@@ -28,8 +28,10 @@ import {
   DEFAULT_POS_FORM,
   loadPOSDraft,
   loadPOSFavorites,
+  loadPOSRecentSearches,
   savePOSDraft,
   savePOSFavorites,
+  savePOSRecentSearches,
 } from "./posPersistence";
 import type { POSCartLine, WalkInOrderType } from "./types";
 import { RightPanelState } from "./types";
@@ -49,7 +51,12 @@ export function useWalkInPOSController(
   const draft = useMemo(loadPOSDraft, []);
   const [cart, setCart] = useState<POSCartLine[]>(draft.cart);
   const [category, setCategory] = useState("All");
+  const [searchVisible, setSearchVisible] = useState(false);
+  const [search, setSearch] = useState("");
   const [favoriteIds, setFavoriteIds] = useState<string[]>(loadPOSFavorites);
+  const [recentSearches, setRecentSearches] = useState<string[]>(
+    loadPOSRecentSearches,
+  );
   const [selectedItem, setSelectedItem] = useState<MenuItem>();
   const [rightPanelState, setRightPanelState] = useState(RightPanelState.CART);
   const [newOrderOpen, setNewOrderOpen] = useState(false);
@@ -59,6 +66,7 @@ export function useWalkInPOSController(
   const [error, setError] = useState("");
   const [pendingAction, setPendingAction] = useState<PendingPOSAction>();
   const [optionsOpen, setOptionsOpen] = useState(false);
+  const menuSearchRef = useRef<HTMLInputElement>(null);
   const checkoutRef = useRef<HTMLButtonElement>(null);
   const confirmOrderRef = useRef<HTMLButtonElement>(null);
   const previousPaymentMethod = useRef<POSForm["paymentMethod"]>(
@@ -177,6 +185,7 @@ export function useWalkInPOSController(
     return () => window.removeEventListener("beforeunload", warn);
   }, [isDirty]);
   useEffect(() => savePOSFavorites(favoriteIds), [favoriteIds]);
+  useEffect(() => savePOSRecentSearches(recentSearches), [recentSearches]);
   useEffect(() => {
     if (previousPaymentMethod.current === values.paymentMethod) return;
     previousPaymentMethod.current = values.paymentMethod;
@@ -359,6 +368,18 @@ export function useWalkInPOSController(
         : [...current, itemId],
     );
   }, []);
+  const commitSearch = useCallback((value: string) => {
+    const normalized = value.trim();
+    if (!normalized) return;
+    setRecentSearches((current) =>
+      [
+        normalized,
+        ...current.filter(
+          (entry) => entry.toLowerCase() !== normalized.toLowerCase(),
+        ),
+      ].slice(0, POS_RECENT_SEARCH_LIMIT),
+    );
+  }, []);
   const selectOrderType = useCallback(
     (orderType: WalkInOrderType) => {
       form.setValue("orderType", orderType, {
@@ -378,6 +399,8 @@ export function useWalkInPOSController(
   const resetPOS = useCallback(() => {
     setCart([]);
     setCategory("All");
+    setSearchVisible(false);
+    setSearch("");
     setSelectedItem(undefined);
     setRightPanelState(RightPanelState.CART);
     setNewOrderOpen(false);
@@ -561,6 +584,18 @@ export function useWalkInPOSController(
     setOptionsOpen(true);
     window.requestAnimationFrame(() => form.setFocus("discountType"));
   }, [cart.length, form]);
+  const showSearch = useCallback(() => {
+    setSearchVisible(true);
+    window.requestAnimationFrame(() => menuSearchRef.current?.focus());
+  }, []);
+  const hideSearch = useCallback(() => {
+    setSearchVisible(false);
+    setSearch("");
+  }, []);
+  const toggleSearch = useCallback(() => {
+    if (searchVisible) hideSearch();
+    else showSearch();
+  }, [hideSearch, searchVisible, showSearch]);
   const openCheckout = useCallback(() => {
     if (!cart.length) {
       Toast.error("Add an item before proceeding to checkout.");
@@ -625,13 +660,21 @@ export function useWalkInPOSController(
   }, [receiptPrinted]);
   const runQuickAction = useCallback(
     (action: QuickActionId) => {
-      if (action === "checkout") beginCheckout();
+      if (action === "search") toggleSearch();
+      else if (action === "checkout") beginCheckout();
       else if (action === "discount") openDiscount();
       else if (action === "hold") void handleHold();
       else if (action === "cancel") requestCancel();
       else guardedReset();
     },
-    [beginCheckout, guardedReset, handleHold, openDiscount, requestCancel],
+    [
+      beginCheckout,
+      guardedReset,
+      handleHold,
+      openDiscount,
+      requestCancel,
+      toggleSearch,
+    ],
   );
 
   useEffect(() => {
@@ -643,6 +686,9 @@ export function useWalkInPOSController(
         if (selectedItem) {
           event.preventDefault();
           closeCustomize();
+        } else if (searchVisible) {
+          event.preventDefault();
+          hideSearch();
         } else if (rightPanelState === RightPanelState.PAYMENT) {
           event.preventDefault();
           backToSummary();
@@ -655,6 +701,9 @@ export function useWalkInPOSController(
         }
       } else if (selectedItem || rightPanelState === RightPanelState.RECEIPT) {
         return;
+      } else if (event.key === "F2" || (event.key === "/" && !modifier)) {
+        event.preventDefault();
+        showSearch();
       } else if (modifier && event.key === "Enter") {
         event.preventDefault();
         if (rightPanelState === RightPanelState.PAYMENT) {
@@ -694,11 +743,14 @@ export function useWalkInPOSController(
     continueToPayment,
     guardedReset,
     handleHold,
+    hideSearch,
     isDirty,
     openDiscount,
     requestCancel,
     rightPanelState,
+    searchVisible,
     selectedItem,
+    showSearch,
   ]);
 
   return {
@@ -707,6 +759,12 @@ export function useWalkInPOSController(
     cart,
     category,
     setCategory,
+    searchVisible,
+    search,
+    setSearch,
+    recentSearches,
+    commitSearch,
+    hideSearch,
     favoriteIds,
     selectedItem,
     rightPanelState,
@@ -729,6 +787,7 @@ export function useWalkInPOSController(
     setError,
     pendingAction,
     setPendingAction,
+    menuSearchRef,
     checkoutRef,
     confirmOrderRef,
     optionsOpen,

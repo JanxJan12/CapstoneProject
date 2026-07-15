@@ -125,12 +125,19 @@ export function WalkInPOSPage({
         >
           <MenuGrid
             menuItems={pos.state.menuItems}
+            searchRef={pos.menuSearchRef}
             cart={pos.cart}
             category={pos.category}
+            searchVisible={pos.searchVisible}
+            search={pos.search}
             recentIds={pos.recentIds}
+            recentSearches={pos.recentSearches}
             bestSellerIds={pos.bestSellerIds}
             favoriteIds={pos.favoriteIds}
             onCategoryChange={pos.setCategory}
+            onSearchChange={pos.setSearch}
+            onCommitSearch={pos.commitSearch}
+            onCloseSearch={pos.hideSearch}
             onSelect={pos.openCustomize}
             onQuickAdd={pos.addItem}
             onToggleFavorite={pos.toggleFavorite}
