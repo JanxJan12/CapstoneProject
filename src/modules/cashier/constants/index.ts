@@ -30,9 +30,6 @@ export const POS_ITEM_NOTE_MAX_LENGTH = 120;
 export const MAX_ACTIVITY_RECORDS = 40;
 export const MENU_GRID_ROW_HEIGHT_PX = 300;
 export const MENU_GRID_OVERSCAN_ROWS = 2;
-export const POS_SWIPE_DELETE_THRESHOLD_PX = 72;
-export const POS_SWIPE_MAX_OFFSET_PX = 96;
-export const POS_PRINT_PREVIEW_DELAY_MS = 100;
 export const OPTIMISTIC_DELAY_MS = {
   fast: 160,
   default: 180,
@@ -102,6 +99,9 @@ export const MENU_CATEGORIES = [
   "Vegetables",
   "Rice",
   "Beverages",
+  "Desserts",
+  "Sides",
+  "Add-ons",
 ];
 
 export const POPULAR_MENU_SEARCHES = [

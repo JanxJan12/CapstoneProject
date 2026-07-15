@@ -11,10 +11,12 @@ speed-critical behavior as a separate layer from presentation.
   and keyboard result navigation.
 - `CategorySidebar` renders memoized category and quick-view counts.
 - `OrderItem` owns line-level quantity, modifiers, notes, duplicate, reorder,
-  swipe removal, and accessible actions.
-- `ModifierModal` supports required/optional and single/multi-select groups with
-  price adjustments.
-- `PaymentPanel` owns payment presentation and composes the touch keypad.
+  visible removal, and accessible actions.
+- `ModifierDrawer` supports required/optional and single/multi-select groups
+  without covering the menu.
+- `MealRecommendations` derives non-blocking, one-tap meal completion options.
+- `CheckoutPanel` replaces the right-side cart only after Checkout is pressed
+  and composes order information with `PaymentPanel`.
 
 ## Business and state boundaries
 
@@ -27,6 +29,6 @@ speed-critical behavior as a separate layer from presentation.
 - `VirtualizedProductGrid` renders only visible rows and keeps product lookups
   indexed for catalogs with 1,000 or more items.
 
-The default fast path is: search or category → Quick Add → tender suggestion →
-Place Order. Products with required modifiers receive a safe default, while
-opening the modifier modal remains available for customized orders.
+The default fast path is: search or category → Quick Add → continue browsing →
+Checkout → Confirm Order. Products receive a safe default configuration on the
+fast path, while explicit customization uses the compact right-side drawer.

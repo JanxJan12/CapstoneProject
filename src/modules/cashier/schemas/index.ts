@@ -91,6 +91,7 @@ export const posSchema = z
     paymentMethod: z.enum(["Cash", "GCash"]),
     amountTendered: z.number().optional(),
     gcashReference: z.string().optional(),
+    gcashConfirmed: z.boolean(),
     discountType: z.enum(["None", "Senior Citizen", "PWD"]),
     discountReference: z.string().optional(),
     orderInstructions: z
@@ -134,6 +135,13 @@ export const posSchema = z
         code: "custom",
         path: ["gcashReference"],
         message: "GCash reference number is required.",
+      });
+    }
+    if (value.paymentMethod === "GCash" && !value.gcashConfirmed) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["gcashConfirmed"],
+        message: "Confirm the GCash payment before placing the order.",
       });
     }
     if (value.discountType !== "None" && !value.discountReference?.trim()) {

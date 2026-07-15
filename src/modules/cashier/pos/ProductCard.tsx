@@ -94,8 +94,8 @@ export const ProductCard = memo(function ProductCard({
       <button
         type="button"
         disabled={soldOut}
-        onClick={onSelect}
-        aria-label={`Configure ${item.name}`}
+        onClick={onQuickAdd}
+        aria-label={`Add ${item.name} to cart`}
         className="block w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-amber-400"
       >
         <div className="pos-menu-item-image relative overflow-hidden">
@@ -159,7 +159,9 @@ export const ProductCard = memo(function ProductCard({
         </div>
       </button>
 
-      <div className="px-3 pb-3">
+      <div
+        className={`grid gap-2 px-3 pb-3 ${modifierCount ? "grid-cols-2" : ""}`}
+      >
         <button
           type="button"
           disabled={soldOut}
@@ -169,6 +171,16 @@ export const ProductCard = memo(function ProductCard({
           <Plus className="h-4 w-4" aria-hidden="true" />
           {soldOut ? "Sold Out" : "Quick Add"}
         </button>
+        {modifierCount && !soldOut ? (
+          <button
+            type="button"
+            onClick={onSelect}
+            className="pos-menu-customize flex min-h-11 items-center justify-center gap-2 rounded-lg border text-[10px] font-black transition-all duration-200"
+          >
+            <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden="true" />
+            Customize
+          </button>
+        ) : null}
       </div>
 
       {soldOut ? (

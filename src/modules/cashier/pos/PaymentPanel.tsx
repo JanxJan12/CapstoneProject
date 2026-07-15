@@ -1,7 +1,14 @@
 import { useMemo } from "react";
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
 import type { RefObject } from "react";
-import { ArrowRight, Banknote, Eye, Loader2, Smartphone } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Banknote,
+  CheckCircle2,
+  Loader2,
+  Smartphone,
+} from "lucide-react";
 import type { POSForm } from "../schemas";
 import { formatCompactMoney, formatMoney } from "../constants";
 import { CashierInput, FieldError, Label } from "../components";
@@ -22,10 +29,10 @@ export function PaymentPanel({
   disabledReason,
   shiftOpen,
   loading,
-  checkoutRef,
+  confirmRef,
   submitLabel = "Place Order",
   onTenderedChange,
-  onPreview,
+  onBack,
   onConfirm,
 }: {
   subtotal: number;
@@ -41,10 +48,10 @@ export function PaymentPanel({
   disabledReason?: string;
   shiftOpen: boolean;
   loading: boolean;
-  checkoutRef?: RefObject<HTMLButtonElement | null>;
+  confirmRef?: RefObject<HTMLButtonElement | null>;
   submitLabel?: string;
   onTenderedChange: (amount: number) => void;
-  onPreview: () => void;
+  onBack: () => void;
   onConfirm: () => void;
 }) {
   const change = Math.max(0, tendered - total);
@@ -168,9 +175,16 @@ export function PaymentPanel({
             {...register("gcashReference")}
           />
           <FieldError>{errors.gcashReference?.message}</FieldError>
-          <p className="mt-2 text-[9px] font-semibold">
-            No cash entry needed. Enter the reference, then place the order.
-          </p>
+          <label className="pos-gcash-confirm mt-3 flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border px-3 text-[10px] font-bold">
+            <input
+              type="checkbox"
+              className="h-4 w-4 accent-orange-500"
+              {...register("gcashConfirmed")}
+            />
+            <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+            Cashier confirms the GCash payment was received
+          </label>
+          <FieldError>{errors.gcashConfirmed?.message}</FieldError>
         </div>
       )}
 
@@ -196,14 +210,14 @@ export function PaymentPanel({
       <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-2 p-4">
         <button
           type="button"
-          disabled={!subtotal}
-          onClick={onPreview}
+          disabled={loading}
+          onClick={onBack}
           className="pos-receipt-button flex min-h-14 items-center justify-center gap-2 rounded-xl border px-4 text-xs font-black disabled:cursor-not-allowed disabled:opacity-30"
         >
-          <Eye className="h-4 w-4" /> Preview
+          <ArrowLeft className="h-4 w-4" /> Back to Cart
         </button>
         <button
-          ref={checkoutRef}
+          ref={confirmRef}
           type="button"
           disabled={!canPlace || !shiftOpen || loading}
           onClick={onConfirm}
@@ -221,7 +235,7 @@ export function PaymentPanel({
           <ArrowRight className="ml-2 h-5 w-5" />
         </button>
         <p className="col-span-2 text-center text-[9px] font-bold text-muted-foreground">
-          F3 Checkout · Ctrl+Enter Complete
+          Esc Back to Cart · Ctrl+Enter Confirm
         </p>
       </div>
     </section>

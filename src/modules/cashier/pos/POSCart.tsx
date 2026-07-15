@@ -2,12 +2,12 @@ import { useRef } from "react";
 import { UtensilsCrossed } from "lucide-react";
 import { OrderItem } from "./OrderItem";
 import type { POSCartLine } from "./types";
-import type { OrderType } from "../types";
+import type { WalkInOrderType } from "./types";
 
 export interface POSCartProps {
   items: POSCartLine[];
   orderNumber: string;
-  orderType: OrderType;
+  orderType: WalkInOrderType;
   onAdjust: (lineId: string, delta: number) => void;
   onQuantityChange: (lineId: string, quantity: number) => void;
   onRemove: (lineId: string) => void;
@@ -67,9 +67,9 @@ export function POSCart({
             <span className="flex h-14 w-14 items-center justify-center rounded-2xl border">
               <UtensilsCrossed className="h-6 w-6" aria-hidden="true" />
             </span>
-            <p className="text-xs font-black">No items yet.</p>
+            <p className="text-xs font-black">Your cart is empty</p>
             <p className="max-w-52 text-[10px] leading-4">
-              Select products to begin.
+              Select an item from the menu to begin.
             </p>
           </div>
         ) : (

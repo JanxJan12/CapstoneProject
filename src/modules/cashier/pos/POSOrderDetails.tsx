@@ -1,5 +1,5 @@
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
-import { MapPin, Phone, UserRound, Utensils } from "lucide-react";
+import { UserRound, Utensils } from "lucide-react";
 import {
   CashierInput,
   CashierSelect,
@@ -9,9 +9,10 @@ import {
 } from "../components";
 import { DINING_TABLES } from "../constants";
 import type { POSForm } from "../schemas";
+import type { WalkInOrderType } from "./types";
 
 export interface POSOrderDetailsProps {
-  orderType: POSForm["orderType"];
+  orderType: WalkInOrderType;
   discountType: POSForm["discountType"];
   occupiedTables: string[];
   optionsOpen: boolean;
@@ -29,16 +30,12 @@ export function POSOrderDetails({
   register,
   errors,
 }: POSOrderDetailsProps) {
-  const delivery = orderType === "Delivery";
-
   return (
     <section className="pos-order-details shrink-0 border-t px-4 py-3">
       <div className="mb-3">
         <p className="text-xs font-black">Order information</p>
         <p className="mt-1 text-[9px] font-semibold text-muted-foreground">
-          {delivery
-            ? "Delivery contact and destination are required."
-            : "Customer details are optional; add only what is relevant."}
+          Add fulfillment details now that the order is ready for checkout.
         </p>
       </div>
 
@@ -73,12 +70,11 @@ export function POSOrderDetails({
 
         <div className={orderType === "Take-out" ? "col-span-2" : ""}>
           <Label htmlFor="pos-customer-name">
-            <UserRound className="h-3 w-3" /> Customer name
-            {!delivery ? " (optional)" : ""}
+            <UserRound className="h-3 w-3" /> Customer name (optional)
           </Label>
           <CashierInput
             id="pos-customer-name"
-            placeholder={delivery ? "Delivery customer" : "Walk-in Customer"}
+            placeholder="Walk-in Customer"
             autoComplete="off"
             aria-invalid={Boolean(errors.customerName)}
             {...register("customerName")}
@@ -86,52 +82,12 @@ export function POSOrderDetails({
           <FieldError>{errors.customerName?.message}</FieldError>
         </div>
 
-        {delivery ? (
-          <>
-            <div className="col-span-2">
-              <Label htmlFor="pos-contact-number">
-                <Phone className="h-3 w-3" /> Contact number
-              </Label>
-              <CashierInput
-                id="pos-contact-number"
-                type="tel"
-                inputMode="tel"
-                autoComplete="tel"
-                placeholder="09XX XXX XXXX"
-                aria-invalid={Boolean(errors.contactNumber)}
-                {...register("contactNumber")}
-              />
-              <FieldError>{errors.contactNumber?.message}</FieldError>
-            </div>
-            <div className="col-span-2">
-              <Label htmlFor="pos-delivery-address">
-                <MapPin className="h-3 w-3" /> Delivery address
-              </Label>
-              <CashierTextarea
-                id="pos-delivery-address"
-                maxLength={200}
-                placeholder="House number, street, barangay, and landmarks"
-                className="min-h-16 text-xs"
-                aria-invalid={Boolean(errors.deliveryAddress)}
-                {...register("deliveryAddress")}
-              />
-              <FieldError>{errors.deliveryAddress?.message}</FieldError>
-            </div>
-          </>
-        ) : null}
-
         <div className="col-span-2">
-          <Label htmlFor="order-instructions">
-            {delivery ? "Delivery notes" : "Notes"}
-          </Label>
+          <Label htmlFor="order-instructions">Order notes (optional)</Label>
           <CashierTextarea
             id="order-instructions"
             maxLength={300}
-            placeholder={
-              delivery
-                ? "Gate, landmark, rider, or delivery instructions…"
-                : "Notes for the whole order…"
-            }
+            placeholder="Notes for the whole order…"
             className="min-h-14 text-xs"
             aria-invalid={Boolean(errors.orderInstructions)}
             {...register("orderInstructions")}
@@ -140,47 +96,42 @@ export function POSOrderDetails({
         </div>
       </div>
 
-      {!delivery ? (
-        <details
-          id="pos-order-options"
-          open={optionsOpen}
-          onToggle={(event) => onOptionsOpenChange(event.currentTarget.open)}
-          className="pos-order-options mt-2"
-        >
-          <summary className="flex min-h-10 cursor-pointer items-center justify-between rounded-lg px-2 text-[10px] font-black">
-            Discount
-            <span className="normal-case text-primary">
-              {discountType === "None" ? "Optional" : discountType}
-            </span>
-          </summary>
-          <div className="grid grid-cols-2 gap-2 pt-2">
-            <div>
-              <Label htmlFor="pos-discount-type">Discount</Label>
-              <CashierSelect
-                id="pos-discount-type"
-                {...register("discountType")}
-              >
-                <option value="None">No discount</option>
-                <option value="Senior Citizen">Senior Citizen · 20%</option>
-                <option value="PWD">PWD · 20%</option>
-              </CashierSelect>
-            </div>
-            <div>
-              <Label htmlFor="pos-discount-reference">ID / reference</Label>
-              <CashierInput
-                id="pos-discount-reference"
-                disabled={discountType === "None"}
-                placeholder={
-                  discountType === "None" ? "Not required" : "Required"
-                }
-                aria-invalid={Boolean(errors.discountReference)}
-                {...register("discountReference")}
-              />
-              <FieldError>{errors.discountReference?.message}</FieldError>
-            </div>
+      <details
+        id="pos-order-options"
+        open={optionsOpen}
+        onToggle={(event) => onOptionsOpenChange(event.currentTarget.open)}
+        className="pos-order-options mt-2"
+      >
+        <summary className="flex min-h-10 cursor-pointer items-center justify-between rounded-lg px-2 text-[10px] font-black">
+          Discount
+          <span className="normal-case text-primary">
+            {discountType === "None" ? "Optional" : discountType}
+          </span>
+        </summary>
+        <div className="grid grid-cols-2 gap-2 pt-2">
+          <div>
+            <Label htmlFor="pos-discount-type">Discount</Label>
+            <CashierSelect id="pos-discount-type" {...register("discountType")}>
+              <option value="None">No discount</option>
+              <option value="Senior Citizen">Senior Citizen · 20%</option>
+              <option value="PWD">PWD · 20%</option>
+            </CashierSelect>
           </div>
-        </details>
-      ) : null}
+          <div>
+            <Label htmlFor="pos-discount-reference">ID / reference</Label>
+            <CashierInput
+              id="pos-discount-reference"
+              disabled={discountType === "None"}
+              placeholder={
+                discountType === "None" ? "Not required" : "Required"
+              }
+              aria-invalid={Boolean(errors.discountReference)}
+              {...register("discountReference")}
+            />
+            <FieldError>{errors.discountReference?.message}</FieldError>
+          </div>
+        </div>
+      </details>
     </section>
   );
 }

@@ -1,0 +1,141 @@
+import { defaultModifiersFor } from "../src/modules/cashier/constants/modifiers";
+import {
+  addCartItem,
+  calculatePOSTotals,
+  getMealRecommendations,
+  getPOSWorkflowState,
+} from "../src/modules/cashier/pos/posOperations";
+import { DEFAULT_POS_FORM } from "../src/modules/cashier/pos/posPersistence";
+import type { POSCartLine } from "../src/modules/cashier/pos/types";
+import {
+  createWalkInOrder,
+  holdOrder,
+  removeHeldOrder,
+} from "../src/modules/cashier/services/cashierService";
+import { createInitialCashierState } from "../src/modules/cashier/services/seed";
+
+function assert(condition: unknown, message: string): asserts condition {
+  if (!condition) throw new Error(message);
+}
+
+let state = createInitialCashierState();
+let cart: POSCartLine[] = [];
+const menuItem = (id: string) => {
+  const item = state.menuItems.find((entry) => entry.id === id);
+  assert(item, `Missing test menu item ${id}.`);
+  return item;
+};
+const add = (id: string) => {
+  const item = menuItem(id);
+  const result = addCartItem(cart, item, 1, "", defaultModifiersFor(item));
+  assert(!result.error, result.error ?? `Unable to add ${item.name}.`);
+  cart = result.cart;
+};
+
+assert(
+  getPOSWorkflowState("reset", false) === "selectingItems",
+  "A new POS order must open directly in item selection.",
+);
+add("MENU-02");
+assert(
+  getPOSWorkflowState("addItem", true) === "reviewingCart",
+  "Adding a product must keep the cashier in the continuous cart workflow.",
+);
+const afterViand = getMealRecommendations(cart, state.menuItems);
+assert(
+  afterViand.title === "Complete the meal" &&
+    afterViand.items.some((item) => item.category === "Rice") &&
+    afterViand.items.some((item) => item.category === "Beverages"),
+  "A viand must recommend rice and beverages without blocking the cart.",
+);
+
+add("MENU-08");
+const afterRice = getMealRecommendations(cart, state.menuItems);
+assert(
+  afterRice.title === "Add a drink" &&
+    afterRice.items.every((item) => item.category === "Beverages"),
+  "A viand and rice must prioritize beverage recommendations.",
+);
+
+add("MENU-10");
+assert(
+  cart.length === 3 &&
+    cart.some(
+      (item) =>
+        item.menuItemId === "MENU-10" &&
+        item.modifiers?.some((modifier) => modifier.id === "drink-regular"),
+    ),
+  "Quick Add must support several categories and apply required defaults.",
+);
+const totals = calculatePOSTotals(cart, {
+  ...DEFAULT_POS_FORM,
+  orderType: "Take-out",
+  amountTendered: 500,
+});
+assert(totals.total === 190, "The multi-category cart total is incorrect.");
+
+const cartSnapshot = JSON.stringify(cart);
+assert(
+  getPOSWorkflowState("checkout", true) === "checkout" &&
+    getPOSWorkflowState("backToCart", true) === "reviewingCart" &&
+    JSON.stringify(cart) === cartSnapshot,
+  "Back to Cart must preserve the complete draft.",
+);
+
+const heldResult = holdOrder(state, {
+  type: "Take-out",
+  items: cart.map(({ lineId: _lineId, ...item }, index) => ({
+    ...item,
+    id: `POS-HOLD-${index + 1}`,
+  })),
+  discountType: null,
+});
+state = heldResult.state;
+assert(
+  state.heldOrders.some((held) => held.id === heldResult.held.id),
+  "Hold must persist the draft cart and order type.",
+);
+const resumedCart = heldResult.held.items;
+state = removeHeldOrder(state, heldResult.held.id);
+assert(
+  resumedCart.length === cart.length &&
+    !state.heldOrders.some((held) => held.id === heldResult.held.id),
+  "Resuming a held order must recover its items and remove the hold record.",
+);
+
+const orderCountBeforeDraftCancel = state.orders.length;
+cart = [];
+assert(
+  state.orders.length === orderCountBeforeDraftCancel &&
+    getPOSWorkflowState("reset", false) === "selectingItems",
+  "Cancelling an unsubmitted draft must not create a voided order record.",
+);
+
+const confirmed = createWalkInOrder(state, {
+  customerName: "Walk-in Test",
+  type: "Take-out",
+  items: resumedCart.map(({ id: _id, ...item }) => item),
+  discountType: null,
+  paymentMethod: "Cash",
+  amountTendered: 500,
+});
+state = confirmed.state;
+assert(
+  confirmed.order.status === "Confirmed" &&
+    state.payments.some(
+      (payment) => payment.id === confirmed.order.paymentId,
+    ) &&
+    state.transactions.some(
+      (transaction) => transaction.id === confirmed.order.transactionId,
+    ),
+  "Confirm Order must create connected kitchen, payment, and transaction records.",
+);
+assert(
+  getPOSWorkflowState("process", true) === "processing" &&
+    getPOSWorkflowState("showReceipt", false) === "receipt",
+  "Successful confirmation must progress from processing to receipt.",
+);
+
+console.log(
+  `Verified Walk-in POS: ${confirmed.order.id}, ${resumedCart.length} cart lines, ${state.transactions.length} transactions.`,
+);

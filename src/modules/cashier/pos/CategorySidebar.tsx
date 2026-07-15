@@ -1,10 +1,13 @@
 import { memo, useMemo } from "react";
 import {
   Beef,
+  CakeSlice,
   CupSoda,
   Flame,
   Grid2X2,
   History,
+  Package,
+  PlusCircle,
   Salad,
   Soup,
   Star,
@@ -21,6 +24,9 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
   Vegetables: Salad,
   Rice: Wheat,
   Beverages: CupSoda,
+  Desserts: CakeSlice,
+  Sides: Package,
+  "Add-ons": PlusCircle,
 };
 
 const QUICK_VIEWS = [
@@ -58,6 +64,15 @@ export const CategorySidebar = memo(function CategorySidebar({
     "Best sellers": bestSellerCount,
     Favorites: favoriteCount,
   };
+  const categories = useMemo(() => {
+    const configured = MENU_CATEGORIES.filter(
+      (category) => category === "All" || (counts.get(category) ?? 0) > 0,
+    );
+    const discovered = [...counts.keys()].filter(
+      (category) => !configured.includes(category),
+    );
+    return [...configured, ...discovered];
+  }, [counts]);
 
   return (
     <nav
@@ -80,7 +95,7 @@ export const CategorySidebar = memo(function CategorySidebar({
       <p className="pos-category-label px-2 pb-1 pt-3 text-[8px] font-black uppercase tracking-[0.18em]">
         Categories
       </p>
-      {MENU_CATEGORIES.map((category) => (
+      {categories.map((category) => (
         <CategoryButton
           key={category}
           label={category}

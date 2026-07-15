@@ -9,7 +9,7 @@ import {
 import type { POSForm } from "../schemas";
 import type { MenuItem, Order, OrderItemModifier } from "../types";
 import { createLineId } from "./posPersistence";
-import type { POSCartLine } from "./types";
+import type { POSCartLine, POSWorkflowState } from "./types";
 
 export interface CartUpdateResult {
   cart: POSCartLine[];
@@ -22,16 +22,31 @@ export interface CashTenderSuggestion {
   amount: number;
 }
 
-export type POSOrderInformationField =
-  | "tableNumber"
-  | "customerName"
-  | "contactNumber"
-  | "deliveryAddress"
-  | "discountReference";
+export interface MealRecommendations {
+  title: string;
+  items: MenuItem[];
+}
 
-export interface CheckoutEntryIssue {
-  field?: POSOrderInformationField;
-  message: string;
+export type POSWorkflowEvent =
+  | "addItem"
+  | "customize"
+  | "closeCustomization"
+  | "checkout"
+  | "backToCart"
+  | "process"
+  | "showReceipt"
+  | "reset";
+
+export function getPOSWorkflowState(
+  event: POSWorkflowEvent,
+  hasItems: boolean,
+): POSWorkflowState {
+  if (event === "customize") return "customizingItem";
+  if (event === "checkout") return "checkout";
+  if (event === "process") return "processing";
+  if (event === "showReceipt") return "receipt";
+  if (event === "reset") return "selectingItems";
+  return hasItems ? "reviewingCart" : "selectingItems";
 }
 
 export function getCashTenderSuggestions(
@@ -112,6 +127,59 @@ export function getProductHistory(orders: Order[]) {
   };
 }
 
+export function getMealRecommendations(
+  cart: POSCartLine[],
+  menuItems: MenuItem[],
+): MealRecommendations {
+  const cartItemIds = new Set(cart.map((item) => item.menuItemId));
+  const cartCategories = new Set(
+    cart
+      .map(
+        (item) =>
+          menuItems.find((menuItem) => menuItem.id === item.menuItemId)
+            ?.category,
+      )
+      .filter((category): category is string => Boolean(category)),
+  );
+  const hasMainDish = ["Viands", "Soups", "Vegetables"].some((category) =>
+    cartCategories.has(category),
+  );
+  const hasRice = cartCategories.has("Rice");
+  const hasBeverage = cartCategories.has("Beverages");
+
+  let title = "Frequently paired items";
+  let preferredCategories: string[];
+  if (hasMainDish && !hasRice) {
+    title = "Complete the meal";
+    preferredCategories = ["Rice", "Beverages"];
+  } else if (hasMainDish && hasRice && !hasBeverage) {
+    title = "Add a drink";
+    preferredCategories = ["Beverages", "Desserts", "Sides"];
+  } else if (hasBeverage && !hasRice) {
+    title = "Add rice";
+    preferredCategories = ["Rice", "Viands", "Vegetables"];
+  } else {
+    preferredCategories = [
+      "Desserts",
+      "Sides",
+      "Beverages",
+      "Rice",
+      "Vegetables",
+    ];
+  }
+
+  const items = preferredCategories.flatMap((category) =>
+    menuItems.filter(
+      (item) =>
+        item.category === category &&
+        item.available &&
+        item.inventoryRemaining !== 0 &&
+        !cartItemIds.has(item.id),
+    ),
+  );
+  return { title, items: items.slice(0, 4) };
+}
+
 export function getNextOrderNumber(orders: Order[]) {
   const maximum = orders.reduce((current, order) => {
     const parsed = Number(order.id.match(/(\d+)$/)?.[1] ?? 0);
@@ -161,66 +229,6 @@ export function getInventoryIssue(cart: POSCartLine[], menuItems: MenuItem[]) {
   return undefined;
 }
 
-export function getCheckoutEntryIssue(
-  form: POSForm,
-  occupiedTables: string[],
-  hasActiveShift: boolean,
-  unavailableItemName?: string,
-  inventoryIssue?: string,
-): CheckoutEntryIssue | undefined {
-  if (!hasActiveShift) {
-    return { message: "Start a cashier shift before proceeding to checkout." };
-  }
-  if (unavailableItemName) {
-    return {
-      message: `${unavailableItemName} is no longer available. Remove it to continue.`,
-    };
-  }
-  if (inventoryIssue) {
-    return { message: `${inventoryIssue} Adjust the quantity to continue.` };
-  }
-  if (form.orderType === "Dine-in" && !form.tableNumber?.trim()) {
-    return {
-      field: "tableNumber",
-      message: "Select an available table for this dine-in order.",
-    };
-  }
-  if (
-    form.orderType === "Dine-in" &&
-    occupiedTables.includes(String(Number(form.tableNumber)))
-  ) {
-    return {
-      field: "tableNumber",
-      message: `Table ${form.tableNumber} already has an active order.`,
-    };
-  }
-  if (form.orderType === "Delivery" && !form.customerName?.trim()) {
-    return {
-      field: "customerName",
-      message: "Enter the delivery customer name.",
-    };
-  }
-  if (form.orderType === "Delivery" && !form.contactNumber?.trim()) {
-    return {
-      field: "contactNumber",
-      message: "Enter the delivery contact number.",
-    };
-  }
-  if (form.orderType === "Delivery" && !form.deliveryAddress?.trim()) {
-    return {
-      field: "deliveryAddress",
-      message: "Enter the delivery address.",
-    };
-  }
-  if (form.discountType !== "None" && !form.discountReference?.trim()) {
-    return {
-      field: "discountReference",
-      message: "Enter the Senior/PWD ID or reference.",
-    };
-  }
-  return undefined;
-}
-
 export function getPlaceOrderAvailability(
   cart: POSCartLine[],
   form: POSForm,
@@ -253,7 +261,7 @@ export function getPlaceOrderAvailability(
     (form.discountType === "None" || Boolean(form.discountReference?.trim())) &&
     (form.paymentMethod === "Cash"
       ? tendered >= total
-      : Boolean(form.gcashReference?.trim()));
+      : Boolean(form.gcashReference?.trim() && form.gcashConfirmed));
   const disabledReason = !cart.length
     ? "Add at least one menu item to continue."
     : unavailableItem
@@ -278,7 +286,9 @@ export function getPlaceOrderAvailability(
                       : form.paymentMethod === "GCash" &&
                           !form.gcashReference?.trim()
                         ? "Enter the customer's GCash reference number."
-                        : undefined;
+                        : form.paymentMethod === "GCash" && !form.gcashConfirmed
+                          ? "Confirm the GCash payment before placing the order."
+                          : undefined;
   return { unavailableItem, selectedTableOccupied, canPlace, disabledReason };
 }
 

@@ -1,21 +1,23 @@
-import { XCircle } from "lucide-react";
-import type { POSForm } from "../schemas";
+import { CircleX } from "lucide-react";
 import type { HeldOrder } from "../types";
 import { CashierSelect } from "../components";
+import type { WalkInOrderType } from "./types";
 
 export function POSOrderHeader({
   orderType,
   busy,
   heldOrders,
   onOrderTypeChange,
-  onVoid,
+  canCancel,
+  onCancel,
   onReopen,
 }: {
-  orderType: POSForm["orderType"];
+  orderType: WalkInOrderType;
   busy: boolean;
   heldOrders: HeldOrder[];
-  onOrderTypeChange: (type: POSForm["orderType"]) => void;
-  onVoid: () => void;
+  canCancel: boolean;
+  onOrderTypeChange: (type: WalkInOrderType) => void;
+  onCancel: () => void;
   onReopen: (id: string) => void;
 }) {
   return (
@@ -30,7 +32,7 @@ export function POSOrderHeader({
             role="radiogroup"
             aria-label="Order type"
           >
-            {(["Dine-in", "Take-out", "Delivery"] as const).map((type) => (
+            {(["Dine-in", "Take-out"] as const).map((type) => (
               <button
                 type="button"
                 key={type}
@@ -70,11 +72,11 @@ export function POSOrderHeader({
         )}
         <div className="pos-order-actions ml-auto flex flex-wrap gap-1.5">
           <Action
-            label="Void"
-            icon={XCircle}
+            label="Cancel Order"
+            icon={CircleX}
             danger
-            onClick={onVoid}
-            disabled={busy}
+            onClick={onCancel}
+            disabled={busy || !canCancel}
           />
         </div>
       </div>

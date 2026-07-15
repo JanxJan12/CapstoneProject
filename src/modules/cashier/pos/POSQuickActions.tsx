@@ -3,7 +3,6 @@ import {
   CircleX,
   CreditCard,
   PauseCircle,
-  Printer,
   RotateCcw,
   Search,
 } from "lucide-react";
@@ -13,7 +12,6 @@ const ACTIONS = [
   { id: "checkout", label: "Checkout", hint: "F3", icon: CreditCard },
   { id: "new", label: "New", hint: "Ctrl+N", icon: RotateCcw },
   { id: "discount", label: "Discount", hint: "Ctrl+D", icon: BadgePercent },
-  { id: "print", label: "Print", hint: "Ctrl+P", icon: Printer },
   { id: "hold", label: "Hold", hint: "Ctrl+H", icon: PauseCircle },
   { id: "cancel", label: "Cancel", hint: "Esc", icon: CircleX },
 ] as const;
@@ -35,10 +33,7 @@ export function POSQuickActions({
         <button
           key={id}
           type="button"
-          disabled={
-            busy ||
-            (!hasItems && !["search", "new", "discount", "cancel"].includes(id))
-          }
+          disabled={busy || (!hasItems && !["search", "new"].includes(id))}
           onClick={() => onAction(id)}
           className="pos-quick-action"
           title={`${label} (${hint})`}

@@ -1523,44 +1523,6 @@
   color: var(--pos-text);
 }
 
-.tablet-pos .pos-order-type-gate {
-  background:
-    radial-gradient(
-      circle at 50% 12%,
-      rgba(237, 116, 28, 0.12),
-      transparent 34%
-    ),
-    var(--pos-bg);
-}
-
-.tablet-pos .pos-order-type-choice {
-  border-color: var(--pos-line);
-  background: linear-gradient(145deg, #24201b, #1b1713);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
-  color: var(--pos-text);
-}
-
-.tablet-pos .pos-order-type-choice > span:first-child {
-  border-color: rgba(247, 156, 58, 0.28);
-  background: rgba(237, 116, 28, 0.08);
-  color: var(--pos-orange-soft);
-}
-
-.tablet-pos .pos-order-type-choice:hover,
-.tablet-pos .pos-order-type-choice:focus-visible {
-  transform: translateY(-2px);
-  border-color: rgba(247, 156, 58, 0.52);
-  background: linear-gradient(145deg, #2b251f, #211a15);
-  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.3);
-  outline: none;
-}
-
-.tablet-pos .pos-order-type-choice:focus-visible {
-  box-shadow:
-    0 0 0 3px rgba(237, 116, 28, 0.22),
-    0 18px 36px rgba(0, 0, 0, 0.3);
-}
-
 .tablet-pos .pos-order-header {
   border-color: var(--pos-line);
   background:
@@ -1793,6 +1755,7 @@
 .tablet-pos .pos-menu-item-card > span[aria-label$="in cart"] {
   background: var(--pos-orange);
   color: white;
+  animation: pos-cart-badge 180ms ease-out both;
 }
 
 .tablet-pos .pos-menu-item-image {
@@ -1908,6 +1871,18 @@
   transform: translateY(0);
 }
 
+.tablet-pos .pos-menu-customize {
+  border-color: var(--pos-line-soft);
+  background: #211d18;
+  color: #b7a797;
+}
+
+.tablet-pos .pos-menu-customize:hover {
+  border-color: rgba(245, 153, 62, 0.42);
+  background: rgba(237, 116, 28, 0.1);
+  color: white;
+}
+
 .tablet-pos .pos-menu-item-card.is-unavailable {
   opacity: 0.58;
 }
@@ -1931,7 +1906,7 @@
 
 .tablet-pos .pos-order-pane {
   min-width: 410px;
-  overflow-y: auto !important;
+  overflow: hidden !important;
   overscroll-behavior: contain;
   border-color: var(--pos-line);
   background: #171410;
@@ -1976,6 +1951,9 @@
 }
 
 .tablet-pos .pos-cart-checkout {
+  position: sticky;
+  z-index: 4;
+  bottom: 0;
   border-color: var(--pos-line);
   background: linear-gradient(180deg, #1c1814, #17130f);
   box-shadow: 0 -12px 28px rgba(0, 0, 0, 0.18);
@@ -1986,26 +1964,130 @@
   box-shadow: 0 12px 25px rgba(177, 65, 7, 0.3);
 }
 
-.tablet-pos .pos-proceed-checkout:hover {
+.tablet-pos .pos-proceed-checkout:hover:not(:disabled) {
   transform: translateY(-2px);
   background: linear-gradient(100deg, #d9570b, #f27f27 62%, #ec6b19);
   box-shadow: 0 16px 30px rgba(177, 65, 7, 0.38);
 }
 
-.tablet-pos.pos-checkout-content {
+.tablet-pos .pos-proceed-checkout:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
+.tablet-pos .pos-meal-recommendations {
   border-color: var(--pos-line);
-  background: var(--pos-panel);
+  background: #181511;
+}
+
+.tablet-pos .pos-recommendation-strip {
+  scrollbar-color: #514337 transparent;
+}
+
+.tablet-pos .pos-recommendation-card {
+  border-color: var(--pos-line-soft);
+  background: #211d18;
+}
+
+.tablet-pos .pos-recommendation-card button {
+  background: rgba(237, 116, 28, 0.12);
+  color: var(--pos-orange-soft);
+  transition:
+    background 150ms ease,
+    color 150ms ease,
+    transform 100ms ease;
+}
+
+.tablet-pos .pos-recommendation-card button:hover {
+  background: var(--pos-orange);
+  color: white;
+}
+
+.tablet-pos .pos-recommendation-card button:active {
+  transform: scale(0.95);
+}
+
+.tablet-pos .pos-side-drawer,
+.tablet-pos .pos-checkout-panel {
+  background: #171410;
+}
+
+.tablet-pos .pos-side-drawer-header,
+.tablet-pos .pos-side-drawer-footer,
+.tablet-pos .pos-checkout-panel-header {
+  border-color: var(--pos-line);
+  background: #1c1814;
+}
+
+.tablet-pos .pos-side-drawer-header > span:first-child {
+  border: 1px solid rgba(245, 153, 62, 0.28);
+  background: rgba(237, 116, 28, 0.09);
+  color: var(--pos-orange-soft);
+}
+
+.tablet-pos .pos-side-drawer-header button,
+.tablet-pos .pos-checkout-panel-header button {
+  color: var(--pos-muted);
+}
+
+.tablet-pos .pos-side-drawer-header button:hover,
+.tablet-pos .pos-checkout-panel-header button:hover {
+  background: rgba(255, 255, 255, 0.055);
+  color: white;
+}
+
+.tablet-pos .pos-side-drawer textarea {
+  border-color: var(--pos-line-soft);
+  background: #24201b;
   color: var(--pos-text);
 }
 
-.tablet-pos .pos-checkout-summary {
+.tablet-pos .pos-modifier-option {
+  border-color: var(--pos-line-soft);
+  background: #211d18;
+  color: #b7a797;
+  transition:
+    border-color 150ms ease,
+    background 150ms ease,
+    color 150ms ease;
+}
+
+.tablet-pos .pos-modifier-option:hover {
+  border-color: rgba(245, 153, 62, 0.34);
+  color: white;
+}
+
+.tablet-pos .pos-modifier-option.is-selected {
+  border-color: rgba(245, 153, 62, 0.52);
+  background: rgba(237, 116, 28, 0.12);
+  color: #ffd0a0;
+}
+
+.tablet-pos .pos-checkout-panel-header {
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.2);
+}
+
+.tablet-pos .pos-checkout-review {
   background:
-    radial-gradient(circle at 0 0, rgba(237, 116, 28, 0.06), transparent 34%),
+    radial-gradient(circle at 0 0, rgba(237, 116, 28, 0.06), transparent 36%),
     #171410;
 }
 
-.tablet-pos .pos-checkout-fulfillment {
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+.tablet-pos .pos-gcash-confirm {
+  border-color: var(--pos-line-soft);
+  background: #211d18;
+  color: #b7a797;
+}
+
+@keyframes pos-cart-badge {
+  from {
+    opacity: 0.55;
+    transform: scale(0.78);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .tablet-pos .pos-cart-list,
@@ -2070,10 +2152,6 @@
 .tablet-pos .pos-cart-modifiers span {
   background: rgba(237, 116, 28, 0.08);
   color: #d4a276;
-}
-
-.tablet-pos .pos-swipe-delete {
-  background: #8e2f24;
 }
 
 .tablet-pos .pos-order-notes,

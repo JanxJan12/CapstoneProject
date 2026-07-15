@@ -17,6 +17,7 @@ export const DEFAULT_POS_FORM: POSForm = {
   paymentMethod: "Cash",
   amountTendered: 0,
   gcashReference: "",
+  gcashConfirmed: false,
   discountType: "None",
   discountReference: "",
   orderInstructions: "",
@@ -41,12 +42,18 @@ export function loadPOSDraft(): { cart: POSCartLine[]; form: POSForm } {
       form: {
         ...DEFAULT_POS_FORM,
         ...saved?.form,
+        orderType:
+          saved?.form?.orderType === "Take-out" ||
+          saved?.form?.orderType === "Delivery"
+            ? "Take-out"
+            : "Dine-in",
         customerName: "",
         contactNumber: "",
         deliveryAddress: "",
         tableNumber: "",
         discountType: "None",
         discountReference: "",
+        gcashConfirmed: false,
       },
     };
   } catch {
