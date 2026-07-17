@@ -5,7 +5,6 @@ import {
   History,
   Plus,
   SlidersHorizontal,
-  Star,
 } from "lucide-react";
 import { POS_LOW_INVENTORY_THRESHOLD, formatMoney } from "../constants";
 import { modifierGroupsFor } from "../constants/modifiers";
@@ -30,25 +29,21 @@ const productImageFor = (itemId: string) =>
 export interface ProductCardProps {
   item: MenuItem;
   quantity: number;
-  favorite: boolean;
   bestSeller: boolean;
   recentlyOrdered: boolean;
   keyboardActive: boolean;
   onSelect: () => void;
   onQuickAdd: () => void;
-  onToggleFavorite: () => void;
 }
 
 export const ProductCard = memo(function ProductCard({
   item,
   quantity,
-  favorite,
   bestSeller,
   recentlyOrdered,
   keyboardActive,
   onSelect,
   onQuickAdd,
-  onToggleFavorite,
 }: ProductCardProps) {
   const modifierCount = modifierGroupsFor(item).length;
   const lowInventory =
@@ -137,24 +132,6 @@ export const ProductCard = memo(function ProductCard({
           </button>
         ) : null}
       </div>
-
-      <button
-        type="button"
-        disabled={soldOut}
-        onClick={onToggleFavorite}
-        aria-label={
-          favorite
-            ? `Remove ${item.name} from favorites`
-            : `Favorite ${item.name}`
-        }
-        aria-pressed={favorite}
-        className="pos-menu-favorite absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-lg disabled:cursor-not-allowed"
-      >
-        <Star
-          className={`h-3.5 w-3.5 ${favorite ? "fill-current" : ""}`}
-          aria-hidden="true"
-        />
-      </button>
     </article>
   );
 }, areProductCardPropsEqual);
@@ -166,7 +143,6 @@ function areProductCardPropsEqual(
   return (
     previous.item === next.item &&
     previous.quantity === next.quantity &&
-    previous.favorite === next.favorite &&
     previous.bestSeller === next.bestSeller &&
     previous.recentlyOrdered === next.recentlyOrdered &&
     previous.keyboardActive === next.keyboardActive

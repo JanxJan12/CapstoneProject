@@ -29,8 +29,7 @@ requires them.
   order-line, and duplication rules.
 - `cashierService` and the shared cashier store remain the authoritative order,
   payment, transaction, held-order, and inventory boundary.
-- `posPersistence` defensively stores active drafts, favorites, and recent
-  searches.
+- `posPersistence` defensively stores active drafts and recent searches.
 - `VirtualizedProductGrid` renders only visible rows and keeps product lookups
   indexed for large catalogs.
 

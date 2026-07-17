@@ -5,14 +5,7 @@ import {
   useState,
   type RefObject,
 } from "react";
-import {
-  AlertTriangle,
-  Flame,
-  PauseCircle,
-  Search,
-  Star,
-  Zap,
-} from "lucide-react";
+import { AlertTriangle, Flame, PauseCircle, Search, Zap } from "lucide-react";
 import { EmptyState } from "../components";
 import type { MenuItem } from "../types";
 import { CategorySidebar } from "./CategorySidebar";
@@ -30,14 +23,12 @@ export interface MenuGridProps {
   recentIds: string[];
   recentSearches: string[];
   bestSellerIds: string[];
-  favoriteIds: string[];
   heldOrderCount: number;
   onCategoryChange: (category: string) => void;
   onSearchChange: (search: string) => void;
   onCommitSearch: (search: string) => void;
   onSelect: (item: MenuItem) => void;
   onQuickAdd: (item: MenuItem) => void;
-  onToggleFavorite: (itemId: string) => void;
 }
 
 export function MenuGrid({
@@ -49,19 +40,16 @@ export function MenuGrid({
   recentIds,
   recentSearches,
   bestSellerIds,
-  favoriteIds,
   heldOrderCount,
   onCategoryChange,
   onSearchChange,
   onCommitSearch,
   onSelect,
   onQuickAdd,
-  onToggleFavorite,
 }: MenuGridProps) {
   const [activeIndex, setActiveIndex] = useState(-1);
   const recent = useMemo(() => new Set(recentIds), [recentIds]);
   const bestSellers = useMemo(() => new Set(bestSellerIds), [bestSellerIds]);
-  const favorites = useMemo(() => new Set(favoriteIds), [favoriteIds]);
   const soldOutCount = useMemo(
     () =>
       menuItems.filter(
@@ -78,16 +66,8 @@ export function MenuGrid({
     [bestSellerIds, menuItems],
   );
   const filtered = useMemo(
-    () =>
-      filterMenuItems(
-        menuItems,
-        category,
-        search,
-        recent,
-        bestSellers,
-        favorites,
-      ),
-    [bestSellers, category, favorites, menuItems, recent, search],
+    () => filterMenuItems(menuItems, category, search, recent, bestSellers),
+    [bestSellers, category, menuItems, recent, search],
   );
   useEffect(() => setActiveIndex(-1), [category, search]);
   const activeItem = filtered[activeIndex];
@@ -164,7 +144,6 @@ export function MenuGrid({
           value={category}
           recentCount={recentIds.length}
           bestSellerCount={bestSellerIds.length}
-          favoriteCount={favoriteIds.length}
           onChange={handleCategoryChange}
         />
 
@@ -227,26 +206,16 @@ export function MenuGrid({
               cart={cart}
               recentIds={recentIds}
               bestSellerIds={bestSellerIds}
-              favoriteIds={favoriteIds}
               activeItemId={activeItem?.id}
               onSelect={onSelect}
               onQuickAdd={onQuickAdd}
-              onToggleFavorite={onToggleFavorite}
             />
           ) : (
             <div className="flex flex-1 items-center justify-center p-4">
               <EmptyState
-                icon={category === "Favorites" ? Star : Search}
-                title={
-                  category === "Favorites"
-                    ? "No favorites yet"
-                    : "No menu items found"
-                }
-                description={
-                  category === "Favorites"
-                    ? "Use the star on a product card to build a fast-access list."
-                    : "Try another name, alias, or category."
-                }
+                icon={Search}
+                title="No menu items found"
+                description="Try another name, alias, or category."
               />
             </div>
           )}

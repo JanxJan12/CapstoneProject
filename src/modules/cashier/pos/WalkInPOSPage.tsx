@@ -142,14 +142,12 @@ export function WalkInPOSPage({
           recentIds={pos.recentIds}
           recentSearches={pos.recentSearches}
           bestSellerIds={pos.bestSellerIds}
-          favoriteIds={pos.favoriteIds}
           heldOrderCount={pos.state.heldOrders.length}
           onCategoryChange={pos.setCategory}
           onSearchChange={pos.setSearch}
           onCommitSearch={pos.commitSearch}
           onSelect={pos.openCustomize}
           onQuickAdd={pos.addItem}
-          onToggleFavorite={pos.toggleFavorite}
         />
       </main>
 

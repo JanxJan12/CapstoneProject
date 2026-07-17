@@ -2,7 +2,6 @@ import type { OrderStatus } from "../types";
 
 export const CASHIER_STORAGE_KEY = "rrj_cashier_state_v4";
 export const POS_DRAFT_STORAGE_KEY = "rrj_cashier_pos_draft_v3";
-export const POS_FAVORITES_STORAGE_KEY = "rrj_cashier_pos_favorites_v1";
 export const POS_RECENT_SEARCHES_STORAGE_KEY =
   "rrj_cashier_pos_recent_searches_v1";
 export const CASHIER_STATE_VERSION = 6;

@@ -48,7 +48,6 @@ const codeSearch = filterMenuItems(
   "R1",
   new Set(),
   new Set(),
-  new Set(),
 );
 assert(
   codeSearch.length === 1 && codeSearch[0]?.name === "White Rice",

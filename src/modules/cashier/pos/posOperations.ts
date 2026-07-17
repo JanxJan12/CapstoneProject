@@ -107,7 +107,6 @@ export function filterMenuItems(
   search: string,
   recentIds: ReadonlySet<string>,
   bestSellerIds: ReadonlySet<string>,
-  favoriteIds: ReadonlySet<string>,
 ) {
   const terms = search.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
   return items.filter((item) => {
@@ -115,8 +114,7 @@ export function filterMenuItems(
       category === "All" ||
       item.category === category ||
       (category === "Recently ordered" && recentIds.has(item.id)) ||
-      (category === "Best sellers" && bestSellerIds.has(item.id)) ||
-      (category === "Favorites" && favoriteIds.has(item.id));
+      (category === "Best sellers" && bestSellerIds.has(item.id));
     if (!inView) return false;
     const searchable = [
       item.code,

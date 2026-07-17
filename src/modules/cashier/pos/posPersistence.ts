@@ -1,6 +1,5 @@
 import {
   POS_DRAFT_STORAGE_KEY,
-  POS_FAVORITES_STORAGE_KEY,
   POS_RECENT_SEARCHES_STORAGE_KEY,
   POS_RECENT_SEARCH_LIMIT,
 } from "../constants";
@@ -81,27 +80,6 @@ export function clearPOSDraft() {
     localStorage.removeItem(POS_DRAFT_STORAGE_KEY);
   } catch {
     // Ignore restricted storage environments.
-  }
-}
-
-export function loadPOSFavorites(): string[] {
-  try {
-    const saved = JSON.parse(
-      localStorage.getItem(POS_FAVORITES_STORAGE_KEY) ?? "[]",
-    ) as unknown;
-    return Array.isArray(saved)
-      ? saved.filter((entry): entry is string => typeof entry === "string")
-      : [];
-  } catch {
-    return [];
-  }
-}
-
-export function savePOSFavorites(ids: string[]) {
-  try {
-    localStorage.setItem(POS_FAVORITES_STORAGE_KEY, JSON.stringify(ids));
-  } catch {
-    // Favorites remain available for the active session.
   }
 }
 

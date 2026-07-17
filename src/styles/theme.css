@@ -1822,24 +1822,6 @@
   color: var(--pos-orange-soft);
 }
 
-.tablet-pos .pos-menu-favorite {
-  border: 1px solid rgba(255, 255, 255, 0.11);
-  background: rgba(20, 16, 13, 0.78);
-  color: #c7b7a7;
-  backdrop-filter: blur(7px);
-  transition:
-    background 160ms ease,
-    color 160ms ease,
-    transform 160ms ease;
-}
-
-.tablet-pos .pos-menu-favorite:hover:not(:disabled),
-.tablet-pos .pos-menu-favorite[aria-pressed="true"] {
-  background: rgba(237, 116, 28, 0.92);
-  color: white;
-  transform: translateY(-1px);
-}
-
 .tablet-pos .pos-availability {
   color: #d08078;
 }
@@ -3244,16 +3226,6 @@
 
 .tablet-pos .pos-product-main .pos-availability.is-available {
   color: #6fd690;
-}
-
-.tablet-pos .pos-product-actions {
-  padding-right: 3rem;
-}
-
-.tablet-pos .pos-menu-favorite {
-  top: 0.65rem;
-  right: 0.65rem;
-  bottom: auto;
 }
 
 .tablet-pos .pos-menu-quick-add {

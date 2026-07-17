@@ -9,11 +9,9 @@ export interface VirtualizedProductGridProps {
   cart: POSCartLine[];
   recentIds: string[];
   bestSellerIds: string[];
-  favoriteIds: string[];
   activeItemId?: string;
   onSelect: (item: MenuItem) => void;
   onQuickAdd: (item: MenuItem) => void;
-  onToggleFavorite: (itemId: string) => void;
 }
 
 export const VirtualizedProductGrid = memo(function VirtualizedProductGrid({
@@ -21,11 +19,9 @@ export const VirtualizedProductGrid = memo(function VirtualizedProductGrid({
   cart,
   recentIds,
   bestSellerIds,
-  favoriteIds,
   activeItemId,
   onSelect,
   onQuickAdd,
-  onToggleFavorite,
 }: VirtualizedProductGridProps) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const scrollFrame = useRef<number | undefined>(undefined);
@@ -89,7 +85,6 @@ export const VirtualizedProductGrid = memo(function VirtualizedProductGrid({
   const visibleItems = items.slice(startRow * columns, endRow * columns);
   const recent = useMemo(() => new Set(recentIds), [recentIds]);
   const bestSellers = useMemo(() => new Set(bestSellerIds), [bestSellerIds]);
-  const favorites = useMemo(() => new Set(favoriteIds), [favoriteIds]);
   const quantities = useMemo(() => {
     const result = new Map<string, number>();
     for (const entry of cart) {
@@ -148,13 +143,11 @@ export const VirtualizedProductGrid = memo(function VirtualizedProductGrid({
               <ProductCard
                 item={item}
                 quantity={quantities.get(item.id) ?? 0}
-                favorite={favorites.has(item.id)}
                 bestSeller={bestSellers.has(item.id)}
                 recentlyOrdered={recent.has(item.id)}
                 keyboardActive={activeItemId === item.id}
                 onSelect={() => onSelect(item)}
                 onQuickAdd={() => onQuickAdd(item)}
-                onToggleFavorite={() => onToggleFavorite(item.id)}
               />
             </div>
           ))}

@@ -26,10 +26,8 @@ import {
   createLineId,
   DEFAULT_POS_FORM,
   loadPOSDraft,
-  loadPOSFavorites,
   loadPOSRecentSearches,
   savePOSDraft,
-  savePOSFavorites,
   savePOSRecentSearches,
 } from "./posPersistence";
 import type { POSCartLine, WalkInOrderType } from "./types";
@@ -53,7 +51,6 @@ export function useWalkInPOSController(
   const [cart, setCart] = useState<POSCartLine[]>(draft.cart);
   const [category, setCategory] = useState("All");
   const [search, setSearch] = useState("");
-  const [favoriteIds, setFavoriteIds] = useState<string[]>(loadPOSFavorites);
   const [recentSearches, setRecentSearches] = useState<string[]>(
     loadPOSRecentSearches,
   );
@@ -184,7 +181,6 @@ export function useWalkInPOSController(
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
   }, [isDirty]);
-  useEffect(() => savePOSFavorites(favoriteIds), [favoriteIds]);
   useEffect(() => savePOSRecentSearches(recentSearches), [recentSearches]);
   useEffect(() => {
     if (previousPaymentMethod.current === values.paymentMethod) return;
@@ -431,13 +427,6 @@ export function useWalkInPOSController(
   }, []);
   const reorder = useCallback((sourceLineId: string, targetLineId: string) => {
     setCart((current) => reorderCart(current, sourceLineId, targetLineId));
-  }, []);
-  const toggleFavorite = useCallback((itemId: string) => {
-    setFavoriteIds((current) =>
-      current.includes(itemId)
-        ? current.filter((id) => id !== itemId)
-        : [...current, itemId],
-    );
   }, []);
   const commitSearch = useCallback((value: string) => {
     const normalized = value.trim();
@@ -855,7 +844,6 @@ export function useWalkInPOSController(
     recentSearches,
     commitSearch,
     hideSearch,
-    favoriteIds,
     selectedItem,
     editingLine: cart.find((entry) => entry.lineId === editingLineId),
     transactionState,
@@ -910,7 +898,6 @@ export function useWalkInPOSController(
     duplicate,
     note,
     reorder,
-    toggleFavorite,
     reopenHeld,
     submitOrder,
     requestCancel,

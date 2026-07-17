@@ -10,7 +10,6 @@ import {
   PlusCircle,
   Salad,
   Soup,
-  Star,
   Wheat,
   type LucideIcon,
 } from "lucide-react";
@@ -32,7 +31,6 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
 const QUICK_VIEWS = [
   { id: "Recently ordered", label: "Recent", icon: History },
   { id: "Best sellers", label: "Best sellers", icon: Flame },
-  { id: "Favorites", label: "Favorites", icon: Star },
 ] as const;
 
 export interface CategorySidebarProps {
@@ -40,7 +38,6 @@ export interface CategorySidebarProps {
   value: string;
   recentCount: number;
   bestSellerCount: number;
-  favoriteCount: number;
   onChange: (category: string) => void;
 }
 
@@ -49,7 +46,6 @@ export const CategorySidebar = memo(function CategorySidebar({
   value,
   recentCount,
   bestSellerCount,
-  favoriteCount,
   onChange,
 }: CategorySidebarProps) {
   const counts = useMemo(() => {
@@ -62,7 +58,6 @@ export const CategorySidebar = memo(function CategorySidebar({
   const quickCounts: Record<(typeof QUICK_VIEWS)[number]["id"], number> = {
     "Recently ordered": recentCount,
     "Best sellers": bestSellerCount,
-    Favorites: favoriteCount,
   };
   const categories = useMemo(() => {
     const configured = MENU_CATEGORIES.filter(
