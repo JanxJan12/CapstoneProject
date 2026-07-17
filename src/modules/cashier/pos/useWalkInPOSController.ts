@@ -11,12 +11,12 @@ import {
   addCartItem,
   calculatePOSTotals,
   duplicateCartLine,
+  getBestSellerIds,
   getInventoryIssue,
   getMealRecommendations,
   getNextOrderNumber,
   getOrderSummaryAvailability,
   getPlaceOrderAvailability,
-  getProductHistory,
   reorderCart,
   setCartLineQuantity,
   transitionTransactionState,
@@ -81,8 +81,8 @@ export function useWalkInPOSController(
   const walkInOrderType: WalkInOrderType =
     values.orderType === "Take-out" ? "Take-out" : "Dine-in";
 
-  const productHistory = useMemo(
-    () => getProductHistory(state.orders),
+  const bestSellerIds = useMemo(
+    () => getBestSellerIds(state.orders),
     [state.orders],
   );
   const orderNumber = useMemo(
@@ -877,8 +877,7 @@ export function useWalkInPOSController(
     errors: form.formState.errors,
     values,
     walkInOrderType,
-    recentIds: productHistory.recentIds,
-    bestSellerIds: productHistory.bestSellerIds,
+    bestSellerIds,
     orderNumber,
     ...totals,
     ...availability,

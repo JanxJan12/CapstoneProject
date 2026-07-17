@@ -2,7 +2,7 @@ import {
   CASH_TENDER_ROUNDING_STEPS,
   DISCOUNT_RATE,
   MAX_POS_ITEM_QUANTITY,
-  POS_PRODUCT_HISTORY_LIMIT,
+  POS_BEST_SELLER_LIMIT,
   POS_TAX_ENABLED,
   POS_TAX_RATE,
 } from "../constants";
@@ -105,7 +105,6 @@ export function filterMenuItems(
   items: MenuItem[],
   category: string,
   search: string,
-  recentIds: ReadonlySet<string>,
   bestSellerIds: ReadonlySet<string>,
 ) {
   const terms = search.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
@@ -113,7 +112,6 @@ export function filterMenuItems(
     const inView =
       category === "All" ||
       item.category === category ||
-      (category === "Recently ordered" && recentIds.has(item.id)) ||
       (category === "Best sellers" && bestSellerIds.has(item.id));
     if (!inView) return false;
     const searchable = [
@@ -129,12 +127,10 @@ export function filterMenuItems(
   });
 }
 
-export function getProductHistory(orders: Order[]) {
-  const recent = new Set<string>();
+export function getBestSellerIds(orders: Order[]) {
   const quantities = new Map<string, number>();
   for (const order of orders) {
     for (const item of order.items) {
-      if (recent.size < POS_PRODUCT_HISTORY_LIMIT) recent.add(item.menuItemId);
       if (order.status !== "Cancelled") {
         quantities.set(
           item.menuItemId,
@@ -143,13 +139,10 @@ export function getProductHistory(orders: Order[]) {
       }
     }
   }
-  return {
-    recentIds: [...recent].slice(0, POS_PRODUCT_HISTORY_LIMIT),
-    bestSellerIds: [...quantities.entries()]
-      .sort((left, right) => right[1] - left[1])
-      .slice(0, POS_PRODUCT_HISTORY_LIMIT)
-      .map(([id]) => id),
-  };
+  return [...quantities.entries()]
+    .sort((left, right) => right[1] - left[1])
+    .slice(0, POS_BEST_SELLER_LIMIT)
+    .map(([id]) => id);
 }
 
 export function getMealRecommendations(

@@ -20,7 +20,6 @@ export interface MenuGridProps {
   cart: POSCartLine[];
   category: string;
   search: string;
-  recentIds: string[];
   recentSearches: string[];
   bestSellerIds: string[];
   heldOrderCount: number;
@@ -37,7 +36,6 @@ export function MenuGrid({
   cart,
   category,
   search,
-  recentIds,
   recentSearches,
   bestSellerIds,
   heldOrderCount,
@@ -48,7 +46,6 @@ export function MenuGrid({
   onQuickAdd,
 }: MenuGridProps) {
   const [activeIndex, setActiveIndex] = useState(-1);
-  const recent = useMemo(() => new Set(recentIds), [recentIds]);
   const bestSellers = useMemo(() => new Set(bestSellerIds), [bestSellerIds]);
   const soldOutCount = useMemo(
     () =>
@@ -66,17 +63,12 @@ export function MenuGrid({
     [bestSellerIds, menuItems],
   );
   const filtered = useMemo(
-    () => filterMenuItems(menuItems, category, search, recent, bestSellers),
-    [bestSellers, category, menuItems, recent, search],
+    () => filterMenuItems(menuItems, category, search, bestSellers),
+    [bestSellers, category, menuItems, search],
   );
   useEffect(() => setActiveIndex(-1), [category, search]);
   const activeItem = filtered[activeIndex];
-  const title =
-    category === "All"
-      ? "Popular dishes"
-      : category === "Recently ordered"
-        ? "Recently ordered"
-        : category;
+  const title = category === "All" ? "Popular dishes" : category;
 
   const moveResult = useCallback(
     (direction: 1 | -1) => {
@@ -142,7 +134,6 @@ export function MenuGrid({
         <CategorySidebar
           menuItems={menuItems}
           value={category}
-          recentCount={recentIds.length}
           bestSellerCount={bestSellerIds.length}
           onChange={handleCategoryChange}
         />
@@ -204,7 +195,6 @@ export function MenuGrid({
             <VirtualizedProductGrid
               items={filtered}
               cart={cart}
-              recentIds={recentIds}
               bestSellerIds={bestSellerIds}
               activeItemId={activeItem?.id}
               onSelect={onSelect}

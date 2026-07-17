@@ -42,13 +42,7 @@ assert(
     state.menuItems.length,
   "Every cashier menu item must have a unique item code.",
 );
-const codeSearch = filterMenuItems(
-  state.menuItems,
-  "All",
-  "R1",
-  new Set(),
-  new Set(),
-);
+const codeSearch = filterMenuItems(state.menuItems, "All", "R1", new Set());
 assert(
   codeSearch.length === 1 && codeSearch[0]?.name === "White Rice",
   "Item code search must resolve the exact cashier menu item.",

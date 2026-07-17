@@ -139,7 +139,6 @@ export function WalkInPOSPage({
           cart={pos.cart}
           category={pos.category}
           search={pos.search}
-          recentIds={pos.recentIds}
           recentSearches={pos.recentSearches}
           bestSellerIds={pos.bestSellerIds}
           heldOrderCount={pos.state.heldOrders.length}

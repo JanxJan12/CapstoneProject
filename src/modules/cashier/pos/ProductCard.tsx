@@ -1,11 +1,5 @@
 import { memo } from "react";
-import {
-  AlertTriangle,
-  Flame,
-  History,
-  Plus,
-  SlidersHorizontal,
-} from "lucide-react";
+import { AlertTriangle, Flame, Plus, SlidersHorizontal } from "lucide-react";
 import { POS_LOW_INVENTORY_THRESHOLD, formatMoney } from "../constants";
 import { modifierGroupsFor } from "../constants/modifiers";
 import type { MenuItem } from "../types";
@@ -30,7 +24,6 @@ export interface ProductCardProps {
   item: MenuItem;
   quantity: number;
   bestSeller: boolean;
-  recentlyOrdered: boolean;
   keyboardActive: boolean;
   onSelect: () => void;
   onQuickAdd: () => void;
@@ -40,7 +33,6 @@ export const ProductCard = memo(function ProductCard({
   item,
   quantity,
   bestSeller,
-  recentlyOrdered,
   keyboardActive,
   onSelect,
   onQuickAdd,
@@ -94,10 +86,6 @@ export const ProductCard = memo(function ProductCard({
               <em>
                 <Flame className="h-3 w-3" /> Popular
               </em>
-            ) : recentlyOrdered ? (
-              <em>
-                <History className="h-3 w-3" /> Recent
-              </em>
             ) : null}
             {lowInventory && !soldOut ? (
               <em className="is-warning">
@@ -144,7 +132,6 @@ function areProductCardPropsEqual(
     previous.item === next.item &&
     previous.quantity === next.quantity &&
     previous.bestSeller === next.bestSeller &&
-    previous.recentlyOrdered === next.recentlyOrdered &&
     previous.keyboardActive === next.keyboardActive
   );
 }

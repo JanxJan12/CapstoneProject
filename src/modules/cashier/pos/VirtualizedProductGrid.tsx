@@ -7,7 +7,6 @@ import type { POSCartLine } from "./types";
 export interface VirtualizedProductGridProps {
   items: MenuItem[];
   cart: POSCartLine[];
-  recentIds: string[];
   bestSellerIds: string[];
   activeItemId?: string;
   onSelect: (item: MenuItem) => void;
@@ -17,7 +16,6 @@ export interface VirtualizedProductGridProps {
 export const VirtualizedProductGrid = memo(function VirtualizedProductGrid({
   items,
   cart,
-  recentIds,
   bestSellerIds,
   activeItemId,
   onSelect,
@@ -83,7 +81,6 @@ export const VirtualizedProductGrid = memo(function VirtualizedProductGrid({
     MENU_GRID_OVERSCAN_ROWS * 2;
   const endRow = Math.min(totalRows, startRow + visibleRows);
   const visibleItems = items.slice(startRow * columns, endRow * columns);
-  const recent = useMemo(() => new Set(recentIds), [recentIds]);
   const bestSellers = useMemo(() => new Set(bestSellerIds), [bestSellerIds]);
   const quantities = useMemo(() => {
     const result = new Map<string, number>();
@@ -144,7 +141,6 @@ export const VirtualizedProductGrid = memo(function VirtualizedProductGrid({
                 item={item}
                 quantity={quantities.get(item.id) ?? 0}
                 bestSeller={bestSellers.has(item.id)}
-                recentlyOrdered={recent.has(item.id)}
                 keyboardActive={activeItemId === item.id}
                 onSelect={() => onSelect(item)}
                 onQuickAdd={() => onQuickAdd(item)}

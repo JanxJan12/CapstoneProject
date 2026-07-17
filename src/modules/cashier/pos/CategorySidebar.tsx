@@ -5,7 +5,6 @@ import {
   CupSoda,
   Flame,
   Grid2X2,
-  History,
   Package,
   PlusCircle,
   Salad,
@@ -29,14 +28,12 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
 };
 
 const QUICK_VIEWS = [
-  { id: "Recently ordered", label: "Recent", icon: History },
   { id: "Best sellers", label: "Best sellers", icon: Flame },
 ] as const;
 
 export interface CategorySidebarProps {
   menuItems: MenuItem[];
   value: string;
-  recentCount: number;
   bestSellerCount: number;
   onChange: (category: string) => void;
 }
@@ -44,7 +41,6 @@ export interface CategorySidebarProps {
 export const CategorySidebar = memo(function CategorySidebar({
   menuItems,
   value,
-  recentCount,
   bestSellerCount,
   onChange,
 }: CategorySidebarProps) {
@@ -56,7 +52,6 @@ export const CategorySidebar = memo(function CategorySidebar({
     return result;
   }, [menuItems]);
   const quickCounts: Record<(typeof QUICK_VIEWS)[number]["id"], number> = {
-    "Recently ordered": recentCount,
     "Best sellers": bestSellerCount,
   };
   const categories = useMemo(() => {
