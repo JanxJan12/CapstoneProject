@@ -2,6 +2,7 @@ import { ConfirmationDialog, ErrorBanner } from "../components";
 import { MenuGrid } from "./MenuGrid";
 import { ModifierDrawer } from "./ModifierDrawer";
 import { NewOrderDialog } from "./NewOrderDialog";
+import { OrderTypeGate } from "./OrderTypeGate";
 import { OrderReviewDrawer } from "./OrderReviewDrawer";
 import { PaymentPanel } from "./PaymentPanel";
 import { POSOrderHeader } from "./POSOrderHeader";
@@ -26,6 +27,11 @@ export function WalkInPOSPage({
     pos.transactionState === POSTransactionState.ORDER_REVIEW ||
     pos.transactionState === POSTransactionState.PAYMENT ||
     pos.transactionState === POSTransactionState.RECEIPT;
+  const orderTypeGateOpen =
+    !pos.orderTypeSelected &&
+    pos.transactionState !== POSTransactionState.RECEIPT;
+  const changingOrderType =
+    orderTypeGateOpen && pos.transactionState === POSTransactionState.ORDERING;
   const closeDrawer = () => {
     if (pos.selectedItem) pos.closeCustomize();
     else if (pos.transactionState === POSTransactionState.ORDER_REVIEW) {
@@ -110,21 +116,35 @@ export function WalkInPOSPage({
       className="tablet-pos relative flex h-full min-h-0 flex-col overflow-hidden border"
       data-transaction-state={pos.transactionState}
     >
-      <POSOrderHeader
-        orderType={pos.walkInOrderType}
-        busy={
-          pos.loading || pos.transactionState === POSTransactionState.RECEIPT
-        }
-        shiftOpen={Boolean(pos.activeShift)}
-        hasItems={pos.cart.length > 0}
-        canCancel={pos.cart.length > 0}
-        heldOrders={pos.state.heldOrders}
-        onOrderTypeChange={pos.selectOrderType}
-        onNew={() => pos.runQuickAction("new")}
-        onHold={() => pos.runQuickAction("hold")}
-        onCancel={pos.requestCancel}
-        onReopen={pos.reopenHeld}
-      />
+      {!orderTypeGateOpen ? (
+        <POSOrderHeader
+          orderType={pos.walkInOrderType}
+          busy={
+            pos.loading || pos.transactionState === POSTransactionState.RECEIPT
+          }
+          shiftOpen={Boolean(pos.activeShift)}
+          hasItems={pos.cart.length > 0}
+          canCancel={pos.cart.length > 0}
+          heldOrders={pos.state.heldOrders}
+          search={{
+            value: pos.search,
+            resultCount: pos.searchResultCount,
+            recentSearches: pos.recentSearches,
+            activeResultId: pos.activeSearchResultId,
+            inputRef: pos.menuSearchRef,
+            onChange: pos.setSearch,
+            onCommit: pos.commitSearch,
+            onMove: pos.moveSearchResult,
+            onEnter: pos.quickAddSearchResult,
+            onEscape: pos.resetSearchSelection,
+          }}
+          onNew={() => pos.runQuickAction("new")}
+          onHold={() => pos.runQuickAction("hold")}
+          onCancel={pos.requestCancel}
+          onReopen={pos.reopenHeld}
+          onChangeOrderType={pos.requestOrderTypeChange}
+        />
+      ) : null}
 
       {pos.error ? (
         <div className="p-3 pb-0">
@@ -133,38 +153,46 @@ export function WalkInPOSPage({
       ) : null}
 
       <main className="pos-workspace min-h-0 flex-1">
-        <MenuGrid
-          menuItems={pos.state.menuItems}
-          searchRef={pos.menuSearchRef}
-          cart={pos.cart}
-          category={pos.category}
-          search={pos.search}
-          recentSearches={pos.recentSearches}
-          bestSellerIds={pos.bestSellerIds}
-          heldOrderCount={pos.state.heldOrders.length}
-          onCategoryChange={pos.setCategory}
-          onSearchChange={pos.setSearch}
-          onCommitSearch={pos.commitSearch}
-          onSelect={pos.openCustomize}
-          onQuickAdd={pos.addItem}
-        />
+        {orderTypeGateOpen ? (
+          <OrderTypeGate
+            busy={pos.loading}
+            currentType={pos.walkInOrderType}
+            onSelect={pos.selectOrderType}
+            onCancel={changingOrderType ? pos.cancelOrderTypeChange : undefined}
+          />
+        ) : (
+          <MenuGrid
+            menuItems={pos.state.menuItems}
+            cart={pos.cart}
+            category={pos.category}
+            search={pos.search}
+            bestSellerIds={pos.bestSellerIds}
+            activeItemId={pos.activeSearchItemId}
+            heldOrderCount={pos.state.heldOrders.length}
+            onCategoryChange={pos.setCategory}
+            onSelect={pos.openCustomize}
+            onQuickAdd={pos.addItem}
+          />
+        )}
       </main>
 
-      <TransactionBar
-        items={pos.cart}
-        lastItemCode={lastItemCode}
-        itemCount={pos.itemCount}
-        total={pos.total}
-        state={pos.transactionState}
-        busy={
-          pos.loading || pos.transactionState === POSTransactionState.RECEIPT
-        }
-        paymentRef={pos.checkoutRef}
-        onAdjust={pos.adjust}
-        onUndoLast={pos.undoLastAdd}
-        onReview={pos.openOrderReview}
-        onPayment={pos.beginPayment}
-      />
+      {!orderTypeGateOpen ? (
+        <TransactionBar
+          items={pos.cart}
+          lastItemCode={lastItemCode}
+          itemCount={pos.itemCount}
+          total={pos.total}
+          state={pos.transactionState}
+          busy={
+            pos.loading || pos.transactionState === POSTransactionState.RECEIPT
+          }
+          paymentRef={pos.checkoutRef}
+          onAdjust={pos.adjust}
+          onUndoLast={pos.undoLastAdd}
+          onReview={pos.openOrderReview}
+          onPayment={pos.beginPayment}
+        />
+      ) : null}
 
       {drawerOpen ? (
         <div className="pos-workspace-overlay">
@@ -237,7 +265,8 @@ function getConfirmationCopy(type?: "clear" | "cancel" | "remove" | "reopen") {
   if (type === "remove") {
     return {
       title: "Remove the final item?",
-      description: "This will return the workstation to its idle state.",
+      description:
+        "This will keep the selected order type and return to an empty order.",
       confirmLabel: "Remove item",
     };
   }

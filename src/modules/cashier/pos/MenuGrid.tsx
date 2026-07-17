@@ -1,51 +1,37 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  type RefObject,
-} from "react";
+import { useMemo } from "react";
 import { AlertTriangle, Flame, PauseCircle, Search, Zap } from "lucide-react";
 import { EmptyState } from "../components";
 import type { MenuItem } from "../types";
 import { CategorySidebar } from "./CategorySidebar";
 import { filterMenuItems } from "./posOperations";
-import { SearchBar } from "./SearchBar";
 import type { POSCartLine } from "./types";
 import { VirtualizedProductGrid } from "./VirtualizedProductGrid";
 
 export interface MenuGridProps {
   menuItems: MenuItem[];
-  searchRef?: RefObject<HTMLInputElement | null>;
   cart: POSCartLine[];
   category: string;
   search: string;
-  recentSearches: string[];
   bestSellerIds: string[];
+  activeItemId?: string;
   heldOrderCount: number;
   onCategoryChange: (category: string) => void;
-  onSearchChange: (search: string) => void;
-  onCommitSearch: (search: string) => void;
   onSelect: (item: MenuItem) => void;
   onQuickAdd: (item: MenuItem) => void;
 }
 
 export function MenuGrid({
   menuItems,
-  searchRef,
   cart,
   category,
   search,
-  recentSearches,
   bestSellerIds,
+  activeItemId,
   heldOrderCount,
   onCategoryChange,
-  onSearchChange,
-  onCommitSearch,
   onSelect,
   onQuickAdd,
 }: MenuGridProps) {
-  const [activeIndex, setActiveIndex] = useState(-1);
   const bestSellers = useMemo(() => new Set(bestSellerIds), [bestSellerIds]);
   const soldOutCount = useMemo(
     () =>
@@ -66,76 +52,15 @@ export function MenuGrid({
     () => filterMenuItems(menuItems, category, search, bestSellers),
     [bestSellers, category, menuItems, search],
   );
-  useEffect(() => setActiveIndex(-1), [category, search]);
-  const activeItem = filtered[activeIndex];
   const title = category === "All" ? "Popular dishes" : category;
-
-  const moveResult = useCallback(
-    (direction: 1 | -1) => {
-      if (!filtered.length) return;
-      setActiveIndex((current) => {
-        if (current < 0) return direction > 0 ? 0 : filtered.length - 1;
-        return (current + direction + filtered.length) % filtered.length;
-      });
-    },
-    [filtered.length],
-  );
-  const quickAddActiveResult = useCallback(() => {
-    const normalizedSearch = search.trim().toLocaleLowerCase();
-    const target =
-      filtered.find(
-        (item) => item.code.toLocaleLowerCase() === normalizedSearch,
-      ) ??
-      activeItem ??
-      filtered[0];
-    if (target?.available) onQuickAdd(target);
-  }, [activeItem, filtered, onQuickAdd, search]);
-  const handleSearchChange = useCallback(
-    (value: string) => {
-      if (value.trim() && category !== "All") onCategoryChange("All");
-      onSearchChange(value);
-    },
-    [category, onCategoryChange, onSearchChange],
-  );
-  const handleCategoryChange = useCallback(
-    (value: string) => {
-      onSearchChange("");
-      onCategoryChange(value);
-    },
-    [onCategoryChange, onSearchChange],
-  );
   return (
     <div className="pos-menu-grid flex h-full min-w-0 flex-1 flex-col overflow-hidden">
-      <div className="pos-menu-toolbar flex items-center gap-3 border-b p-3">
-        <div className="pos-command-label hidden shrink-0 sm:block">
-          <span>Menu command</span>
-          <strong>Name or code</strong>
-        </div>
-        <SearchBar
-          value={search}
-          resultCount={filtered.length}
-          recentSearches={recentSearches}
-          activeResultId={
-            activeItem ? `pos-product-${activeItem.id}` : undefined
-          }
-          inputRef={searchRef}
-          onChange={handleSearchChange}
-          onCommit={onCommitSearch}
-          onMove={moveResult}
-          onEnter={quickAddActiveResult}
-          onEscape={() => setActiveIndex(-1)}
-        />
-        <div className="pos-code-hint hidden shrink-0 lg:block">
-          <kbd>B1</kbd>
-          <span>+ Enter</span>
-        </div>
-      </div>
       <div className="pos-menu-browser flex min-h-0 flex-1">
         <CategorySidebar
           menuItems={menuItems}
           value={category}
           bestSellerCount={bestSellerIds.length}
-          onChange={handleCategoryChange}
+          onChange={onCategoryChange}
         />
 
         <div className="pos-menu-results flex min-w-0 flex-1 flex-col overflow-hidden">
@@ -196,7 +121,7 @@ export function MenuGrid({
               items={filtered}
               cart={cart}
               bestSellerIds={bestSellerIds}
-              activeItemId={activeItem?.id}
+              activeItemId={activeItemId}
               onSelect={onSelect}
               onQuickAdd={onQuickAdd}
             />

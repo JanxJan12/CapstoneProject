@@ -11,6 +11,7 @@ import {
   addCartItem,
   calculatePOSTotals,
   duplicateCartLine,
+  filterMenuItems,
   getBestSellerIds,
   getInventoryIssue,
   getMealRecommendations,
@@ -51,6 +52,7 @@ export function useWalkInPOSController(
   const [cart, setCart] = useState<POSCartLine[]>(draft.cart);
   const [category, setCategory] = useState("All");
   const [search, setSearch] = useState("");
+  const [activeSearchIndex, setActiveSearchIndex] = useState(-1);
   const [recentSearches, setRecentSearches] = useState<string[]>(
     loadPOSRecentSearches,
   );
@@ -58,6 +60,9 @@ export function useWalkInPOSController(
   const [editingLineId, setEditingLineId] = useState<string>();
   const [transactionState, setTransactionState] = useState<POSTransactionState>(
     draft.cart.length ? POSTransactionState.ORDERING : POSTransactionState.IDLE,
+  );
+  const [orderTypeSelected, setOrderTypeSelected] = useState(
+    draft.cart.length > 0,
   );
   const [newOrderOpen, setNewOrderOpen] = useState(false);
   const [receiptOrder, setReceiptOrder] = useState<Order>();
@@ -85,6 +90,12 @@ export function useWalkInPOSController(
     () => getBestSellerIds(state.orders),
     [state.orders],
   );
+  const bestSellerSet = useMemo(() => new Set(bestSellerIds), [bestSellerIds]);
+  const searchResults = useMemo(
+    () => filterMenuItems(state.menuItems, category, search, bestSellerSet),
+    [bestSellerSet, category, search, state.menuItems],
+  );
+  const activeSearchItem = searchResults[activeSearchIndex];
   const orderNumber = useMemo(
     () => getNextOrderNumber(state.orders),
     [state.orders],
@@ -197,15 +208,21 @@ export function useWalkInPOSController(
   useEffect(() => {
     if (receiptOrder) return;
     setTransactionState((current) => {
-      if (!cart.length && current !== POSTransactionState.PAYMENT) {
+      if (
+        !orderTypeSelected &&
+        !cart.length &&
+        current !== POSTransactionState.PAYMENT
+      ) {
         return POSTransactionState.IDLE;
       }
-      if (cart.length && current === POSTransactionState.IDLE) {
+      if (orderTypeSelected && current === POSTransactionState.IDLE) {
         return POSTransactionState.ORDERING;
       }
       return current;
     });
-  }, [cart.length, receiptOrder]);
+  }, [cart.length, orderTypeSelected, receiptOrder]);
+
+  useEffect(() => setActiveSearchIndex(-1), [category, search]);
 
   const addItem = useCallback(
     (
@@ -214,6 +231,10 @@ export function useWalkInPOSController(
       itemNote = "",
       modifiers: OrderItemModifier[] = [],
     ) => {
+      if (!orderTypeSelected) {
+        Toast.info("Select Dine-in or Take-out before adding menu items.");
+        return;
+      }
       if (receiptOrder) {
         Toast.info("Start a new order before adding more items.");
         return;
@@ -243,11 +264,15 @@ export function useWalkInPOSController(
         return result.cart;
       });
     },
-    [receiptOrder],
+    [orderTypeSelected, receiptOrder],
   );
 
   const openCustomize = useCallback(
     (item: MenuItem) => {
+      if (!orderTypeSelected) {
+        Toast.info("Select an order type before opening the menu.");
+        return;
+      }
       if (receiptOrder) {
         Toast.info("Start a new order before customizing another item.");
         return;
@@ -255,7 +280,7 @@ export function useWalkInPOSController(
       setEditingLineId(undefined);
       setSelectedItem(item);
     },
-    [receiptOrder],
+    [orderTypeSelected, receiptOrder],
   );
   const closeCustomize = useCallback(() => {
     const productId = selectedItem?.id;
@@ -440,6 +465,40 @@ export function useWalkInPOSController(
       ].slice(0, POS_RECENT_SEARCH_LIMIT),
     );
   }, []);
+  const updateSearch = useCallback((value: string) => {
+    if (value.trim()) setCategory("All");
+    setSearch(value);
+  }, []);
+  const selectCategory = useCallback((value: string) => {
+    setSearch("");
+    setCategory(value);
+  }, []);
+  const moveSearchResult = useCallback(
+    (direction: 1 | -1) => {
+      if (!searchResults.length) return;
+      setActiveSearchIndex((current) => {
+        if (current < 0) {
+          return direction > 0 ? 0 : searchResults.length - 1;
+        }
+        return (
+          (current + direction + searchResults.length) % searchResults.length
+        );
+      });
+    },
+    [searchResults.length],
+  );
+  const quickAddSearchResult = useCallback(() => {
+    const normalizedSearch = search.trim().toLocaleLowerCase();
+    const target =
+      searchResults.find(
+        (item) => item.code.toLocaleLowerCase() === normalizedSearch,
+      ) ??
+      activeSearchItem ??
+      searchResults[0];
+
+    if (target?.available) addItem(target);
+  }, [activeSearchItem, addItem, search, searchResults]);
+  const resetSearchSelection = useCallback(() => setActiveSearchIndex(-1), []);
   const selectOrderType = useCallback(
     (orderType: WalkInOrderType) => {
       form.setValue("orderType", orderType, {
@@ -451,10 +510,19 @@ export function useWalkInPOSController(
       }
       form.setValue("contactNumber", "");
       form.setValue("deliveryAddress", "");
+      setOrderTypeSelected(true);
+      setTransactionState(POSTransactionState.ORDERING);
       setError("");
     },
     [form],
   );
+  const requestOrderTypeChange = useCallback(() => {
+    setSearch("");
+    setOrderTypeSelected(false);
+  }, []);
+  const cancelOrderTypeChange = useCallback(() => {
+    setOrderTypeSelected(true);
+  }, []);
 
   const resetPOS = useCallback(() => {
     setCart([]);
@@ -463,6 +531,7 @@ export function useWalkInPOSController(
     setEditingLineId(undefined);
     setSelectedItem(undefined);
     setTransactionState(POSTransactionState.IDLE);
+    setOrderTypeSelected(false);
     setNewOrderOpen(false);
     setOptionsOpen(false);
     setReceiptOrder(undefined);
@@ -477,7 +546,7 @@ export function useWalkInPOSController(
     setCart([]);
     setEditingLineId(undefined);
     setSelectedItem(undefined);
-    setTransactionState(POSTransactionState.IDLE);
+    setTransactionState(POSTransactionState.ORDERING);
     setOptionsOpen(false);
     form.reset({ ...DEFAULT_POS_FORM, orderType: currentOrderType });
     setError("");
@@ -547,6 +616,7 @@ export function useWalkInPOSController(
       form.setValue("discountType", held.discountType ?? "None");
       form.setValue("discountReference", held.discountReference ?? "");
       form.setValue("orderInstructions", held.orderInstructions ?? "");
+      setOrderTypeSelected(true);
       setTransactionState(POSTransactionState.ORDERING);
       removeHeldOrder(held.id);
       Toast.success(`${held.id} reopened`);
@@ -645,8 +715,9 @@ export function useWalkInPOSController(
     window.requestAnimationFrame(() => form.setFocus("discountType"));
   }, [cart.length, form]);
   const showSearch = useCallback(() => {
+    if (!orderTypeSelected) return;
     window.requestAnimationFrame(() => menuSearchRef.current?.focus());
-  }, []);
+  }, [orderTypeSelected]);
   const hideSearch = useCallback(() => {
     setSearch("");
   }, []);
@@ -754,6 +825,7 @@ export function useWalkInPOSController(
         )
       )
         return;
+      if (!orderTypeSelected) return;
       const modifier = event.ctrlKey || event.metaKey;
       const key = event.key.toLowerCase();
       if (event.key === "Escape") {
@@ -826,6 +898,7 @@ export function useWalkInPOSController(
     hideSearch,
     isDirty,
     openDiscount,
+    orderTypeSelected,
     requestCancel,
     search,
     selectedItem,
@@ -838,11 +911,19 @@ export function useWalkInPOSController(
     activeShift,
     cart,
     category,
-    setCategory,
+    setCategory: selectCategory,
     search,
-    setSearch,
+    setSearch: updateSearch,
     recentSearches,
     commitSearch,
+    searchResultCount: searchResults.length,
+    activeSearchResultId: activeSearchItem
+      ? `pos-product-${activeSearchItem.id}`
+      : undefined,
+    activeSearchItemId: activeSearchItem?.id,
+    moveSearchResult,
+    quickAddSearchResult,
+    resetSearchSelection,
     hideSearch,
     selectedItem,
     editingLine: cart.find((entry) => entry.lineId === editingLineId),
@@ -852,6 +933,9 @@ export function useWalkInPOSController(
     addCustomizedItem,
     editLine,
     selectOrderType,
+    orderTypeSelected,
+    requestOrderTypeChange,
+    cancelOrderTypeChange,
     newOrderOpen,
     setNewOrderOpen,
     openOrderReview,

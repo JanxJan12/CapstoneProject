@@ -57,7 +57,7 @@ assert(
 assert(
   transitionTransactionState(POSTransactionState.IDLE, "reset", false) ===
     POSTransactionState.IDLE,
-  "A new POS order must begin in the idle item-selection state.",
+  "A new POS order must begin in the idle order-type selection state.",
 );
 add("MENU-02");
 assert(

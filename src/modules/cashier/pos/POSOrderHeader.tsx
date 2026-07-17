@@ -1,6 +1,14 @@
-import { CircleX, PauseCircle, Radio, RotateCcw } from "lucide-react";
+import {
+  CircleX,
+  PauseCircle,
+  Radio,
+  RotateCcw,
+  ShoppingBag,
+  Utensils,
+} from "lucide-react";
 import type { HeldOrder } from "../types";
 import { CashierSelect } from "../components";
+import { SearchBar, type SearchBarProps } from "./SearchBar";
 import type { WalkInOrderType } from "./types";
 
 export function POSOrderHeader({
@@ -8,26 +16,30 @@ export function POSOrderHeader({
   busy,
   shiftOpen,
   heldOrders,
-  onOrderTypeChange,
+  search,
   hasItems,
   canCancel,
   onNew,
   onHold,
   onCancel,
   onReopen,
+  onChangeOrderType,
 }: {
   orderType: WalkInOrderType;
   busy: boolean;
   shiftOpen: boolean;
   heldOrders: HeldOrder[];
+  search: SearchBarProps;
   hasItems: boolean;
   canCancel: boolean;
-  onOrderTypeChange: (type: WalkInOrderType) => void;
   onNew: () => void;
   onHold: () => void;
   onCancel: () => void;
   onReopen: (id: string) => void;
+  onChangeOrderType: () => void;
 }) {
+  const OrderTypeIcon = orderType === "Dine-in" ? Utensils : ShoppingBag;
+
   return (
     <div className="pos-order-header border-b border-border bg-gradient-to-r from-white via-[#fffaf5] to-orange-50/30 p-2 shadow-[0_4px_14px_rgba(67,42,23,0.035)]">
       <div className="pos-order-fields flex flex-wrap items-center gap-2.5">
@@ -43,29 +55,22 @@ export function POSOrderHeader({
             <strong>{shiftOpen ? "Live · Shift open" : "Shift closed"}</strong>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-[9px] font-black uppercase tracking-wider text-muted-foreground">
-            Order
-          </span>
-          <div
-            className="flex min-h-10 items-center rounded-xl border border-border bg-muted/70 p-1 shadow-inner"
-            role="radiogroup"
-            aria-label="Order type"
+        <div className="pos-header-command flex min-w-[240px] flex-1 items-center gap-2">
+          <SearchBar {...search} />
+          <button
+            type="button"
+            className="pos-current-order-type"
+            aria-label={`Change current order type from ${orderType}`}
+            title="Change order type"
+            disabled={busy}
+            onClick={onChangeOrderType}
           >
-            {(["Dine-in", "Take-out"] as const).map((type) => (
-              <button
-                type="button"
-                key={type}
-                role="radio"
-                aria-checked={orderType === type}
-                onClick={() => onOrderTypeChange(type)}
-                disabled={busy}
-                className={`flex min-h-8 cursor-pointer items-center rounded-lg px-4 text-xs font-black transition has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary ${orderType === type ? "bg-white text-primary shadow-sm ring-1 ring-border/60" : "text-muted-foreground hover:text-foreground"}`}
-              >
-                {type}
-              </button>
-            ))}
-          </div>
+            <OrderTypeIcon className="h-3.5 w-3.5" aria-hidden="true" />
+            <div>
+              <small>Order type</small>
+              <strong>{orderType}</strong>
+            </div>
+          </button>
         </div>
         {heldOrders.length > 0 && (
           <div className="min-w-[150px]">
@@ -137,7 +142,7 @@ function Action({
       className={`inline-flex min-h-10 items-center gap-1.5 rounded-xl border px-3 text-[10px] font-black shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-40 ${danger ? "border-red-200 bg-red-50 text-red-700 hover:bg-red-100" : "border-border bg-white text-muted-foreground hover:border-primary/25 hover:bg-amber-50/40 hover:text-foreground"}`}
     >
       <Icon className="h-3.5 w-3.5" />
-      {label}
+      <span>{label}</span>
     </button>
   );
 }
