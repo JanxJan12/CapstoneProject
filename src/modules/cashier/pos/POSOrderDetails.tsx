@@ -35,7 +35,7 @@ export function POSOrderDetails({
       <div className="mb-3">
         <p className="text-xs font-black">Order information</p>
         <p className="mt-1 text-[9px] font-semibold text-muted-foreground">
-          Add fulfillment details now that the order is ready for payment.
+          Complete only the details required for this transaction.
         </p>
       </div>
 
@@ -51,18 +51,15 @@ export function POSOrderDetails({
               {...register("tableNumber")}
             >
               <option value="">Select table</option>
-              {DINING_TABLES.map((table) => (
-                <option
-                  key={table}
-                  value={table}
-                  disabled={occupiedTables.includes(String(Number(table)))}
-                >
-                  Table {table}
-                  {occupiedTables.includes(String(Number(table)))
-                    ? " · Occupied"
-                    : ""}
-                </option>
-              ))}
+              {DINING_TABLES.map((table) => {
+                const occupied = occupiedTables.includes(String(Number(table)));
+                return (
+                  <option key={table} value={table} disabled={occupied}>
+                    Table {table}
+                    {occupied ? " · Occupied" : ""}
+                  </option>
+                );
+              })}
             </CashierSelect>
             <FieldError>{errors.tableNumber?.message}</FieldError>
           </div>
