@@ -100,13 +100,6 @@ export const posSchema = z
       .optional(),
   })
   .superRefine((value, ctx) => {
-    if (value.orderType === "Dine-in" && !value.tableNumber?.trim()) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["tableNumber"],
-        message: "Select a table for dine-in orders.",
-      });
-    }
     if (value.orderType === "Delivery") {
       if (!value.customerName?.trim()) {
         ctx.addIssue({

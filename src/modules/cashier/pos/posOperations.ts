@@ -59,7 +59,6 @@ export function getOrderSummaryAvailability(
   cart: POSCartLine[],
   form: POSForm,
   menuItems: MenuItem[],
-  occupiedTables: string[],
   inventoryIssue?: string,
 ) {
   const unavailableItem = cart.find(
@@ -67,19 +66,12 @@ export function getOrderSummaryAvailability(
       !menuItems.find((menuItem) => menuItem.id === entry.menuItemId)
         ?.available,
   );
-  const selectedTableOccupied =
-    form.orderType === "Dine-in" &&
-    occupiedTables.includes(String(Number(form.tableNumber)));
-  const missingTable =
-    form.orderType === "Dine-in" && !form.tableNumber?.trim();
   const missingDiscountReference =
     form.discountType !== "None" && !form.discountReference?.trim();
   const canContinue =
     cart.length > 0 &&
     !unavailableItem &&
     !inventoryIssue &&
-    !missingTable &&
-    !selectedTableOccupied &&
     !missingDiscountReference;
   const disabledReason = !cart.length
     ? "Add at least one menu item to continue."
@@ -87,13 +79,9 @@ export function getOrderSummaryAvailability(
       ? `${unavailableItem.name} is no longer available. Remove it to continue.`
       : inventoryIssue
         ? `${inventoryIssue} Adjust the quantity to continue.`
-        : missingTable
-          ? "Select an available table for this dine-in order."
-          : selectedTableOccupied
-            ? `Table ${form.tableNumber} already has an active order.`
-            : missingDiscountReference
-              ? "Enter the Senior/PWD ID or reference."
-              : undefined;
+        : missingDiscountReference
+          ? "Enter the Senior/PWD ID or reference."
+          : undefined;
 
   return { canContinue, disabledReason };
 }
@@ -141,17 +129,6 @@ export function filterMenuItems(
       .toLocaleLowerCase();
     return terms.every((term) => searchable.includes(term));
   });
-}
-
-export function getOccupiedTables(orders: Order[]) {
-  return orders
-    .filter(
-      (order) =>
-        order.type === "Dine-in" &&
-        order.tableNumber &&
-        !["Completed", "Cancelled"].includes(order.status),
-    )
-    .map((order) => String(Number(order.tableNumber)));
 }
 
 export function getProductHistory(orders: Order[]) {
@@ -304,7 +281,6 @@ export function getPlaceOrderAvailability(
   cart: POSCartLine[],
   form: POSForm,
   menuItems: MenuItem[],
-  occupiedTables: string[],
   total: number,
   tendered: number,
   inventoryIssue?: string,
@@ -314,19 +290,14 @@ export function getPlaceOrderAvailability(
       !menuItems.find((menuItem) => menuItem.id === entry.menuItemId)
         ?.available,
   );
-  const selectedTableOccupied =
-    form.orderType === "Dine-in" &&
-    occupiedTables.includes(String(Number(form.tableNumber)));
   const canPlace =
     cart.length > 0 &&
-    (form.orderType !== "Dine-in" || Boolean(form.tableNumber?.trim())) &&
     (form.orderType !== "Delivery" ||
       Boolean(
         form.customerName?.trim() &&
         form.contactNumber?.trim() &&
         form.deliveryAddress?.trim(),
       )) &&
-    !selectedTableOccupied &&
     !unavailableItem &&
     !inventoryIssue &&
     (form.discountType === "None" || Boolean(form.discountReference?.trim())) &&
@@ -339,28 +310,23 @@ export function getPlaceOrderAvailability(
       ? `${unavailableItem.name} is no longer available. Remove it to continue.`
       : inventoryIssue
         ? `${inventoryIssue} Adjust the quantity to continue.`
-        : form.orderType === "Dine-in" && !form.tableNumber?.trim()
-          ? "Select an available table for this dine-in order."
-          : form.orderType === "Delivery" && !form.customerName?.trim()
-            ? "Enter the delivery customer name."
-            : form.orderType === "Delivery" && !form.contactNumber?.trim()
-              ? "Enter the delivery contact number."
-              : form.orderType === "Delivery" && !form.deliveryAddress?.trim()
-                ? "Enter the delivery address."
-                : selectedTableOccupied
-                  ? `Table ${form.tableNumber} already has an active order.`
-                  : form.discountType !== "None" &&
-                      !form.discountReference?.trim()
-                    ? "Enter the Senior/PWD ID or reference."
-                    : form.paymentMethod === "Cash" && tendered < total
-                      ? "Enter enough cash tendered to cover the total."
-                      : form.paymentMethod === "GCash" &&
-                          !form.gcashReference?.trim()
-                        ? "Enter the customer's GCash reference number."
-                        : form.paymentMethod === "GCash" && !form.gcashConfirmed
-                          ? "Confirm the GCash payment before placing the order."
-                          : undefined;
-  return { unavailableItem, selectedTableOccupied, canPlace, disabledReason };
+        : form.orderType === "Delivery" && !form.customerName?.trim()
+          ? "Enter the delivery customer name."
+          : form.orderType === "Delivery" && !form.contactNumber?.trim()
+            ? "Enter the delivery contact number."
+            : form.orderType === "Delivery" && !form.deliveryAddress?.trim()
+              ? "Enter the delivery address."
+              : form.discountType !== "None" && !form.discountReference?.trim()
+                ? "Enter the Senior/PWD ID or reference."
+                : form.paymentMethod === "Cash" && tendered < total
+                  ? "Enter enough cash tendered to cover the total."
+                  : form.paymentMethod === "GCash" &&
+                      !form.gcashReference?.trim()
+                    ? "Enter the customer's GCash reference number."
+                    : form.paymentMethod === "GCash" && !form.gcashConfirmed
+                      ? "Confirm the GCash payment before placing the order."
+                      : undefined;
+  return { unavailableItem, canPlace, disabledReason };
 }
 
 export function addCartItem(

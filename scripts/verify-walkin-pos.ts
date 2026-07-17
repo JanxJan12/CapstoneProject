@@ -134,21 +134,19 @@ const summaryCheck = getOrderSummaryAvailability(
   cart,
   { ...DEFAULT_POS_FORM, orderType: "Take-out" },
   state.menuItems,
-  [],
 );
 assert(
   summaryCheck.canContinue,
   "A valid take-out order must continue from summary to payment.",
 );
-const missingTable = getOrderSummaryAvailability(
+const tablelessDineIn = getOrderSummaryAvailability(
   cart,
   { ...DEFAULT_POS_FORM, orderType: "Dine-in", tableNumber: "" },
   state.menuItems,
-  [],
 );
 assert(
-  !missingTable.canContinue && missingTable.disabledReason?.includes("table"),
-  "Dine-in summary must require an available table before payment.",
+  tablelessDineIn.canContinue,
+  "Dine-in orders must continue without a table number.",
 );
 
 const heldResult = holdOrder(state, {
@@ -170,6 +168,19 @@ assert(
   resumedCart.length === cart.length &&
     !state.heldOrders.some((held) => held.id === heldResult.held.id),
   "Resuming a held order must recover its items and remove the hold record.",
+);
+
+const tablelessOrder = createWalkInOrder(state, {
+  type: "Dine-in",
+  items: resumedCart.slice(0, 1).map(({ id: _id, ...item }) => item),
+  discountType: null,
+  paymentMethod: "Cash",
+  amountTendered: 500,
+}).order;
+assert(
+  tablelessOrder.tableNumber === undefined &&
+    tablelessOrder.customerName === "Walk-in Customer",
+  "Tableless dine-in orders must use the automatic walk-in identity.",
 );
 
 const orderCountBeforeDraftCancel = state.orders.length;

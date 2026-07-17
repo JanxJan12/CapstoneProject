@@ -11,7 +11,6 @@ export function OrderReviewDrawer({
   orderType,
   items,
   values,
-  occupiedTables,
   optionsOpen,
   subtotal,
   discountAmount,
@@ -38,7 +37,6 @@ export function OrderReviewDrawer({
   orderType: WalkInOrderType;
   items: POSCartLine[];
   values: POSForm;
-  occupiedTables: string[];
   optionsOpen: boolean;
   subtotal: number;
   discountAmount: number;
@@ -104,9 +102,7 @@ export function OrderReviewDrawer({
         />
 
         <POSOrderDetails
-          orderType={orderType}
           discountType={values.discountType}
-          occupiedTables={occupiedTables}
           optionsOpen={optionsOpen}
           onOptionsOpenChange={onOptionsOpenChange}
           register={register}

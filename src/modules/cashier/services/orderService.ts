@@ -49,8 +49,6 @@ export function createWalkInOrder(
     throw new Error("Delivery address must be 200 characters or fewer.");
   const tableNumber =
     input.type === "Dine-in" ? normalizeTable(input.tableNumber) : undefined;
-  if (input.type === "Dine-in" && !tableNumber)
-    throw new Error("Select a table for this dine-in order.");
   if (
     tableNumber &&
     state.orders.some(

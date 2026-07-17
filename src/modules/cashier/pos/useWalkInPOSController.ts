@@ -14,7 +14,6 @@ import {
   getInventoryIssue,
   getMealRecommendations,
   getNextOrderNumber,
-  getOccupiedTables,
   getOrderSummaryAvailability,
   getPlaceOrderAvailability,
   getProductHistory,
@@ -85,10 +84,6 @@ export function useWalkInPOSController(
   const walkInOrderType: WalkInOrderType =
     values.orderType === "Take-out" ? "Take-out" : "Dine-in";
 
-  const occupiedTables = useMemo(
-    () => getOccupiedTables(state.orders),
-    [state.orders],
-  );
   const productHistory = useMemo(
     () => getProductHistory(state.orders),
     [state.orders],
@@ -111,7 +106,6 @@ export function useWalkInPOSController(
         cart,
         values,
         state.menuItems,
-        occupiedTables,
         totals.total,
         totals.tendered,
         inventoryIssue,
@@ -119,7 +113,6 @@ export function useWalkInPOSController(
     [
       cart,
       inventoryIssue,
-      occupiedTables,
       state.menuItems,
       totals.tendered,
       totals.total,
@@ -132,10 +125,9 @@ export function useWalkInPOSController(
         cart,
         values,
         state.menuItems,
-        occupiedTables,
         inventoryIssue,
       ),
-    [cart, inventoryIssue, occupiedTables, state.menuItems, values],
+    [cart, inventoryIssue, state.menuItems, values],
   );
   const mealRecommendations = useMemo(
     () => getMealRecommendations(cart, state.menuItems),
@@ -693,12 +685,7 @@ export function useWalkInPOSController(
         summaryAvailability.disabledReason ??
           "Complete the order information before payment.",
       );
-      if (values.orderType === "Dine-in" && !values.tableNumber?.trim()) {
-        window.requestAnimationFrame(() => form.setFocus("tableNumber"));
-      } else if (
-        values.discountType !== "None" &&
-        !values.discountReference?.trim()
-      ) {
+      if (values.discountType !== "None" && !values.discountReference?.trim()) {
         window.requestAnimationFrame(() => form.setFocus("discountReference"));
       }
       return;
@@ -902,7 +889,6 @@ export function useWalkInPOSController(
     errors: form.formState.errors,
     values,
     walkInOrderType,
-    occupiedTables,
     recentIds: productHistory.recentIds,
     bestSellerIds: productHistory.bestSellerIds,
     orderNumber,

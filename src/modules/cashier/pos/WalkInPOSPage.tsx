@@ -49,7 +49,6 @@ export function WalkInPOSPage({
       orderType={pos.walkInOrderType}
       items={pos.cart}
       values={pos.values}
-      occupiedTables={pos.occupiedTables}
       optionsOpen={pos.optionsOpen}
       subtotal={pos.subtotal}
       discountAmount={pos.discountAmount}

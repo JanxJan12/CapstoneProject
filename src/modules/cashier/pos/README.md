@@ -14,8 +14,8 @@ requires them.
   modifier path in a dense cashier-friendly tile.
 - `TransactionBar` keeps item count, running total, last-item correction,
   optional review, and F3 payment available without reserving a side column.
-- `OrderReviewDrawer` composes `POSCart`, fulfillment details, discounts, notes,
-  and totals in an on-demand right drawer.
+- `OrderReviewDrawer` composes `POSCart`, discounts, kitchen notes, and totals
+  in an on-demand right drawer.
 - `ModifierDrawer`, `PaymentPanel`, and `ReceiptPanel` reuse that drawer surface
   without navigating away from the menu workspace.
 - `ReceiptContent` keeps printed receipt details consistent between the POS and
@@ -36,6 +36,7 @@ requires them.
 
 The default fast path is code/name/category → Quick Add → continue entry → F3
 payment → receipt. Review is optional for a valid order, but the controller
-opens it when table or discount information is missing. Simple products use
-safe defaults; explicit customization and later modifier edits stay in the same
-workspace.
+opens it when required discount information is missing. Dine-in and take-out
+orders use the automatic walk-in identity without requesting a customer or
+table. Simple products use safe defaults; explicit customization and later
+modifier edits stay in the same workspace.
