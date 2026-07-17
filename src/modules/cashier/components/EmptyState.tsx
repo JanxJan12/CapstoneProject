@@ -1,6 +1,6 @@
 import type { ElementType, ReactNode } from "react";
 import { PackageOpen } from "lucide-react";
-import { cn } from "../../../app/components/ui/utils";
+import { cn } from "@/components/ui/utils";
 
 export interface EmptyStateProps {
   title: string;

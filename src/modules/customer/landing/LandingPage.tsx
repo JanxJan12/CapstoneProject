@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { ShoppingCart, Clock, Plus, UtensilsCrossed } from "lucide-react";
 import { menuItems } from "../../../data/mockData";
-import { ImageWithFallback } from "../../../app/components/figma/ImageWithFallback";
-import rrjLogo from "../../../imports/451655946_497836222754416_7005773426468078155_n__1_.jpg";
-import rrjPhoto from "../../../imports/484095755_660911096446927_9159573585999384791_n__1_.jpg";
+import { ImageWithFallback } from "@/components/media/ImageWithFallback";
+import rrjLogo from "@/assets/brand/rrj-logo.jpg";
+import rrjPhoto from "@/assets/brand/rrj-restaurant.jpg";
 
 type CartItem = { id: number; name: string; price: number; qty: number };
 

@@ -6,7 +6,7 @@ import {
   type TextareaHTMLAttributes,
 } from "react";
 import { AlertCircle } from "lucide-react";
-import { cn } from "../../../app/components/ui/utils";
+import { cn } from "@/components/ui/utils";
 
 export const fieldClass =
   "cashier-field min-h-11 w-full rounded-[11px] border border-border bg-white/90 px-3 text-sm text-foreground shadow-[0_1px_2px_rgba(36,26,19,0.03)] outline-none transition-all placeholder:text-muted-foreground/55 hover:border-primary/25 focus:border-primary/55 focus:bg-white focus:ring-4 focus:ring-primary/10 aria-[invalid=true]:border-red-400 aria-[invalid=true]:ring-4 aria-[invalid=true]:ring-red-100 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground";

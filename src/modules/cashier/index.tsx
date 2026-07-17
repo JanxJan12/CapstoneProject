@@ -10,7 +10,7 @@ import {
 import { Toaster } from "sonner";
 import { AppShell } from "../../components/layout/AppShell";
 import type { NavGroup } from "../../types";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "@/app/providers/AuthProvider";
 import { useCashierStore } from "./hooks/CashierStore";
 import type { CashierNavigationIntent, CashierPageId } from "./types";
 import { CashierDashboardPage } from "./dashboard/CashierDashboardPage";
@@ -188,7 +188,7 @@ function CashierModule() {
           if (!open) setPendingNavigation(undefined);
         }}
         title="Leave the active order?"
-        description="Your cart is saved on this device, but leaving the POS interrupts the current checkout flow."
+        description="Your order is saved on this device, but leaving the POS interrupts the current payment flow."
         confirmLabel="Leave POS"
         cancelLabel="Stay here"
         danger

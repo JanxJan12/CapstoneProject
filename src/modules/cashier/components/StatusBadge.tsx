@@ -5,7 +5,7 @@ import {
   XCircle,
   type LucideIcon,
 } from "lucide-react";
-import { cn } from "../../../app/components/ui/utils";
+import { cn } from "@/components/ui/utils";
 import type {
   OrderStatus,
   PaymentStatus,

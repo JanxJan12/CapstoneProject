@@ -6,7 +6,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "../../../app/components/ui/dialog";
+} from "@/components/ui/dialog";
 import { PAYMENT_REJECTION_REASONS } from "../constants";
 import { rejectionSchema, type RejectionForm } from "../schemas";
 import {

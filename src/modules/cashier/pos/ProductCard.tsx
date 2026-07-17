@@ -1,7 +1,6 @@
 import { memo } from "react";
 import {
   AlertTriangle,
-  Clock3,
   Flame,
   History,
   Plus,
@@ -25,7 +24,7 @@ const MENU_IMAGES: Record<string, string> = {
   "MENU-10": "/menu/buko-juice.jpg",
 };
 
-export const productImageFor = (itemId: string) =>
+const productImageFor = (itemId: string) =>
   MENU_IMAGES[itemId] ?? "/menu/kare-kare.jpg";
 
 export interface ProductCardProps {
@@ -62,8 +61,83 @@ export const ProductCard = memo(function ProductCard({
       id={`pos-product-${item.id}`}
       role="option"
       aria-selected={keyboardActive || undefined}
-      className={`pos-menu-item-card group relative h-full overflow-hidden rounded-xl border text-left transition-all duration-200 ${soldOut ? "is-unavailable" : ""} ${quantity ? "is-selected" : ""} ${keyboardActive ? "is-keyboard-active" : ""}`}
+      className={`pos-menu-item-card group relative flex h-full flex-col overflow-hidden rounded-xl border text-left ${soldOut ? "is-unavailable" : ""} ${quantity ? "is-selected" : ""} ${keyboardActive ? "is-keyboard-active" : ""}`}
     >
+      <button
+        type="button"
+        disabled={soldOut}
+        onClick={onQuickAdd}
+        aria-label={`Add ${item.code} ${item.name} to order`}
+        className="pos-product-main flex min-h-0 flex-1 gap-3 p-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-amber-400"
+      >
+        <span className="pos-product-thumb relative h-14 w-14 shrink-0 overflow-hidden rounded-lg">
+          <img
+            src={item.imageUrl ?? productImageFor(item.id)}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            className="h-full w-full object-cover"
+          />
+          {quantity ? (
+            <b aria-label={`${quantity} in order`}>{quantity}</b>
+          ) : null}
+        </span>
+
+        <span className="min-w-0 flex-1">
+          <span className="flex items-start justify-between gap-2">
+            <b className="pos-product-code">{item.code}</b>
+            <span
+              className={`pos-availability ${soldOut ? "" : "is-available"}`}
+            >
+              <i /> {soldOut ? "Sold out" : "Ready"}
+            </span>
+          </span>
+          <strong className="pos-product-name">{item.name}</strong>
+          <span className="pos-product-price">{formatMoney(item.price)}</span>
+          <span className="pos-product-signals">
+            {bestSeller ? (
+              <em>
+                <Flame className="h-3 w-3" /> Popular
+              </em>
+            ) : recentlyOrdered ? (
+              <em>
+                <History className="h-3 w-3" /> Recent
+              </em>
+            ) : null}
+            {lowInventory && !soldOut ? (
+              <em className="is-warning">
+                <AlertTriangle className="h-3 w-3" /> {item.inventoryRemaining}{" "}
+                left
+              </em>
+            ) : null}
+          </span>
+        </span>
+      </button>
+
+      <div
+        className={`pos-product-actions grid gap-2 px-3 pb-3 ${modifierCount ? "grid-cols-2" : ""}`}
+      >
+        <button
+          type="button"
+          disabled={soldOut}
+          onClick={onQuickAdd}
+          className="pos-menu-quick-add flex min-h-10 items-center justify-center gap-2 rounded-lg text-[10px] font-black"
+        >
+          <Plus className="h-3.5 w-3.5" aria-hidden="true" />
+          {soldOut ? "Unavailable" : "Quick add"}
+        </button>
+        {modifierCount > 0 && !soldOut ? (
+          <button
+            type="button"
+            onClick={onSelect}
+            className="pos-menu-customize flex min-h-10 items-center justify-center gap-2 rounded-lg border text-[10px] font-black"
+          >
+            <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden="true" />
+            Customize
+          </button>
+        ) : null}
+      </div>
+
       <button
         type="button"
         disabled={soldOut}
@@ -74,120 +148,13 @@ export const ProductCard = memo(function ProductCard({
             : `Favorite ${item.name}`
         }
         aria-pressed={favorite}
-        className="pos-menu-favorite absolute right-2 top-2 z-30 flex h-10 w-10 items-center justify-center rounded-lg disabled:cursor-not-allowed"
+        className="pos-menu-favorite absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-lg disabled:cursor-not-allowed"
       >
         <Star
-          className={`h-4 w-4 ${favorite ? "fill-current" : ""}`}
+          className={`h-3.5 w-3.5 ${favorite ? "fill-current" : ""}`}
           aria-hidden="true"
         />
       </button>
-
-      {quantity > 0 ? (
-        <span
-          className="absolute left-2 top-2 z-20 flex h-8 min-w-8 items-center justify-center rounded-full px-2 text-xs font-black shadow"
-          aria-label={`${quantity} in cart`}
-        >
-          {quantity}
-        </span>
-      ) : null}
-
-      <button
-        type="button"
-        disabled={soldOut}
-        onClick={onQuickAdd}
-        aria-label={`Add ${item.name} to cart`}
-        className="block w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-amber-400"
-      >
-        <div className="pos-menu-item-image relative overflow-hidden">
-          <img
-            src={item.imageUrl ?? productImageFor(item.id)}
-            alt=""
-            loading="lazy"
-            decoding="async"
-            className="h-full w-full object-cover transition-all duration-200"
-          />
-          <span className="pos-menu-item-category absolute bottom-2 left-2 rounded-md px-2 py-1 text-[8px] font-black uppercase tracking-wider">
-            {item.category}
-          </span>
-          <span className="pos-menu-item-time absolute bottom-2 right-2 flex items-center gap-1 rounded-md px-2 py-1 text-[8px] font-bold">
-            <Clock3 className="h-2.5 w-2.5" aria-hidden="true" />
-            {item.preparationMinutes ?? 5}m
-          </span>
-        </div>
-
-        <div className="pos-menu-item-copy p-3 pb-2">
-          <div className="flex min-w-0 items-start justify-between gap-2">
-            <div className="min-w-0">
-              <p className="line-clamp-2 text-sm font-black leading-snug">
-                {item.name}
-              </p>
-              <p className="mt-1.5 text-base font-black">
-                {formatMoney(item.price)}
-              </p>
-            </div>
-            <span
-              className={`pos-availability mt-0.5 inline-flex shrink-0 items-center gap-1 text-[9px] font-black ${soldOut ? "" : "is-available"}`}
-            >
-              <span className="h-2 w-2 rounded-full" />
-              {soldOut ? "Sold Out" : "Available"}
-            </span>
-          </div>
-          <div className="mt-2 flex min-h-5 flex-wrap items-center gap-1.5">
-            {bestSeller ? (
-              <span className="pos-product-signal">
-                <Flame className="h-3 w-3" aria-hidden="true" /> Bestseller
-              </span>
-            ) : null}
-            {!bestSeller && recentlyOrdered ? (
-              <span className="pos-product-signal">
-                <History className="h-3 w-3" aria-hidden="true" /> Recent
-              </span>
-            ) : null}
-            {modifierCount > 0 ? (
-              <span className="pos-product-signal">
-                <SlidersHorizontal className="h-3 w-3" aria-hidden="true" />
-                {modifierCount} modifier{modifierCount === 1 ? "" : "s"}
-              </span>
-            ) : null}
-            {lowInventory && !soldOut ? (
-              <span className="pos-product-signal is-warning">
-                <AlertTriangle className="h-3 w-3" aria-hidden="true" /> Only{" "}
-                {item.inventoryRemaining}
-              </span>
-            ) : null}
-          </div>
-        </div>
-      </button>
-
-      <div
-        className={`grid gap-2 px-3 pb-3 ${modifierCount ? "grid-cols-2" : ""}`}
-      >
-        <button
-          type="button"
-          disabled={soldOut}
-          onClick={onQuickAdd}
-          className="pos-menu-quick-add flex min-h-11 w-full items-center justify-center gap-2 rounded-lg text-xs font-black transition-all duration-200 disabled:cursor-not-allowed"
-        >
-          <Plus className="h-4 w-4" aria-hidden="true" />
-          {soldOut ? "Sold Out" : "Quick Add"}
-        </button>
-        {modifierCount && !soldOut ? (
-          <button
-            type="button"
-            onClick={onSelect}
-            className="pos-menu-customize flex min-h-11 items-center justify-center gap-2 rounded-lg border text-[10px] font-black transition-all duration-200"
-          >
-            <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden="true" />
-            Customize
-          </button>
-        ) : null}
-      </div>
-
-      {soldOut ? (
-        <span className="pos-menu-unavailable pointer-events-none absolute inset-x-3 top-14 z-20 rounded-lg px-3 py-2 text-center text-[10px] font-black uppercase tracking-wider">
-          Sold Out
-        </span>
-      ) : null}
     </article>
   );
 }, areProductCardPropsEqual);

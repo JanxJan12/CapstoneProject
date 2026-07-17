@@ -28,7 +28,7 @@ export const POS_RECENT_SEARCH_LIMIT = 6;
 export const POS_LOW_INVENTORY_THRESHOLD = 5;
 export const POS_ITEM_NOTE_MAX_LENGTH = 120;
 export const MAX_ACTIVITY_RECORDS = 40;
-export const MENU_GRID_ROW_HEIGHT_PX = 300;
+export const MENU_GRID_ROW_HEIGHT_PX = 190;
 export const MENU_GRID_OVERSCAN_ROWS = 2;
 export const OPTIMISTIC_DELAY_MS = {
   fast: 160,

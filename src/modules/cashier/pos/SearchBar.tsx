@@ -53,7 +53,7 @@ export const SearchBar = memo(function SearchBar({
       <CashierInput
         ref={inputRef}
         role="combobox"
-        aria-label="Search products by name, alias, or category"
+        aria-label="Search products by item code, name, or alias"
         aria-keyshortcuts="F2 / ArrowDown ArrowUp Enter Escape"
         aria-controls="pos-product-results"
         aria-expanded={showSuggestions}
@@ -79,7 +79,7 @@ export const SearchBar = memo(function SearchBar({
             onEscape();
           }
         }}
-        placeholder="Search name, alias, or category — F2"
+        placeholder="Type item code or product name — F2"
         className="pl-9 pr-20"
       />
       {value ? (
@@ -117,7 +117,7 @@ export const SearchBar = memo(function SearchBar({
             onChoose={chooseSearch}
           />
           <p className="mt-2 text-[9px] font-semibold text-muted-foreground">
-            ↑↓ choose product · Enter quick adds · Esc clears
+            Exact code + Enter adds immediately · ↑↓ selects a result
           </p>
         </div>
       ) : null}

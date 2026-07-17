@@ -13,9 +13,9 @@ import {
 } from "lucide-react";
 import { CUSTOMER_ACCOUNT } from "../../../data/authAccounts";
 import type { AccountRole } from "../../../data/authAccounts";
-import { useAuth } from "../../../context/AuthContext";
-import { ImageWithFallback } from "../../../app/components/figma/ImageWithFallback";
-import rrjLogo from "../../../imports/451655946_497836222754416_7005773426468078155_n__1_.jpg";
+import { useAuth } from "@/app/providers/AuthProvider";
+import { ImageWithFallback } from "@/components/media/ImageWithFallback";
+import rrjLogo from "@/assets/brand/rrj-logo.jpg";
 
 const GOOGLE_SVG = (
   <svg className="h-5 w-5 flex-shrink-0" viewBox="0 0 24 24" aria-hidden="true">

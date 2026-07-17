@@ -8,9 +8,11 @@ import {
 } from "../constants";
 import { modifierGroupsFor } from "../constants/modifiers";
 import type { MenuItem, OrderItemModifier } from "../types";
+import type { POSCartLine } from "./types";
 
 export interface ModifierDrawerProps {
   item: MenuItem;
+  initialLine?: POSCartLine;
   currentQuantity: number;
   onCancel: () => void;
   onAdd: (
@@ -23,6 +25,7 @@ export interface ModifierDrawerProps {
 
 export function ModifierDrawer({
   item,
+  initialLine,
   currentQuantity,
   onCancel,
   onAdd,
@@ -40,16 +43,17 @@ export function ModifierDrawer({
   );
 
   useEffect(() => {
-    setQuantity(1);
-    setNote("");
+    setQuantity(initialLine?.quantity ?? 1);
+    setNote(initialLine?.note ?? "");
     setSelectedIds(
-      modifierGroupsFor(item).flatMap((group) =>
-        group.required && group.selection === "single"
-          ? (group.options[0]?.id ?? [])
-          : [],
-      ),
+      initialLine?.modifiers?.map((modifier) => modifier.id) ??
+        modifierGroupsFor(item).flatMap((group) =>
+          group.required && group.selection === "single"
+            ? (group.options[0]?.id ?? [])
+            : [],
+        ),
     );
-  }, [item]);
+  }, [initialLine, item]);
 
   const selectedModifiers = groups.flatMap((group) =>
     group.options.filter((option) => selectedIds.includes(option.id)),
@@ -92,7 +96,7 @@ export function ModifierDrawer({
         </span>
         <div className="min-w-0 flex-1">
           <p className="text-[9px] font-black uppercase tracking-wider text-[var(--pos-orange-soft)]">
-            Customize item
+            {initialLine ? "Edit order item" : "Customize item"}
           </p>
           <h2 className="mt-1 truncate text-sm font-black">{item.name}</h2>
           <p className="mt-1 text-[10px] text-[var(--pos-muted)]">
@@ -206,7 +210,11 @@ export function ModifierDrawer({
             onClick={() => onAdd(item, quantity, note, selectedModifiers)}
             className="pos-place-order min-h-12 rounded-xl px-4 text-xs font-black text-white disabled:cursor-not-allowed disabled:opacity-35"
           >
-            {missingRequired ? "Complete required choices" : "Add to Cart"}
+            {missingRequired
+              ? "Complete required choices"
+              : initialLine
+                ? "Update Order Item"
+                : "Add to Order"}
           </button>
         </div>
       </footer>

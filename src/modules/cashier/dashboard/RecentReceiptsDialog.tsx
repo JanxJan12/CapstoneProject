@@ -5,7 +5,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "../../../app/components/ui/dialog";
+} from "@/components/ui/dialog";
 import { formatDateTime, formatMoney } from "../constants";
 import { useCashierStore } from "../hooks/CashierStore";
 import type { Order } from "../types";

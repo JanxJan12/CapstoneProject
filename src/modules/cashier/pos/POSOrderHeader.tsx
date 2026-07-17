@@ -1,4 +1,4 @@
-import { CircleX } from "lucide-react";
+import { CircleX, PauseCircle, Radio, RotateCcw } from "lucide-react";
 import type { HeldOrder } from "../types";
 import { CashierSelect } from "../components";
 import type { WalkInOrderType } from "./types";
@@ -6,23 +6,43 @@ import type { WalkInOrderType } from "./types";
 export function POSOrderHeader({
   orderType,
   busy,
+  shiftOpen,
   heldOrders,
   onOrderTypeChange,
+  hasItems,
   canCancel,
+  onNew,
+  onHold,
   onCancel,
   onReopen,
 }: {
   orderType: WalkInOrderType;
   busy: boolean;
+  shiftOpen: boolean;
   heldOrders: HeldOrder[];
+  hasItems: boolean;
   canCancel: boolean;
   onOrderTypeChange: (type: WalkInOrderType) => void;
+  onNew: () => void;
+  onHold: () => void;
   onCancel: () => void;
   onReopen: (id: string) => void;
 }) {
   return (
     <div className="pos-order-header border-b border-border bg-gradient-to-r from-white via-[#fffaf5] to-orange-50/30 p-2 shadow-[0_4px_14px_rgba(67,42,23,0.035)]">
       <div className="pos-order-fields flex flex-wrap items-center gap-2.5">
+        <div
+          className="pos-workstation-status hidden items-center gap-2 lg:flex"
+          data-live={shiftOpen || undefined}
+        >
+          <span>
+            <Radio className="h-3.5 w-3.5" aria-hidden="true" />
+          </span>
+          <div>
+            <small>Counter workstation</small>
+            <strong>{shiftOpen ? "Live · Shift open" : "Shift closed"}</strong>
+          </div>
+        </div>
         <div className="flex items-center gap-2">
           <span className="text-[9px] font-black uppercase tracking-wider text-muted-foreground">
             Order
@@ -71,6 +91,18 @@ export function POSOrderHeader({
           </div>
         )}
         <div className="pos-order-actions ml-auto flex flex-wrap gap-1.5">
+          <Action
+            label="New"
+            icon={RotateCcw}
+            onClick={onNew}
+            disabled={busy}
+          />
+          <Action
+            label="Hold"
+            icon={PauseCircle}
+            onClick={onHold}
+            disabled={busy || !hasItems}
+          />
           <Action
             label="Cancel Order"
             icon={CircleX}

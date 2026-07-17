@@ -5,7 +5,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "../../../app/components/ui/dialog";
+} from "@/components/ui/dialog";
 import {
   CashierDialogContent,
   CashierInput,

@@ -34,6 +34,7 @@ export interface CashierUser {
 
 export interface MenuItem {
   id: string;
+  code: string;
   name: string;
   aliases?: string[];
   imageUrl?: string;

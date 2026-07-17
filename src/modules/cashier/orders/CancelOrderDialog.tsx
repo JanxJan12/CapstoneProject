@@ -6,7 +6,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "../../../app/components/ui/dialog";
+} from "@/components/ui/dialog";
 import { cancellationSchema, type CancellationForm } from "../schemas";
 import {
   CashierButton,

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { cn } from "../../../app/components/ui/utils";
+import { cn } from "@/components/ui/utils";
 
 export interface SearchToolbarProps {
   label: string;

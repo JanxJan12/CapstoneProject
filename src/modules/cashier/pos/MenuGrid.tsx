@@ -5,7 +5,14 @@ import {
   useState,
   type RefObject,
 } from "react";
-import { Search, Star, X } from "lucide-react";
+import {
+  AlertTriangle,
+  Flame,
+  PauseCircle,
+  Search,
+  Star,
+  Zap,
+} from "lucide-react";
 import { EmptyState } from "../components";
 import type { MenuItem } from "../types";
 import { CategorySidebar } from "./CategorySidebar";
@@ -19,16 +26,15 @@ export interface MenuGridProps {
   searchRef?: RefObject<HTMLInputElement | null>;
   cart: POSCartLine[];
   category: string;
-  searchVisible: boolean;
   search: string;
   recentIds: string[];
   recentSearches: string[];
   bestSellerIds: string[];
   favoriteIds: string[];
+  heldOrderCount: number;
   onCategoryChange: (category: string) => void;
   onSearchChange: (search: string) => void;
   onCommitSearch: (search: string) => void;
-  onCloseSearch: () => void;
   onSelect: (item: MenuItem) => void;
   onQuickAdd: (item: MenuItem) => void;
   onToggleFavorite: (itemId: string) => void;
@@ -39,16 +45,15 @@ export function MenuGrid({
   searchRef,
   cart,
   category,
-  searchVisible,
   search,
   recentIds,
   recentSearches,
   bestSellerIds,
   favoriteIds,
+  heldOrderCount,
   onCategoryChange,
   onSearchChange,
   onCommitSearch,
-  onCloseSearch,
   onSelect,
   onQuickAdd,
   onToggleFavorite,
@@ -57,6 +62,21 @@ export function MenuGrid({
   const recent = useMemo(() => new Set(recentIds), [recentIds]);
   const bestSellers = useMemo(() => new Set(bestSellerIds), [bestSellerIds]);
   const favorites = useMemo(() => new Set(favoriteIds), [favoriteIds]);
+  const soldOutCount = useMemo(
+    () =>
+      menuItems.filter(
+        (item) => !item.available || item.inventoryRemaining === 0,
+      ).length,
+    [menuItems],
+  );
+  const fastLaneItems = useMemo(
+    () =>
+      bestSellerIds
+        .map((id) => menuItems.find((item) => item.id === id))
+        .filter((item): item is MenuItem => Boolean(item?.available))
+        .slice(0, 3),
+    [bestSellerIds, menuItems],
+  );
   const filtered = useMemo(
     () =>
       filterMenuItems(
@@ -89,9 +109,15 @@ export function MenuGrid({
     [filtered.length],
   );
   const quickAddActiveResult = useCallback(() => {
-    const target = activeItem ?? filtered[0];
+    const normalizedSearch = search.trim().toLocaleLowerCase();
+    const target =
+      filtered.find(
+        (item) => item.code.toLocaleLowerCase() === normalizedSearch,
+      ) ??
+      activeItem ??
+      filtered[0];
     if (target?.available) onQuickAdd(target);
-  }, [activeItem, filtered, onQuickAdd]);
+  }, [activeItem, filtered, onQuickAdd, search]);
   const handleSearchChange = useCallback(
     (value: string) => {
       if (value.trim() && category !== "All") onCategoryChange("All");
@@ -106,44 +132,32 @@ export function MenuGrid({
     },
     [onCategoryChange, onSearchChange],
   );
-  const closeSearch = useCallback(() => {
-    onSearchChange("");
-    setActiveIndex(-1);
-    onCloseSearch();
-  }, [onCloseSearch, onSearchChange]);
-
   return (
     <div className="pos-menu-grid flex h-full min-w-0 flex-1 flex-col overflow-hidden">
-      {searchVisible ? (
-        <div className="pos-menu-toolbar pos-menu-toolbar-reveal flex items-center gap-2 border-b p-3">
-          <SearchBar
-            value={search}
-            resultCount={filtered.length}
-            recentSearches={recentSearches}
-            activeResultId={
-              activeItem ? `pos-product-${activeItem.id}` : undefined
-            }
-            inputRef={searchRef}
-            onChange={handleSearchChange}
-            onCommit={onCommitSearch}
-            onMove={moveResult}
-            onEnter={quickAddActiveResult}
-            onEscape={() => {
-              setActiveIndex(-1);
-              if (!search.trim()) onCloseSearch();
-            }}
-          />
-          <button
-            type="button"
-            onClick={closeSearch}
-            aria-label="Close product search"
-            title="Close search"
-            className="pos-search-close flex h-11 w-11 shrink-0 items-center justify-center rounded-lg"
-          >
-            <X className="h-4 w-4" aria-hidden="true" />
-          </button>
+      <div className="pos-menu-toolbar flex items-center gap-3 border-b p-3">
+        <div className="pos-command-label hidden shrink-0 sm:block">
+          <span>Menu command</span>
+          <strong>Name or code</strong>
         </div>
-      ) : null}
+        <SearchBar
+          value={search}
+          resultCount={filtered.length}
+          recentSearches={recentSearches}
+          activeResultId={
+            activeItem ? `pos-product-${activeItem.id}` : undefined
+          }
+          inputRef={searchRef}
+          onChange={handleSearchChange}
+          onCommit={onCommitSearch}
+          onMove={moveResult}
+          onEnter={quickAddActiveResult}
+          onEscape={() => setActiveIndex(-1)}
+        />
+        <div className="pos-code-hint hidden shrink-0 lg:block">
+          <kbd>B1</kbd>
+          <span>+ Enter</span>
+        </div>
+      </div>
       <div className="pos-menu-browser flex min-h-0 flex-1">
         <CategorySidebar
           menuItems={menuItems}
@@ -155,6 +169,45 @@ export function MenuGrid({
         />
 
         <div className="pos-menu-results flex min-w-0 flex-1 flex-col overflow-hidden">
+          {!cart.length && !search.trim() ? (
+            <section className="pos-idle-tools" aria-label="Quick order tools">
+              <div className="pos-idle-ready">
+                <span>
+                  <Zap className="h-4 w-4" aria-hidden="true" />
+                </span>
+                <div>
+                  <strong>Ready for next order</strong>
+                  <small>Use a menu key or type a code</small>
+                </div>
+              </div>
+              <div className="pos-fast-lane" aria-label="Popular today">
+                <span>
+                  <Flame className="h-3.5 w-3.5" /> Popular
+                </span>
+                {fastLaneItems.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => onQuickAdd(item)}
+                    title={`Quick add ${item.name}`}
+                  >
+                    <b>{item.code}</b>
+                    <span>{item.name}</span>
+                  </button>
+                ))}
+              </div>
+              <div className="pos-idle-signals">
+                <span>
+                  <PauseCircle className="h-3.5 w-3.5" />
+                  {heldOrderCount} held
+                </span>
+                <span className={soldOutCount ? "is-warning" : ""}>
+                  <AlertTriangle className="h-3.5 w-3.5" />
+                  {soldOutCount} unavailable
+                </span>
+              </div>
+            </section>
+          ) : null}
           <div className="pos-menu-section-heading flex shrink-0 items-end justify-between gap-3 px-3 pb-2 pt-3">
             <div>
               <span className="text-[8px] font-black uppercase tracking-[0.2em]">

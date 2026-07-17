@@ -5,6 +5,7 @@ import {
   GripVertical,
   Minus,
   Plus,
+  SlidersHorizontal,
   Trash2,
 } from "lucide-react";
 import { CashierInput } from "../components";
@@ -22,6 +23,7 @@ export interface OrderItemProps {
   onRemove: (lineId: string) => void;
   onDuplicate: (lineId: string) => void;
   onNoteChange: (lineId: string, note: string) => void;
+  onCustomize?: (lineId: string) => void;
   onDragStart: (lineId: string) => void;
   onDrop: (lineId: string) => void;
 }
@@ -34,6 +36,7 @@ export const OrderItem = memo(
     onRemove,
     onDuplicate,
     onNoteChange,
+    onCustomize,
     onDragStart,
     onDrop,
   }: OrderItemProps) {
@@ -44,6 +47,17 @@ export const OrderItem = memo(
         onDrop={() => onDrop(item.lineId)}
       >
         <div className="flex items-start gap-2">
+          {onCustomize ? (
+            <button
+              type="button"
+              aria-label={`Edit choices for ${item.name}`}
+              title="Edit modifiers"
+              onClick={() => onCustomize(item.lineId)}
+              className="pos-cart-edit flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition"
+            >
+              <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden="true" />
+            </button>
+          ) : null}
           <button
             type="button"
             draggable

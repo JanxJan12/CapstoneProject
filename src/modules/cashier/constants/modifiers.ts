@@ -58,7 +58,20 @@ const DRINK_SIZE: MenuModifierGroup = {
   ],
 };
 
+const SOFTDRINK_FLAVOR: MenuModifierGroup = {
+  id: "softdrink-flavor",
+  name: "Drink flavor",
+  selection: "single",
+  required: true,
+  options: [
+    { id: "drink-coke", name: "Coke", price: 0 },
+    { id: "drink-sprite", name: "Sprite", price: 0 },
+    { id: "drink-royal", name: "Royal", price: 0 },
+  ],
+};
+
 export function modifierGroupsFor(item: MenuItem): MenuModifierGroup[] {
+  if (item.id === "MENU-09") return [SOFTDRINK_FLAVOR, DRINK_SIZE];
   if (item.category === "Beverages") return [DRINK_SIZE];
   if (item.category === "Rice") return [];
   return [FOOD_ADD_ONS, FOOD_PREFERENCES, SPICY_LEVEL, COOKING_PREFERENCE];

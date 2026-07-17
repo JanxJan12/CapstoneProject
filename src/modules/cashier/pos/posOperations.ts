@@ -10,7 +10,7 @@ import type { POSForm } from "../schemas";
 import type { MenuItem, Order, OrderItemModifier } from "../types";
 import { createLineId } from "./posPersistence";
 import type { POSCartLine } from "./types";
-import { RightPanelState } from "./types";
+import { POSTransactionState } from "./types";
 
 export interface CartUpdateResult {
   cart: POSCartLine[];
@@ -28,28 +28,30 @@ export interface MealRecommendations {
   items: MenuItem[];
 }
 
-export type RightPanelEvent =
-  | "openSummary"
-  | "continueToPayment"
-  | "backToSummary"
-  | "backToCart"
+export type POSTransactionEvent =
+  | "itemAdded"
+  | "openReview"
+  | "proceedToPayment"
+  | "backToReview"
+  | "backToOrdering"
   | "showReceipt"
   | "reset";
 
-export function transitionRightPanel(
-  current: RightPanelState,
-  event: RightPanelEvent,
+export function transitionTransactionState(
+  current: POSTransactionState,
+  event: POSTransactionEvent,
   hasItems: boolean,
-): RightPanelState {
-  if (event === "showReceipt") return RightPanelState.RECEIPT;
-  if (event === "reset" || event === "backToCart") {
-    return RightPanelState.CART;
+): POSTransactionState {
+  if (event === "showReceipt") return POSTransactionState.RECEIPT;
+  if (event === "reset") return POSTransactionState.IDLE;
+  if (event === "itemAdded" || event === "backToOrdering") {
+    return hasItems ? POSTransactionState.ORDERING : POSTransactionState.IDLE;
   }
-  if (!hasItems) return RightPanelState.CART;
-  if (event === "openSummary" || event === "backToSummary") {
-    return RightPanelState.SUMMARY;
+  if (!hasItems) return POSTransactionState.IDLE;
+  if (event === "openReview" || event === "backToReview") {
+    return POSTransactionState.ORDER_REVIEW;
   }
-  if (event === "continueToPayment") return RightPanelState.PAYMENT;
+  if (event === "proceedToPayment") return POSTransactionState.PAYMENT;
   return current;
 }
 
@@ -129,6 +131,7 @@ export function filterMenuItems(
       (category === "Favorites" && favoriteIds.has(item.id));
     if (!inView) return false;
     const searchable = [
+      item.code,
       item.name,
       item.category,
       item.description,
@@ -431,7 +434,7 @@ export function addCartItem(
       amountToAdd < quantity
         ? {
             title: `Quantity limited to ${currentQuantity + amountToAdd}`,
-            description: `The cart now contains the maximum available ${menuItem.name}.`,
+            description: `The order now contains the maximum available ${menuItem.name}.`,
           }
         : undefined,
   };

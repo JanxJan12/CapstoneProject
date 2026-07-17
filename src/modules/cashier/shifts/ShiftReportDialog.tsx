@@ -11,7 +11,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "../../../app/components/ui/dialog";
+} from "@/components/ui/dialog";
 import { formatDateTime, formatMoney } from "../constants";
 import type { CashierShift, ShiftTotals } from "../types";
 import {

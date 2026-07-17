@@ -6,9 +6,10 @@ export interface POSCartLine extends Omit<OrderItem, "id"> {
 
 export type WalkInOrderType = Extract<OrderType, "Dine-in" | "Take-out">;
 
-export enum RightPanelState {
-  CART = "cart",
-  SUMMARY = "summary",
+export enum POSTransactionState {
+  IDLE = "idle",
+  ORDERING = "ordering",
+  ORDER_REVIEW = "order-review",
   PAYMENT = "payment",
   RECEIPT = "receipt",
 }

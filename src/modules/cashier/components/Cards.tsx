@@ -1,6 +1,6 @@
 import type { ButtonHTMLAttributes, ElementType, ReactNode } from "react";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
-import { cn } from "../../../app/components/ui/utils";
+import { cn } from "@/components/ui/utils";
 
 export interface MetricCardProps extends Omit<
   ButtonHTMLAttributes<HTMLButtonElement>,

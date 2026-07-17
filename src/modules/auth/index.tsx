@@ -12,11 +12,11 @@ import {
 import { StaffLoginPage } from "./pages/StaffLoginPage";
 import { CustomerLoginPage } from "./pages/CustomerLoginPage";
 import { RiderLoginPage } from "./pages/RiderLoginPage";
-import { ImageWithFallback } from "../../app/components/figma/ImageWithFallback";
-import { useAuth } from "../../context/AuthContext";
+import { ImageWithFallback } from "@/components/media/ImageWithFallback";
+import { useAuth } from "@/app/providers/AuthProvider";
 import type { AccountRole, DemoAccount } from "../../data/authAccounts";
-import rrjLogo from "../../imports/451655946_497836222754416_7005773426468078155_n__1_.jpg";
-import rrjPhoto from "../../imports/484095755_660911096446927_9159573585999384791_n__1_.jpg";
+import rrjLogo from "@/assets/brand/rrj-logo.jpg";
+import rrjPhoto from "@/assets/brand/rrj-restaurant.jpg";
 
 type AuthScreen = "staff" | "customer" | "rider";
 

@@ -2,13 +2,14 @@ import { defaultModifiersFor } from "../src/modules/cashier/constants/modifiers"
 import {
   addCartItem,
   calculatePOSTotals,
+  filterMenuItems,
   getMealRecommendations,
   getOrderSummaryAvailability,
-  transitionRightPanel,
+  transitionTransactionState,
 } from "../src/modules/cashier/pos/posOperations";
 import { DEFAULT_POS_FORM } from "../src/modules/cashier/pos/posPersistence";
 import {
-  RightPanelState,
+  POSTransactionState,
   type POSCartLine,
 } from "../src/modules/cashier/pos/types";
 import {
@@ -37,15 +38,39 @@ const add = (id: string) => {
 };
 
 assert(
-  transitionRightPanel(RightPanelState.CART, "reset", false) ===
-    RightPanelState.CART,
-  "A new POS order must open directly in item selection.",
+  new Set(state.menuItems.map((item) => item.code.toLowerCase())).size ===
+    state.menuItems.length,
+  "Every cashier menu item must have a unique item code.",
+);
+const codeSearch = filterMenuItems(
+  state.menuItems,
+  "All",
+  "R1",
+  new Set(),
+  new Set(),
+  new Set(),
+);
+assert(
+  codeSearch.length === 1 && codeSearch[0]?.name === "White Rice",
+  "Item code search must resolve the exact cashier menu item.",
+);
+const softdrinkDefaults = defaultModifiersFor(menuItem("MENU-09"));
+assert(
+  softdrinkDefaults.some((modifier) => modifier.id === "drink-coke") &&
+    softdrinkDefaults.some((modifier) => modifier.id === "drink-regular"),
+  "Soft drink Quick Add must apply a valid flavor and size that can be edited later.",
+);
+
+assert(
+  transitionTransactionState(POSTransactionState.IDLE, "reset", false) ===
+    POSTransactionState.IDLE,
+  "A new POS order must begin in the idle item-selection state.",
 );
 add("MENU-02");
 assert(
-  transitionRightPanel(RightPanelState.CART, "backToCart", true) ===
-    RightPanelState.CART,
-  "Adding a product must keep the cashier in the persistent cart panel.",
+  transitionTransactionState(POSTransactionState.IDLE, "itemAdded", true) ===
+    POSTransactionState.ORDERING,
+  "Adding a product must move the workstation into order entry.",
 );
 const afterViand = getMealRecommendations(cart, state.menuItems);
 assert(
@@ -82,16 +107,28 @@ assert(totals.total === 190, "The multi-category cart total is incorrect.");
 
 const cartSnapshot = JSON.stringify(cart);
 assert(
-  transitionRightPanel(RightPanelState.CART, "openSummary", true) ===
-    RightPanelState.SUMMARY &&
-    transitionRightPanel(RightPanelState.SUMMARY, "continueToPayment", true) ===
-      RightPanelState.PAYMENT &&
-    transitionRightPanel(RightPanelState.PAYMENT, "backToSummary", true) ===
-      RightPanelState.SUMMARY &&
-    transitionRightPanel(RightPanelState.SUMMARY, "backToCart", true) ===
-      RightPanelState.CART &&
+  transitionTransactionState(
+    POSTransactionState.ORDERING,
+    "openReview",
+    true,
+  ) === POSTransactionState.ORDER_REVIEW &&
+    transitionTransactionState(
+      POSTransactionState.ORDER_REVIEW,
+      "proceedToPayment",
+      true,
+    ) === POSTransactionState.PAYMENT &&
+    transitionTransactionState(
+      POSTransactionState.PAYMENT,
+      "backToReview",
+      true,
+    ) === POSTransactionState.ORDER_REVIEW &&
+    transitionTransactionState(
+      POSTransactionState.ORDER_REVIEW,
+      "backToOrdering",
+      true,
+    ) === POSTransactionState.ORDERING &&
     JSON.stringify(cart) === cartSnapshot,
-  "Cart, summary, and payment panel transitions must preserve the draft.",
+  "Order review and payment transitions must preserve the active order.",
 );
 const summaryCheck = getOrderSummaryAvailability(
   cart,
@@ -139,8 +176,8 @@ const orderCountBeforeDraftCancel = state.orders.length;
 cart = [];
 assert(
   state.orders.length === orderCountBeforeDraftCancel &&
-    transitionRightPanel(RightPanelState.CART, "reset", false) ===
-      RightPanelState.CART,
+    transitionTransactionState(POSTransactionState.ORDERING, "reset", false) ===
+      POSTransactionState.IDLE,
   "Cancelling an unsubmitted draft must not create a voided order record.",
 );
 
@@ -164,11 +201,14 @@ assert(
   "Confirm Order must create connected kitchen, payment, and transaction records.",
 );
 assert(
-  transitionRightPanel(RightPanelState.PAYMENT, "showReceipt", false) ===
-    RightPanelState.RECEIPT,
-  "Successful confirmation must transform the right panel into receipt.",
+  transitionTransactionState(
+    POSTransactionState.PAYMENT,
+    "showReceipt",
+    false,
+  ) === POSTransactionState.RECEIPT,
+  "Successful confirmation must move the transaction into receipt state.",
 );
 
 console.log(
-  `Verified Walk-in POS: ${confirmed.order.id}, ${resumedCart.length} cart lines, ${state.transactions.length} transactions.`,
+  `Verified Walk-in POS: ${confirmed.order.id}, ${resumedCart.length} order lines, ${state.transactions.length} transactions.`,
 );

@@ -35,7 +35,7 @@ export function POSOrderDetails({
       <div className="mb-3">
         <p className="text-xs font-black">Order information</p>
         <p className="mt-1 text-[9px] font-semibold text-muted-foreground">
-          Add fulfillment details now that the order is ready for checkout.
+          Add fulfillment details now that the order is ready for payment.
         </p>
       </div>
 

@@ -8,7 +8,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "../../../app/components/ui/dialog";
+} from "@/components/ui/dialog";
 import { formatMoney, SHIFT_VARIANCE_REASONS } from "../constants";
 import { endShiftSchema, type EndShiftForm } from "../schemas";
 import type { ShiftClosureInput, ShiftTotals } from "../types";

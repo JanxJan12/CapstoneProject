@@ -5,7 +5,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "../../../app/components/ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu";
 import { formatDateTime, formatMoney } from "../constants";
 import type { CashierShift, Order, Transaction } from "../types";
 import {

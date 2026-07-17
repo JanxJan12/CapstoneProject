@@ -6,7 +6,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "../../../app/components/ui/dialog";
+} from "@/components/ui/dialog";
 import { formatMoney } from "../constants";
 import type { Order, Payment } from "../types";
 import { CashierButton, CashierDialogContent } from "../components";

@@ -1,5 +1,5 @@
 import { RouterProvider } from "react-router";
-import { AuthProvider } from "../context/AuthContext";
+import { AuthProvider } from "@/app/providers/AuthProvider";
 import { CashierProvider } from "../modules/cashier/hooks/CashierStore";
 import { router } from "./routes";
 

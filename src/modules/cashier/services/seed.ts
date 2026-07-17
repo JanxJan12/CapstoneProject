@@ -256,6 +256,7 @@ export function createInitialCashierState(): CashierState {
     menuItems: [
       {
         id: "MENU-01",
+        code: "B1",
         name: "Crispy Beef Tadyang",
         aliases: ["Tadyang", "Beef ribs", "Crispy beef"],
         category: "Viands",
@@ -267,6 +268,7 @@ export function createInitialCashierState(): CashierState {
       },
       {
         id: "MENU-02",
+        code: "A1",
         name: "Adobong Manok",
         aliases: ["Adobo", "Chicken adobo", "Manok"],
         category: "Viands",
@@ -278,6 +280,7 @@ export function createInitialCashierState(): CashierState {
       },
       {
         id: "MENU-03",
+        code: "S1",
         name: "Sinigang na Baka",
         aliases: ["Sinigang", "Beef soup", "Baka soup"],
         category: "Soups",
@@ -289,6 +292,7 @@ export function createInitialCashierState(): CashierState {
       },
       {
         id: "MENU-04",
+        code: "B2",
         name: "Chicken Bicol Express",
         aliases: ["Bicol express", "Spicy chicken"],
         category: "Viands",
@@ -300,6 +304,7 @@ export function createInitialCashierState(): CashierState {
       },
       {
         id: "MENU-05",
+        code: "K1",
         name: "Kare-Kare",
         aliases: ["Kare kare", "Peanut stew"],
         category: "Viands",
@@ -311,6 +316,7 @@ export function createInitialCashierState(): CashierState {
       },
       {
         id: "MENU-06",
+        code: "V1",
         name: "Pinakbet",
         aliases: ["Pakbet", "Mixed vegetables"],
         category: "Vegetables",
@@ -322,6 +328,7 @@ export function createInitialCashierState(): CashierState {
       },
       {
         id: "MENU-07",
+        code: "R2",
         name: "Fried Rice",
         aliases: ["Sinangag", "Garlic rice"],
         category: "Rice",
@@ -333,6 +340,7 @@ export function createInitialCashierState(): CashierState {
       },
       {
         id: "MENU-08",
+        code: "R1",
         name: "White Rice",
         aliases: ["Plain rice", "Steamed rice", "Kanin"],
         category: "Rice",
@@ -344,6 +352,7 @@ export function createInitialCashierState(): CashierState {
       },
       {
         id: "MENU-09",
+        code: "D1",
         name: "Softdrinks",
         aliases: ["Soda", "Coke", "Royal", "Sprite"],
         category: "Beverages",
@@ -355,6 +364,7 @@ export function createInitialCashierState(): CashierState {
       },
       {
         id: "MENU-10",
+        code: "D2",
         name: "Buko Juice",
         aliases: ["Coconut juice", "Buko"],
         category: "Beverages",

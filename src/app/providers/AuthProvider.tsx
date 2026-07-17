@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
-import { saveSession, getSession, clearSession, type Session } from "../data/session";
-import type { DemoAccount } from "../data/authAccounts";
+import { clearSession, getSession, saveSession, type Session } from "@/data/session";
+import type { DemoAccount } from "@/data/authAccounts";
 
 interface AuthContextValue {
   session: Session | null;

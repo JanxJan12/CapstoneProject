@@ -4,7 +4,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "../../../app/components/ui/dialog";
+} from "@/components/ui/dialog";
 import { CashierButton, CashierDialogContent } from "../components";
 
 export function NewOrderDialog({
@@ -30,7 +30,7 @@ export function NewOrderDialog({
           <DialogTitle>Start a new order?</DialogTitle>
           <DialogDescription>
             Hold this draft to resume it later, or discard it and begin with an
-            empty cart.
+            empty order.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-2 sm:grid-cols-2">

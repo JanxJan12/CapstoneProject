@@ -1,6 +1,6 @@
 import { type ButtonHTMLAttributes, type ElementType, forwardRef } from "react";
 import { Loader2 } from "lucide-react";
-import { cn } from "../../../app/components/ui/utils";
+import { cn } from "@/components/ui/utils";
 
 export type ButtonVariant = "primary" | "secondary" | "danger" | "ghost";
 export type ButtonSize = "sm" | "md" | "lg";

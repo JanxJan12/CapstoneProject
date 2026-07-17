@@ -20,7 +20,7 @@ import {
   getProductHistory,
   reorderCart,
   setCartLineQuantity,
-  transitionRightPanel,
+  transitionTransactionState,
 } from "./posOperations";
 import {
   clearPOSDraft,
@@ -34,8 +34,10 @@ import {
   savePOSRecentSearches,
 } from "./posPersistence";
 import type { POSCartLine, WalkInOrderType } from "./types";
-import { RightPanelState } from "./types";
-import type { QuickActionId } from "./POSQuickActions";
+import { POSTransactionState } from "./types";
+
+type QuickActionId =
+  "search" | "checkout" | "new" | "discount" | "hold" | "cancel";
 
 export type PendingPOSAction =
   | { type: "clear" }
@@ -51,14 +53,16 @@ export function useWalkInPOSController(
   const draft = useMemo(loadPOSDraft, []);
   const [cart, setCart] = useState<POSCartLine[]>(draft.cart);
   const [category, setCategory] = useState("All");
-  const [searchVisible, setSearchVisible] = useState(false);
   const [search, setSearch] = useState("");
   const [favoriteIds, setFavoriteIds] = useState<string[]>(loadPOSFavorites);
   const [recentSearches, setRecentSearches] = useState<string[]>(
     loadPOSRecentSearches,
   );
   const [selectedItem, setSelectedItem] = useState<MenuItem>();
-  const [rightPanelState, setRightPanelState] = useState(RightPanelState.CART);
+  const [editingLineId, setEditingLineId] = useState<string>();
+  const [transactionState, setTransactionState] = useState<POSTransactionState>(
+    draft.cart.length ? POSTransactionState.ORDERING : POSTransactionState.IDLE,
+  );
   const [newOrderOpen, setNewOrderOpen] = useState(false);
   const [receiptOrder, setReceiptOrder] = useState<Order>();
   const [receiptPrinted, setReceiptPrinted] = useState(false);
@@ -144,9 +148,13 @@ export function useWalkInPOSController(
   const currentSelectedQuantity = useMemo(
     () =>
       cart
-        .filter((entry) => entry.menuItemId === selectedItem?.id)
+        .filter(
+          (entry) =>
+            entry.menuItemId === selectedItem?.id &&
+            entry.lineId !== editingLineId,
+        )
         .reduce((sum, entry) => sum + entry.quantity, 0),
-    [cart, selectedItem?.id],
+    [cart, editingLineId, selectedItem?.id],
   );
   const receiptPayment = useMemo(
     () => state.payments.find((entry) => entry.orderId === receiptOrder?.id),
@@ -171,7 +179,7 @@ export function useWalkInPOSController(
   useEffect(() => {
     if (draft.cart.length) {
       Toast.info("Unsaved order restored", {
-        description: "Your cart and payment details were recovered.",
+        description: "Your order and payment details were recovered.",
       });
     }
   }, [draft.cart.length]);
@@ -189,13 +197,27 @@ export function useWalkInPOSController(
   useEffect(() => {
     if (previousPaymentMethod.current === values.paymentMethod) return;
     previousPaymentMethod.current = values.paymentMethod;
-    if (receiptOrder || rightPanelState !== RightPanelState.PAYMENT) return;
+    if (receiptOrder || transactionState !== POSTransactionState.PAYMENT)
+      return;
     window.requestAnimationFrame(() =>
       form.setFocus(
         values.paymentMethod === "GCash" ? "gcashReference" : "amountTendered",
       ),
     );
-  }, [form, receiptOrder, rightPanelState, values.paymentMethod]);
+  }, [form, receiptOrder, transactionState, values.paymentMethod]);
+
+  useEffect(() => {
+    if (receiptOrder) return;
+    setTransactionState((current) => {
+      if (!cart.length && current !== POSTransactionState.PAYMENT) {
+        return POSTransactionState.IDLE;
+      }
+      if (cart.length && current === POSTransactionState.IDLE) {
+        return POSTransactionState.ORDERING;
+      }
+      return current;
+    });
+  }, [cart.length, receiptOrder]);
 
   const addItem = useCallback(
     (
@@ -222,7 +244,7 @@ export function useWalkInPOSController(
         if (result.error) Toast.error(result.error);
         else {
           Toast.success(`${menuItem.name} added`, {
-            description: "Cart totals updated. Continue building the order.",
+            description: "Running total updated. Continue entering the order.",
           });
         }
         if (result.warning) {
@@ -242,12 +264,14 @@ export function useWalkInPOSController(
         Toast.info("Start a new order before customizing another item.");
         return;
       }
+      setEditingLineId(undefined);
       setSelectedItem(item);
     },
     [receiptOrder],
   );
   const closeCustomize = useCallback(() => {
     const productId = selectedItem?.id;
+    setEditingLineId(undefined);
     setSelectedItem(undefined);
     window.requestAnimationFrame(() => {
       const product = productId
@@ -265,7 +289,34 @@ export function useWalkInPOSController(
       itemNote: string,
       modifiers: OrderItemModifier[],
     ) => {
-      addItem(item, quantity, itemNote, modifiers);
+      if (editingLineId) {
+        setCart((current) =>
+          current.map((entry) =>
+            entry.lineId === editingLineId
+              ? {
+                  ...entry,
+                  menuItemId: item.id,
+                  name: item.name,
+                  unitPrice:
+                    item.price +
+                    modifiers.reduce(
+                      (sum, modifier) => sum + modifier.price,
+                      0,
+                    ),
+                  quantity,
+                  note: itemNote.trim() || undefined,
+                  modifiers: modifiers.length
+                    ? modifiers.map((modifier) => ({ ...modifier }))
+                    : undefined,
+                }
+              : entry,
+          ),
+        );
+        Toast.success(`${item.name} updated`);
+      } else {
+        addItem(item, quantity, itemNote, modifiers);
+      }
+      setEditingLineId(undefined);
       setSelectedItem(undefined);
       window.requestAnimationFrame(() => {
         document
@@ -275,7 +326,20 @@ export function useWalkInPOSController(
           ?.focus();
       });
     },
-    [addItem],
+    [addItem, editingLineId],
+  );
+
+  const editLine = useCallback(
+    (lineId: string) => {
+      const line = cart.find((entry) => entry.lineId === lineId);
+      const menuItem = state.menuItems.find(
+        (entry) => entry.id === line?.menuItemId,
+      );
+      if (!line || !menuItem) return;
+      setEditingLineId(lineId);
+      setSelectedItem(menuItem);
+    },
+    [cart, state.menuItems],
   );
 
   const setLineQuantity = useCallback(
@@ -304,6 +368,21 @@ export function useWalkInPOSController(
     },
     [state.menuItems],
   );
+  const undoLastAdd = useCallback(() => {
+    setCart((current) => {
+      const last = current.at(-1);
+      if (!last) return current;
+      Toast.info(`${last.name} addition undone`);
+      if (last.quantity > 1) {
+        return current.map((entry) =>
+          entry.lineId === last.lineId
+            ? { ...entry, quantity: entry.quantity - 1 }
+            : entry,
+        );
+      }
+      return current.slice(0, -1);
+    });
+  }, []);
   const removeLine = useCallback((lineId: string) => {
     setCart((current) => {
       const index = current.findIndex((entry) => entry.lineId === lineId);
@@ -399,10 +478,10 @@ export function useWalkInPOSController(
   const resetPOS = useCallback(() => {
     setCart([]);
     setCategory("All");
-    setSearchVisible(false);
     setSearch("");
+    setEditingLineId(undefined);
     setSelectedItem(undefined);
-    setRightPanelState(RightPanelState.CART);
+    setTransactionState(POSTransactionState.IDLE);
     setNewOrderOpen(false);
     setOptionsOpen(false);
     setReceiptOrder(undefined);
@@ -415,8 +494,9 @@ export function useWalkInPOSController(
     const currentOrderType =
       form.getValues("orderType") === "Take-out" ? "Take-out" : "Dine-in";
     setCart([]);
+    setEditingLineId(undefined);
     setSelectedItem(undefined);
-    setRightPanelState(RightPanelState.CART);
+    setTransactionState(POSTransactionState.IDLE);
     setOptionsOpen(false);
     form.reset({ ...DEFAULT_POS_FORM, orderType: currentOrderType });
     setError("");
@@ -450,7 +530,7 @@ export function useWalkInPOSController(
         orderInstructions: values.orderInstructions,
       });
       Toast.success(`${held.id} held`, {
-        description: "The cart can be reopened from the order header.",
+        description: "The order can be reopened from the workstation header.",
       });
       resetPOS();
     } catch (caught) {
@@ -486,7 +566,7 @@ export function useWalkInPOSController(
       form.setValue("discountType", held.discountType ?? "None");
       form.setValue("discountReference", held.discountReference ?? "");
       form.setValue("orderInstructions", held.orderInstructions ?? "");
-      setRightPanelState(RightPanelState.CART);
+      setTransactionState(POSTransactionState.ORDERING);
       removeHeldOrder(held.id);
       Toast.success(`${held.id} reopened`);
     },
@@ -521,8 +601,8 @@ export function useWalkInPOSController(
       });
       resetPOS();
       setReceiptOrder(order);
-      setRightPanelState((current) =>
-        transitionRightPanel(current, "showReceipt", false),
+      setTransactionState((current) =>
+        transitionTransactionState(current, "showReceipt", false),
       );
       Toast.success(`${order.id} created`, {
         description:
@@ -532,7 +612,7 @@ export function useWalkInPOSController(
       const message =
         caught instanceof Error ? caught.message : "Unable to place the order.";
       setError(message);
-      setRightPanelState(RightPanelState.PAYMENT);
+      setTransactionState(POSTransactionState.PAYMENT);
       Toast.error("Order could not be placed", { description: message });
     } finally {
       setLoading(false);
@@ -557,7 +637,6 @@ export function useWalkInPOSController(
     if (pendingAction?.type === "reopen") performReopen(pendingAction.heldId);
     else if (pendingAction?.type === "remove") {
       removeLine(pendingAction.lineId);
-      setRightPanelState(RightPanelState.CART);
     } else if (pendingAction?.type === "clear") clearCartDraft();
     else if (pendingAction?.type === "cancel") resetPOS();
     setPendingAction(undefined);
@@ -578,39 +657,33 @@ export function useWalkInPOSController(
       Toast.error("Add an item before applying a discount.");
       return;
     }
-    setRightPanelState((current) =>
-      transitionRightPanel(current, "openSummary", true),
+    setTransactionState((current) =>
+      transitionTransactionState(current, "openReview", true),
     );
     setOptionsOpen(true);
     window.requestAnimationFrame(() => form.setFocus("discountType"));
   }, [cart.length, form]);
   const showSearch = useCallback(() => {
-    setSearchVisible(true);
     window.requestAnimationFrame(() => menuSearchRef.current?.focus());
   }, []);
   const hideSearch = useCallback(() => {
-    setSearchVisible(false);
     setSearch("");
   }, []);
-  const toggleSearch = useCallback(() => {
-    if (searchVisible) hideSearch();
-    else showSearch();
-  }, [hideSearch, searchVisible, showSearch]);
-  const openCheckout = useCallback(() => {
+  const openOrderReview = useCallback(() => {
     if (!cart.length) {
-      Toast.error("Add an item before proceeding to checkout.");
+      Toast.error("Add an item before reviewing the order.");
       return;
     }
     setSelectedItem(undefined);
-    setRightPanelState((current) =>
-      transitionRightPanel(current, "openSummary", true),
+    setTransactionState((current) =>
+      transitionTransactionState(current, "openReview", true),
     );
     setError("");
   }, [cart.length]);
-  const backToCart = useCallback(() => {
+  const backToOrdering = useCallback(() => {
     if (loading) return;
-    setRightPanelState((current) =>
-      transitionRightPanel(current, "backToCart", cart.length > 0),
+    setTransactionState((current) =>
+      transitionTransactionState(current, "backToOrdering", cart.length > 0),
     );
     setError("");
   }, [cart.length, loading]);
@@ -631,8 +704,8 @@ export function useWalkInPOSController(
       return;
     }
     setError("");
-    setRightPanelState((current) =>
-      transitionRightPanel(current, "continueToPayment", true),
+    setTransactionState((current) =>
+      transitionTransactionState(current, "proceedToPayment", true),
     );
     window.requestAnimationFrame(() =>
       form.setFocus(
@@ -640,14 +713,34 @@ export function useWalkInPOSController(
       ),
     );
   }, [form, summaryAvailability, values]);
-  const backToSummary = useCallback(() => {
+  const backToReview = useCallback(() => {
     if (loading) return;
     setError("");
-    setRightPanelState((current) =>
-      transitionRightPanel(current, "backToSummary", cart.length > 0),
+    setTransactionState((current) =>
+      transitionTransactionState(current, "backToReview", cart.length > 0),
     );
   }, [cart.length, loading]);
-  const beginCheckout = useCallback(() => openCheckout(), [openCheckout]);
+  const beginPayment = useCallback(() => {
+    if (!cart.length) {
+      Toast.error("Add an item before taking payment.");
+      return;
+    }
+    if (!summaryAvailability.canContinue) {
+      openOrderReview();
+      setError(
+        summaryAvailability.disabledReason ??
+          "Complete the order information before payment.",
+      );
+      return;
+    }
+    continueToPayment();
+  }, [
+    cart.length,
+    continueToPayment,
+    openOrderReview,
+    summaryAvailability.canContinue,
+    summaryAvailability.disabledReason,
+  ]);
   const closeReceipt = useCallback(() => {
     resetPOS();
   }, [resetPOS]);
@@ -660,67 +753,78 @@ export function useWalkInPOSController(
   }, [receiptPrinted]);
   const runQuickAction = useCallback(
     (action: QuickActionId) => {
-      if (action === "search") toggleSearch();
-      else if (action === "checkout") beginCheckout();
+      if (action === "search") showSearch();
+      else if (action === "checkout") beginPayment();
       else if (action === "discount") openDiscount();
       else if (action === "hold") void handleHold();
       else if (action === "cancel") requestCancel();
       else guardedReset();
     },
     [
-      beginCheckout,
+      beginPayment,
       guardedReset,
       handleHold,
       openDiscount,
       requestCancel,
-      toggleSearch,
+      showSearch,
     ],
   );
 
   useEffect(() => {
     const handleShortcut = (event: KeyboardEvent) => {
-      if (document.querySelector('[role="dialog"]')) return;
+      if (
+        document.querySelector(
+          '[role="dialog"]:not([data-pos-workspace-drawer])',
+        )
+      )
+        return;
       const modifier = event.ctrlKey || event.metaKey;
       const key = event.key.toLowerCase();
       if (event.key === "Escape") {
         if (selectedItem) {
           event.preventDefault();
           closeCustomize();
-        } else if (searchVisible) {
+        } else if (search) {
           event.preventDefault();
           hideSearch();
-        } else if (rightPanelState === RightPanelState.PAYMENT) {
+        } else if (transactionState === POSTransactionState.PAYMENT) {
           event.preventDefault();
-          backToSummary();
-        } else if (rightPanelState === RightPanelState.SUMMARY) {
+          backToReview();
+        } else if (transactionState === POSTransactionState.ORDER_REVIEW) {
           event.preventDefault();
-          backToCart();
-        } else if (rightPanelState === RightPanelState.CART && isDirty) {
+          backToOrdering();
+        } else if (
+          transactionState === POSTransactionState.ORDERING &&
+          isDirty
+        ) {
           event.preventDefault();
           requestCancel();
         }
-      } else if (selectedItem || rightPanelState === RightPanelState.RECEIPT) {
+      } else if (
+        selectedItem ||
+        transactionState === POSTransactionState.RECEIPT
+      ) {
         return;
       } else if (event.key === "F2" || (event.key === "/" && !modifier)) {
         event.preventDefault();
         showSearch();
       } else if (modifier && event.key === "Enter") {
         event.preventDefault();
-        if (rightPanelState === RightPanelState.PAYMENT) {
+        if (transactionState === POSTransactionState.PAYMENT) {
           confirmOrderRef.current?.click();
-        } else if (rightPanelState === RightPanelState.SUMMARY) {
+        } else if (transactionState === POSTransactionState.ORDER_REVIEW) {
           continueToPayment();
         } else {
-          beginCheckout();
+          beginPayment();
         }
       } else if (event.key === "F3") {
         event.preventDefault();
-        if (rightPanelState === RightPanelState.PAYMENT) {
+        if (transactionState === POSTransactionState.PAYMENT) {
           confirmOrderRef.current?.click();
-        } else if (rightPanelState === RightPanelState.SUMMARY) {
+        } else if (transactionState === POSTransactionState.ORDER_REVIEW) {
           continueToPayment();
         } else {
-          beginCheckout();
+          beginPayment();
         }
       } else if (modifier && key === "n") {
         event.preventDefault();
@@ -736,9 +840,9 @@ export function useWalkInPOSController(
     window.addEventListener("keydown", handleShortcut);
     return () => window.removeEventListener("keydown", handleShortcut);
   }, [
-    backToCart,
-    backToSummary,
-    beginCheckout,
+    backToOrdering,
+    backToReview,
+    beginPayment,
     closeCustomize,
     continueToPayment,
     guardedReset,
@@ -747,10 +851,10 @@ export function useWalkInPOSController(
     isDirty,
     openDiscount,
     requestCancel,
-    rightPanelState,
-    searchVisible,
+    search,
     selectedItem,
     showSearch,
+    transactionState,
   ]);
 
   return {
@@ -759,7 +863,6 @@ export function useWalkInPOSController(
     cart,
     category,
     setCategory,
-    searchVisible,
     search,
     setSearch,
     recentSearches,
@@ -767,17 +870,20 @@ export function useWalkInPOSController(
     hideSearch,
     favoriteIds,
     selectedItem,
-    rightPanelState,
+    editingLine: cart.find((entry) => entry.lineId === editingLineId),
+    transactionState,
     openCustomize,
     closeCustomize,
     addCustomizedItem,
+    editLine,
     selectOrderType,
     newOrderOpen,
     setNewOrderOpen,
-    openCheckout,
-    backToCart,
+    openOrderReview,
+    backToOrdering,
+    beginPayment,
     continueToPayment,
-    backToSummary,
+    backToReview,
     receiptOrder,
     closeReceipt,
     receiptPrinted,
@@ -813,6 +919,7 @@ export function useWalkInPOSController(
     addItem,
     setLineQuantity,
     adjust,
+    undoLastAdd,
     requestRemove,
     duplicate,
     note,

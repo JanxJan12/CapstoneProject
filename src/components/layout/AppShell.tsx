@@ -10,8 +10,8 @@ import {
   X,
 } from "lucide-react";
 import type { NavGroup } from "../../types";
-import { ImageWithFallback } from "../../app/components/figma/ImageWithFallback";
-import rrjLogo from "../../imports/451655946_497836222754416_7005773426468078155_n__1_.jpg";
+import { ImageWithFallback } from "@/components/media/ImageWithFallback";
+import rrjLogo from "@/assets/brand/rrj-logo.jpg";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,7 +19,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../../app/components/ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu";
 
 export function AppShell<T extends string>({
   groups,

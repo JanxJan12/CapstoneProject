@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Navigate, useNavigate } from "react-router";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "@/app/providers/AuthProvider";
 import { getSession } from "../data/session";
 import type { AccountRole } from "../data/authAccounts";
 

@@ -19,15 +19,15 @@ import {
   ChevronUp,
   ClipboardList,
 } from "lucide-react";
-import { ImageWithFallback } from "../../../app/components/figma/ImageWithFallback";
-import rrjLogo from "../../../imports/451655946_497836222754416_7005773426468078155_n__1_.jpg";
+import { ImageWithFallback } from "@/components/media/ImageWithFallback";
+import rrjLogo from "@/assets/brand/rrj-logo.jpg";
 import {
   authenticate,
   STAFF_ACCOUNTS,
   type DemoAccount,
 } from "../../../data/authAccounts";
 import type { AccountRole } from "../../../data/authAccounts";
-import { useAuth } from "../../../context/AuthContext";
+import { useAuth } from "@/app/providers/AuthProvider";
 
 // ── Types ──────────────────────────────────────────────────────────
 type CardMode =

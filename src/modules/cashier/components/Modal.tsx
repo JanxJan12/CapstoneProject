@@ -1,6 +1,6 @@
 import type { ComponentProps } from "react";
-import { DialogContent as BaseDialogContent } from "../../../app/components/ui/dialog";
-import { cn } from "../../../app/components/ui/utils";
+import { DialogContent as BaseDialogContent } from "@/components/ui/dialog";
+import { cn } from "@/components/ui/utils";
 
 export function CashierDialogContent({
   className,

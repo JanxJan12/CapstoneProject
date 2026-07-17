@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import { Dialog } from "../../../app/components/ui/dialog";
-import { cn } from "../../../app/components/ui/utils";
+import { Dialog } from "@/components/ui/dialog";
+import { cn } from "@/components/ui/utils";
 import { CashierDialogContent } from "./Modal";
 
 export interface DrawerProps {
