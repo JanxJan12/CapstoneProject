@@ -157,6 +157,7 @@ export function CashierDashboardPage({
         view={queueView}
         attentionFilter={attentionFilter}
         orders={state.orders}
+        actionsEnabled={shiftSummary.isActive}
         loadingOrderId={loadingOrderId}
         onViewChange={handleQueueViewChange}
         onClearAttentionFilter={() => setAttentionFilter(undefined)}

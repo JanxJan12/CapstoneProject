@@ -28,6 +28,7 @@ export function CashierWorkQueue({
   view,
   attentionFilter,
   orders,
+  actionsEnabled,
   loadingOrderId,
   onViewChange,
   onClearAttentionFilter,
@@ -40,6 +41,7 @@ export function CashierWorkQueue({
   view: CashierQueueView;
   attentionFilter?: CashierAttentionFilter;
   orders: Order[];
+  actionsEnabled: boolean;
   loadingOrderId?: string;
   onViewChange: (view: CashierQueueView) => void;
   onClearAttentionFilter: () => void;
@@ -207,6 +209,9 @@ export function CashierWorkQueue({
                     }
                     size="sm"
                     className="min-w-[122px]"
+                    disabled={
+                      item.nextAction !== "view_details" && !actionsEnabled
+                    }
                     loading={loadingOrderId === item.orderId}
                     loadingLabel="Working…"
                     onClick={() => {
