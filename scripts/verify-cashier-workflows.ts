@@ -4,6 +4,8 @@ import {
   cancelOrder,
   createWalkInOrder,
   endShift,
+  getCashierActionQueue,
+  getCashierShiftSummary,
   holdOrder,
   rejectOnlinePayment,
   releaseReadyOrder,
@@ -35,6 +37,33 @@ function expectFailure(run: () => unknown, message: string) {
 let state: CashierState = createInitialCashierState();
 const initialTransactionCount = state.transactions.length;
 
+const initialShift = state.shifts.find((shift) => shift.status === "Open");
+assert(initialShift, "The dashboard verifier requires an active shift.");
+const initialQueue = getCashierActionQueue(state, initialShift.id, Date.now());
+const initialSummary = getCashierShiftSummary(state, initialShift.id);
+assert(
+  initialQueue.every(
+    (item) => !["Completed", "Cancelled"].includes(item.orderStatus),
+  ),
+  "The cashier action queue must exclude terminal orders.",
+);
+assert(
+  initialQueue.find((item) => item.orderId === "ORD-2045")?.isDelayed === false,
+  "Preparing delay must use the preparing-stage timestamp, not order age.",
+);
+assert(
+  initialQueue.find((item) => item.orderId === "ORD-2044")?.isDelayed === true,
+  "Payment pending beyond five minutes must be delayed.",
+);
+assert(
+  initialQueue.find((item) => item.orderId === "ORD-2047")?.isDelayed === false,
+  "Delivery transit time must not use a universal delay timer.",
+);
+assert(
+  initialSummary.pendingPaymentCount === 3 && initialSummary.isActive,
+  "The compact shift summary must consolidate shift and pending-action state.",
+);
+
 state = verifyOnlinePayment(state, "PAY-9104", false);
 assert(
   state.orders.find((order) => order.id === "ORD-2044")?.status === "Confirmed",
@@ -50,6 +79,12 @@ assert(
   "Verification must create one transaction.",
 );
 state = updateKitchenStatus(state, "ORD-2044", "Preparing");
+assert(
+  getCashierActionQueue(state, initialShift.id).find(
+    (item) => item.orderId === "ORD-2044",
+  )?.isDelayed === false,
+  "The payment timer must stop when the order enters preparation.",
+);
 state = updateKitchenStatus(state, "ORD-2044", "Ready");
 assert(
   state.orders.find((order) => order.id === "ORD-2044")?.status === "Ready",
@@ -245,6 +280,12 @@ state = releaseReadyOrder(state, "ORD-2046");
 assert(
   state.orders.find((order) => order.id === "ORD-2046")?.status === "Completed",
   "Ready take-out orders must complete on release.",
+);
+assert(
+  !getCashierActionQueue(state, initialShift.id).some(
+    (item) => item.orderId === "ORD-2046",
+  ),
+  "Released completed orders must leave the cashier action queue.",
 );
 
 const heldResult = holdOrder(state, {

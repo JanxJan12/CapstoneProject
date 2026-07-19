@@ -309,3 +309,58 @@ export interface ShiftClosureInput {
   managerName: string;
   managerApproved: boolean;
 }
+
+export type CashierQueueStage =
+  | "payment_pending"
+  | "payment_resubmission"
+  | "kitchen_queue"
+  | "preparing"
+  | "ready_for_handoff"
+  | "rider_assignment"
+  | "rider_assigned"
+  | "picked_up"
+  | "out_for_delivery";
+
+export type CashierQueueNextAction =
+  "verify_payment" | "release_order" | "view_details";
+
+export type CashierQueuePriority = 1 | 2 | 3;
+
+export interface CashierActionQueueItem {
+  orderId: string;
+  customerName: string;
+  orderType: OrderType;
+  totalAmount: number;
+  currentStage: string;
+  stage: CashierQueueStage;
+  nextAction: CashierQueueNextAction;
+  waitingMinutes: number;
+  isDelayed: boolean;
+  priority: CashierQueuePriority;
+  orderStatus: OrderStatus;
+  stageStartedAt: string;
+  paymentId?: string;
+}
+
+export interface CashierShiftSummary {
+  shiftId?: string;
+  isActive: boolean;
+  cashierName: string;
+  terminal: string;
+  startedAt?: string;
+  expectedDrawer: number;
+  pendingPaymentCount: number;
+}
+
+export interface CashierAttentionSummary {
+  pendingPayments: number;
+  readyOrders: number;
+  delayedOrders: number;
+  actionRequired: number;
+  allActive: number;
+}
+
+export type CashierQueueView =
+  "action_required" | "all_active" | "ready_for_handoff";
+
+export type CashierAttentionFilter = "payments" | "ready" | "delayed";

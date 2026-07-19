@@ -14,6 +14,12 @@ export const DISCOUNT_RATE = 0.2;
 export const POS_TAX_ENABLED = false;
 export const POS_TAX_RATE = 0.12;
 export const DEFAULT_DELAY_THRESHOLD_MINUTES = 20;
+export const CASHIER_STAGE_DELAY_THRESHOLDS = {
+  paymentPending: 5,
+  preparing: 20,
+  readyForHandoff: 10,
+  riderAssignment: 10,
+} as const;
 export const PAGE_SIZE = 7;
 export const ORDER_REFRESH_INTERVAL_MS = 15_000;
 export const DASHBOARD_CLOCK_REFRESH_MS = 30_000;
