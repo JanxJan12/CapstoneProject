@@ -24,7 +24,10 @@ import { RecentReceiptsDialog } from "./RecentReceiptsDialog";
 export function CashierDashboardPage({
   onNavigate,
 }: {
-  onNavigate: (page: CashierPageId, intent?: CashierNavigationIntent) => void;
+  onNavigate: (
+    page: CashierPageId,
+    intent?: CashierNavigationIntent,
+  ) => void;
 }) {
   const {
     state,
@@ -35,31 +38,42 @@ export function CashierDashboardPage({
     verifyPayment,
     releaseReadyOrder,
   } = useCashierStore();
-  const { actionQueue, shiftSummary, attention } = useCashierDashboard();
+
+  const { actionQueue, shiftSummary, attention } =
+    useCashierDashboard();
+
   const [selectedOrder, setSelectedOrder] = useState<Order>();
-  const [verificationOrder, setVerificationOrder] = useState<Order>();
+  const [verificationOrder, setVerificationOrder] =
+    useState<Order>();
   const [lookupOpen, setLookupOpen] = useState(false);
   const [receiptsOpen, setReceiptsOpen] = useState(false);
   const [settlementOpen, setSettlementOpen] = useState(false);
   const [settling, setSettling] = useState(false);
   const [loadingOrderId, setLoadingOrderId] = useState<string>();
+
   const [queueView, setQueueView] =
     useState<CashierQueueView>("action_required");
+
   const [attentionFilter, setAttentionFilter] =
     useState<CashierAttentionFilter>();
 
-  if (isHydrating) return <CashierDashboardSkeleton />;
+  if (isHydrating) {
+    return <CashierDashboardSkeleton />;
+  }
 
   const handleEndShift = async (input: ShiftClosureInput) => {
     setSettling(true);
+
     try {
       await endShift(input);
+
       Toast.success("Shift closed and settlement recorded", {
         description:
           input.actualCash === shiftTotals.expectedCash
             ? "The drawer is balanced."
             : "The approved variance and reason were recorded.",
       });
+
       setSettlementOpen(false);
       onNavigate("shift-settlement");
     } catch (caught) {
@@ -74,7 +88,9 @@ export function CashierDashboardPage({
     }
   };
 
-  const handleAttentionFilter = (filter: CashierAttentionFilter) => {
+  const handleAttentionFilter = (
+    filter: CashierAttentionFilter,
+  ) => {
     setQueueView("action_required");
     setAttentionFilter(filter);
   };
@@ -86,13 +102,21 @@ export function CashierDashboardPage({
 
   const handleVerifyPayment = async (override: boolean) => {
     if (!verificationOrder?.paymentId) return;
+
     const orderId = verificationOrder.id;
     setLoadingOrderId(orderId);
+
     try {
-      await verifyPayment(verificationOrder.paymentId, override);
+      await verifyPayment(
+        verificationOrder.paymentId,
+        override,
+      );
+
       Toast.success(`Payment verified for ${orderId}`, {
-        description: "The order was released to the kitchen queue.",
+        description:
+          "The order was released to the kitchen queue.",
       });
+
       setVerificationOrder(undefined);
     } catch (caught) {
       Toast.error("Verification failed", {
@@ -108,8 +132,10 @@ export function CashierDashboardPage({
 
   const handleReleaseOrder = async (order: Order) => {
     setLoadingOrderId(order.id);
+
     try {
       await releaseReadyOrder(order.id);
+
       Toast.success(`${order.id} released`, {
         description:
           order.type === "Delivery"
@@ -129,80 +155,111 @@ export function CashierDashboardPage({
   };
 
   const verificationPayment = state.payments.find(
-    (payment) => payment.id === verificationOrder?.paymentId,
+    (payment) =>
+      payment.id === verificationOrder?.paymentId,
   );
 
   return (
-    <div className="cashier-page cashier-dashboard-page lg:h-[calc(100dvh-8rem)] lg:min-h-0 lg:overflow-hidden">
-      <CompactShiftHeader
-        summary={shiftSummary}
-        onEndShift={() => setSettlementOpen(true)}
-      />
-      <PrimaryCashierActions
-        attention={attention}
-        shiftActive={shiftSummary.isActive}
-        onNewOrder={() => onNavigate("walkin-pos")}
-        onVerifyPayments={() => handleAttentionFilter("payments")}
-        onReleaseOrders={() => handleAttentionFilter("ready")}
-        onSearchOrder={() => setLookupOpen(true)}
-        onReprintReceipt={() => setReceiptsOpen(true)}
-      />
-      <AttentionSummary
-        attention={attention}
-        onFilter={handleAttentionFilter}
-      />
-      <CashierWorkQueue
-        items={actionQueue}
-        attention={attention}
-        view={queueView}
-        attentionFilter={attentionFilter}
-        orders={state.orders}
-        actionsEnabled={shiftSummary.isActive}
-        loadingOrderId={loadingOrderId}
-        onViewChange={handleQueueViewChange}
-        onClearAttentionFilter={() => setAttentionFilter(undefined)}
-        onSelect={setSelectedOrder}
-        onVerify={setVerificationOrder}
-        onRelease={handleReleaseOrder}
-      />
+    <>
+      <main
+        className="
+          cashier-page cashier-dashboard-page
+          mx-auto flex w-full max-w-[1600px]
+          flex-col gap-3 pb-5
+          sm:gap-4
+        "
+      >
+        <CompactShiftHeader
+          summary={shiftSummary}
+          onEndShift={() => setSettlementOpen(true)}
+        />
+
+        <PrimaryCashierActions
+          attention={attention}
+          shiftActive={shiftSummary.isActive}
+          onNewOrder={() => onNavigate("walkin-pos")}
+          onVerifyPayments={() =>
+            handleAttentionFilter("payments")
+          }
+          onReleaseOrders={() =>
+            handleAttentionFilter("ready")
+          }
+          onSearchOrder={() => setLookupOpen(true)}
+          onReprintReceipt={() => setReceiptsOpen(true)}
+        />
+
+        <AttentionSummary
+          attention={attention}
+          onFilter={handleAttentionFilter}
+        />
+
+        <CashierWorkQueue
+          items={actionQueue}
+          attention={attention}
+          view={queueView}
+          attentionFilter={attentionFilter}
+          orders={state.orders}
+          actionsEnabled={shiftSummary.isActive}
+          loadingOrderId={loadingOrderId}
+          onViewChange={handleQueueViewChange}
+          onClearAttentionFilter={() =>
+            setAttentionFilter(undefined)
+          }
+          onSelect={setSelectedOrder}
+          onVerify={setVerificationOrder}
+          onRelease={handleReleaseOrder}
+        />
+      </main>
 
       <OrderLookupDialog
         open={lookupOpen}
         onOpenChange={setLookupOpen}
         onSelect={setSelectedOrder}
       />
+
       <RecentReceiptsDialog
         open={receiptsOpen}
         onOpenChange={setReceiptsOpen}
       />
+
       <OrderDetailsDrawer
         order={selectedOrder}
         open={Boolean(selectedOrder)}
         onOpenChange={(open) => {
-          if (!open) setSelectedOrder(undefined);
+          if (!open) {
+            setSelectedOrder(undefined);
+          }
         }}
       />
+
       <VerifyPaymentDialog
         open={Boolean(verificationOrder)}
         order={verificationOrder}
         payment={verificationPayment}
         payments={state.payments}
-        loading={loadingOrderId === verificationOrder?.id}
+        loading={
+          loadingOrderId === verificationOrder?.id
+        }
         onOpenChange={(open) => {
-          if (!open) setVerificationOrder(undefined);
+          if (!open) {
+            setVerificationOrder(undefined);
+          }
         }}
         onConfirm={handleVerifyPayment}
       />
-      {activeShift && (
+
+      {activeShift ? (
         <EndShiftDialog
           open={settlementOpen}
           loading={settling}
           totals={shiftTotals}
-          pendingPaymentCount={shiftSummary.pendingPaymentCount}
+          pendingPaymentCount={
+            shiftSummary.pendingPaymentCount
+          }
           onOpenChange={setSettlementOpen}
           onConfirm={handleEndShift}
         />
-      )}
-    </div>
+      ) : null}
+    </>
   );
 }
