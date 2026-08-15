@@ -173,7 +173,7 @@ export function AppShell<T extends string>({
             </div>
             <div className="mt-1 flex items-center gap-1.5 text-[9px] font-semibold text-white/40">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_0_3px_rgba(52,211,153,0.1)]" />
-              On active duty
+              Active as {user.role}
             </div>
           </div>
           {onLogout && (

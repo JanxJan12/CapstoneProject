@@ -1,39 +1,510 @@
-import { UtensilsCrossed, Lock, CheckCircle, Loader2 } from "lucide-react";
+import {
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import {
+  useNavigate,
+} from "react-router";
+import type {
+  Session as SupabaseSession,
+} from "@supabase/supabase-js";
+import {
+  AlertCircle,
+  CheckCircle,
+  Loader2,
+  Lock,
+  UtensilsCrossed,
+} from "lucide-react";
+
+import { supabase } from "@/lib/supabase";
+
+type AuthenticationStep =
+  | "credentials"
+  | "permissions"
+  | "workspace"
+  | "error";
+
+type StaffRole = "manager" | "cashier";
+
+interface StaffProfile {
+  id: string;
+  role: string;
+  is_active: boolean;
+}
+
+const STAFF_ROLES: StaffRole[] = [
+  "manager",
+  "cashier",
+];
+
+function isStaffRole(
+  role: unknown,
+): role is StaffRole {
+  return STAFF_ROLES.includes(
+    role as StaffRole,
+  );
+}
 
 export function AuthenticatingPage() {
+  const navigate = useNavigate();
+
+  const [step, setStep] =
+    useState<AuthenticationStep>(
+      "credentials",
+    );
+
+  const [errorMessage, setErrorMessage] =
+    useState<string | null>(null);
+
+  /*
+   * Prevent getSession and onAuthStateChange from
+   * processing the same login twice.
+   */
+  const authenticationHandled =
+    useRef(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    let redirectTimer:
+      | number
+      | undefined;
+
+    let sessionTimeout:
+      | number
+      | undefined;
+
+    const returnToStaffPortal = (
+      notice = "unauthorized",
+    ): void => {
+      redirectTimer = window.setTimeout(
+        () => {
+          navigate(
+            `/auth?notice=${notice}`,
+            {
+              replace: true,
+            },
+          );
+        },
+        1500,
+      );
+    };
+
+    const denyAccess = async (
+      message: string,
+    ): Promise<void> => {
+      const { error } =
+        await supabase.auth.signOut({
+          scope: "local",
+        });
+
+      if (error) {
+        console.error(
+          "Unable to clear unauthorized session:",
+          error.message,
+        );
+      }
+
+      if (!isMounted) {
+        return;
+      }
+
+      setErrorMessage(message);
+      setStep("error");
+      returnToStaffPortal();
+    };
+
+    const inspectSession = async (
+      authSession:
+        | SupabaseSession
+        | null,
+    ): Promise<void> => {
+      if (
+        !isMounted ||
+        authenticationHandled.current
+      ) {
+        return;
+      }
+
+      /*
+       * OAuth may still be finishing when the page first
+       * renders. Wait for onAuthStateChange when there is
+       * no session yet.
+       */
+      if (!authSession?.user) {
+        return;
+      }
+
+      authenticationHandled.current =
+        true;
+
+      setStep("permissions");
+
+      /*
+       * Read the role belonging to the exact Google account
+       * that Supabase authenticated.
+       */
+      const {
+        data,
+        error,
+      } = await supabase
+        .from("profiles")
+        .select(
+          `
+            id,
+            role,
+            is_active
+          `,
+        )
+        .eq(
+          "id",
+          authSession.user.id,
+        )
+        .maybeSingle();
+
+      if (!isMounted) {
+        return;
+      }
+
+      if (error) {
+        console.error(
+          "Unable to read staff profile:",
+          error.message,
+        );
+
+        await denyAccess(
+          "Your Google account was verified, but its staff profile could not be loaded.",
+        );
+
+        return;
+      }
+
+      const profile =
+        data as StaffProfile | null;
+
+      if (!profile) {
+        await denyAccess(
+          "No system profile is connected to this Google account.",
+        );
+
+        return;
+      }
+
+      if (!profile.is_active) {
+        await denyAccess(
+          "This staff account has been disabled. Please contact the manager.",
+        );
+
+        return;
+      }
+
+      if (!isStaffRole(profile.role)) {
+        await denyAccess(
+          "This Google account is not assigned as a manager or cashier.",
+        );
+
+        return;
+      }
+
+      /*
+       * Authentication and authorization both passed.
+       */
+      setStep("workspace");
+
+      redirectTimer = window.setTimeout(
+        () => {
+          navigate(
+            `/${profile.role}`,
+            {
+              replace: true,
+            },
+          );
+        },
+        650,
+      );
+    };
+
+    const initializeAuthentication =
+      async (): Promise<void> => {
+        const {
+          data: { session },
+          error,
+        } =
+          await supabase.auth.getSession();
+
+        if (!isMounted) {
+          return;
+        }
+
+        if (error) {
+          console.error(
+            "Unable to restore OAuth session:",
+            error.message,
+          );
+
+          authenticationHandled.current =
+            true;
+
+          setErrorMessage(
+            "The Google login session could not be restored.",
+          );
+
+          setStep("error");
+          returnToStaffPortal();
+
+          return;
+        }
+
+        await inspectSession(session);
+      };
+
+    /*
+     * Supabase may finish detecting the OAuth session
+     * shortly after this component loads.
+     */
+    const {
+      data: { subscription },
+    } =
+      supabase.auth.onAuthStateChange(
+        (_event, nextSession) => {
+          window.setTimeout(() => {
+            void inspectSession(
+              nextSession,
+            );
+          }, 0);
+        },
+      );
+
+    void initializeAuthentication();
+
+    /*
+     * Avoid leaving the user on an endless loading screen
+     * when the OAuth callback contains no valid session.
+     */
+    sessionTimeout =
+      window.setTimeout(() => {
+        if (
+          !isMounted ||
+          authenticationHandled.current
+        ) {
+          return;
+        }
+
+        authenticationHandled.current =
+          true;
+
+        setErrorMessage(
+          "No valid Google login session was found.",
+        );
+
+        setStep("error");
+        returnToStaffPortal();
+      }, 8000);
+
+    return () => {
+      isMounted = false;
+
+      subscription.unsubscribe();
+
+      if (redirectTimer) {
+        window.clearTimeout(
+          redirectTimer,
+        );
+      }
+
+      if (sessionTimeout) {
+        window.clearTimeout(
+          sessionTimeout,
+        );
+      }
+    };
+  }, [navigate]);
+
+  const verifyingCredentials =
+    step === "credentials";
+
+  const credentialsVerified =
+    step === "permissions" ||
+    step === "workspace";
+
+  const checkingPermissions =
+    step === "permissions";
+
+  const permissionsVerified =
+    step === "workspace";
+
+  const loadingWorkspace =
+    step === "workspace";
+
   return (
-    <div className="min-h-full bg-background flex items-center justify-center p-6">
-      <div className="flex flex-col items-center gap-7 text-center max-w-xs">
+    <div className="flex min-h-full items-center justify-center bg-background p-6">
+      <div className="flex w-full max-w-xs flex-col items-center gap-7 text-center">
+        {/* Brand */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-sm">
-            <UtensilsCrossed className="text-white w-4 h-4" strokeWidth={2.5} />
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-sm">
+            <UtensilsCrossed
+              className="h-4 w-4 text-white"
+              strokeWidth={2.5}
+            />
           </div>
-          <div>
-            <div className="font-bold text-xl text-foreground tracking-tight leading-none">RRJ Food-House</div>
-            <div className="text-[10px] text-muted-foreground font-semibold mt-0.5 tracking-widest uppercase">Management System</div>
-          </div>
-        </div>
-        <div className="relative w-16 h-16">
-          <div className="absolute inset-0 rounded-full border-4 border-muted" />
-          <div className="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin" style={{ animationDuration: "0.9s" }} />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Lock className="w-5 h-5 text-primary" />
-          </div>
-        </div>
-        <div>
-          <h2 className="text-lg font-bold text-foreground">Authenticating...</h2>
-          <p className="text-sm text-muted-foreground mt-1">Checking account permissions...</p>
-        </div>
-        <div className="w-full flex flex-col gap-2">
-          {[{ l: "Verifying credentials", done: true }, { l: "Checking permissions", active: true }, { l: "Loading workspace" }].map((s) => (
-            <div key={s.l} className={`flex items-center gap-3 px-4 py-2.5 rounded-lg border text-sm ${s.done ? "bg-green-50 border-green-200" : s.active ? "bg-accent border-primary/20" : "bg-card border-border"}`}>
-              {s.done ? <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" /> : s.active ? <Loader2 className="w-4 h-4 text-primary animate-spin flex-shrink-0" /> : <div className="w-4 h-4 rounded-full border-2 border-border flex-shrink-0" />}
-              <span className={`text-xs font-medium ${s.done ? "text-green-700" : s.active ? "text-foreground" : "text-muted-foreground"}`}>{s.l}</span>
+
+          <div className="text-left">
+            <div className="text-xl font-bold leading-none tracking-tight text-foreground">
+              RRJ Food-House
             </div>
-          ))}
+
+            <div className="mt-0.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+              Management System
+            </div>
+          </div>
         </div>
-        <p className="text-[10px] text-muted-foreground">You will be redirected based on your assigned role.</p>
+
+        {/* Main indicator */}
+        {step !== "error" ? (
+          <div className="relative h-16 w-16">
+            <div className="absolute inset-0 rounded-full border-4 border-muted" />
+
+            <div
+              className="absolute inset-0 animate-spin rounded-full border-4 border-primary border-t-transparent"
+              style={{
+                animationDuration:
+                  "0.9s",
+              }}
+            />
+
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Lock className="h-5 w-5 text-primary" />
+            </div>
+          </div>
+        ) : (
+          <div className="flex h-16 w-16 items-center justify-center rounded-full border border-red-200 bg-red-50">
+            <AlertCircle className="h-7 w-7 text-red-500" />
+          </div>
+        )}
+
+        {/* Status heading */}
+        <div>
+          <h2 className="text-lg font-bold text-foreground">
+            {step === "credentials" &&
+              "Authenticating..."}
+
+            {step === "permissions" &&
+              "Checking account permissions..."}
+
+            {step === "workspace" &&
+              "Access granted"}
+
+            {step === "error" &&
+              "Access denied"}
+          </h2>
+
+          <p className="mt-1 text-sm text-muted-foreground">
+            {step === "credentials" &&
+              "Verifying your Google login session."}
+
+            {step === "permissions" &&
+              "Reading your assigned staff role."}
+
+            {step === "workspace" &&
+              "Preparing your workspace..."}
+
+            {step === "error" &&
+              "Returning to the Staff Portal..."}
+          </p>
+        </div>
+
+        {/* Authentication steps */}
+        {step !== "error" && (
+          <div className="flex w-full flex-col gap-2">
+            <StatusRow
+              label="Verifying credentials"
+              done={
+                credentialsVerified
+              }
+              active={
+                verifyingCredentials
+              }
+            />
+
+            <StatusRow
+              label="Checking permissions"
+              done={
+                permissionsVerified
+              }
+              active={
+                checkingPermissions
+              }
+            />
+
+            <StatusRow
+              label="Loading workspace"
+              done={false}
+              active={
+                loadingWorkspace
+              }
+            />
+          </div>
+        )}
+
+        {/* Error message */}
+        {step === "error" &&
+          errorMessage && (
+            <div className="w-full rounded-xl border border-red-200 bg-red-50 p-4 text-left">
+              <p className="text-xs font-semibold leading-relaxed text-red-700">
+                {errorMessage}
+              </p>
+            </div>
+          )}
+
+        <p className="text-[10px] text-muted-foreground">
+          {step === "error"
+            ? "Use a Google account assigned to a manager or cashier."
+            : "You will be redirected based on your assigned role."}
+        </p>
       </div>
+    </div>
+  );
+}
+
+function StatusRow({
+  label,
+  done = false,
+  active = false,
+}: {
+  label: string;
+  done?: boolean;
+  active?: boolean;
+}) {
+  return (
+    <div
+      className={`flex items-center gap-3 rounded-lg border px-4 py-2.5 text-sm ${
+        done
+          ? "border-green-200 bg-green-50"
+          : active
+            ? "border-primary/20 bg-accent"
+            : "border-border bg-card"
+      }`}
+    >
+      {done ? (
+        <CheckCircle className="h-4 w-4 flex-shrink-0 text-green-500" />
+      ) : active ? (
+        <Loader2 className="h-4 w-4 flex-shrink-0 animate-spin text-primary" />
+      ) : (
+        <div className="h-4 w-4 flex-shrink-0 rounded-full border-2 border-border" />
+      )}
+
+      <span
+        className={`text-xs font-medium ${
+          done
+            ? "text-green-700"
+            : active
+              ? "text-foreground"
+              : "text-muted-foreground"
+        }`}
+      >
+        {label}
+      </span>
     </div>
   );
 }

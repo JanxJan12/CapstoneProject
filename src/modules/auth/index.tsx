@@ -1,4 +1,4 @@
-import { useState } from "react";
+import {useEffect,useState,} from "react";
 import { useNavigate } from "react-router";
 import { AnimatePresence, motion } from "motion/react";
 import {
@@ -33,8 +33,22 @@ const SCREEN_TABS: {
 
 export function AuthApp() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const {
+  login,
+  session,
+  loading,
+} = useAuth();
   const [screen, setScreen] = useState<AuthScreen>("staff");
+
+  useEffect(() => {
+  if (loading || !session) {
+    return;
+  }
+
+  navigate(`/${session.role}`, {
+    replace: true,
+  });
+}, [loading, navigate, session]);
 
   const handleLoginSuccess = (role: AccountRole, account?: DemoAccount) => {
     if (account) login(account);

@@ -8,11 +8,18 @@ import {
   ShoppingCart,
 } from "lucide-react";
 import { Toaster } from "sonner";
+
 import { AppShell } from "../../components/layout/AppShell";
 import type { NavGroup } from "../../types";
+
 import { useAuth } from "@/app/providers/AuthProvider";
 import { useCashierStore } from "./hooks/CashierStore";
-import type { CashierNavigationIntent, CashierPageId } from "./types";
+
+import type {
+  CashierNavigationIntent,
+  CashierPageId,
+} from "./types";
+
 import { CashierDashboardPage } from "./dashboard/CashierDashboardPage";
 import { PendingPaymentsPage } from "./payments/PendingPaymentsPage";
 import { WalkInPOSPage } from "./pos/WalkInPOSPage";
@@ -26,17 +33,44 @@ export function CashierApp() {
 }
 
 function CashierModule() {
-  const { state, markNotificationRead, markNotificationsRead } =
-    useCashierStore();
-  const { logout } = useAuth();
-  const [page, setPage] = useState<CashierPageId>("dashboard");
-  const [intent, setIntent] = useState<CashierNavigationIntent>();
-  const [posDirty, setPosDirty] = useState(false);
-  const [pendingNavigation, setPendingNavigation] = useState<{
-    page: CashierPageId;
-    intent?: CashierNavigationIntent;
-  }>();
-  const groups = useMemo<NavGroup<CashierPageId>[]>(
+  const {
+    state,
+    markNotificationRead,
+    markNotificationsRead,
+  } = useCashierStore();
+
+  const { session, logout } = useAuth();
+
+  const [page, setPage] =
+    useState<CashierPageId>("dashboard");
+
+  const [intent, setIntent] =
+    useState<CashierNavigationIntent>();
+
+  const [posDirty, setPosDirty] =
+    useState(false);
+
+  const [pendingNavigation, setPendingNavigation] =
+    useState<{
+      page: CashierPageId;
+      intent?: CashierNavigationIntent;
+    }>();
+
+  /*
+   * Real logged-in account from Supabase/AuthProvider.
+   * This replaces the prototype state.cashier.name.
+   */
+  const accountName =
+    session?.name?.trim() || "Cashier";
+
+  const accountRole = session?.role
+    ? session.role.charAt(0).toUpperCase() +
+      session.role.slice(1)
+    : "Cashier";
+
+  const groups = useMemo<
+    NavGroup<CashierPageId>[]
+  >(
     () => [
       {
         label: "Operations",
@@ -52,8 +86,10 @@ function CashierModule() {
             label: "Pending Payments",
             icon: CreditCard,
             shortcut: "F3",
-            badge: state.payments.filter((entry) => entry.status === "Pending")
-              .length,
+            badge: state.payments.filter(
+              (entry) =>
+                entry.status === "Pending",
+            ).length,
           },
           {
             id: "walkin-pos",
@@ -86,7 +122,10 @@ function CashierModule() {
   );
 
   const commitNavigation = useCallback(
-    (nextPage: CashierPageId, nextIntent?: CashierNavigationIntent) => {
+    (
+      nextPage: CashierPageId,
+      nextIntent?: CashierNavigationIntent,
+    ) => {
       setPage(nextPage);
       setIntent(nextIntent);
     },
@@ -94,39 +133,95 @@ function CashierModule() {
   );
 
   const navigate = useCallback(
-    (nextPage: CashierPageId, nextIntent?: CashierNavigationIntent) => {
-      if (page === "walkin-pos" && nextPage !== "walkin-pos" && posDirty) {
-        setPendingNavigation({ page: nextPage, intent: nextIntent });
+    (
+      nextPage: CashierPageId,
+      nextIntent?: CashierNavigationIntent,
+    ) => {
+      if (
+        page === "walkin-pos" &&
+        nextPage !== "walkin-pos" &&
+        posDirty
+      ) {
+        setPendingNavigation({
+          page: nextPage,
+          intent: nextIntent,
+        });
+
         return;
       }
-      commitNavigation(nextPage, nextIntent);
+
+      commitNavigation(
+        nextPage,
+        nextIntent,
+      );
     },
-    [commitNavigation, page, posDirty],
+    [
+      commitNavigation,
+      page,
+      posDirty,
+    ],
   );
 
   const openNotification = useCallback(
     (notificationId: string) => {
-      const notification = state.notifications.find(
-        (entry) => entry.id === notificationId,
+      const notification =
+        state.notifications.find(
+          (entry) =>
+            entry.id === notificationId,
+        );
+
+      if (!notification) {
+        return;
+      }
+
+      markNotificationRead(
+        notificationId,
       );
-      if (!notification) return;
-      markNotificationRead(notificationId);
-      navigate(notification.page, notification.intent);
+
+      navigate(
+        notification.page,
+        notification.intent,
+      );
     },
-    [markNotificationRead, navigate, state.notifications],
+    [
+      markNotificationRead,
+      navigate,
+      state.notifications,
+    ],
   );
 
   useEffect(() => {
-    const shortcuts = (event: KeyboardEvent) => {
-      const target = event.target as HTMLElement;
+    const shortcuts = (
+      event: KeyboardEvent,
+    ) => {
+      const target =
+        event.target as HTMLElement;
+
       const editing =
         target.tagName === "INPUT" ||
         target.tagName === "TEXTAREA" ||
         target.tagName === "SELECT" ||
         target.isContentEditable;
-      if (editing) return;
-      if (page === "walkin-pos" && ["F2", "F3"].includes(event.key)) return;
-      const shortcutPages: Partial<Record<string, CashierPageId>> = {
+
+      if (editing) {
+        return;
+      }
+
+      if (
+        page === "walkin-pos" &&
+        ["F2", "F3"].includes(
+          event.key,
+        )
+      ) {
+        return;
+      }
+
+      const shortcutPages: Partial<
+        Record<
+          string,
+          CashierPageId
+        >
+      > = {
         F1: "dashboard",
         F2: "walkin-pos",
         F3: "pending-payments",
@@ -134,36 +229,72 @@ function CashierModule() {
         F6: "transactions",
         F7: "shift-settlement",
       };
-      const shortcutPage = shortcutPages[event.key];
+
+      const shortcutPage =
+        shortcutPages[event.key];
+
       if (shortcutPage) {
         event.preventDefault();
-        navigate(shortcutPage);
+
+        navigate(
+          shortcutPage,
+        );
+
         return;
       }
+
       if (
-        (event.ctrlKey || event.metaKey) &&
-        event.key.toLowerCase() === "f" &&
+        (event.ctrlKey ||
+          event.metaKey) &&
+        event.key.toLowerCase() ===
+          "f" &&
         !editing
       ) {
         event.preventDefault();
-        navigate("order-list", { focusSearch: true });
+
+        navigate(
+          "order-list",
+          {
+            focusSearch: true,
+          },
+        );
       }
     };
-    window.addEventListener("keydown", shortcuts);
-    return () => window.removeEventListener("keydown", shortcuts);
+
+    window.addEventListener(
+      "keydown",
+      shortcuts,
+    );
+
+    return () =>
+      window.removeEventListener(
+        "keydown",
+        shortcuts,
+      );
   }, [navigate, page]);
 
   const content =
     page === "dashboard" ? (
-      <CashierDashboardPage onNavigate={navigate} />
-    ) : page === "pending-payments" ? (
+      <CashierDashboardPage
+        onNavigate={navigate}
+      />
+    ) : page ===
+      "pending-payments" ? (
       <PendingPaymentsPage />
     ) : page === "walkin-pos" ? (
-      <WalkInPOSPage onDirtyChange={setPosDirty} />
+      <WalkInPOSPage
+        onDirtyChange={
+          setPosDirty
+        }
+      />
     ) : page === "order-list" ? (
-      <CashierOrderListPage intent={intent} />
+      <CashierOrderListPage
+        intent={intent}
+      />
     ) : page === "transactions" ? (
-      <TransactionHistoryPage intent={intent} />
+      <TransactionHistoryPage
+        intent={intent}
+      />
     ) : (
       <ShiftSettlementPage />
     );
@@ -173,19 +304,37 @@ function CashierModule() {
       <AppShell
         groups={groups}
         active={page}
-        onSelect={(next) => navigate(next)}
-        user={{ name: state.cashier.name, role: "Cashier" }}
-        notifications={state.notifications}
-        onNotificationsRead={markNotificationsRead}
-        onNotificationSelect={openNotification}
+        onSelect={(next) =>
+          navigate(next)
+        }
+        user={{
+          name: accountName,
+          role: accountRole,
+        }}
+        notifications={
+          state.notifications
+        }
+        onNotificationsRead={
+          markNotificationsRead
+        }
+        onNotificationSelect={
+          openNotification
+        }
         onLogout={logout}
       >
         {content}
       </AppShell>
+
       <ConfirmationDialog
-        open={Boolean(pendingNavigation)}
+        open={Boolean(
+          pendingNavigation,
+        )}
         onOpenChange={(open) => {
-          if (!open) setPendingNavigation(undefined);
+          if (!open) {
+            setPendingNavigation(
+              undefined,
+            );
+          }
         }}
         title="Leave the active order?"
         description="Your order is saved on this device, but leaving the POS interrupts the current payment flow."
@@ -193,12 +342,21 @@ function CashierModule() {
         cancelLabel="Stay here"
         danger
         onConfirm={() => {
-          if (pendingNavigation) {
-            commitNavigation(pendingNavigation.page, pendingNavigation.intent);
+          if (
+            pendingNavigation
+          ) {
+            commitNavigation(
+              pendingNavigation.page,
+              pendingNavigation.intent,
+            );
           }
-          setPendingNavigation(undefined);
+
+          setPendingNavigation(
+            undefined,
+          );
         }}
       />
+
       <Toaster
         richColors
         closeButton
@@ -210,11 +368,16 @@ function CashierModule() {
           classNames: {
             toast:
               "cashier-toast rounded-xl border-border font-medium shadow-xl",
-            success: "cashier-toast-success",
-            warning: "cashier-toast-warning",
-            error: "cashier-toast-error",
-            title: "text-xs font-black",
-            description: "text-[11px] leading-4",
+            success:
+              "cashier-toast-success",
+            warning:
+              "cashier-toast-warning",
+            error:
+              "cashier-toast-error",
+            title:
+              "text-xs font-black",
+            description:
+              "text-[11px] leading-4",
           },
         }}
       />

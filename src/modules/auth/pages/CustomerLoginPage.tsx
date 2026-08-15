@@ -11,6 +11,7 @@ import {
   ShoppingBag,
   UserRound,
 } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 import { CUSTOMER_ACCOUNT } from "../../../data/authAccounts";
 import type { AccountRole } from "../../../data/authAccounts";
 import { useAuth } from "@/app/providers/AuthProvider";
@@ -36,15 +37,22 @@ export function CustomerLoginPage({ onLoginSuccess }: Props) {
   const [success, setSuccess] = useState(false);
   const [demoPanelOpen, setDemoPanelOpen] = useState(false);
 
-  const handleGoogleLogin = () => {
-    setGoogleLoading(true);
-    setTimeout(() => {
-      setGoogleLoading(false);
-      setSuccess(true);
-      login(CUSTOMER_ACCOUNT);
-      setTimeout(() => onLoginSuccess?.("customer"), 1200);
-    }, 1300);
-  };
+const handleGoogleLogin = async () => {
+  setGoogleLoading(true);
+
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: `${window.location.origin}/auth`,
+    },
+  });
+
+  if (error) {
+    console.error("Google sign-in failed:", error.message);
+    setGoogleLoading(false);
+    window.alert(`Google sign-in failed: ${error.message}`);
+  }
+};
 
   const browseMenu = () => {
     login(CUSTOMER_ACCOUNT);

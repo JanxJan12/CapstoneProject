@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useAuth } from "@/app/providers/AuthProvider";
 import { Toast } from "../components";
 import type {
   CashierAttentionFilter,
@@ -39,9 +40,16 @@ export function CashierDashboardPage({
     releaseReadyOrder,
   } = useCashierStore();
 
+  const { session } = useAuth();
+
   const { actionQueue, shiftSummary, attention } =
     useCashierDashboard();
-
+  const currentShiftSummary = {
+  ...shiftSummary,
+  cashierName:
+    session?.name?.trim() ||
+    shiftSummary.cashierName,
+};
   const [selectedOrder, setSelectedOrder] = useState<Order>();
   const [verificationOrder, setVerificationOrder] =
     useState<Order>();
@@ -169,10 +177,10 @@ export function CashierDashboardPage({
           sm:gap-4
         "
       >
-        <CompactShiftHeader
-          summary={shiftSummary}
-          onEndShift={() => setSettlementOpen(true)}
-        />
+      <CompactShiftHeader
+        summary={currentShiftSummary}
+        onEndShift={() => setSettlementOpen(true)}
+      />
 
         <PrimaryCashierActions
           attention={attention}

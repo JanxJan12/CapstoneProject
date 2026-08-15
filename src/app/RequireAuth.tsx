@@ -1,10 +1,8 @@
-import { useEffect } from "react";
 import { Navigate, useNavigate } from "react-router";
-import { useAuth } from "@/app/providers/AuthProvider";
-import { getSession } from "../data/session";
-import type { AccountRole } from "../data/authAccounts";
 
-// Set to true to force all protected routes into maintenance mode
+import { useAuth } from "@/app/providers/AuthProvider";
+import type { AccountRole } from "@/data/authAccounts";
+
 export const MAINTENANCE_MODE = false;
 
 interface RequireAuthProps {
@@ -12,40 +10,71 @@ interface RequireAuthProps {
   children: React.ReactNode;
 }
 
-export function RequireAuth({ role, children }: RequireAuthProps) {
-  const { session, logout } = useAuth();
-  const navigate = useNavigate();
+export function RequireAuth({
+  role,
+  children,
+}: RequireAuthProps) {
+  const {
+    session,
+    loading,
+    logout,
+  } = useAuth();
 
   if (MAINTENANCE_MODE) {
-    return <Navigate to="/auth?notice=maintenance" replace />;
+    return (
+      <Navigate
+        to="/auth?notice=maintenance"
+        replace
+      />
+    );
   }
 
-  // No session at all — redirect with unauthorized notice
+  /*
+   * Do not redirect while Supabase is still restoring the
+   * browser session. Redirecting too early would send a
+   * valid Google user back to the login page.
+   */
+  if (loading) {
+    return (
+      <div className="flex h-full items-center justify-center bg-background p-6">
+        <div className="flex flex-col items-center gap-3 text-center">
+          <div className="h-9 w-9 animate-spin rounded-full border-[3px] border-primary/20 border-t-primary" />
+
+          <p className="text-sm font-bold text-foreground">
+            Checking your account…
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (!session) {
-    return <Navigate to="/auth?notice=unauthorized" replace />;
+    return (
+      <Navigate
+        to="/auth?notice=unauthorized"
+        replace
+      />
+    );
   }
 
-  // Check if session has expired since last render
-  const live = getSession();
-  if (!live) {
-    logout();
-    return <Navigate to="/auth?notice=session-expired" replace />;
-  }
-
-  // Session belongs to a different role — access denied
   if (session.role !== role) {
-    return <Navigate to="/auth?notice=unauthorized" replace />;
+    return (
+      <Navigate
+        to="/auth?notice=unauthorized"
+        replace
+      />
+    );
   }
 
   return <>{children}</>;
 }
 
-/** Hook for triggering a logout from inside a protected module */
 export function useLogout() {
   const { logout } = useAuth();
   const navigate = useNavigate();
-  return () => {
-    logout();
-    navigate("/auth");
+
+  return async (): Promise<void> => {
+    await logout();
+    navigate("/auth", { replace: true });
   };
 }

@@ -1,10 +1,27 @@
+import { supabase } from "@/lib/supabase";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
-  ShoppingCart, ArrowLeft, Plus, Minus, Upload,
-  Check, Loader2, ChefHat, User, Phone,
-  Search, Star, Menu as MenuIcon, X, BadgeCheck, ChevronRight,
-  MapPin, Sparkles, Truck,
+  ShoppingCart,
+  ArrowLeft,
+  Plus,
+  Minus,
+  Upload,
+  Check,
+  Loader2,
+  ChefHat,
+  User,
+  Phone,
+  Search,
+  Star,
+  Menu as MenuIcon,
+  X,
+  BadgeCheck,
+  ChevronRight,
+  MapPin,
+  Sparkles,
+  Truck,
+  LogOut,
 } from "lucide-react";
 import { menuItems } from "../../data/mockData";
 import type { MenuItem } from "../../types";
@@ -94,91 +111,374 @@ function FoodCard({
 }
 
 // ── Shared Customer Nav ──────────────────────────────────────────
-function CustNav({ cart, onNav, currentPage }: { cart: CartItem[]; onNav: (p: CustomerPage) => void; currentPage: CustomerPage }) {
+function CustNav({
+  cart,
+  onNav,
+  currentPage,
+}: {
+  cart: CartItem[];
+  onNav: (page: CustomerPage) => void;
+  currentPage: CustomerPage;
+}) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const totalItems = cart.reduce((s, c) => s + c.qty, 0);
+  const [accountMenuOpen, setAccountMenuOpen] =
+    useState(false);
+  const [signingOut, setSigningOut] =
+    useState(false);
+
+  const totalItems = cart.reduce(
+    (sum, cartItem) => sum + cartItem.qty,
+    0,
+  );
+
+  const handleSignOut =
+    async (): Promise<void> => {
+      if (signingOut) {
+        return;
+      }
+
+      setSigningOut(true);
+      setAccountMenuOpen(false);
+      setMenuOpen(false);
+
+      const { error } =
+        await supabase.auth.signOut({
+          scope: "local",
+        });
+
+      if (error) {
+        console.error(
+          "Sign-out failed:",
+          error.message,
+        );
+
+        window.alert(
+          "Unable to sign out. Please try again.",
+        );
+
+        setSigningOut(false);
+        return;
+      }
+
+      /*
+       * Reload the application at the authentication portal.
+       * The profile and account remain in Supabase.
+       * Only the current browser session is removed.
+       */
+      window.location.replace("/auth");
+    };
 
   return (
     <header className="customer-nav sticky top-0 z-30 flex flex-shrink-0 items-center justify-between border-b border-border/70 bg-card/85 px-4 py-2.5 shadow-[0_8px_30px_rgba(64,40,25,0.04)] backdrop-blur-xl sm:px-6">
       {/* Logo */}
-      <button onClick={() => onNav("home")} className="flex min-h-11 flex-shrink-0 items-center gap-2.5 rounded-xl pr-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+      <button
+        type="button"
+        onClick={() => onNav("home")}
+        className="flex min-h-11 flex-shrink-0 items-center gap-2.5 rounded-xl pr-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+      >
         <div className="h-9 w-9 flex-shrink-0 overflow-hidden rounded-xl bg-zinc-900 shadow-md ring-1 ring-black/10">
-          <ImageWithFallback src={rrjLogo} alt="RRJ's Food-Haus" className="w-full h-full object-contain" />
+          <ImageWithFallback
+            src={rrjLogo}
+            alt="RRJ's Food-Haus"
+            className="h-full w-full object-contain"
+          />
         </div>
+
         <span className="hidden sm:block">
-          <span className="block font-['Fraunces'] text-sm font-bold leading-none text-foreground">RRJ's Food-Haus</span>
-          <span className="mt-1 flex items-center gap-1 text-[8px] font-extrabold uppercase tracking-[0.15em] text-emerald-700"><BadgeCheck className="h-2.5 w-2.5" /> Halal kitchen</span>
+          <span className="block font-['Fraunces'] text-sm font-bold leading-none text-foreground">
+            RRJ&apos;s Food-Haus
+          </span>
+
+          <span className="mt-1 flex items-center gap-1 text-[8px] font-extrabold uppercase tracking-[0.15em] text-emerald-700">
+            <BadgeCheck className="h-2.5 w-2.5" />
+            Halal kitchen
+          </span>
         </span>
       </button>
 
-      {/* Desktop nav links */}
+      {/* Desktop navigation links */}
       <nav className="hidden items-center gap-1 rounded-xl border border-border/70 bg-background/60 p-1 md:flex">
-        {NAV_LINKS.map((n) => (
-          <button key={n.id} onClick={() => onNav(n.id)}
-            aria-current={currentPage === n.id ? "page" : undefined}
-            className={`min-h-9 rounded-lg px-3 text-[11px] font-extrabold transition-all ${currentPage === n.id ? "bg-[#211914] text-white shadow-sm" : "text-muted-foreground hover:bg-white hover:text-foreground"}`}>
-            {n.label}
+        {NAV_LINKS.map((navItem) => (
+          <button
+            key={navItem.id}
+            type="button"
+            onClick={() => onNav(navItem.id)}
+            aria-current={
+              currentPage === navItem.id
+                ? "page"
+                : undefined
+            }
+            className={`min-h-9 rounded-lg px-3 text-[11px] font-extrabold transition-all ${
+              currentPage === navItem.id
+                ? "bg-[#211914] text-white shadow-sm"
+                : "text-muted-foreground hover:bg-white hover:text-foreground"
+            }`}
+          >
+            {navItem.label}
           </button>
         ))}
       </nav>
 
       {/* Right actions */}
       <div className="flex items-center gap-2">
-        <button onClick={() => onNav("cart")} className="relative flex min-h-11 items-center gap-1.5 rounded-xl bg-primary px-3.5 text-sm font-extrabold text-primary-foreground shadow-md shadow-orange-900/10 hover:bg-amber-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
+        <button
+          type="button"
+          onClick={() => onNav("cart")}
+          className="relative flex min-h-11 items-center gap-1.5 rounded-xl bg-primary px-3.5 text-sm font-extrabold text-primary-foreground shadow-md shadow-orange-900/10 hover:bg-amber-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+        >
           <ShoppingCart className="h-4 w-4" />
-          <span className="hidden sm:inline">Cart</span>
+
+          <span className="hidden sm:inline">
+            Cart
+          </span>
+
           {totalItems > 0 && (
             <motion.span
               key={totalItems}
               initial={{ scale: 0.55 }}
               animate={{ scale: 1 }}
               className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#211914] px-1 text-[9px] font-extrabold text-white ring-2 ring-white"
-            >{totalItems}</motion.span>
+            >
+              {totalItems}
+            </motion.span>
           )}
         </button>
-        <button onClick={() => onNav("profile")} aria-label="Open profile" className="hidden h-11 w-11 items-center justify-center rounded-xl border border-border bg-white text-muted-foreground hover:text-foreground sm:flex">
-          <User className="w-4 h-4 text-muted-foreground" />
-        </button>
+
+        {/* Desktop account dropdown */}
+        <div className="relative hidden sm:block">
+          <button
+            type="button"
+            onClick={() =>
+              setAccountMenuOpen(
+                (currentValue) =>
+                  !currentValue,
+              )
+            }
+            aria-label="Open account menu"
+            aria-haspopup="menu"
+            aria-expanded={accountMenuOpen}
+            className={`flex h-11 w-11 items-center justify-center rounded-xl border bg-white transition-colors ${
+              accountMenuOpen
+                ? "border-primary text-primary"
+                : "border-border text-muted-foreground hover:bg-muted hover:text-foreground"
+            }`}
+          >
+            <User className="h-4 w-4" />
+          </button>
+
+          <AnimatePresence>
+            {accountMenuOpen && (
+              <>
+                {/* Click outside to close */}
+                <button
+                  type="button"
+                  aria-label="Close account menu"
+                  onClick={() =>
+                    setAccountMenuOpen(false)
+                  }
+                  className="fixed inset-0 z-40 cursor-default"
+                />
+
+                <motion.div
+                  role="menu"
+                  initial={{
+                    opacity: 0,
+                    y: -6,
+                    scale: 0.97,
+                  }}
+                  animate={{
+                    opacity: 1,
+                    y: 0,
+                    scale: 1,
+                  }}
+                  exit={{
+                    opacity: 0,
+                    y: -6,
+                    scale: 0.97,
+                  }}
+                  transition={{
+                    duration: 0.14,
+                  }}
+                  className="absolute right-0 top-[calc(100%+0.6rem)] z-50 w-48 overflow-hidden rounded-xl border border-border bg-white p-1.5 shadow-xl shadow-black/10"
+                >
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setAccountMenuOpen(false);
+                      onNav("profile");
+                    }}
+                    className="flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-bold text-foreground hover:bg-muted"
+                  >
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    My Profile
+                  </button>
+
+                  <div className="my-1 border-t border-border" />
+
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      void handleSignOut();
+                    }}
+                    disabled={signingOut}
+                    className="flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-bold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {signingOut ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <LogOut className="h-4 w-4" />
+                    )}
+
+                    {signingOut
+                      ? "Signing out…"
+                      : "Sign Out"}
+                  </button>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
+        </div>
+
         {/* Mobile hamburger */}
-        <button onClick={() => setMenuOpen(true)} aria-label="Open navigation" className="flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-white hover:bg-muted md:hidden">
-          <MenuIcon className="w-4 h-4 text-muted-foreground" />
+        <button
+          type="button"
+          onClick={() => setMenuOpen(true)}
+          aria-label="Open navigation"
+          className="flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-white hover:bg-muted md:hidden"
+        >
+          <MenuIcon className="h-4 w-4 text-muted-foreground" />
         </button>
       </div>
 
       {/* Mobile drawer */}
       <AnimatePresence>
         {menuOpen && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 md:hidden">
-            <button aria-label="Close navigation" className="absolute inset-0 h-full w-full bg-black/45 backdrop-blur-sm" onClick={() => setMenuOpen(false)} />
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 md:hidden"
+          >
+            <button
+              type="button"
+              aria-label="Close navigation"
+              className="absolute inset-0 h-full w-full bg-black/45 backdrop-blur-sm"
+              onClick={() =>
+                setMenuOpen(false)
+              }
+            />
+
             <motion.div
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
-              transition={{ type: "spring", stiffness: 360, damping: 34 }}
+              transition={{
+                type: "spring",
+                stiffness: 360,
+                damping: 34,
+              }}
               className="absolute right-0 top-0 flex h-full w-[min(19rem,86vw)] flex-col bg-[#1d1713] text-white shadow-2xl"
             >
               <div className="flex items-center justify-between border-b border-white/10 px-4 py-4">
                 <div className="flex items-center gap-2.5">
-                  <div className="h-9 w-9 overflow-hidden rounded-xl bg-black ring-1 ring-white/15"><ImageWithFallback src={rrjLogo} alt="RRJ's Food-Haus" className="h-full w-full object-contain" /></div>
-                  <div><span className="block font-['Fraunces'] text-sm font-bold">RRJ's Food-Haus</span><span className="text-[8px] font-extrabold uppercase tracking-widest text-emerald-300">Halal kitchen</span></div>
+                  <div className="h-9 w-9 overflow-hidden rounded-xl bg-black ring-1 ring-white/15">
+                    <ImageWithFallback
+                      src={rrjLogo}
+                      alt="RRJ's Food-Haus"
+                      className="h-full w-full object-contain"
+                    />
+                  </div>
+
+                  <div>
+                    <span className="block font-['Fraunces'] text-sm font-bold">
+                      RRJ&apos;s Food-Haus
+                    </span>
+
+                    <span className="text-[8px] font-extrabold uppercase tracking-widest text-emerald-300">
+                      Halal kitchen
+                    </span>
+                  </div>
                 </div>
-                <button onClick={() => setMenuOpen(false)} aria-label="Close navigation" className="flex h-11 w-11 items-center justify-center rounded-xl text-white/60 hover:bg-white/10 hover:text-white">
-                  <X className="w-4 h-4" />
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setMenuOpen(false)
+                  }
+                  aria-label="Close navigation"
+                  className="flex h-11 w-11 items-center justify-center rounded-xl text-white/60 hover:bg-white/10 hover:text-white"
+                >
+                  <X className="h-4 w-4" />
                 </button>
               </div>
+
               <nav className="flex flex-col gap-1 p-3">
-                {NAV_LINKS.map((n) => (
-                  <button key={n.id} onClick={() => { onNav(n.id); setMenuOpen(false); }}
-                    className={`flex min-h-12 items-center justify-between rounded-xl px-4 text-left text-sm font-bold transition-colors ${currentPage === n.id ? "bg-primary text-white" : "text-white/65 hover:bg-white/[0.07] hover:text-white"}`}>
-                    {n.label}<ChevronRight className="h-4 w-4 opacity-50" />
+                {NAV_LINKS.map((navItem) => (
+                  <button
+                    key={navItem.id}
+                    type="button"
+                    onClick={() => {
+                      onNav(navItem.id);
+                      setMenuOpen(false);
+                    }}
+                    className={`flex min-h-12 items-center justify-between rounded-xl px-4 text-left text-sm font-bold transition-colors ${
+                      currentPage === navItem.id
+                        ? "bg-primary text-white"
+                        : "text-white/65 hover:bg-white/[0.07] hover:text-white"
+                    }`}
+                  >
+                    {navItem.label}
+
+                    <ChevronRight className="h-4 w-4 opacity-50" />
                   </button>
                 ))}
-                <button onClick={() => { onNav("profile"); setMenuOpen(false); }}
-                  className="flex min-h-12 items-center justify-between rounded-xl px-4 text-left text-sm font-bold text-white/65 hover:bg-white/[0.07] hover:text-white">
-                  My Profile<ChevronRight className="h-4 w-4 opacity-50" />
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    onNav("profile");
+                    setMenuOpen(false);
+                  }}
+                  className={`flex min-h-12 items-center justify-between rounded-xl px-4 text-left text-sm font-bold transition-colors ${
+                    currentPage === "profile"
+                      ? "bg-primary text-white"
+                      : "text-white/65 hover:bg-white/[0.07] hover:text-white"
+                  }`}
+                >
+                  My Profile
+
+                  <ChevronRight className="h-4 w-4 opacity-50" />
                 </button>
               </nav>
-              <div className="mt-auto border-t border-white/10 p-4 text-[10px] leading-relaxed text-white/35">Halal Filipino comfort food<br />Made with care since 2021.</div>
+
+              <div className="mt-auto border-t border-white/10 p-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    void handleSignOut();
+                  }}
+                  disabled={signingOut}
+                  className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-red-500/15 px-4 text-sm font-bold text-red-200 hover:bg-red-500/25 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {signingOut ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <LogOut className="h-4 w-4" />
+                  )}
+
+                  {signingOut
+                    ? "Signing out…"
+                    : "Sign Out"}
+                </button>
+
+                <p className="mt-4 text-[10px] leading-relaxed text-white/35">
+                  Halal Filipino comfort food
+                  <br />
+                  Made with care since 2021.
+                </p>
+              </div>
             </motion.div>
           </motion.div>
         )}
@@ -627,33 +927,259 @@ function HistoryPage({ cart, onNav }: { cart: CartItem[]; onNav: (p: CustomerPag
 }
 
 // ── Profile ───────────────────────────────────────────────────────
-function ProfilePage({ cart, onNav }: { cart: CartItem[]; onNav: (p: CustomerPage) => void }) {
+interface CustomerProfileData {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  contact_number: string | null;
+  avatar_url: string | null;
+}
+
+interface CustomerAccountData {
+  fullName: string;
+  email: string;
+  phone: string;
+  avatarUrl: string | null;
+}
+
+function ProfilePage({
+  cart,
+  onNav,
+}: {
+  cart: CartItem[];
+  onNav: (page: CustomerPage) => void;
+}) {
+  const [account, setAccount] =
+    useState<CustomerAccountData | null>(null);
+
+  const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] =
+    useState<string | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadCurrentAccount() {
+      setLoading(true);
+      setErrorMessage(null);
+
+      /*
+       * Get the Google/Supabase account that is currently
+       * authenticated in this browser.
+       */
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (!isMounted) {
+        return;
+      }
+
+      if (userError || !user) {
+        setErrorMessage(
+          userError?.message ??
+            "No authenticated account was found.",
+        );
+        setLoading(false);
+        return;
+      }
+
+      /*
+       * Load the application profile connected to the
+       * authenticated user's UUID.
+       */
+      const {
+        data: profile,
+        error: profileError,
+      } = await supabase
+        .from("profiles")
+        .select(
+          `
+            id,
+            first_name,
+            last_name,
+            contact_number,
+            avatar_url
+          `,
+        )
+        .eq("id", user.id)
+        .single<CustomerProfileData>();
+
+      if (!isMounted) {
+        return;
+      }
+
+      if (profileError || !profile) {
+        setErrorMessage(
+          profileError?.message ??
+            "Your profile could not be loaded.",
+        );
+        setLoading(false);
+        return;
+      }
+
+      const profileName = [
+        profile.first_name,
+        profile.last_name,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .trim();
+
+      const googleName =
+        typeof user.user_metadata?.full_name ===
+        "string"
+          ? user.user_metadata.full_name
+          : "";
+
+      const displayName =
+        profileName ||
+        googleName ||
+        user.email?.split("@")[0] ||
+        "Customer";
+
+      const googleAvatar =
+        typeof user.user_metadata?.avatar_url ===
+        "string"
+          ? user.user_metadata.avatar_url
+          : typeof user.user_metadata?.picture ===
+              "string"
+            ? user.user_metadata.picture
+            : null;
+
+      setAccount({
+        fullName: displayName,
+        email: user.email ?? "",
+        phone: profile.contact_number ?? "",
+        avatarUrl:
+          profile.avatar_url ?? googleAvatar,
+      });
+
+      setLoading(false);
+    }
+
+    void loadCurrentAccount();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   return (
-    <div className="flex flex-col h-full overflow-hidden">
-      <CustNav cart={cart} onNav={onNav} currentPage="profile" />
+    <div className="flex h-full flex-col overflow-hidden">
+      <CustNav
+        cart={cart}
+        onNav={onNav}
+        currentPage="profile"
+      />
+
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-2xl mx-auto w-full px-4 sm:px-6 py-5 sm:py-8">
-          <h1 className="text-lg sm:text-xl font-bold text-foreground mb-4 sm:mb-6">My Profile</h1>
-          <div className="bg-card border border-border rounded-xl p-5 sm:p-6 mb-5">
-            <div className="flex items-center gap-4 mb-5">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-primary/15 flex items-center justify-center flex-shrink-0">
-                <User className="w-7 h-7 sm:w-8 sm:h-8 text-primary" />
-              </div>
-              <div>
-                <p className="font-bold text-foreground text-base sm:text-lg">Maria Santos</p>
-                <p className="text-sm text-muted-foreground">maria.santos@gmail.com</p>
-                <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1"><Phone className="w-3 h-3" /> 09171234567</p>
-              </div>
-            </div>
-            <div className="flex flex-col gap-3">
-              {[{ l: "Full Name", v: "Maria Santos" }, { l: "Email", v: "maria.santos@gmail.com" }, { l: "Phone", v: "09171234567" }, { l: "Default Address", v: "123 Main St., Manila" }].map((f) => (
-                <div key={f.l} className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{f.l}</label>
-                  <input defaultValue={f.v} className="px-3 py-2.5 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:border-primary/50" />
+        <div className="mx-auto w-full max-w-2xl px-4 py-5 sm:px-6 sm:py-8">
+          <h1 className="mb-4 text-lg font-bold text-foreground sm:mb-6 sm:text-xl">
+            My Profile
+          </h1>
+
+          <div className="mb-5 rounded-xl border border-border bg-card p-5 sm:p-6">
+            {loading && (
+              <div className="flex min-h-48 items-center justify-center">
+                <div className="flex flex-col items-center gap-3">
+                  <Loader2 className="h-7 w-7 animate-spin text-primary" />
+
+                  <p className="text-sm font-semibold text-muted-foreground">
+                    Loading your account…
+                  </p>
                 </div>
-              ))}
-              <button className="w-fit mt-2 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-amber-800">Save Changes</button>
-            </div>
+              </div>
+            )}
+
+            {!loading && errorMessage && (
+              <div className="rounded-xl border border-red-200 bg-red-50 p-4">
+                <p className="text-sm font-semibold text-red-700">
+                  Unable to load profile
+                </p>
+
+                <p className="mt-1 text-xs text-red-600">
+                  {errorMessage}
+                </p>
+              </div>
+            )}
+
+            {!loading && account && (
+              <>
+                <div className="mb-5 flex items-center gap-4">
+                  <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary/15 sm:h-16 sm:w-16">
+                    {account.avatarUrl ? (
+                      <ImageWithFallback
+                        src={account.avatarUrl}
+                        alt={`${account.fullName} profile`}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <User className="h-7 w-7 text-primary sm:h-8 sm:w-8" />
+                    )}
+                  </div>
+
+                  <div className="min-w-0">
+                    <p className="truncate text-base font-bold text-foreground sm:text-lg">
+                      {account.fullName}
+                    </p>
+
+                    <p className="truncate text-sm text-muted-foreground">
+                      {account.email}
+                    </p>
+
+                    {account.phone && (
+                      <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
+                        <Phone className="h-3 w-3" />
+                        {account.phone}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-3">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      Full Name
+                    </label>
+
+                    <input
+                      value={account.fullName}
+                      readOnly
+                      className="rounded-lg border border-border bg-muted/40 px-3 py-2.5 text-sm text-foreground outline-none"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      Email
+                    </label>
+
+                    <input
+                      value={account.email}
+                      readOnly
+                      className="rounded-lg border border-border bg-muted/40 px-3 py-2.5 text-sm text-foreground outline-none"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      Phone
+                    </label>
+
+                    <input
+                      value={
+                        account.phone ||
+                        "No phone number saved"
+                      }
+                      readOnly
+                      className="rounded-lg border border-border bg-muted/40 px-3 py-2.5 text-sm text-foreground outline-none"
+                    />
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
