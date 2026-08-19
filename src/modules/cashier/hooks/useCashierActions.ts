@@ -1,6 +1,10 @@
 import { useCallback, useMemo, type MutableRefObject } from "react";
 import { OPTIMISTIC_DELAY_MS } from "../constants";
 import {
+  confirmCashierOrder,
+  fetchCashierOrders,
+} from "../services/supabaseOrderService";
+import {
   assignOrderRider,
   cancelOrder,
   createWalkInOrder,
@@ -75,6 +79,35 @@ export function useCashierActions(
     },
     [commitOptimistically, stateRef],
   );
+
+  const confirm = useCallback(
+  async (databaseOrderId: string, notes?: string) => {
+    await confirmCashierOrder(databaseOrderId, notes);
+
+    const databaseOrders = await fetchCashierOrders();
+
+    const current = stateRef.current;
+
+    const databaseOrderNumbers = new Set(
+      databaseOrders.map((order) => order.id),
+    );
+
+    const localOnlyOrders = current.orders.filter(
+      (order) =>
+        !order.databaseId &&
+        !databaseOrderNumbers.has(order.id),
+    );
+
+    commit({
+      ...current,
+      orders: [
+        ...databaseOrders,
+        ...localOnlyOrders,
+      ],
+    });
+  },
+  [commit, stateRef],
+);
 
   const cancel = useCallback(
     async (orderId: string, reason: string) => {
@@ -228,6 +261,7 @@ export function useCashierActions(
       verifyPayment,
       rejectPayment,
       createWalkInOrder: createOrder,
+      confirmOrder: confirm,
       cancelOrder: cancel,
       updateOrder,
       assignRider,
@@ -243,9 +277,10 @@ export function useCashierActions(
       markNotificationRead: markRead,
       markNotificationsRead: markAllRead,
     }),
-    [
+    [ 
       assignRider,
       cancel,
+      confirm,
       createOrder,
       duplicate,
       end,

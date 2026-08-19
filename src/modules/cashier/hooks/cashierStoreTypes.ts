@@ -20,13 +20,19 @@ export interface CashierActions {
     notes?: string,
   ) => Promise<void>;
   createWalkInOrder: (input: WalkInOrderInput) => Promise<Order>;
+
+  confirmOrder: (
+    databaseOrderId: string,
+    notes?: string,
+  ) => Promise<void>;
+
   cancelOrder: (orderId: string, reason: string) => Promise<void>;
   updateOrder: (
     orderId: string,
     input: OrderOperationalEditInput,
   ) => Promise<void>;
   assignRider: (orderId: string, riderId: string) => Promise<void>;
-  duplicateOrder: (orderId: string) => Promise<Order>;
+  duplicateOrder: (orderId: string) => Promise<Order>;  
   releaseReadyOrder: (orderId: string) => Promise<void>;
   updateKitchenStatus: (
     orderId: string,

@@ -1,5 +1,8 @@
 import {useEffect,useState,} from "react";
-import { useNavigate } from "react-router";
+import {
+  useNavigate,
+  useSearchParams,
+} from "react-router";
 import { AnimatePresence, motion } from "motion/react";
 import {
   Bike,
@@ -33,12 +36,25 @@ const SCREEN_TABS: {
 
 export function AuthApp() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const {
   login,
   session,
   loading,
 } = useAuth();
   const [screen, setScreen] = useState<AuthScreen>("staff");
+
+  useEffect(() => {
+  const portal = searchParams.get("portal");
+
+  if (
+    portal === "staff" ||
+    portal === "customer" ||
+    portal === "rider"
+  ) {
+    setScreen(portal);
+  }
+}, [searchParams]);
 
   useEffect(() => {
   if (loading || !session) {

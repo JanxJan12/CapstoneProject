@@ -80,6 +80,14 @@ export interface OrderTimelineEvent {
 
 export interface Order {
   id: string;
+
+  /**
+   * PostgreSQL orders.id UUID.
+   * Present for orders loaded from Supabase.
+   * Local/demo orders may not have one yet.
+   */
+  databaseId?: string;
+
   customerName: string;
   contactNumber: string;
   deliveryAddress?: string;

@@ -165,11 +165,9 @@ export const router = createBrowserRouter([
       {
         path: "customer",
         element: (
-          <RequireAuth role="customer">
-            <RouteBoundary>
-              <CustomerApp />
-            </RouteBoundary>
-          </RequireAuth>
+          <RouteBoundary>
+            <CustomerApp />
+          </RouteBoundary>
         ),
       },
 
@@ -191,6 +189,18 @@ export const router = createBrowserRouter([
         element: (
           <RouteBoundary>
             <SystemStates />
+          </RouteBoundary>
+        ),
+      },
+
+            // Kitchen Display System
+      // Development access only for now.
+      // Device-level authorization will be added before production use.
+      {
+        path: "kitchen",
+        element: (
+          <RouteBoundary>
+            <KitchenApp />
           </RouteBoundary>
         ),
       },

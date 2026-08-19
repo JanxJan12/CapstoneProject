@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
+import { useAuth } from "@/app/providers/AuthProvider";
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -103,7 +105,17 @@ const NAV_GROUPS: NavGroup<ManagerPage>[] = [
 ];
 
 export function ManagerApp() {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
   const [page, setPage] = useState<ManagerPage>("dashboard");
+
+  const handleLogout = async () => {
+  await logout();
+
+  navigate("/auth?portal=staff", {
+    replace: true,
+  });
+};
 
   const renderPage = () => {
     switch (page) {
@@ -145,12 +157,15 @@ export function ManagerApp() {
   };
 
   return (
-    <AppShell
-      groups={NAV_GROUPS}
-      active={page}
-      onSelect={setPage}
-      user={{ name: "Maria Reyes", role: "Manager" }}
-    >
+  <AppShell
+    groups={NAV_GROUPS}
+    active={page}
+    onSelect={setPage}
+    user={{ name: "Maria Reyes", role: "Manager" }}
+    onLogout={() => {
+      void handleLogout();
+    }}
+  >
       {renderPage()}
     </AppShell>
   );

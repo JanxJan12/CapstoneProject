@@ -8,6 +8,8 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { supabase } from "@/lib/supabase";
+import { fetchCashierOrders } from "../services/supabaseOrderService";
 import { OPTIMISTIC_DELAY_MS } from "../constants";
 import { calculateShiftTotals } from "../services/cashierService";
 import type { CashierState, ShiftTotals } from "../types";
@@ -69,6 +71,128 @@ export function CashierProvider({ children }: { children: ReactNode }) {
     const frame = window.requestAnimationFrame(() => setIsHydrating(false));
     return () => window.cancelAnimationFrame(frame);
   }, []);
+
+  useEffect(() => {
+  let cancelled = false;
+
+  const loadDatabaseOrders = async () => {
+    try {
+      const databaseOrders = await fetchCashierOrders();
+
+      if (cancelled) return;
+
+      const current = stateRef.current;
+
+      const databaseOrderNumbers = new Set(
+        databaseOrders.map((order) => order.id),
+      );
+
+      const localOnlyOrders = current.orders.filter(
+        (order) =>
+          !order.databaseId &&
+          !databaseOrderNumbers.has(order.id),
+      );
+
+      commit({
+        ...current,
+        orders: [
+          ...databaseOrders,
+          ...localOnlyOrders,
+        ],
+      });
+    } catch (error) {
+      console.error(
+        "Unable to load Supabase cashier orders:",
+        error,
+      );
+    }
+  };
+
+  void loadDatabaseOrders();
+
+  return () => {
+    cancelled = true;
+  };
+}, [commit]);
+
+  useEffect(() => {
+  let cancelled = false;
+
+  const refreshDatabaseOrders = async () => {
+    try {
+      const databaseOrders = await fetchCashierOrders();
+
+      if (cancelled) return;
+
+      const current = stateRef.current;
+
+      const databaseOrderNumbers = new Set(
+        databaseOrders.map((order) => order.id),
+      );
+
+      const localOnlyOrders = current.orders.filter(
+        (order) =>
+          !order.databaseId &&
+          !databaseOrderNumbers.has(order.id),
+      );
+
+      commit({
+        ...current,
+        orders: [
+          ...databaseOrders,
+          ...localOnlyOrders,
+        ],
+      });
+    } catch (error) {
+      console.error(
+        "Unable to refresh Supabase cashier orders:",
+        error,
+      );
+    }
+  };
+
+  const channel = supabase
+    .channel("cashier-orders-live")
+    .on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "orders",
+      },
+      () => {
+        void refreshDatabaseOrders();
+      },
+    )
+    .on(
+      "postgres_changes",
+      {
+        event: "UPDATE",
+        schema: "public",
+        table: "orders",
+      },
+      () => {
+        void refreshDatabaseOrders();
+      },
+    )
+    .subscribe((status, error) => {
+      if (
+        status === "CHANNEL_ERROR" ||
+        status === "TIMED_OUT"
+      ) {
+        console.error(
+          "Cashier order realtime error:",
+          status,
+          error,
+        );
+      }
+    });
+
+  return () => {
+    cancelled = true;
+    void supabase.removeChannel(channel);
+  };
+}, [commit]);
 
   const activeShift = useMemo(
     () => state.shifts.find((entry) => entry.status === "Open"),

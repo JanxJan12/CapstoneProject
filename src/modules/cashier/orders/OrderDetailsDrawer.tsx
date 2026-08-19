@@ -199,6 +199,16 @@ export function OrderDetailsDrawer({
           </section>
 
           <div className="sticky bottom-0 flex flex-wrap gap-2 border-t border-border bg-[#f8f4ef]/95 py-3 backdrop-blur-xl">
+              {currentOrder.databaseId &&
+              currentOrder.status === "Awaiting Payment" && (
+                <CashierButton
+                  loading={drawer.loading}
+                  disabled={drawer.loading}
+                  onClick={drawer.handleConfirm}
+                >
+                  Confirm order
+                </CashierButton>  
+              )}
             <CashierButton
               variant="secondary"
               onClick={drawer.printReceipt}
