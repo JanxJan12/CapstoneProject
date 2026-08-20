@@ -32,6 +32,7 @@ export interface CashierActions {
     input: OrderOperationalEditInput,
   ) => Promise<void>;
   assignRider: (orderId: string, riderId: string) => Promise<void>;
+  offerNextRider: (orderId: string) => Promise<void>;
   duplicateOrder: (orderId: string) => Promise<Order>;  
   releaseReadyOrder: (orderId: string) => Promise<void>;
   updateKitchenStatus: (

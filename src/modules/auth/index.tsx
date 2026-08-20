@@ -17,7 +17,7 @@ import { CustomerLoginPage } from "./pages/CustomerLoginPage";
 import { RiderLoginPage } from "./pages/RiderLoginPage";
 import { ImageWithFallback } from "@/components/media/ImageWithFallback";
 import { useAuth } from "@/app/providers/AuthProvider";
-import type { AccountRole, DemoAccount } from "../../data/authAccounts";
+import type { AccountRole, } from "../../data/authAccounts";
 import rrjLogo from "@/assets/brand/rrj-logo.jpg";
 import rrjPhoto from "@/assets/brand/rrj-restaurant.jpg";
 
@@ -38,10 +38,9 @@ export function AuthApp() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const {
-  login,
-  session,
-  loading,
-} = useAuth();
+    session,
+    loading,
+  } = useAuth();
   const [screen, setScreen] = useState<AuthScreen>("staff");
 
   useEffect(() => {
@@ -66,10 +65,7 @@ export function AuthApp() {
   });
 }, [loading, navigate, session]);
 
-  const handleLoginSuccess = (role: AccountRole, account?: DemoAccount) => {
-    if (account) login(account);
-    navigate(`/${role}`);
-  };
+  const handleLoginSuccess = ( role: AccountRole, ) => { navigate(`/${role}`); };
 
   return (
     <main className="auth-experience">

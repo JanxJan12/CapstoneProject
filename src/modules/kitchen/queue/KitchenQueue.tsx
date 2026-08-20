@@ -87,8 +87,16 @@ export function KitchenQueue() {
   }, []);
 
   useEffect(() => {
+  void loadQueue();
+
+  const interval = window.setInterval(() => {
     void loadQueue();
-  }, [loadQueue]);
+  }, 5000);
+
+  return () => {
+    window.clearInterval(interval);
+  };
+}, [loadQueue]);
 
   const advance = async (
     ticket: KdsQueueTicket,

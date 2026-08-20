@@ -3,6 +3,8 @@ import { OPTIMISTIC_DELAY_MS } from "../constants";
 import {
   confirmCashierOrder,
   fetchCashierOrders,
+  offerOrderToNextRider,
+  releaseReadyCashierOrder,
 } from "../services/supabaseOrderService";
 import {
   assignOrderRider,
@@ -142,6 +144,31 @@ export function useCashierActions(
     [commitOptimistically, stateRef],
   );
 
+  const offerNextRider = useCallback(
+  async (orderId: string) => {
+    const current = stateRef.current;
+
+    const order = current.orders.find(
+      (entry) => entry.id === orderId,
+    );
+
+    if (!order) {
+      throw new Error("Order not found.");
+    }
+
+    if (!order.databaseId) {
+      throw new Error(
+        "This order is not connected to a database order.",
+      );
+    }
+
+    await offerOrderToNextRider(
+      order.databaseId,
+    );
+  },
+  [stateRef],
+);
+
   const duplicate = useCallback(
     async (orderId: string) => {
       const previous = stateRef.current;
@@ -156,16 +183,54 @@ export function useCashierActions(
     [commitOptimistically, stateRef],
   );
 
-  const releaseReadyOrderAction = useCallback(
-    async (orderId: string) => {
-      const previous = stateRef.current;
-      await commitOptimistically(
-        releaseReadyOrder(previous, orderId),
-        previous,
+const releaseReadyOrderAction = useCallback(
+  async (orderId: string) => {
+    const current = stateRef.current;
+
+    const order = current.orders.find(
+      (entry) => entry.id === orderId,
+    );
+
+    if (!order) {
+      throw new Error("Order not found.");
+    }
+
+    if (!order.databaseId) {
+      throw new Error(
+        "This order is not connected to a database order.",
       );
-    },
-    [commitOptimistically, stateRef],
-  );
+    }
+
+    await releaseReadyCashierOrder(
+      order.databaseId,
+      "Ready order released by cashier",
+    );
+
+    const databaseOrders =
+      await fetchCashierOrders();
+
+    const latest = stateRef.current;
+
+    const databaseOrderNumbers = new Set(
+      databaseOrders.map((entry) => entry.id),
+    );
+
+    const localOnlyOrders = latest.orders.filter(
+      (entry) =>
+        !entry.databaseId &&
+        !databaseOrderNumbers.has(entry.id),
+    );
+
+    commit({
+      ...latest,
+      orders: [
+        ...databaseOrders,
+        ...localOnlyOrders,
+      ],
+    });
+  },
+  [commit, stateRef],
+);
 
   const updateKitchen = useCallback(
     async (
@@ -265,6 +330,7 @@ export function useCashierActions(
       cancelOrder: cancel,
       updateOrder,
       assignRider,
+      offerNextRider,
       duplicateOrder: duplicate,
       releaseReadyOrder: releaseReadyOrderAction,
       updateKitchenStatus: updateKitchen,
@@ -277,8 +343,9 @@ export function useCashierActions(
       markNotificationRead: markRead,
       markNotificationsRead: markAllRead,
     }),
-    [ 
+    [
       assignRider,
+      offerNextRider,
       cancel,
       confirm,
       createOrder,

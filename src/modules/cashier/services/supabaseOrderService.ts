@@ -88,6 +88,22 @@ interface ConfirmOrderResult {
   processed_by: string;
 }
 
+interface ReleaseReadyOrderResult {
+  order_id: string;
+  order_number: string;
+  previous_status: DatabaseOrderStatus;
+  current_status: DatabaseOrderStatus;
+}
+
+interface OfferRiderResult {
+  assignment_id: string;
+  order_id: string;
+  order_number: string;
+  rider_id: string;
+  assignment_status: "offered";
+  assigned_at: string;
+}
+
 export async function confirmCashierOrder(
   databaseOrderId: string,
   notes?: string,
@@ -121,6 +137,82 @@ export async function confirmCashierOrder(
   if (!result) {
     throw new Error(
       "The order was confirmed but no updated order record was returned.",
+    );
+  }
+
+  return result;
+}
+
+export async function releaseReadyCashierOrder(
+  databaseOrderId: string,
+  notes?: string,
+): Promise<ReleaseReadyOrderResult> {
+  const normalizedId = databaseOrderId.trim();
+
+  if (!normalizedId) {
+    throw new Error(
+      "This order does not have a valid database ID.",
+    );
+  }
+
+  const { data, error } = await supabase.rpc(
+    "release_ready_order",
+    {
+      p_order_id: normalizedId,
+      p_notes: notes?.trim() || null,
+    },
+  );
+
+  if (error) {
+    throw new Error(
+      `Unable to release ready order: ${error.message}`,
+    );
+  }
+
+  const result = (
+    data as ReleaseReadyOrderResult[] | null
+  )?.[0];
+
+  if (!result) {
+    throw new Error(
+      "The order was released, but no updated order record was returned.",
+    );
+  }
+
+  return result;
+}
+
+export async function offerOrderToNextRider(
+  databaseOrderId: string,
+): Promise<OfferRiderResult> {
+  const normalizedId = databaseOrderId.trim();
+
+  if (!normalizedId) {
+    throw new Error(
+      "This order does not have a valid database ID.",
+    );
+  }
+
+  const { data, error } = await supabase.rpc(
+    "offer_order_to_next_rider",
+    {
+      p_order_id: normalizedId,
+    },
+  );
+
+  if (error) {
+    throw new Error(
+      `Unable to assign rider: ${error.message}`,
+    );
+  }
+
+  const result = (
+    data as OfferRiderResult[] | null
+  )?.[0];
+
+  if (!result) {
+    throw new Error(
+      "The rider assignment was created, but no assignment record was returned.",
     );
   }
 

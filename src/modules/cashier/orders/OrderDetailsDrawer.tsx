@@ -199,43 +199,64 @@ export function OrderDetailsDrawer({
           </section>
 
           <div className="sticky bottom-0 flex flex-wrap gap-2 border-t border-border bg-[#f8f4ef]/95 py-3 backdrop-blur-xl">
-              {currentOrder.databaseId &&
-              currentOrder.status === "Awaiting Payment" && (
-                <CashierButton
-                  loading={drawer.loading}
-                  disabled={drawer.loading}
-                  onClick={drawer.handleConfirm}
-                >
-                  Confirm order
-                </CashierButton>  
-              )}
-            <CashierButton
-              variant="secondary"
-              onClick={drawer.printReceipt}
-              disabled={!currentOrder.transactionId}
-            >
-              <Printer className="h-4 w-4" />
-              Print receipt
-            </CashierButton>
-            {currentOrder.status === "Ready" && (
+          {currentOrder.databaseId &&
+            currentOrder.status === "Awaiting Payment" && (
               <CashierButton
                 loading={drawer.loading}
-                onClick={drawer.handleRelease}
-              >
-                Release ready order
-              </CashierButton>
-            )}
-            {CANCELLABLE_STATUSES.includes(currentOrder.status) && (
-              <CashierButton
-                variant="danger"
                 disabled={drawer.loading}
-                onClick={() => drawer.setCancelOpen(true)}
+                onClick={drawer.handleConfirm}
               >
-                <XCircle className="h-4 w-4" />
-                Cancel order
+                Confirm order
               </CashierButton>
             )}
-          </div>
+
+          <CashierButton
+            variant="secondary"
+            onClick={drawer.printReceipt}
+            disabled={!currentOrder.transactionId}
+          >
+            <Printer className="h-4 w-4" />
+            Print receipt
+          </CashierButton>
+
+          {currentOrder.status === "Ready" && (
+            <CashierButton
+              loading={drawer.loading}
+              disabled={drawer.loading}
+              onClick={drawer.handleRelease}
+            >
+              Release ready order
+            </CashierButton>
+          )}
+
+          {currentOrder.databaseId &&
+            currentOrder.type === "Delivery" &&
+            currentOrder.status === "Waiting for Rider" && (
+              <CashierButton
+                loading={drawer.loading}
+                disabled={drawer.loading}
+                onClick={drawer.handleOfferNextRider}
+              >
+                <Bike className="h-4 w-4" />
+                Offer to next rider
+              </CashierButton>
+            )}
+
+          {CANCELLABLE_STATUSES.includes(
+            currentOrder.status,
+          ) && (
+            <CashierButton
+              variant="danger"
+              disabled={drawer.loading}
+              onClick={() =>
+                drawer.setCancelOpen(true)
+              }
+            >
+              <XCircle className="h-4 w-4" />
+              Cancel order
+            </CashierButton>
+          )}
+        </div>
         </div>
       </Drawer>
       <CancelOrderDialog

@@ -164,29 +164,29 @@ export function CashierProvider({ children }: { children: ReactNode }) {
         void refreshDatabaseOrders();
       },
     )
-    .on(
-      "postgres_changes",
-      {
-        event: "UPDATE",
-        schema: "public",
-        table: "orders",
-      },
-      () => {
-        void refreshDatabaseOrders();
-      },
-    )
-    .subscribe((status, error) => {
-      if (
-        status === "CHANNEL_ERROR" ||
-        status === "TIMED_OUT"
-      ) {
-        console.error(
-          "Cashier order realtime error:",
-          status,
-          error,
-        );
-      }
-    });
+.on(
+  "postgres_changes",
+  {
+    event: "UPDATE",
+    schema: "public",
+    table: "orders",
+  },
+() => {
+  void refreshDatabaseOrders();
+},
+)
+.subscribe((status, error) => {
+  if (
+    status === "CHANNEL_ERROR" ||
+    status === "TIMED_OUT"
+  ) {
+    console.error(
+      "Cashier order realtime error:",
+      status,
+      error,
+    );
+  }
+});
 
   return () => {
     cancelled = true;

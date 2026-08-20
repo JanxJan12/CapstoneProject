@@ -1,16 +1,24 @@
-import { useState } from "react";
+import {useEffect, useState } from "react";
 import {
   UtensilsCrossed, Bike, LayoutDashboard, History, User,
   MapPin, Phone, Check, X, ArrowLeft, Upload, Camera,
-  Navigation, Clock, ImageIcon, LogOut, ChefHat,
+ Navigation, ImageIcon, LogOut,
 } from "lucide-react";
+
+import {
+  acceptRiderOffer,
+  fetchActiveRiderDelivery,
+  fetchRiderOffers,
+  type RiderActiveDelivery,
+  type RiderDeliveryRequest,
+} from "./services/supabaseRiderService";
 
 type RiderScreen =
   | "splash" | "login" | "home" | "requests" | "delivery-detail"
   | "nav-assist" | "update-status" | "upload-proof" | "history" | "profile";
 
 type BottomTab = "home" | "deliveries" | "history" | "profile";
-
+    
 // ── Android phone shell ───────────────────────────────────────────
 // On mobile (< md): full-screen, no chrome
 // On desktop (>= md): phone frame centered on dark bg
@@ -131,6 +139,52 @@ function LoginScreen({ onNext }: { onNext: () => void }) {
 // ── Home Tab ─────────────────────────────────────────────────────
 function HomeTab({ onNav }: { onNav: (s: RiderScreen) => void }) {
   const [available, setAvailable] = useState(true);
+  
+  const [activeDelivery, setActiveDelivery] =
+    useState<RiderActiveDelivery | null>(null);
+
+  const [activeDeliveryLoading, setActiveDeliveryLoading] =
+    useState(true);
+
+  const [activeDeliveryError, setActiveDeliveryError] =
+    useState("");
+
+    useEffect(() => {
+    let active = true;
+
+    const loadActiveDelivery = async () => {
+      setActiveDeliveryLoading(true);
+      setActiveDeliveryError("");
+
+      try {
+        const delivery =
+          await fetchActiveRiderDelivery();
+
+        if (active) {
+          setActiveDelivery(delivery);
+        }
+      } catch (caught) {
+        if (active) {
+          setActiveDeliveryError(
+            caught instanceof Error
+              ? caught.message
+              : "Unable to load active delivery.",
+          );
+        }
+      } finally {
+        if (active) {
+          setActiveDeliveryLoading(false);
+        }
+      }
+    };
+
+    void loadActiveDelivery();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       <div className="bg-primary px-4 pt-4 pb-8 flex-shrink-0">
@@ -151,13 +205,80 @@ function HomeTab({ onNav }: { onNav: (s: RiderScreen) => void }) {
             <div key={s.l} className="bg-card rounded-xl border border-border p-3"><p className="text-[9px] text-muted-foreground mb-0.5">{s.l}</p><p className={`text-xl font-bold ${s.c}`}>{s.v}</p></div>
           ))}
         </div>
-        <p className="text-xs font-bold text-foreground mb-2">Active Delivery</p>
-        <button onClick={() => onNav("delivery-detail")} className="w-full bg-card rounded-xl border border-border p-3 text-left mb-4 hover:border-primary/40 transition-colors">
-          <div className="flex justify-between mb-1.5"><span className="font-mono text-[9px] font-bold text-primary">ORD-1046</span><span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-blue-100 text-blue-700">Out for Delivery</span></div>
-          <p className="text-xs font-semibold mb-1">Juan dela Cruz</p>
-          <div className="flex items-start gap-1 text-[9px] text-muted-foreground mb-2"><MapPin className="w-3 h-3 mt-0.5 text-primary flex-shrink-0" /><span>23 Katipunan Ave., QC</span></div>
-          <div className="w-full py-1.5 rounded-lg bg-primary text-white text-[10px] font-bold text-center">View Delivery</div>
-        </button>
+      <p className="text-xs font-bold text-foreground mb-2">
+        Active Delivery
+      </p>
+
+      {activeDeliveryLoading && (
+        <div className="w-full bg-card rounded-xl border border-border p-4 mb-4 text-center">
+          <p className="text-[10px] text-muted-foreground">
+            Loading active delivery…
+          </p>
+        </div>
+      )}
+
+      {!activeDeliveryLoading && activeDeliveryError && (
+        <div className="w-full rounded-xl border border-red-200 bg-red-50 p-3 mb-4">
+          <p className="text-[10px] font-semibold text-red-700">
+            {activeDeliveryError}
+          </p>
+        </div>
+      )}
+
+      {!activeDeliveryLoading &&
+        !activeDeliveryError &&
+        !activeDelivery && (
+          <div className="w-full bg-card rounded-xl border border-border p-4 mb-4 text-center">
+            <Bike className="w-6 h-6 mx-auto text-muted-foreground/50 mb-1" />
+
+            <p className="text-[10px] font-semibold">
+              No active delivery
+            </p>
+
+            <p className="text-[9px] text-muted-foreground mt-1">
+              Accepted deliveries will appear here.
+            </p>
+          </div>
+        )}
+
+      {!activeDeliveryLoading &&
+        !activeDeliveryError &&
+        activeDelivery && (
+          <button
+            onClick={() => onNav("delivery-detail")}
+            className="w-full bg-card rounded-xl border border-border p-3 text-left mb-4 hover:border-primary/40 transition-colors"
+          >
+            <div className="flex justify-between mb-1.5">
+              <span className="font-mono text-[9px] font-bold text-primary">
+                {activeDelivery.orderNumber}
+              </span>
+
+              <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-blue-100 text-blue-700">
+                {activeDelivery.assignmentStatus === "accepted"
+                  ? "Rider Accepted"
+                  : activeDelivery.assignmentStatus === "picked_up"
+                    ? "Picked Up"
+                    : "Out for Delivery"}
+              </span>
+            </div>
+
+            <p className="text-xs font-semibold mb-1">
+              {activeDelivery.customerName}
+            </p>
+
+            <div className="flex items-start gap-1 text-[9px] text-muted-foreground mb-2">
+              <MapPin className="w-3 h-3 mt-0.5 text-primary flex-shrink-0" />
+
+              <span>
+                {activeDelivery.deliveryAddress}
+              </span>
+            </div>
+
+            <div className="w-full py-1.5 rounded-lg bg-primary text-white text-[10px] font-bold text-center">
+              View Delivery
+            </div>
+          </button>
+        )}
         {available && (
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
             <p className="text-[10px] font-bold text-amber-800 mb-1">1 new delivery request</p>
@@ -169,66 +290,489 @@ function HomeTab({ onNav }: { onNav: (s: RiderScreen) => void }) {
   );
 }
 
-// ── Delivery Requests ─────────────────────────────────────────────
-function DeliveryRequestsTab({ onNav }: { onNav: (s: RiderScreen) => void }) {
+// ── Delivery Requests ────────────────────────────────────────────
+
+function DeliveryRequestsTab() {
+  const [offers, setOffers] = useState<
+    RiderDeliveryRequest[]
+  >([]);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState("");
+  
+  const [acceptingId, setAcceptingId] =
+  useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+
+    const loadOffers = async () => {
+      setLoading(true);
+      setError("");
+
+      try {
+        const nextOffers =
+          await fetchRiderOffers();
+
+        if (active) {
+          setOffers(nextOffers);
+        }
+      } catch (caught) {
+        if (active) {
+          setError(
+            caught instanceof Error
+              ? caught.message
+              : "Unable to load delivery requests.",
+          );
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void loadOffers();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const handleAccept = async (
+  assignmentId: string,
+) => {
+  if (acceptingId) {
+    return;
+  }
+
+  setAcceptingId(assignmentId);
+  setError("");
+
+  try {
+    await acceptRiderOffer(
+      assignmentId,
+    );
+
+    const nextOffers =
+      await fetchRiderOffers();
+
+    setOffers(nextOffers);
+  } catch (caught) {
+    setError(
+      caught instanceof Error
+        ? caught.message
+        : "Unable to accept the delivery.",
+    );
+  } finally {
+    setAcceptingId(null);
+  }
+};
+
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      <div className="bg-primary px-4 py-4 flex-shrink-0"><p className="text-white font-bold">Delivery Request</p><p className="text-white/60 text-[9px]">New delivery available near you</p></div>
+      <div className="bg-primary px-4 py-4 flex-shrink-0">
+        <p className="text-white font-bold">
+          Delivery Requests
+        </p>
+
+        <p className="text-white/60 text-[9px]">
+          Orders currently offered to you
+        </p>
+      </div>
+
       <div className="-mt-3 rounded-t-2xl bg-background flex-1 px-4 pt-4 overflow-y-auto">
-        <div className="bg-card rounded-xl border border-border p-3 mb-3">
-          <div className="flex justify-between mb-2"><span className="font-mono text-[9px] font-bold text-primary">ORD-1052</span><span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-blue-100 text-blue-700">Confirmed</span></div>
-          <p className="text-xs font-bold mb-2">Grace Villanueva · 09282345678</p>
-          <div className="flex flex-col gap-1.5 mb-2.5">
-            <div className="flex items-start gap-1.5 text-[9px] text-muted-foreground"><MapPin className="w-3 h-3 mt-0.5 text-primary flex-shrink-0" /><span><span className="font-semibold text-foreground">Pickup:</span> RRJ Food-House, Manila</span></div>
-            <div className="flex items-start gap-1.5 text-[9px] text-muted-foreground"><MapPin className="w-3 h-3 mt-0.5 text-green-500 flex-shrink-0" /><span><span className="font-semibold text-foreground">Deliver to:</span> 12 Mabini Ave., Makati</span></div>
-            <div className="flex items-start gap-1.5 text-[9px] text-muted-foreground"><Navigation className="w-3 h-3 mt-0.5 flex-shrink-0" /><span>Landmark: Near BPI Bank</span></div>
+        {loading && (
+          <div className="bg-card rounded-xl border border-border p-4 text-center">
+            <p className="text-[10px] text-muted-foreground">
+              Loading delivery requests…
+            </p>
           </div>
-          <div className="bg-muted/60 rounded-lg p-2 mb-3"><p className="text-[8px] font-bold text-muted-foreground mb-0.5">ORDER ITEMS</p><p className="text-[9px]">Sinigang na Baka, White Rice · ₱190</p></div>
-          <div className="flex items-center justify-between text-[9px] text-muted-foreground mb-3">
-            <div className="flex items-center gap-1"><Clock className="w-3 h-3" /> Est. 15–20 min</div>
-            <span>Delivery fee: ₱50</span>
+        )}
+
+        {!loading && error && (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-3">
+            <p className="text-[10px] font-semibold text-red-700">
+              {error}
+            </p>
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            <button onClick={() => onNav("delivery-detail")} className="py-2.5 rounded-xl bg-primary text-white text-[10px] font-bold flex items-center justify-center gap-1"><Check className="w-3 h-3" />Accept</button>
-            <button className="py-2.5 rounded-xl border border-border bg-white text-[10px] font-bold text-muted-foreground flex items-center justify-center gap-1"><X className="w-3 h-3" />Reject</button>
-          </div>
-        </div>
+        )}
+
+        {!loading &&
+          !error &&
+          offers.length === 0 && (
+            <div className="bg-card rounded-xl border border-border p-5 text-center">
+              <Bike className="mx-auto h-7 w-7 text-muted-foreground/50" />
+
+              <p className="mt-2 text-xs font-bold">
+                No delivery requests
+              </p>
+
+              <p className="mt-1 text-[9px] text-muted-foreground">
+                New assigned deliveries will appear
+                here.
+              </p>
+            </div>
+          )}
+
+        {!loading &&
+          !error &&
+          offers.map((offer) => (
+            <div
+              key={offer.assignmentId}
+              className="bg-card rounded-xl border border-border p-3 mb-3"
+            >
+              <div className="flex justify-between mb-2">
+                <span className="font-mono text-[9px] font-bold text-primary">
+                  {offer.orderNumber}
+                </span>
+
+                <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-100 text-amber-700">
+                  Offered
+                </span>
+              </div>
+
+              <p className="text-xs font-bold mb-2">
+                {offer.customerName} ·{" "}
+                {offer.contactNumber}
+              </p>
+
+              <div className="flex flex-col gap-1.5 mb-2.5">
+                <div className="flex items-start gap-1.5 text-[9px] text-muted-foreground">
+                  <MapPin className="w-3 h-3 mt-0.5 text-primary flex-shrink-0" />
+
+                  <span>
+                    <span className="font-semibold text-foreground">
+                      Deliver to:
+                    </span>{" "}
+                    {offer.deliveryAddress}
+                  </span>
+                </div>
+
+                {offer.landmark && (
+                  <div className="flex items-start gap-1.5 text-[9px] text-muted-foreground">
+                    <Navigation className="w-3 h-3 mt-0.5 flex-shrink-0" />
+
+                    <span>
+                      Landmark: {offer.landmark}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="bg-muted/60 rounded-lg p-2 mb-3">
+                <p className="text-[8px] font-bold text-muted-foreground mb-1">
+                  ORDER ITEMS
+                </p>
+
+                {offer.items.map((item) => (
+                  <p
+                    key={item.id}
+                    className="text-[9px]"
+                  >
+                    {item.quantity} × {item.name}
+                  </p>
+                ))}
+
+                <div className="mt-2 border-t border-border pt-2 flex justify-between text-[9px]">
+                  <span className="text-muted-foreground">
+                    Delivery fee
+                  </span>
+
+                  <span className="font-bold">
+                    ₱{offer.deliveryFee.toFixed(2)}
+                  </span>
+                </div>
+
+                <div className="mt-1 flex justify-between text-[10px] font-bold">
+                  <span>Total</span>
+
+                  <span className="text-primary">
+                    ₱{offer.total.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                disabled={acceptingId !== null}
+                onClick={() => {
+                  void handleAccept(
+                    offer.assignmentId,
+                  );
+                }}
+                className="py-2.5 rounded-xl bg-primary text-white text-[10px] font-bold flex items-center justify-center gap-1 disabled:opacity-60"
+              >
+                <Check className="w-3 h-3" />
+
+                {acceptingId === offer.assignmentId
+                  ? "Accepting…"
+                  : "Accept"}
+              </button>
+
+                <button
+                  type="button"
+                  disabled
+                  className="py-2.5 rounded-xl border border-border bg-white text-[10px] font-bold text-muted-foreground flex items-center justify-center gap-1 disabled:opacity-60"
+                >
+                  <X className="w-3 h-3" />
+                  Reject
+                </button>
+              </div>
+            </div>
+          ))}
       </div>
     </div>
   );
 }
 
 // ── Delivery Detail ───────────────────────────────────────────────
-function DeliveryDetailScreen({ onNav }: { onNav: (s: RiderScreen) => void }) {
+function DeliveryDetailScreen({
+  onNav,
+}: {
+  onNav: (s: RiderScreen) => void;
+}) {
+  const [delivery, setDelivery] =
+    useState<RiderActiveDelivery | null>(null);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState("");
+
+  useEffect(() => {
+    let active = true;
+
+    const loadDelivery = async () => {
+      setLoading(true);
+      setError("");
+
+      try {
+        const nextDelivery =
+          await fetchActiveRiderDelivery();
+
+        if (active) {
+          setDelivery(nextDelivery);
+        }
+      } catch (caught) {
+        if (active) {
+          setError(
+            caught instanceof Error
+              ? caught.message
+              : "Unable to load delivery details.",
+          );
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void loadDelivery();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const statusLabel =
+    delivery?.assignmentStatus === "accepted"
+      ? "Rider Accepted"
+      : delivery?.assignmentStatus === "picked_up"
+        ? "Picked Up"
+        : delivery?.assignmentStatus === "out_for_delivery"
+          ? "Out for Delivery"
+          : "";
+
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       <div className="bg-primary px-4 py-4 flex items-center gap-3 flex-shrink-0">
-        <button onClick={() => onNav("home")} className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center"><ArrowLeft className="w-4 h-4 text-white" /></button>
-        <p className="text-white font-bold text-sm">Delivery Detail</p>
+        <button
+          onClick={() => onNav("home")}
+          className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center"
+        >
+          <ArrowLeft className="w-4 h-4 text-white" />
+        </button>
+
+        <p className="text-white font-bold text-sm">
+          Delivery Detail
+        </p>
       </div>
+
       <div className="flex-1 bg-background overflow-y-auto px-4 py-3">
-        <div className="flex items-center gap-2 mb-3"><span className="font-mono text-[9px] font-bold text-primary">ORD-1046</span><span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-blue-100 text-blue-700">Out for Delivery</span></div>
-        <div className="bg-card rounded-xl border border-border p-3 mb-2"><p className="text-[8px] font-bold text-muted-foreground uppercase mb-1">Customer</p><p className="text-xs font-bold">Juan dela Cruz</p><div className="flex items-center gap-1 text-[9px] text-muted-foreground mt-0.5"><Phone className="w-3 h-3" /><span>09283456789</span></div></div>
-        <div className="bg-card rounded-xl border border-border p-3 mb-2">
-          <p className="text-[8px] font-bold text-muted-foreground uppercase mb-1">Delivery Address</p>
-          <div className="flex items-start gap-1.5 text-[9px]"><MapPin className="w-3 h-3 mt-0.5 text-primary flex-shrink-0" /><p className="font-semibold">23 Katipunan Ave., QC</p></div>
-          <p className="text-[9px] text-muted-foreground mt-0.5 ml-4">Landmark: Near Mercury Drug</p>
-          <button onClick={() => onNav("nav-assist")} className="mt-2 w-full h-14 bg-blue-50 rounded-lg border border-blue-200 flex items-center justify-center gap-2 text-[10px] text-blue-600 font-semibold">
-            <Navigation className="w-4 h-4" /> Open Navigation Assistance
-          </button>
-        </div>
-        <div className="bg-card rounded-xl border border-border p-3 mb-3">
-          <p className="text-[8px] font-bold text-muted-foreground uppercase mb-1">Items</p>
-          <div className="flex justify-between text-[9px] mb-0.5"><span>Adobong Manok</span><span className="font-bold">×1</span></div>
-          <div className="flex justify-between text-[9px] mb-1.5"><span>White Rice</span><span className="font-bold">×1</span></div>
-          <div className="flex justify-between font-bold text-xs border-t border-border pt-1.5"><span>Total</span><span className="text-primary">₱155</span></div>
-        </div>
-        <button onClick={() => onNav("update-status")} className="w-full py-3 rounded-xl bg-primary text-white font-bold text-[11px] flex items-center justify-center gap-1.5 mb-2">
-          Update Delivery Status
-        </button>
-        <button onClick={() => onNav("upload-proof")} className="w-full py-2.5 rounded-xl border border-border bg-white text-[10px] font-semibold flex items-center justify-center gap-1.5">
-          <Upload className="w-3.5 h-3.5" /> Upload Proof of Delivery
-        </button>
+        {loading && (
+          <div className="bg-card rounded-xl border border-border p-4 text-center">
+            <p className="text-[10px] text-muted-foreground">
+              Loading delivery details…
+            </p>
+          </div>
+        )}
+
+        {!loading && error && (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-3">
+            <p className="text-[10px] font-semibold text-red-700">
+              {error}
+            </p>
+          </div>
+        )}
+
+        {!loading &&
+          !error &&
+          !delivery && (
+            <div className="bg-card rounded-xl border border-border p-5 text-center">
+              <Bike className="w-7 h-7 mx-auto text-muted-foreground/50" />
+
+              <p className="mt-2 text-xs font-bold">
+                No active delivery
+              </p>
+            </div>
+          )}
+
+        {!loading &&
+          !error &&
+          delivery && (
+            <>
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <span className="font-mono text-[9px] font-bold text-primary">
+                  {delivery.orderNumber}
+                </span>
+
+                <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-blue-100 text-blue-700">
+                  {statusLabel}
+                </span>
+              </div>
+
+              <div className="bg-card rounded-xl border border-border p-3 mb-2">
+                <p className="text-[8px] font-bold text-muted-foreground uppercase mb-1">
+                  Customer
+                </p>
+
+                <p className="text-xs font-bold">
+                  {delivery.customerName}
+                </p>
+
+                <div className="flex items-center gap-1 text-[9px] text-muted-foreground mt-0.5">
+                  <Phone className="w-3 h-3" />
+
+                  <span>
+                    {delivery.contactNumber}
+                  </span>
+                </div>
+              </div>
+
+              <div className="bg-card rounded-xl border border-border p-3 mb-2">
+                <p className="text-[8px] font-bold text-muted-foreground uppercase mb-1">
+                  Delivery Address
+                </p>
+
+                <div className="flex items-start gap-1.5 text-[9px]">
+                  <MapPin className="w-3 h-3 mt-0.5 text-primary flex-shrink-0" />
+
+                  <p className="font-semibold">
+                    {delivery.deliveryAddress}
+                  </p>
+                </div>
+
+                {delivery.landmark && (
+                  <p className="text-[9px] text-muted-foreground mt-1 ml-4">
+                    Landmark: {delivery.landmark}
+                  </p>
+                )}
+
+                <button
+                  onClick={() =>
+                    onNav("nav-assist")
+                  }
+                  className="mt-2 w-full h-14 bg-blue-50 rounded-lg border border-blue-200 flex items-center justify-center gap-2 text-[10px] text-blue-600 font-semibold"
+                >
+                  <Navigation className="w-4 h-4" />
+                  Open Navigation Assistance
+                </button>
+              </div>
+
+              <div className="bg-card rounded-xl border border-border p-3 mb-3">
+                <p className="text-[8px] font-bold text-muted-foreground uppercase mb-2">
+                  Items
+                </p>
+
+                {delivery.items.map(
+                  (item) => (
+                    <div
+                      key={item.id}
+                      className="flex justify-between text-[9px] mb-1"
+                    >
+                      <span>
+                        {item.name}
+                      </span>
+
+                      <span className="font-bold">
+                        ×{item.quantity}
+                      </span>
+                    </div>
+                  ),
+                )}
+
+                <div className="flex justify-between text-[9px] border-t border-border pt-2 mt-2">
+                  <span className="text-muted-foreground">
+                    Delivery Fee
+                  </span>
+
+                  <span>
+                    ₱
+                    {delivery.deliveryFee.toFixed(
+                      2,
+                    )}
+                  </span>
+                </div>
+
+                <div className="flex justify-between font-bold text-xs mt-1">
+                  <span>Total</span>
+
+                  <span className="text-primary">
+                    ₱
+                    {delivery.total.toFixed(
+                      2,
+                    )}
+                  </span>
+                </div>
+              </div>
+
+              {delivery.notes && (
+                <div className="bg-card rounded-xl border border-border p-3 mb-3">
+                  <p className="text-[8px] font-bold text-muted-foreground uppercase mb-1">
+                    Order Notes
+                  </p>
+
+                  <p className="text-[9px]">
+                    {delivery.notes}
+                  </p>
+                </div>
+              )}
+
+              <button
+                type="button"
+                disabled
+                className="w-full py-3 rounded-xl bg-primary text-white font-bold text-[11px] flex items-center justify-center gap-1.5 mb-2 disabled:opacity-60"
+              >
+                Update Delivery Status
+              </button>
+
+              <button
+                type="button"
+                disabled
+                className="w-full py-2.5 rounded-xl border border-border bg-white text-[10px] font-semibold flex items-center justify-center gap-1.5 disabled:opacity-50"
+              >
+                <Upload className="w-3.5 h-3.5" />
+                Upload Proof of Delivery
+              </button>
+            </>
+          )}
       </div>
     </div>
   );
@@ -382,7 +926,7 @@ function ProfileTab() {
 
 // ── Root Rider App ────────────────────────────────────────────────
 export function RiderApp() {
-  const [screen, setScreen] = useState<RiderScreen>("splash");
+  const [screen, setScreen] = useState<RiderScreen>("home");
   const [activeTab, setActiveTab] = useState<BottomTab>("home");
 
   // Screens that show bottom navigation
@@ -399,13 +943,11 @@ export function RiderApp() {
 
   return (
     <PhoneShell>
-      {screen === "splash" && <SplashScreen onNext={() => setScreen("login")} />}
-      {screen === "login"  && <LoginScreen  onNext={() => setScreen("home")} />}
 
       {showBottomNav && (
         <>
           {activeTab === "home"       && <HomeTab        onNav={setScreen} />}
-          {activeTab === "deliveries" && <DeliveryRequestsTab onNav={setScreen} />}
+          {activeTab === "deliveries" && (<DeliveryRequestsTab />)}
           {activeTab === "history"    && <HistoryTab />}
           {activeTab === "profile"    && <ProfileTab />}
           <BottomNav active={activeTab} onSelect={handleTabSelect} />

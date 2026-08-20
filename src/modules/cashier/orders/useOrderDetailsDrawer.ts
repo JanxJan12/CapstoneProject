@@ -10,6 +10,7 @@ export function useOrderDetailsDrawer(order?: Order) {
     confirmOrder,
     cancelOrder,
     releaseReadyOrder,
+    offerNextRider,
     recordReceiptReprint,
   } = useCashierStore();
   const [cancelOpen, setCancelOpen] = useState(false);
@@ -112,6 +113,54 @@ export function useOrderDetailsDrawer(order?: Order) {
     }
   }, [currentOrder, releaseReadyOrder]);
 
+  const handleOfferNextRider = useCallback(async () => {
+  if (!currentOrder) return;
+
+  if (!currentOrder.databaseId) {
+    setError(
+      "This order is not connected to a database order.",
+    );
+    return;
+  }
+
+  if (currentOrder.type !== "Delivery") {
+    setError(
+      "Only delivery orders can be offered to riders.",
+    );
+    return;
+  }
+
+  if (currentOrder.status !== "Waiting for Rider") {
+    setError(
+      "This order must be waiting for a rider before an offer can be created.",
+    );
+    return;
+  }
+
+  setLoading(true);
+  setError("");
+
+  try {
+    await offerNextRider(currentOrder.id);
+
+    Toast.success(
+      `${currentOrder.id} offered to a rider`,
+      {
+        description:
+          "The next eligible rider was selected using the fairness rule.",
+      },
+    );
+  } catch (caught) {
+    setError(
+      caught instanceof Error
+        ? caught.message
+        : "Unable to offer the order to a rider.",
+    );
+  } finally {
+    setLoading(false);
+  }
+}, [currentOrder, offerNextRider]);
+
   const printReceipt = useCallback(() => {
     if (!currentOrder?.transactionId) return;
     window.print();
@@ -121,7 +170,7 @@ export function useOrderDetailsDrawer(order?: Order) {
 
   return {
     currentOrder,
-    payment,  
+    payment,
     delayed,
     cancelOpen,
     setCancelOpen,
@@ -130,6 +179,7 @@ export function useOrderDetailsDrawer(order?: Order) {
     handleConfirm,
     handleCancel,
     handleRelease,
+    handleOfferNextRider,
     printReceipt,
   };
 }
