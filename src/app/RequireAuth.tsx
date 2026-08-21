@@ -17,7 +17,6 @@ export function RequireAuth({
   const {
     session,
     loading,
-    logout,
   } = useAuth();
 
   if (MAINTENANCE_MODE) {
@@ -48,14 +47,18 @@ export function RequireAuth({
     );
   }
 
-  if (!session) {
-    return (
-      <Navigate
-        to="/auth?notice=unauthorized"
-        replace
-      />
-    );
-  }
+if (!session) {
+  return (
+    <Navigate
+      to={
+        role === "rider"
+          ? "/auth?portal=rider"
+          : "/auth"
+      }
+      replace
+    />
+  );
+}
 
   if (session.role !== role) {
     return (

@@ -15,6 +15,7 @@ import {
   fetchRiderOffers,
   fetchRiderProfile,
   fetchRiderProfileStats,
+  rejectRiderOffer,
   uploadRiderDeliveryProof,
   type RiderActiveDelivery,
   type RiderDashboardStats,
@@ -403,9 +404,8 @@ function HomeTab({ onNav }: { onNav: (s: RiderScreen) => void }) {
 // ── Delivery Requests ────────────────────────────────────────────
 
 function DeliveryRequestsTab() {
-  const [offers, setOffers] = useState<
-    RiderDeliveryRequest[]
-  >([]);
+  const [offers, setOffers] =
+    useState<RiderDeliveryRequest[]>([]);
 
   const [loading, setLoading] =
     useState(true);
@@ -413,9 +413,11 @@ function DeliveryRequestsTab() {
   const [error, setError] =
     useState("");
 
-  
   const [acceptingId, setAcceptingId] =
-  useState<string | null>(null);
+    useState<string | null>(null);
+
+  const [rejectingId, setRejectingId] =
+    useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -454,34 +456,72 @@ function DeliveryRequestsTab() {
   }, []);
 
   const handleAccept = async (
-  assignmentId: string,
-) => {
-  if (acceptingId) {
-    return;
-  }
+    assignmentId: string,
+  ) => {
+    if (acceptingId || rejectingId) {
+      return;
+    }
 
-  setAcceptingId(assignmentId);
-  setError("");
+    setAcceptingId(assignmentId);
+    setError("");
 
-  try {
-    await acceptRiderOffer(
-      assignmentId,
+    try {
+      await acceptRiderOffer(
+        assignmentId,
+      );
+
+      const nextOffers =
+        await fetchRiderOffers();
+
+      setOffers(nextOffers);
+    } catch (caught) {
+      setError(
+        caught instanceof Error
+          ? caught.message
+          : "Unable to accept the delivery.",
+      );
+    } finally {
+      setAcceptingId(null);
+    }
+  };
+
+  const handleReject = async (
+    assignmentId: string,
+  ) => {
+    if (acceptingId || rejectingId) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Reject this delivery request?",
     );
 
-    const nextOffers =
-      await fetchRiderOffers();
+    if (!confirmed) {
+      return;
+    }
 
-    setOffers(nextOffers);
-  } catch (caught) {
-    setError(
-      caught instanceof Error
-        ? caught.message
-        : "Unable to accept the delivery.",
-    );
-  } finally {
-    setAcceptingId(null);
-  }
-};
+    setRejectingId(assignmentId);
+    setError("");
+
+    try {
+      await rejectRiderOffer(
+        assignmentId,
+      );
+
+      const nextOffers =
+        await fetchRiderOffers();
+
+      setOffers(nextOffers);
+    } catch (caught) {
+      setError(
+        caught instanceof Error
+          ? caught.message
+          : "Unable to reject the delivery.",
+      );
+    } finally {
+      setRejectingId(null);
+    }
+  };
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
@@ -594,7 +634,10 @@ function DeliveryRequestsTab() {
                   </span>
 
                   <span className="font-bold">
-                    ₱{offer.deliveryFee.toFixed(2)}
+                    ₱
+                    {offer.deliveryFee.toFixed(
+                      2,
+                    )}
                   </span>
                 </div>
 
@@ -602,36 +645,55 @@ function DeliveryRequestsTab() {
                   <span>Total</span>
 
                   <span className="text-primary">
-                    ₱{offer.total.toFixed(2)}
+                    ₱
+                    {offer.total.toFixed(
+                      2,
+                    )}
                   </span>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                disabled={acceptingId !== null}
-                onClick={() => {
-                  void handleAccept(
-                    offer.assignmentId,
-                  );
-                }}
-                className="py-2.5 rounded-xl bg-primary text-white text-[10px] font-bold flex items-center justify-center gap-1 disabled:opacity-60"
-              >
-                <Check className="w-3 h-3" />
+                <button
+                  type="button"
+                  disabled={
+                    acceptingId !== null ||
+                    rejectingId !== null
+                  }
+                  onClick={() => {
+                    void handleAccept(
+                      offer.assignmentId,
+                    );
+                  }}
+                  className="py-2.5 rounded-xl bg-primary text-white text-[10px] font-bold flex items-center justify-center gap-1 disabled:opacity-60"
+                >
+                  <Check className="w-3 h-3" />
 
-                {acceptingId === offer.assignmentId
-                  ? "Accepting…"
-                  : "Accept"}
-              </button>
+                  {acceptingId ===
+                  offer.assignmentId
+                    ? "Accepting…"
+                    : "Accept"}
+                </button>
 
                 <button
                   type="button"
-                  disabled
+                  disabled={
+                    acceptingId !== null ||
+                    rejectingId !== null
+                  }
+                  onClick={() => {
+                    void handleReject(
+                      offer.assignmentId,
+                    );
+                  }}
                   className="py-2.5 rounded-xl border border-border bg-white text-[10px] font-bold text-muted-foreground flex items-center justify-center gap-1 disabled:opacity-60"
                 >
                   <X className="w-3 h-3" />
-                  Reject
+
+                  {rejectingId ===
+                  offer.assignmentId
+                    ? "Rejecting…"
+                    : "Reject"}
                 </button>
               </div>
             </div>
@@ -949,30 +1011,195 @@ function DeliveryDetailScreen({
 }
 
 // ── Navigation Assistance ─────────────────────────────────────────
-function NavAssistScreen({ onNav }: { onNav: (s: RiderScreen) => void }) {
+function NavAssistScreen({
+  onNav,
+}: {
+  onNav: (s: RiderScreen) => void;
+}) {
+  const [delivery, setDelivery] =
+    useState<RiderActiveDelivery | null>(null);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState("");
+
+  useEffect(() => {
+    let active = true;
+
+    const loadDelivery = async () => {
+      setLoading(true);
+      setError("");
+
+      try {
+        const nextDelivery =
+          await fetchActiveRiderDelivery();
+
+        if (active) {
+          setDelivery(nextDelivery);
+        }
+      } catch (caught) {
+        if (active) {
+          setError(
+            caught instanceof Error
+              ? caught.message
+              : "Unable to load delivery address.",
+          );
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void loadDelivery();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const openGoogleMaps = () => {
+    if (!delivery) {
+      return;
+    }
+
+    const destination =
+      [
+        delivery.deliveryAddress,
+        delivery.landmark,
+      ]
+        .filter(Boolean)
+        .join(", ");
+
+    const mapsUrl =
+      `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
+        destination,
+      )}`;
+
+    window.open(
+      mapsUrl,
+      "_blank",
+      "noopener,noreferrer",
+    );
+  };
+
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       <div className="bg-primary px-4 py-4 flex items-center gap-3 flex-shrink-0">
-        <button onClick={() => onNav("delivery-detail")} className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center"><ArrowLeft className="w-4 h-4 text-white" /></button>
-        <p className="text-white font-bold text-sm">Navigation</p>
+        <button
+          type="button"
+          onClick={() =>
+            onNav("delivery-detail")
+          }
+          className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center"
+        >
+          <ArrowLeft className="w-4 h-4 text-white" />
+        </button>
+
+        <div>
+          <p className="text-white font-bold text-sm">
+            Navigation
+          </p>
+
+          <p className="text-white/60 text-[9px]">
+            Delivery destination
+          </p>
+        </div>
       </div>
-      <div className="flex-1 bg-background overflow-y-auto px-4 py-3">
-        {/* Map placeholder */}
-        <div className="h-52 bg-blue-50 rounded-2xl border border-blue-200 flex flex-col items-center justify-center gap-2 mb-4 overflow-hidden relative">
-          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "repeating-linear-gradient(0deg, #3b82f6 0, #3b82f6 1px, transparent 1px, transparent 40px), repeating-linear-gradient(90deg, #3b82f6 0, #3b82f6 1px, transparent 1px, transparent 40px)" }} />
-          <Navigation className="w-10 h-10 text-blue-500" />
-          <p className="text-sm font-bold text-blue-700">Navigation Map</p>
-          <p className="text-xs text-blue-500">23 Katipunan Ave., QC</p>
-        </div>
-        <div className="bg-card rounded-xl border border-border p-3 mb-3">
-          <div className="flex items-start gap-2 mb-2"><div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0 mt-0.5"><span className="text-white text-[8px] font-bold">A</span></div><div><p className="text-[10px] font-semibold">RRJ Food-House</p><p className="text-[9px] text-muted-foreground">Pickup point</p></div></div>
-          <div className="w-px h-4 bg-border ml-2.5 mb-2" />
-          <div className="flex items-start gap-2"><div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0 mt-0.5"><span className="text-white text-[8px] font-bold">B</span></div><div><p className="text-[10px] font-semibold">23 Katipunan Ave., QC</p><p className="text-[9px] text-muted-foreground">Near Mercury Drug · Est. 12 min</p></div></div>
-        </div>
-        <div className="grid grid-cols-2 gap-2">
-          <div className="bg-card rounded-xl border border-border p-3 text-center"><p className="text-[9px] text-muted-foreground">Distance</p><p className="text-sm font-bold">4.2 km</p></div>
-          <div className="bg-card rounded-xl border border-border p-3 text-center"><p className="text-[9px] text-muted-foreground">Est. Time</p><p className="text-sm font-bold">12 min</p></div>
-        </div>
+
+      <div className="flex-1 bg-background overflow-y-auto px-4 py-4">
+        {loading && (
+          <div className="py-6 text-center">
+            <p className="text-[10px] text-muted-foreground">
+              Loading delivery destination…
+            </p>
+          </div>
+        )}
+
+        {!loading && error && (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-3">
+            <p className="text-[10px] font-semibold text-red-700">
+              {error}
+            </p>
+          </div>
+        )}
+
+        {!loading &&
+          !error &&
+          !delivery && (
+            <div className="bg-card rounded-xl border border-border p-5 text-center">
+              <Navigation className="w-7 h-7 mx-auto text-muted-foreground/50" />
+
+              <p className="mt-2 text-xs font-bold">
+                No active delivery
+              </p>
+
+              <p className="mt-1 text-[9px] text-muted-foreground">
+                Navigation becomes available after
+                accepting a delivery.
+              </p>
+            </div>
+          )}
+
+        {!loading &&
+          !error &&
+          delivery && (
+            <>
+              <div className="bg-card rounded-xl border border-border p-4 mb-3">
+                <p className="text-[8px] font-bold text-muted-foreground uppercase mb-2">
+                  Deliver To
+                </p>
+
+                <div className="flex items-start gap-2">
+                  <div className="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-4 h-4 text-green-600" />
+                  </div>
+
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold">
+                      {delivery.customerName}
+                    </p>
+
+                    <p className="text-[10px] mt-1">
+                      {delivery.deliveryAddress}
+                    </p>
+
+                    {delivery.landmark && (
+                      <p className="text-[9px] text-muted-foreground mt-1">
+                        Landmark:{" "}
+                        {delivery.landmark}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-blue-50 rounded-xl border border-blue-200 p-4 mb-3 text-center">
+                <Navigation className="w-8 h-8 mx-auto text-blue-600 mb-2" />
+
+                <p className="text-xs font-bold text-blue-700">
+                  Open turn-by-turn navigation
+                </p>
+
+                <p className="text-[9px] text-blue-600 mt-1">
+                  Google Maps will use the delivery
+                  address as your destination.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={openGoogleMaps}
+                className="w-full py-3 rounded-xl bg-primary text-white text-[11px] font-bold flex items-center justify-center gap-2"
+              >
+                <Navigation className="w-4 h-4" />
+                Open in Google Maps
+              </button>
+            </>
+          )}
       </div>
     </div>
   );
@@ -1461,7 +1688,10 @@ function HistoryTab() {
 
 // ── Profile Tab ───────────────────────────────────────────────────
 function ProfileTab() {
-  const { session } = useAuth();
+  const {
+    session,
+    logout,
+  } = useAuth();
 
   const riderName =
     session?.name?.trim() || "Rider";
@@ -1473,13 +1703,16 @@ function ProfileTab() {
     useState<RiderProfile | null>(null);
 
   const [profileStats, setProfileStats] =
-  useState<RiderProfileStats | null>(null);
+    useState<RiderProfileStats | null>(null);
 
   const [loading, setLoading] =
     useState(true);
 
   const [error, setError] =
     useState("");
+
+  const [signingOut, setSigningOut] =
+    useState(false);
 
   useEffect(() => {
     let active = true;
@@ -1489,18 +1722,18 @@ function ProfileTab() {
       setError("");
 
       try {
-      const [
-        nextProfile,
-        nextStats,
-      ] = await Promise.all([
-        fetchRiderProfile(),
-        fetchRiderProfileStats(),
-      ]);
+        const [
+          nextProfile,
+          nextStats,
+        ] = await Promise.all([
+          fetchRiderProfile(),
+          fetchRiderProfileStats(),
+        ]);
 
-      if (active) {
-        setProfile(nextProfile);
-        setProfileStats(nextStats);
-      }
+        if (active) {
+          setProfile(nextProfile);
+          setProfileStats(nextStats);
+        }
       } catch (caught) {
         if (active) {
           setError(
@@ -1522,6 +1755,20 @@ function ProfileTab() {
       active = false;
     };
   }, []);
+
+  const handleSignOut = async () => {
+    if (signingOut) {
+      return;
+    }
+
+    setSigningOut(true);
+
+    try {
+      await logout();
+    } finally {
+      setSigningOut(false);
+    }
+  };
 
   const availabilityLabel =
     profile?.availabilityStatus === "on_delivery"
@@ -1575,55 +1822,59 @@ function ProfileTab() {
           </div>
         )}
 
-        {!loading && !error && profile && (
-          <>
-            {[
-              {
-                l: "Contact",
-                v:
-                  profile.contactNumber ||
-                  "Not provided",
-              },
-              {
-                l: "License",
-                v:
-                  profile.driverLicenseNumber ||
-                  "Not provided",
-              },
-              {
-                l: "Plate",
-                v:
-                  profile.plateNumber ||
-                  "Not provided",
-              },
-              {
-                l: "Motor",
-                v: motor,
-              },
-            ].map((field) => (
-              <div
-                key={field.l}
-                className="flex justify-between gap-4 py-2.5 border-b border-border last:border-0 text-[10px]"
-              >
-                <span className="text-muted-foreground">
-                  {field.l}
-                </span>
+        {!loading &&
+          !error &&
+          profile && (
+            <>
+              {[
+                {
+                  l: "Contact",
+                  v:
+                    profile.contactNumber ||
+                    "Not provided",
+                },
+                {
+                  l: "License",
+                  v:
+                    profile.driverLicenseNumber ||
+                    "Not provided",
+                },
+                {
+                  l: "Plate",
+                  v:
+                    profile.plateNumber ||
+                    "Not provided",
+                },
+                {
+                  l: "Motor",
+                  v: motor,
+                },
+              ].map((field) => (
+                <div
+                  key={field.l}
+                  className="flex justify-between gap-4 py-2.5 border-b border-border last:border-0 text-[10px]"
+                >
+                  <span className="text-muted-foreground">
+                    {field.l}
+                  </span>
 
-                <span className="font-semibold text-foreground text-right">
-                  {field.v}
-                </span>
-              </div>
-            ))}
-          </>
-        )}
+                  <span className="font-semibold text-foreground text-right">
+                    {field.v}
+                  </span>
+                </div>
+              ))}
+            </>
+          )}
 
         <div className="grid grid-cols-2 gap-2 mt-3">
           <div className="bg-card rounded-xl border border-border p-2.5 text-center">
             <p className="text-[8px] text-muted-foreground mb-0.5">
               Total Deliveries
             </p>
+
             <p className="text-lg font-bold">
-              {profileStats?.totalDeliveries ?? "—"}
+              {profileStats?.totalDeliveries ??
+                "—"}
             </p>
           </div>
 
@@ -1632,15 +1883,26 @@ function ProfileTab() {
               Today
             </p>
 
-          <p className="text-lg font-bold text-primary">
-            {profileStats?.completedToday ?? "—"}
-          </p>
+            <p className="text-lg font-bold text-primary">
+              {profileStats?.completedToday ??
+                "—"}
+            </p>
           </div>
         </div>
 
-        <button className="w-full mt-4 py-2.5 rounded-xl border border-border bg-white text-[10px] font-bold text-muted-foreground flex items-center justify-center gap-1.5">
+        <button
+          type="button"
+          disabled={signingOut}
+          onClick={() => {
+            void handleSignOut();
+          }}
+          className="w-full mt-4 py-2.5 rounded-xl border border-border bg-white text-[10px] font-bold text-muted-foreground flex items-center justify-center gap-1.5 disabled:opacity-60"
+        >
           <LogOut className="w-3 h-3" />
-          Sign Out
+
+          {signingOut
+            ? "Signing Out…"
+            : "Sign Out"}
         </button>
       </div>
     </div>
@@ -1669,7 +1931,14 @@ export function RiderApp() {
 
       {showBottomNav && (
         <>
-          {activeTab === "home"       && <HomeTab        onNav={setScreen} />}
+          {activeTab === "home" && ( <HomeTab onNav={(nextScreen) => { 
+            if (nextScreen === "requests") 
+              {
+              setActiveTab("deliveries"); 
+            }
+              
+              setScreen(nextScreen);
+            }} /> )}
           {activeTab === "deliveries" && (<DeliveryRequestsTab />)}
           {activeTab === "history"    && <HistoryTab />}
           {activeTab === "profile"    && <ProfileTab />}
