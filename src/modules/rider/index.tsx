@@ -7,11 +7,24 @@ import {
 
 import {
   acceptRiderOffer,
+  advanceRiderDelivery,
+  completeRiderDelivery,
   fetchActiveRiderDelivery,
+  fetchRiderDashboardStats,
+  fetchRiderDeliveryHistory,
   fetchRiderOffers,
+  fetchRiderProfile,
+  fetchRiderProfileStats,
+  uploadRiderDeliveryProof,
   type RiderActiveDelivery,
+  type RiderDashboardStats,
+  type RiderDeliveryHistoryItem,
   type RiderDeliveryRequest,
+  type RiderProfile,
+  type RiderProfileStats,
 } from "./services/supabaseRiderService";
+
+import { useAuth } from "@/app/providers/AuthProvider";
 
 type RiderScreen =
   | "splash" | "login" | "home" | "requests" | "delivery-detail"
@@ -138,7 +151,21 @@ function LoginScreen({ onNext }: { onNext: () => void }) {
 
 // ── Home Tab ─────────────────────────────────────────────────────
 function HomeTab({ onNav }: { onNav: (s: RiderScreen) => void }) {
-  const [available, setAvailable] = useState(true);
+  const { session } = useAuth();
+
+  const riderName =
+    session?.name?.trim() || "Rider";
+
+  const riderInitial =
+    riderName.charAt(0).toUpperCase();
+
+  const [riderProfile, setRiderProfile] =
+  useState<RiderProfile | null>(null);
+
+  const [dashboardStats, setDashboardStats] =
+  useState<RiderDashboardStats | null>(null);
+
+  const [offerCount, setOfferCount] = useState(0);
   
   const [activeDelivery, setActiveDelivery] =
     useState<RiderActiveDelivery | null>(null);
@@ -157,11 +184,22 @@ function HomeTab({ onNav }: { onNav: (s: RiderScreen) => void }) {
       setActiveDeliveryError("");
 
       try {
-        const delivery =
-          await fetchActiveRiderDelivery();
-
+        const [
+          delivery,
+          offers,
+          profile,
+          stats,
+        ] = await Promise.all([
+          fetchActiveRiderDelivery(),
+          fetchRiderOffers(),
+          fetchRiderProfile(),
+          fetchRiderDashboardStats(),
+        ]);
         if (active) {
           setActiveDelivery(delivery);
+          setOfferCount(offers.length);
+          setRiderProfile(profile);
+          setDashboardStats(stats);
         }
       } catch (caught) {
         if (active) {
@@ -185,26 +223,87 @@ function HomeTab({ onNav }: { onNav: (s: RiderScreen) => void }) {
     };
   }, []);
 
+  const isAvailable =
+  riderProfile?.availabilityStatus === "available";
+
+  const availabilityLabel =
+  riderProfile?.availabilityStatus === "on_delivery"
+    ? "Currently on a delivery"
+    : riderProfile?.availabilityStatus === "offline"
+      ? "Not accepting deliveries"
+      : "Accepting deliveries";
+
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       <div className="bg-primary px-4 pt-4 pb-8 flex-shrink-0">
-        <div className="flex items-center justify-between mb-4">
-          <div><p className="text-white/60 text-[8px] font-semibold uppercase tracking-wide">Good morning,</p><p className="text-white font-bold text-sm">Ramil Abad</p></div>
-          <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center"><span className="text-white font-bold text-sm">R</span></div>
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <p className="text-white/60 text-[8px] font-semibold uppercase tracking-wide">
+            Good morning,
+          </p>
+
+          <p className="text-white font-bold text-sm">
+            {riderName}
+          </p>
         </div>
-        <div className="flex items-center justify-between bg-white/15 rounded-xl px-4 py-3">
-          <div><p className="text-white text-xs font-bold">Availability</p><p className="text-white/60 text-[9px]">{available ? "Accepting deliveries" : "Not accepting"}</p></div>
-          <button onClick={() => setAvailable(!available)} className={`w-12 h-6 rounded-full transition-all relative ${available ? "bg-green-400" : "bg-white/30"}`}>
-            <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${available ? "left-6" : "left-0.5"}`} />
-          </button>
+
+        <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
+          <span className="text-white font-bold text-sm">
+            {riderInitial}
+          </span>
         </div>
       </div>
-      <div className="-mt-4 rounded-t-2xl bg-background flex-1 overflow-y-auto px-4 pt-4">
-        <div className="grid grid-cols-2 gap-2 mb-4">
-          {[{ l: "Deliveries Today", v: "5", c: "text-primary" }, { l: "Completed", v: "3", c: "text-green-600" }].map((s) => (
-            <div key={s.l} className="bg-card rounded-xl border border-border p-3"><p className="text-[9px] text-muted-foreground mb-0.5">{s.l}</p><p className={`text-xl font-bold ${s.c}`}>{s.v}</p></div>
-          ))}
+
+      <div className="flex items-center justify-between bg-white/15 rounded-xl px-4 py-3">
+        <div>
+          <p className="text-white text-xs font-bold">
+            Availability
+          </p>
+
+          <p className="text-white/60 text-[9px]">
+            {availabilityLabel}
+          </p>
         </div>
+
+        <div
+          className={`w-12 h-6 rounded-full relative ${
+            isAvailable
+              ? "bg-green-400"
+              : "bg-white/30"
+          }`}
+        >
+          <div
+            className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow ${
+              isAvailable
+                ? "left-6"
+                : "left-0.5"
+            }`}
+          />
+        </div>
+      </div>
+      </div>
+      <div className="-mt-4 rounded-t-2xl bg-background flex-1 overflow-y-auto px-4 pt-4">
+      <div className="grid grid-cols-2 gap-2 mb-4">
+        <div className="bg-card rounded-xl border border-border p-3">
+          <p className="text-[9px] text-muted-foreground mb-0.5">
+            Deliveries Today
+          </p>
+
+          <p className="text-xl font-bold text-primary">
+            {dashboardStats?.deliveriesToday ?? "—"}
+          </p>
+        </div>
+
+        <div className="bg-card rounded-xl border border-border p-3">
+          <p className="text-[9px] text-muted-foreground mb-0.5">
+            Completed
+          </p>
+
+          <p className="text-xl font-bold text-green-600">
+            {dashboardStats?.completedToday ?? "—"}
+          </p>
+        </div>
+      </div>
       <p className="text-xs font-bold text-foreground mb-2">
         Active Delivery
       </p>
@@ -279,10 +378,21 @@ function HomeTab({ onNav }: { onNav: (s: RiderScreen) => void }) {
             </div>
           </button>
         )}
-        {available && (
+        {isAvailable && offerCount > 0 && (
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
-            <p className="text-[10px] font-bold text-amber-800 mb-1">1 new delivery request</p>
-            <button onClick={() => onNav("requests")} className="text-[10px] font-semibold text-primary">View Request →</button>
+            <p className="text-[10px] font-bold text-amber-800 mb-1">
+              {offerCount} new{" "}
+              {offerCount === 1
+                ? "delivery request"
+                : "delivery requests"}
+            </p>
+
+            <button
+              onClick={() => onNav("requests")}
+              className="text-[10px] font-semibold text-primary"
+            >
+              View Request →
+            </button>
           </div>
         )}
       </div>
@@ -302,6 +412,7 @@ function DeliveryRequestsTab() {
 
   const [error, setError] =
     useState("");
+
   
   const [acceptingId, setAcceptingId] =
   useState<string | null>(null);
@@ -544,6 +655,9 @@ function DeliveryDetailScreen({
 
   const [error, setError] =
     useState("");
+  
+  const [updatingStatus, setUpdatingStatus] =
+  useState(false);
 
   useEffect(() => {
     let active = true;
@@ -580,6 +694,41 @@ function DeliveryDetailScreen({
       active = false;
     };
   }, []);
+
+  const handleAdvanceStatus = async () => {
+  if (!delivery || updatingStatus) {
+    return;
+  }
+
+  if (
+    delivery.assignmentStatus ===
+    "out_for_delivery"
+  ) {
+    return;
+  }
+
+  setUpdatingStatus(true);
+  setError("");
+
+  try {
+    await advanceRiderDelivery(
+      delivery.assignmentId,
+    );
+
+    const nextDelivery =
+      await fetchActiveRiderDelivery();
+
+    setDelivery(nextDelivery);
+  } catch (caught) {
+    setError(
+      caught instanceof Error
+        ? caught.message
+        : "Unable to update delivery status.",
+    );
+  } finally {
+    setUpdatingStatus(false);
+  }
+};
 
   const statusLabel =
     delivery?.assignmentStatus === "accepted"
@@ -757,15 +906,36 @@ function DeliveryDetailScreen({
 
               <button
                 type="button"
-                disabled
+                disabled={
+                  updatingStatus ||
+                  delivery.assignmentStatus ===
+                    "out_for_delivery"
+                }
+                onClick={() => {
+                  void handleAdvanceStatus();
+                }}
                 className="w-full py-3 rounded-xl bg-primary text-white font-bold text-[11px] flex items-center justify-center gap-1.5 mb-2 disabled:opacity-60"
               >
-                Update Delivery Status
+                {updatingStatus
+                  ? "Updating…"
+                  : delivery.assignmentStatus ===
+                      "accepted"
+                    ? "Mark as Picked Up"
+                    : delivery.assignmentStatus ===
+                        "picked_up"
+                      ? "Start Delivery"
+                      : "Out for Delivery"}
               </button>
 
               <button
                 type="button"
-                disabled
+                disabled={
+                  delivery.assignmentStatus !==
+                  "out_for_delivery"
+                }
+                onClick={() => {
+                  onNav("upload-proof");
+                }}
                 className="w-full py-2.5 rounded-xl border border-border bg-white text-[10px] font-semibold flex items-center justify-center gap-1.5 disabled:opacity-50"
               >
                 <Upload className="w-3.5 h-3.5" />
@@ -841,37 +1011,299 @@ function UpdateStatusScreen({ onNav }: { onNav: (s: RiderScreen) => void }) {
 }
 
 // ── Upload Proof ──────────────────────────────────────────────────
-function UploadProofScreen({ onNav }: { onNav: (s: RiderScreen) => void }) {
-  const [uploaded, setUploaded] = useState(false);
+function UploadProofScreen({
+  onNav,
+}: {
+  onNav: (s: RiderScreen) => void;
+}) {
+  const [delivery, setDelivery] =
+    useState<RiderActiveDelivery | null>(null);
+
+  const [selectedFile, setSelectedFile] =
+    useState<File | null>(null);
+
+  const [proofPath, setProofPath] =
+    useState("");
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [submitting, setSubmitting] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
+
+  useEffect(() => {
+    let active = true;
+
+    const loadDelivery = async () => {
+      setLoading(true);
+      setError("");
+
+      try {
+        const nextDelivery =
+          await fetchActiveRiderDelivery();
+
+        if (!active) {
+          return;
+        }
+
+        if (
+          !nextDelivery ||
+          nextDelivery.assignmentStatus !==
+            "out_for_delivery"
+        ) {
+          setDelivery(null);
+          setError(
+            "There is no delivery currently ready for proof of delivery.",
+          );
+          return;
+        }
+
+        setDelivery(nextDelivery);
+      } catch (caught) {
+        if (active) {
+          setError(
+            caught instanceof Error
+              ? caught.message
+              : "Unable to load delivery.",
+          );
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void loadDelivery();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const handleFileChange = (
+    file: File | undefined,
+  ) => {
+    if (!file) {
+      return;
+    }
+
+    setError("");
+    setProofPath("");
+
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      setSelectedFile(null);
+      setError(
+        "Please select a JPEG, PNG, or WebP image.",
+      );
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setSelectedFile(null);
+      setError(
+        "The proof image must be 5 MB or smaller.",
+      );
+      return;
+    }
+
+    setSelectedFile(file);
+  };
+
+  const handleSubmit = async () => {
+    if (
+      !delivery ||
+      !selectedFile ||
+      submitting
+    ) {
+      return;
+    }
+
+    setSubmitting(true);
+    setError("");
+
+    try {
+      let uploadedPath =
+        proofPath;
+
+      if (!uploadedPath) {
+        uploadedPath =
+          await uploadRiderDeliveryProof(
+            delivery.assignmentId,
+            selectedFile,
+          );
+
+        setProofPath(uploadedPath);
+      }
+
+      await completeRiderDelivery(
+        delivery.assignmentId,
+        uploadedPath,
+      );
+
+      onNav("home");
+    } catch (caught) {
+      setError(
+        caught instanceof Error
+          ? caught.message
+          : "Unable to complete delivery.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       <div className="bg-primary px-4 py-4 flex items-center gap-3 flex-shrink-0">
-        <button onClick={() => onNav("delivery-detail")} className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center"><ArrowLeft className="w-4 h-4 text-white" /></button>
-        <p className="text-white font-bold text-sm">Proof of Delivery</p>
+        <button
+          type="button"
+          onClick={() =>
+            onNav("delivery-detail")
+          }
+          className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center"
+        >
+          <ArrowLeft className="w-4 h-4 text-white" />
+        </button>
+
+        <div>
+          <p className="text-white font-bold text-sm">
+            Proof of Delivery
+          </p>
+
+          {delivery && (
+            <p className="text-white/60 text-[9px]">
+              {delivery.orderNumber}
+            </p>
+          )}
+        </div>
       </div>
+
       <div className="flex-1 bg-background px-4 py-4 overflow-y-auto">
-        <p className="text-xs font-bold mb-1">Upload Delivery Photo</p>
-        <p className="text-[9px] text-muted-foreground mb-4">Take a photo as proof the order was delivered.</p>
-        {!uploaded ? (
-          <>
-            <button onClick={() => setUploaded(true)} className="w-full h-44 bg-muted/60 border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center gap-2 mb-4 hover:border-primary/40 cursor-pointer transition-colors">
-              <Camera className="w-8 h-8 text-muted-foreground/50" />
-              <p className="text-[10px] font-semibold text-muted-foreground">Tap to take photo</p>
-            </button>
-            <div className="grid grid-cols-2 gap-2 mb-4">
-              <button className="py-2.5 rounded-xl border border-border bg-card text-[10px] font-semibold flex items-center justify-center gap-1.5"><Camera className="w-3.5 h-3.5" />Camera</button>
-              <button className="py-2.5 rounded-xl border border-border bg-card text-[10px] font-semibold flex items-center justify-center gap-1.5"><ImageIcon className="w-3.5 h-3.5" />Gallery</button>
-            </div>
-          </>
-        ) : (
-          <div className="h-44 bg-green-50 border-2 border-green-300 rounded-xl flex flex-col items-center justify-center gap-2 mb-4">
-            <Check className="w-8 h-8 text-green-500" />
-            <p className="text-[10px] font-semibold text-green-700">Photo uploaded</p>
+        {loading && (
+          <div className="py-6 text-center">
+            <p className="text-[10px] text-muted-foreground">
+              Loading delivery…
+            </p>
           </div>
         )}
-        <button onClick={() => { setUploaded(false); onNav("home"); }} disabled={!uploaded} className="w-full py-3 rounded-xl bg-primary text-white font-bold text-[11px] flex items-center justify-center gap-1.5 disabled:opacity-50">
-          <Upload className="w-3.5 h-3.5" /> Submit & Complete Delivery
-        </button>
+
+        {!loading && error && (
+          <div className="mb-3 rounded-xl border border-red-200 bg-red-50 p-3">
+            <p className="text-[10px] font-semibold text-red-700">
+              {error}
+            </p>
+          </div>
+        )}
+
+        {!loading && delivery && (
+          <>
+            <p className="text-xs font-bold mb-1">
+              Delivery Photo
+            </p>
+
+            <p className="text-[9px] text-muted-foreground mb-4">
+              Upload a clear photo showing that the order was delivered.
+            </p>
+
+            <div className="w-full min-h-36 bg-muted/60 border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center gap-2 p-4 mb-4">
+              {selectedFile ? (
+                <>
+                  <Check className="w-8 h-8 text-green-500" />
+
+                  <p className="text-[10px] font-bold text-green-700 text-center break-all">
+                    {selectedFile.name}
+                  </p>
+
+                  <p className="text-[9px] text-muted-foreground">
+                    {(
+                      selectedFile.size /
+                      1024 /
+                      1024
+                    ).toFixed(2)}{" "}
+                    MB
+                  </p>
+                </>
+              ) : (
+                <>
+                  <Camera className="w-8 h-8 text-muted-foreground/50" />
+
+                  <p className="text-[10px] font-semibold text-muted-foreground">
+                    No photo selected
+                  </p>
+                </>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              <label className="py-2.5 rounded-xl border border-border bg-card text-[10px] font-semibold flex items-center justify-center gap-1.5 cursor-pointer">
+                <Camera className="w-3.5 h-3.5" />
+                Camera
+
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  capture="environment"
+                  className="hidden"
+                  disabled={submitting}
+                  onChange={(event) => {
+                    handleFileChange(
+                      event.target.files?.[0],
+                    );
+
+                    event.target.value = "";
+                  }}
+                />
+              </label>
+
+              <label className="py-2.5 rounded-xl border border-border bg-card text-[10px] font-semibold flex items-center justify-center gap-1.5 cursor-pointer">
+                <ImageIcon className="w-3.5 h-3.5" />
+                Gallery
+
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  disabled={submitting}
+                  onChange={(event) => {
+                    handleFileChange(
+                      event.target.files?.[0],
+                    );
+
+                    event.target.value = "";
+                  }}
+                />
+              </label>
+            </div>
+
+            <button
+              type="button"
+              disabled={
+                !selectedFile ||
+                submitting
+              }
+              onClick={() => {
+                void handleSubmit();
+              }}
+              className="w-full py-3 rounded-xl bg-primary text-white font-bold text-[11px] flex items-center justify-center gap-1.5 disabled:opacity-50"
+            >
+              <Upload className="w-3.5 h-3.5" />
+
+              {submitting
+                ? "Completing Delivery…"
+                : "Submit & Complete Delivery"}
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
@@ -879,46 +1311,337 @@ function UploadProofScreen({ onNav }: { onNav: (s: RiderScreen) => void }) {
 
 // ── History Tab ───────────────────────────────────────────────────
 function HistoryTab() {
-  const records = [
-    { id: "ORD-1046", addr: "23 Katipunan Ave., QC",      amt: "₱155", time: "10:35 AM" },
-    { id: "ORD-1043", addr: "34 Shaw Blvd., Mandaluyong", amt: "₱175", time: "9:52 AM" },
-    { id: "ORD-1041", addr: "78 Quezon Blvd., QC",        amt: "₱220", time: "8:30 AM" },
-    { id: "ORD-1039", addr: "12 Mabini Ave., Makati",     amt: "₱190", time: "8:05 AM" },
-  ];
+  const [records, setRecords] =
+    useState<RiderDeliveryHistoryItem[]>([]);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState("");
+
+  useEffect(() => {
+    let active = true;
+
+    const loadHistory = async () => {
+      setLoading(true);
+      setError("");
+
+      try {
+        const nextRecords =
+          await fetchRiderDeliveryHistory();
+
+        if (active) {
+          setRecords(nextRecords);
+        }
+      } catch (caught) {
+        if (active) {
+          setError(
+            caught instanceof Error
+              ? caught.message
+              : "Unable to load delivery history.",
+          );
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void loadHistory();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const formatDeliveredAt = (
+    value: string,
+  ) =>
+    new Intl.DateTimeFormat(
+      "en-PH",
+      {
+        timeZone: "Asia/Manila",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+      },
+    ).format(new Date(value));
+
   return (
-    <div className="flex-1 bg-background overflow-y-auto px-4 pt-4">
-      <p className="text-xs font-bold text-foreground mb-3">Today's Deliveries</p>
-      {records.map((d) => (
-        <div key={d.id} className="flex items-center justify-between py-3 border-b border-border last:border-0">
-          <div><span className="font-mono text-[9px] font-bold text-primary">{d.id}</span><p className="text-[9px] text-muted-foreground">{d.addr} · {d.time}</p></div>
-          <div className="flex items-center gap-2"><span className="text-xs font-bold">{d.amt}</span><span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-green-100 text-green-700">Done</span></div>
-        </div>
-      ))}
+    <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="bg-primary px-4 py-4 flex-shrink-0">
+        <p className="text-white font-bold">
+          Delivery History
+        </p>
+
+        <p className="text-white/60 text-[9px]">
+          Your completed deliveries
+        </p>
+      </div>
+
+      <div className="-mt-3 rounded-t-2xl bg-background flex-1 overflow-y-auto px-4 pt-4">
+        {loading && (
+          <div className="py-6 text-center">
+            <p className="text-[10px] text-muted-foreground">
+              Loading delivery history…
+            </p>
+          </div>
+        )}
+
+        {!loading && error && (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-3">
+            <p className="text-[10px] font-semibold text-red-700">
+              {error}
+            </p>
+          </div>
+        )}
+
+        {!loading &&
+          !error &&
+          records.length === 0 && (
+            <div className="bg-card rounded-xl border border-border p-5 text-center">
+              <History className="w-7 h-7 mx-auto text-muted-foreground/50" />
+
+              <p className="mt-2 text-xs font-bold">
+                No completed deliveries
+              </p>
+
+              <p className="mt-1 text-[9px] text-muted-foreground">
+                Completed deliveries will appear here.
+              </p>
+            </div>
+          )}
+
+        {!loading &&
+          !error &&
+          records.map((record) => (
+            <div
+              key={record.assignmentId}
+              className="bg-card rounded-xl border border-border p-3 mb-2"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-mono text-[9px] font-bold text-primary">
+                  {record.orderNumber}
+                </span>
+
+                <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-green-100 text-green-700">
+                  Delivered
+                </span>
+              </div>
+
+              <div className="flex items-start gap-1.5 mt-2">
+                <MapPin className="w-3 h-3 mt-0.5 text-primary flex-shrink-0" />
+
+                <p className="text-[9px] text-muted-foreground">
+                  {record.deliveryAddress}
+                </p>
+              </div>
+
+              <div className="flex items-end justify-between gap-3 mt-2 pt-2 border-t border-border">
+                <p className="text-[8px] text-muted-foreground">
+                  {formatDeliveredAt(
+                    record.deliveredAt,
+                  )}
+                </p>
+
+                <p className="text-xs font-bold">
+                  ₱{record.total.toFixed(2)}
+                </p>
+              </div>
+            </div>
+          ))}
+      </div>
     </div>
   );
 }
 
 // ── Profile Tab ───────────────────────────────────────────────────
 function ProfileTab() {
+  const { session } = useAuth();
+
+  const riderName =
+    session?.name?.trim() || "Rider";
+
+  const riderInitial =
+    riderName.charAt(0).toUpperCase();
+
+  const [profile, setProfile] =
+    useState<RiderProfile | null>(null);
+
+  const [profileStats, setProfileStats] =
+  useState<RiderProfileStats | null>(null);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState("");
+
+  useEffect(() => {
+    let active = true;
+
+    const loadProfile = async () => {
+      setLoading(true);
+      setError("");
+
+      try {
+      const [
+        nextProfile,
+        nextStats,
+      ] = await Promise.all([
+        fetchRiderProfile(),
+        fetchRiderProfileStats(),
+      ]);
+
+      if (active) {
+        setProfile(nextProfile);
+        setProfileStats(nextStats);
+      }
+      } catch (caught) {
+        if (active) {
+          setError(
+            caught instanceof Error
+              ? caught.message
+              : "Unable to load rider profile.",
+          );
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void loadProfile();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const availabilityLabel =
+    profile?.availabilityStatus === "on_delivery"
+      ? "On Delivery"
+      : profile?.availabilityStatus === "offline"
+        ? "Offline"
+        : "Available";
+
+  const motor =
+    [
+      profile?.motorBrand,
+      profile?.motorModel,
+    ]
+      .filter(Boolean)
+      .join(" ") || "Not provided";
+
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       <div className="bg-primary px-4 py-5 flex flex-col items-center gap-2 flex-shrink-0">
-        <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center"><span className="text-white font-bold text-xl">R</span></div>
-        <p className="text-white font-bold text-sm">Ramil Abad</p>
-        <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-green-400/30 text-green-100">Available</span>
-      </div>
-      <div className="flex-1 bg-background px-4 py-4 overflow-y-auto">
-        {[{ l: "Contact", v: "09172345678" }, { l: "License", v: "LIC-2021-001234" }, { l: "Plate", v: "ABD-1234" }, { l: "Motor", v: "Honda TMX 125" }].map((f) => (
-          <div key={f.l} className="flex justify-between py-2.5 border-b border-border last:border-0 text-[10px]">
-            <span className="text-muted-foreground">{f.l}</span>
-            <span className="font-semibold text-foreground">{f.v}</span>
-          </div>
-        ))}
-        <div className="grid grid-cols-2 gap-2 mt-3">
-          <div className="bg-card rounded-xl border border-border p-2.5 text-center"><p className="text-[8px] text-muted-foreground mb-0.5">Total Deliveries</p><p className="text-lg font-bold">128</p></div>
-          <div className="bg-card rounded-xl border border-border p-2.5 text-center"><p className="text-[8px] text-muted-foreground mb-0.5">Today</p><p className="text-lg font-bold text-primary">5</p></div>
+        <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center">
+          <span className="text-white font-bold text-xl">
+            {riderInitial}
+          </span>
         </div>
-        <button className="w-full mt-4 py-2.5 rounded-xl border border-border bg-white text-[10px] font-bold text-muted-foreground flex items-center justify-center gap-1.5"><LogOut className="w-3 h-3" />Sign Out</button>
+
+        <p className="text-white font-bold text-sm">
+          {riderName}
+        </p>
+
+        {!loading && profile && (
+          <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-green-400/30 text-green-100">
+            {availabilityLabel}
+          </span>
+        )}
+      </div>
+
+      <div className="flex-1 bg-background px-4 py-4 overflow-y-auto">
+        {loading && (
+          <div className="py-4 text-center">
+            <p className="text-[10px] text-muted-foreground">
+              Loading rider profile…
+            </p>
+          </div>
+        )}
+
+        {!loading && error && (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-3 mb-3">
+            <p className="text-[10px] font-semibold text-red-700">
+              {error}
+            </p>
+          </div>
+        )}
+
+        {!loading && !error && profile && (
+          <>
+            {[
+              {
+                l: "Contact",
+                v:
+                  profile.contactNumber ||
+                  "Not provided",
+              },
+              {
+                l: "License",
+                v:
+                  profile.driverLicenseNumber ||
+                  "Not provided",
+              },
+              {
+                l: "Plate",
+                v:
+                  profile.plateNumber ||
+                  "Not provided",
+              },
+              {
+                l: "Motor",
+                v: motor,
+              },
+            ].map((field) => (
+              <div
+                key={field.l}
+                className="flex justify-between gap-4 py-2.5 border-b border-border last:border-0 text-[10px]"
+              >
+                <span className="text-muted-foreground">
+                  {field.l}
+                </span>
+
+                <span className="font-semibold text-foreground text-right">
+                  {field.v}
+                </span>
+              </div>
+            ))}
+          </>
+        )}
+
+        <div className="grid grid-cols-2 gap-2 mt-3">
+          <div className="bg-card rounded-xl border border-border p-2.5 text-center">
+            <p className="text-[8px] text-muted-foreground mb-0.5">
+              Total Deliveries
+            </p>
+            <p className="text-lg font-bold">
+              {profileStats?.totalDeliveries ?? "—"}
+            </p>
+          </div>
+
+          <div className="bg-card rounded-xl border border-border p-2.5 text-center">
+            <p className="text-[8px] text-muted-foreground mb-0.5">
+              Today
+            </p>
+
+          <p className="text-lg font-bold text-primary">
+            {profileStats?.completedToday ?? "—"}
+          </p>
+          </div>
+        </div>
+
+        <button className="w-full mt-4 py-2.5 rounded-xl border border-border bg-white text-[10px] font-bold text-muted-foreground flex items-center justify-center gap-1.5">
+          <LogOut className="w-3 h-3" />
+          Sign Out
+        </button>
       </div>
     </div>
   );
