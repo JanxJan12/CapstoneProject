@@ -71,7 +71,7 @@ const SOFTDRINK_FLAVOR: MenuModifierGroup = {
 };
 
 export function modifierGroupsFor(item: MenuItem): MenuModifierGroup[] {
-  if (item.id === "MENU-09") return [SOFTDRINK_FLAVOR, DRINK_SIZE];
+  if (item.code === "D1") return [SOFTDRINK_FLAVOR, DRINK_SIZE];
   if (item.category === "Beverages") return [DRINK_SIZE];
   if (item.category === "Rice") return [];
   return [FOOD_ADD_ONS, FOOD_PREFERENCES, SPICY_LEVEL, COOKING_PREFERENCE];

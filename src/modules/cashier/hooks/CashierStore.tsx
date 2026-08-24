@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { supabase } from "@/lib/supabase";
+import { fetchCashierMenuItems } from "../api/menuApi";
 import { fetchCashierOrders } from "../services/supabaseOrderService";
 import { OPTIMISTIC_DELAY_MS } from "../constants";
 import { calculateShiftTotals } from "../services/cashierService";
@@ -71,6 +72,35 @@ export function CashierProvider({ children }: { children: ReactNode }) {
     const frame = window.requestAnimationFrame(() => setIsHydrating(false));
     return () => window.cancelAnimationFrame(frame);
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadDatabaseMenu = async () => {
+      try {
+        const menuItems = await fetchCashierMenuItems();
+
+        if (cancelled) return;
+
+        const current = stateRef.current;
+        commit({
+          ...current,
+          menuItems,
+        });
+      } catch (error) {
+        console.error(
+          "Unable to load PostgreSQL cashier menu:",
+          error,
+        );
+      }
+    };
+
+    void loadDatabaseMenu();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [commit]);
 
   useEffect(() => {
   let cancelled = false;

@@ -73,7 +73,10 @@ export function loadCashierState(): CashierState {
     if (
       parsed.version === CASHIER_STATE_VERSION
     ) {
-      return parsed;
+      return {
+        ...parsed,
+        menuItems: [],
+      };
     }
 
     /*
@@ -84,35 +87,10 @@ export function loadCashierState(): CashierState {
       parsed.version >= 4 &&
       parsed.version < CASHIER_STATE_VERSION
     ) {
-      const initial =
-        createInitialCashierState();
-
-      const catalog = new Map(
-        initial.menuItems.map((item) => [
-          item.id,
-          item,
-        ]),
-      );
-
       const migratedState: CashierState = {
         ...parsed,
         version: CASHIER_STATE_VERSION,
-
-        menuItems: parsed.menuItems.map(
-          (item) => ({
-            ...catalog.get(item.id),
-            ...item,
-
-            aliases:
-              item.aliases ??
-              catalog.get(item.id)?.aliases,
-
-            inventoryRemaining:
-              item.inventoryRemaining ??
-              catalog.get(item.id)
-                ?.inventoryRemaining,
-          }),
-        ),
+        menuItems: [],
       };
 
       localStorage.setItem(
@@ -154,7 +132,10 @@ export function saveCashierState(
   try {
     localStorage.setItem(
       CASHIER_STORAGE_KEY,
-      JSON.stringify(state),
+      JSON.stringify({
+        ...state,
+        menuItems: [],
+      }),
     );
   } catch (error) {
     console.error(
