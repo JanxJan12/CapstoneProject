@@ -1,6 +1,7 @@
 import { useCallback, useMemo, type MutableRefObject } from "react";
 import { OPTIMISTIC_DELAY_MS } from "../constants";
 import {
+  cancelCashierOrder,
   confirmCashierOrder,
   fetchCashierOrders,
   offerOrderToNextRider,
@@ -113,13 +114,56 @@ export function useCashierActions(
 
   const cancel = useCallback(
     async (orderId: string, reason: string) => {
-      const previous = stateRef.current;
-      await commitOptimistically(
-        cancelOrder(previous, orderId, reason),
-        previous,
+      const current = stateRef.current;
+
+      const order = current.orders.find(
+        (entry) => entry.id === orderId,
       );
+
+      if (!order) {
+        throw new Error("Order not found.");
+      }
+
+      if (!order.databaseId) {
+        throw new Error(
+          "This order is not connected to a database order.",
+        );
+      }
+
+      await cancelCashierOrder(
+        order.databaseId,
+        reason,
+      );
+
+      const databaseOrders =
+        await fetchCashierOrders();
+
+      const latest = stateRef.current;
+
+      const databaseOrderNumbers = new Set(
+        databaseOrders.map(
+          (entry) => entry.id,
+        ),
+      );
+
+      const localOnlyOrders =
+        latest.orders.filter(
+          (entry) =>
+            !entry.databaseId &&
+            !databaseOrderNumbers.has(
+              entry.id,
+            ),
+        );
+
+      commit({
+        ...latest,
+        orders: [
+          ...databaseOrders,
+          ...localOnlyOrders,
+        ],
+      });
     },
-    [commitOptimistically, stateRef],
+    [commit, stateRef],
   );
 
   const updateOrder = useCallback(

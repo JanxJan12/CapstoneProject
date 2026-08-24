@@ -106,6 +106,13 @@ interface OrderItemRow {
   special_instructions: string | null;
 }
 
+export interface SetRiderAvailabilityResult {
+  rider_id: string;
+  availability_status:
+    | "available"
+    | "offline";
+}
+
 export interface RiderActiveDelivery
   extends RiderDeliveryRequest {
   assignmentStatus:
@@ -699,6 +706,12 @@ export async function uploadRiderDeliveryProof(
     );
   }
 
+  if (file.size > 5 * 1024 * 1024) {
+  throw new Error(
+    "Proof of delivery must be 5 MB or smaller.",
+  );
+}
+
   const {
     data: userData,
     error: userError,
@@ -1148,6 +1161,87 @@ export async function rejectRiderOffer(
   }
 
   return result;
+}
+
+export async function setRiderAvailability(
+  status: "available" | "offline",
+): Promise<SetRiderAvailabilityResult> {
+  const { data, error } =
+    await supabase.rpc(
+      "set_rider_availability",
+      {
+        p_status: status,
+      },
+    );
+
+  if (error) {
+    throw new Error(
+      `Unable to update availability: ${error.message}`,
+    );
+  }
+
+  const result = (
+    data as
+      | SetRiderAvailabilityResult[]
+      | null
+  )?.[0];
+
+  if (!result) {
+    throw new Error(
+      "Availability was updated, but no result was returned.",
+    );
+  }
+
+  return result;
+}
+
+export async function subscribeToRiderAssignmentChanges(
+  onChange: () => void,
+): Promise<() => void> {
+  const {
+    data: userData,
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError) {
+    throw new Error(
+      `Unable to start Rider realtime updates: ${userError.message}`,
+    );
+  }
+
+  const riderId =
+    userData.user?.id;
+
+  if (!riderId) {
+    throw new Error(
+      "No authenticated rider was found.",
+    );
+  }
+
+  const channel =
+    supabase
+      .channel(
+        `rider-assignments-${riderId}-${Date.now()}`,
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "delivery_assignments",
+          filter: `rider_id=eq.${riderId}`,
+        },
+        () => {
+          onChange();
+        },
+      )
+      .subscribe();
+
+  return () => {
+    void supabase.removeChannel(
+      channel,
+    );
+  };
 }
 
 function toNumber(

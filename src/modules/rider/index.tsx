@@ -1,6 +1,6 @@
 import {useEffect, useState } from "react";
 import {
-  UtensilsCrossed, Bike, LayoutDashboard, History, User,
+  Bike, LayoutDashboard, History, User,
   MapPin, Phone, Check, X, ArrowLeft, Upload, Camera,
  Navigation, ImageIcon, LogOut,
 } from "lucide-react";
@@ -16,6 +16,8 @@ import {
   fetchRiderProfile,
   fetchRiderProfileStats,
   rejectRiderOffer,
+  setRiderAvailability,
+  subscribeToRiderAssignmentChanges,
   uploadRiderDeliveryProof,
   type RiderActiveDelivery,
   type RiderDashboardStats,
@@ -28,8 +30,13 @@ import {
 import { useAuth } from "@/app/providers/AuthProvider";
 
 type RiderScreen =
-  | "splash" | "login" | "home" | "requests" | "delivery-detail"
-  | "nav-assist" | "update-status" | "upload-proof" | "history" | "profile";
+  | "home"
+  | "requests"
+  | "delivery-detail"
+  | "nav-assist"
+  | "upload-proof"
+  | "history"
+  | "profile";
 
 type BottomTab = "home" | "deliveries" | "history" | "profile";
     
@@ -96,62 +103,10 @@ function BottomNav({ active, onSelect }: { active: BottomTab; onSelect: (t: Bott
   );
 }
 
-// ── Splash ────────────────────────────────────────────────────────
-function SplashScreen({ onNext }: { onNext: () => void }) {
-  return (
-    <div className="rider-splash relative flex flex-1 flex-col items-center justify-center gap-6 overflow-hidden bg-primary px-8">
-      <div className="w-20 h-20 rounded-3xl bg-white/20 flex items-center justify-center">
-        <UtensilsCrossed className="w-10 h-10 text-white" strokeWidth={2} />
-      </div>
-      <div className="text-center">
-        <p className="text-white font-bold text-2xl">RRJ Rider</p>
-        <p className="text-white/60 text-xs mt-1 uppercase tracking-widest">Delivery App</p>
-      </div>
-      <button
-        onClick={onNext}
-        className="mt-4 w-full py-3 rounded-xl bg-white text-primary font-bold text-sm hover:bg-primary/5"
-      >
-        Get Started
-      </button>
-      <p className="text-white/40 text-[9px] absolute bottom-6">v1.0.0 · RRJ Food-House</p>
-    </div>
-  );
-}
-
-// ── Login ────────────────────────────────────────────────────────
-function LoginScreen({ onNext }: { onNext: () => void }) {
-  const [email, setEmail]   = useState("ramil.abad@rrj.com");
-  const [password, setPassword] = useState("password");
-  return (
-    <>
-      <div className="bg-primary px-5 pt-7 pb-10 flex-shrink-0">
-        <div className="flex items-center gap-2.5 mb-5">
-          <div className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center">
-            <Bike className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <div className="text-white font-bold text-sm">RRJ Rider</div>
-            <div className="text-white/60 text-[9px] font-semibold uppercase tracking-widest mt-0.5">Delivery App</div>
-          </div>
-        </div>
-        <h2 className="text-white text-xl font-bold">Sign in to manage<br />your deliveries</h2>
-        <p className="text-white/60 text-[10px] mt-1">Authorized delivery partners only.</p>
-      </div>
-      <div className="bg-card -mt-5 rounded-t-3xl flex-1 px-5 pt-5 pb-4 overflow-y-auto">
-        <div className="flex flex-col gap-3.5">
-          <div className="flex flex-col gap-1"><label className="text-xs font-semibold">Email</label><input value={email} onChange={(e) => setEmail(e.target.value)} className="px-3 py-2.5 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:border-primary/50" /></div>
-          <div className="flex flex-col gap-1"><label className="text-xs font-semibold">Password</label><input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="px-3 py-2.5 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:border-primary/50" /></div>
-          <div className="flex justify-end"><button className="text-xs font-semibold text-primary">Forgot password?</button></div>
-          <button onClick={onNext} style={{ minHeight: 44 }} className="w-full flex items-center justify-center rounded-xl bg-primary text-white font-bold text-sm hover:bg-amber-800">Sign In</button>
-        </div>
-        <p className="text-center text-[10px] text-muted-foreground mt-5">Need access? Please contact RRJ Food-House management.</p>
-      </div>
-    </>
-  );
-}
 
 // ── Home Tab ─────────────────────────────────────────────────────
 function HomeTab({ onNav }: { onNav: (s: RiderScreen) => void }) {
+
   const { session } = useAuth();
 
   const riderName =
@@ -167,6 +122,9 @@ function HomeTab({ onNav }: { onNav: (s: RiderScreen) => void }) {
   useState<RiderDashboardStats | null>(null);
 
   const [offerCount, setOfferCount] = useState(0);
+
+  const [updatingAvailability, setUpdatingAvailability] =
+  useState(false);
   
   const [activeDelivery, setActiveDelivery] =
     useState<RiderActiveDelivery | null>(null);
@@ -178,51 +136,132 @@ function HomeTab({ onNav }: { onNav: (s: RiderScreen) => void }) {
     useState("");
 
     useEffect(() => {
-    let active = true;
+  let active = true;
+  let unsubscribe:
+    | (() => void)
+    | null = null;
 
-    const loadActiveDelivery = async () => {
+  const loadHomeData = async (
+    showLoading = true,
+  ) => {
+    if (showLoading) {
       setActiveDeliveryLoading(true);
-      setActiveDeliveryError("");
+    }
 
-      try {
-        const [
-          delivery,
-          offers,
-          profile,
-          stats,
-        ] = await Promise.all([
-          fetchActiveRiderDelivery(),
-          fetchRiderOffers(),
-          fetchRiderProfile(),
-          fetchRiderDashboardStats(),
-        ]);
-        if (active) {
-          setActiveDelivery(delivery);
-          setOfferCount(offers.length);
-          setRiderProfile(profile);
-          setDashboardStats(stats);
-        }
-      } catch (caught) {
-        if (active) {
-          setActiveDeliveryError(
-            caught instanceof Error
-              ? caught.message
-              : "Unable to load active delivery.",
-          );
-        }
-      } finally {
-        if (active) {
-          setActiveDeliveryLoading(false);
-        }
+    setActiveDeliveryError("");
+
+    try {
+      const [
+        delivery,
+        offers,
+        profile,
+        stats,
+      ] = await Promise.all([
+        fetchActiveRiderDelivery(),
+        fetchRiderOffers(),
+        fetchRiderProfile(),
+        fetchRiderDashboardStats(),
+      ]);
+
+      if (active) {
+        setActiveDelivery(delivery);
+        setOfferCount(offers.length);
+        setRiderProfile(profile);
+        setDashboardStats(stats);
       }
-    };
+    } catch (caught) {
+      if (active) {
+        setActiveDeliveryError(
+          caught instanceof Error
+            ? caught.message
+            : "Unable to load Rider dashboard.",
+        );
+      }
+    } finally {
+      if (
+        active &&
+        showLoading
+      ) {
+        setActiveDeliveryLoading(false);
+      }
+    }
+  };
 
-    void loadActiveDelivery();
+  const startRealtime = async () => {
+    try {
+      const cleanup =
+        await subscribeToRiderAssignmentChanges(
+          () => {
+            if (active) {
+              void loadHomeData(false);
+            }
+          },
+        );
 
-    return () => {
-      active = false;
-    };
-  }, []);
+      if (!active) {
+        cleanup();
+        return;
+      }
+
+      unsubscribe = cleanup;
+    } catch (caught) {
+      console.error(
+        "Unable to start Rider realtime updates:",
+        caught,
+      );
+    }
+  };
+
+  void loadHomeData();
+  void startRealtime();
+
+  return () => {
+    active = false;
+    unsubscribe?.();
+  };
+}, []);
+
+  const handleToggleAvailability = async () => {
+  if (
+    !riderProfile ||
+    updatingAvailability ||
+    offerCount > 0 ||
+    riderProfile.availabilityStatus === "on_delivery"
+  ) {
+    return;
+  }
+
+  const nextStatus =
+    riderProfile.availabilityStatus === "available"
+      ? "offline"
+      : "available";
+
+  setUpdatingAvailability(true);
+  setActiveDeliveryError("");
+
+  try {
+    const result =
+      await setRiderAvailability(nextStatus);
+
+    setRiderProfile((current) =>
+      current
+        ? {
+            ...current,
+            availabilityStatus:
+              result.availability_status,
+          }
+        : current,
+    );
+  } catch (caught) {
+    setActiveDeliveryError(
+      caught instanceof Error
+        ? caught.message
+        : "Unable to update availability.",
+    );
+  } finally {
+    setUpdatingAvailability(false);
+  }
+};
 
   const isAvailable =
   riderProfile?.availabilityStatus === "available";
@@ -234,13 +273,35 @@ function HomeTab({ onNav }: { onNav: (s: RiderScreen) => void }) {
       ? "Not accepting deliveries"
       : "Accepting deliveries";
 
+  const greeting = (() => {
+  const hour = Number(
+    new Intl.DateTimeFormat("en-PH", {
+      timeZone: "Asia/Manila",
+      hour: "2-digit",
+      hour12: false,
+    }).format(new Date()),
+  );
+
+  if (hour < 12) {
+    return "Good morning";
+  }
+
+  if (hour < 18) {
+    return "Good afternoon";
+  }
+
+  return "Good evening";
+})();
+
   return (
+
+
     <div className="flex-1 flex flex-col overflow-hidden">
       <div className="bg-primary px-4 pt-4 pb-8 flex-shrink-0">
       <div className="flex items-center justify-between mb-4">
         <div>
           <p className="text-white/60 text-[8px] font-semibold uppercase tracking-wide">
-            Good morning,
+            {greeting},
           </p>
 
           <p className="text-white font-bold text-sm">
@@ -266,21 +327,33 @@ function HomeTab({ onNav }: { onNav: (s: RiderScreen) => void }) {
           </p>
         </div>
 
-        <div
-          className={`w-12 h-6 rounded-full relative ${
+        <button
+          type="button"
+          disabled={
+            updatingAvailability ||
+            !riderProfile ||
+            offerCount > 0 ||
+            riderProfile.availabilityStatus ===
+              "on_delivery"
+          }
+          onClick={() => {
+            void handleToggleAvailability();
+          }}
+          aria-label="Toggle rider availability"
+          className={`w-12 h-6 rounded-full relative transition-colors disabled:opacity-60 ${
             isAvailable
               ? "bg-green-400"
               : "bg-white/30"
           }`}
         >
           <div
-            className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow ${
+            className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${
               isAvailable
                 ? "left-6"
                 : "left-0.5"
             }`}
           />
-        </div>
+        </button>
       </div>
       </div>
       <div className="-mt-4 rounded-t-2xl bg-background flex-1 overflow-y-auto px-4 pt-4">
@@ -420,40 +493,78 @@ function DeliveryRequestsTab() {
     useState<string | null>(null);
 
   useEffect(() => {
-    let active = true;
+  let active = true;
+  let unsubscribe:
+    | (() => void)
+    | null = null;
 
-    const loadOffers = async () => {
+  const loadOffers = async (
+    showLoading = true,
+  ) => {
+    if (showLoading) {
       setLoading(true);
-      setError("");
+    }
 
-      try {
-        const nextOffers =
-          await fetchRiderOffers();
+    setError("");
 
-        if (active) {
-          setOffers(nextOffers);
-        }
-      } catch (caught) {
-        if (active) {
-          setError(
-            caught instanceof Error
-              ? caught.message
-              : "Unable to load delivery requests.",
-          );
-        }
-      } finally {
-        if (active) {
-          setLoading(false);
-        }
+    try {
+      const nextOffers =
+        await fetchRiderOffers();
+
+      if (active) {
+        setOffers(nextOffers);
       }
-    };
+    } catch (caught) {
+      if (active) {
+        setError(
+          caught instanceof Error
+            ? caught.message
+            : "Unable to load delivery requests.",
+        );
+      }
+    } finally {
+      if (
+        active &&
+        showLoading
+      ) {
+        setLoading(false);
+      }
+    }
+  };
 
-    void loadOffers();
+  const startRealtime = async () => {
+    try {
+      const cleanup =
+        await subscribeToRiderAssignmentChanges(
+          () => {
+            if (active) {
+              void loadOffers(false);
+            }
+          },
+        );
 
-    return () => {
-      active = false;
-    };
-  }, []);
+      if (!active) {
+        cleanup();
+        return;
+      }
+
+      unsubscribe = cleanup;
+    } catch (caught) {
+      console.error(
+        "Unable to start Rider delivery request realtime updates:",
+        caught,
+      );
+    }
+  };
+
+  void loadOffers();
+  void startRealtime();
+
+  return () => {
+    active = false;
+    unsubscribe?.();
+  };
+}, []);
 
   const handleAccept = async (
     assignmentId: string,
@@ -1205,38 +1316,6 @@ function NavAssistScreen({
   );
 }
 
-// ── Update Status ─────────────────────────────────────────────────
-function UpdateStatusScreen({ onNav }: { onNav: (s: RiderScreen) => void }) {
-  const [current, setCurrent] = useState("Picked Up");
-  const statuses = ["Rider Accepted", "Picked Up", "Out for Delivery", "Delivered"];
-  return (
-    <div className="flex-1 flex flex-col overflow-hidden">
-      <div className="bg-primary px-4 py-4 flex items-center gap-3 flex-shrink-0">
-        <button onClick={() => onNav("delivery-detail")} className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center"><ArrowLeft className="w-4 h-4 text-white" /></button>
-        <p className="text-white font-bold text-sm">Update Status</p>
-      </div>
-      <div className="flex-1 bg-background px-4 py-4 overflow-y-auto">
-        <p className="font-mono text-[9px] font-bold text-primary mb-3">ORD-1046</p>
-        {statuses.map((s, i) => {
-          const isDone = statuses.indexOf(current) > i;
-          const isActive = current === s;
-          return (
-            <button key={s} onClick={() => setCurrent(s)} className={`w-full flex items-center gap-2.5 p-3 mb-2 rounded-xl border text-left transition-all ${isActive ? "border-primary bg-red-50/60" : isDone ? "border-green-300 bg-green-50" : "border-border bg-card"}`}>
-              <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${isActive ? "border-primary bg-primary" : isDone ? "border-green-500 bg-green-500" : "border-border"}`}>
-                {(isActive || isDone) && <Check className="w-2.5 h-2.5 text-white" />}
-              </div>
-              <span className={`text-[10px] font-semibold ${isActive ? "text-primary" : isDone ? "text-green-700" : "text-muted-foreground"}`}>{s}</span>
-            </button>
-          );
-        })}
-        <button onClick={() => current === "Delivered" ? onNav("upload-proof") : onNav("delivery-detail")} className="w-full mt-3 py-3 rounded-xl bg-primary text-white font-bold text-[11px]">
-          {current === "Delivered" ? "Upload Proof of Delivery" : "Confirm Status"}
-        </button>
-      </div>
-    </div>
-  );
-}
-
 // ── Upload Proof ──────────────────────────────────────────────────
 function UploadProofScreen({
   onNav,
@@ -1948,7 +2027,6 @@ export function RiderApp() {
 
       {screen === "delivery-detail" && <DeliveryDetailScreen onNav={setScreen} />}
       {screen === "nav-assist"      && <NavAssistScreen      onNav={setScreen} />}
-      {screen === "update-status"   && <UpdateStatusScreen   onNav={setScreen} />}
       {screen === "upload-proof"    && <UploadProofScreen    onNav={setScreen} />}
     </PhoneShell>
   );

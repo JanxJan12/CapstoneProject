@@ -104,6 +104,14 @@ interface OfferRiderResult {
   assigned_at: string;
 }
 
+interface CancelOrderResult {
+  order_id: string;
+  order_number: string;
+  previous_status: DatabaseOrderStatus;
+  current_status: "cancelled";
+  cancelled_at: string;
+}
+
 export async function confirmCashierOrder(
   databaseOrderId: string,
   notes?: string,
@@ -213,6 +221,58 @@ export async function offerOrderToNextRider(
   if (!result) {
     throw new Error(
       "The rider assignment was created, but no assignment record was returned.",
+    );
+  }
+
+  return result;
+}
+
+export async function cancelCashierOrder(
+  databaseOrderId: string,
+  reason: string,
+): Promise<CancelOrderResult> {
+  const normalizedId =
+    databaseOrderId.trim();
+
+  const normalizedReason =
+    reason.trim();
+
+  if (!normalizedId) {
+    throw new Error(
+      "This order does not have a valid database ID.",
+    );
+  }
+
+  if (!normalizedReason) {
+    throw new Error(
+      "A cancellation reason is required.",
+    );
+  }
+
+  const { data, error } =
+    await supabase.rpc(
+      "cancel_order",
+      {
+        p_order_id: normalizedId,
+        p_reason: normalizedReason,
+      },
+    );
+
+  if (error) {
+    throw new Error(
+      `Unable to cancel order: ${error.message}`,
+    );
+  }
+
+  const result = (
+    data as
+      | CancelOrderResult[]
+      | null
+  )?.[0];
+
+  if (!result) {
+    throw new Error(
+      "The order was cancelled, but no updated order record was returned.",
     );
   }
 

@@ -51,6 +51,7 @@ export function AppShell<T extends string>({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigationTriggerRef = useRef<HTMLButtonElement>(null);
   const navigationCloseRef = useRef<HTMLButtonElement>(null);
+  const navigationDrawerRef = useRef<HTMLElement>(null);
   const [now, setNow] = useState(() => new Date());
   const roleSlug = user.role.toLowerCase().replace(/\s+/g, "-");
   const isCashier = roleSlug === "cashier";
@@ -80,6 +81,21 @@ export function AppShell<T extends string>({
     };
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [sidebarOpen]);
+
+  useEffect(() => {
+    const drawer =
+      navigationDrawerRef.current;
+
+    if (!drawer) {
+      return;
+    }
+
+    if (sidebarOpen) {
+      drawer.removeAttribute("inert");
+    } else {
+      drawer.setAttribute("inert", "");
+    }
   }, [sidebarOpen]);
 
   const SidebarContent = () => (
@@ -207,10 +223,10 @@ export function AppShell<T extends string>({
 
       {/* Navigation drawer */}
       <aside
+        ref={navigationDrawerRef}
         id="app-shell-navigation"
         aria-label={`${user.role} navigation`}
         aria-hidden={!sidebarOpen}
-        inert={!sidebarOpen}
         className={[
           "app-shell-sidebar z-40 flex h-full flex-col overflow-hidden border-r border-white/[0.06] bg-[#1d1713] shadow-[12px_0_45px_rgba(31,20,13,0.14)] transition-transform duration-200",
           "fixed inset-y-0 left-0 w-72 max-w-[calc(100vw-2rem)]",
