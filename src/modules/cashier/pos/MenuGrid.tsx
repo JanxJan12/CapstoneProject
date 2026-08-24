@@ -34,10 +34,7 @@ export function MenuGrid({
 }: MenuGridProps) {
   const bestSellers = useMemo(() => new Set(bestSellerIds), [bestSellerIds]);
   const soldOutCount = useMemo(
-    () =>
-      menuItems.filter(
-        (item) => !item.available || item.inventoryRemaining === 0,
-      ).length,
+    () => menuItems.filter((item) => !item.available).length,
     [menuItems],
   );
   const fastLaneItems = useMemo(

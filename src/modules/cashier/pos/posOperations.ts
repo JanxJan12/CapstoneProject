@@ -59,7 +59,6 @@ export function getOrderSummaryAvailability(
   cart: POSCartLine[],
   form: POSForm,
   menuItems: MenuItem[],
-  inventoryIssue?: string,
 ) {
   const unavailableItem = cart.find(
     (entry) =>
@@ -69,19 +68,14 @@ export function getOrderSummaryAvailability(
   const missingDiscountReference =
     form.discountType !== "None" && !form.discountReference?.trim();
   const canContinue =
-    cart.length > 0 &&
-    !unavailableItem &&
-    !inventoryIssue &&
-    !missingDiscountReference;
+    cart.length > 0 && !unavailableItem && !missingDiscountReference;
   const disabledReason = !cart.length
     ? "Add at least one menu item to continue."
     : unavailableItem
       ? `${unavailableItem.name} is no longer available. Remove it to continue.`
-      : inventoryIssue
-        ? `${inventoryIssue} Adjust the quantity to continue.`
-        : missingDiscountReference
-          ? "Enter the Senior/PWD ID or reference."
-          : undefined;
+      : missingDiscountReference
+        ? "Enter the Senior/PWD ID or reference."
+        : undefined;
 
   return { canContinue, disabledReason };
 }
@@ -205,7 +199,6 @@ export function getMealRecommendations(
         (item) =>
           item.category === category &&
           item.available &&
-          item.inventoryRemaining !== 0 &&
           !cartItemIds.has(item.id),
       )
       .sort((left, right) => {
@@ -248,33 +241,12 @@ export function calculatePOSTotals(cart: POSCartLine[], form: POSForm) {
   };
 }
 
-export function getInventoryIssue(cart: POSCartLine[], menuItems: MenuItem[]) {
-  const requested = new Map<string, number>();
-  for (const entry of cart) {
-    requested.set(
-      entry.menuItemId,
-      (requested.get(entry.menuItemId) ?? 0) + entry.quantity,
-    );
-  }
-  for (const [menuItemId, quantity] of requested) {
-    const item = menuItems.find((entry) => entry.id === menuItemId);
-    if (
-      item?.inventoryRemaining !== undefined &&
-      quantity > item.inventoryRemaining
-    ) {
-      return `Only ${item.inventoryRemaining} ${item.name} remaining.`;
-    }
-  }
-  return undefined;
-}
-
 export function getPlaceOrderAvailability(
   cart: POSCartLine[],
   form: POSForm,
   menuItems: MenuItem[],
   total: number,
   tendered: number,
-  inventoryIssue?: string,
 ) {
   const unavailableItem = cart.find(
     (entry) =>
@@ -290,7 +262,6 @@ export function getPlaceOrderAvailability(
         form.deliveryAddress?.trim(),
       )) &&
     !unavailableItem &&
-    !inventoryIssue &&
     (form.discountType === "None" || Boolean(form.discountReference?.trim())) &&
     (form.paymentMethod === "Cash"
       ? tendered >= total
@@ -299,24 +270,22 @@ export function getPlaceOrderAvailability(
     ? "Add at least one menu item to continue."
     : unavailableItem
       ? `${unavailableItem.name} is no longer available. Remove it to continue.`
-      : inventoryIssue
-        ? `${inventoryIssue} Adjust the quantity to continue.`
-        : form.orderType === "Delivery" && !form.customerName?.trim()
-          ? "Enter the delivery customer name."
-          : form.orderType === "Delivery" && !form.contactNumber?.trim()
-            ? "Enter the delivery contact number."
-            : form.orderType === "Delivery" && !form.deliveryAddress?.trim()
-              ? "Enter the delivery address."
-              : form.discountType !== "None" && !form.discountReference?.trim()
-                ? "Enter the Senior/PWD ID or reference."
-                : form.paymentMethod === "Cash" && tendered < total
-                  ? "Enter enough cash tendered to cover the total."
-                  : form.paymentMethod === "GCash" &&
-                      !form.gcashReference?.trim()
-                    ? "Enter the customer's GCash reference number."
-                    : form.paymentMethod === "GCash" && !form.gcashConfirmed
-                      ? "Confirm the GCash payment before placing the order."
-                      : undefined;
+      : form.orderType === "Delivery" && !form.customerName?.trim()
+        ? "Enter the delivery customer name."
+        : form.orderType === "Delivery" && !form.contactNumber?.trim()
+          ? "Enter the delivery contact number."
+          : form.orderType === "Delivery" && !form.deliveryAddress?.trim()
+            ? "Enter the delivery address."
+            : form.discountType !== "None" && !form.discountReference?.trim()
+              ? "Enter the Senior/PWD ID or reference."
+              : form.paymentMethod === "Cash" && tendered < total
+                ? "Enter enough cash tendered to cover the total."
+                : form.paymentMethod === "GCash" &&
+                    !form.gcashReference?.trim()
+                  ? "Enter the customer's GCash reference number."
+                  : form.paymentMethod === "GCash" && !form.gcashConfirmed
+                    ? "Confirm the GCash payment before placing the order."
+                    : undefined;
   return { unavailableItem, canPlace, disabledReason };
 }
 
@@ -330,21 +299,11 @@ export function addCartItem(
   const currentQuantity = current
     .filter((entry) => entry.menuItemId === menuItem.id)
     .reduce((sum, entry) => sum + entry.quantity, 0);
-  const capacity = Math.max(
-    0,
-    Math.min(
-      MAX_POS_ITEM_QUANTITY - currentQuantity,
-      (menuItem.inventoryRemaining ?? MAX_POS_ITEM_QUANTITY) - currentQuantity,
-    ),
-  );
+  const capacity = Math.max(0, MAX_POS_ITEM_QUANTITY - currentQuantity);
   if (!capacity) {
     return {
       cart: current,
-      error:
-        menuItem.inventoryRemaining !== undefined &&
-        currentQuantity >= menuItem.inventoryRemaining
-          ? `Only ${menuItem.inventoryRemaining} ${menuItem.name} remaining.`
-          : "Maximum quantity reached",
+      error: "Maximum quantity reached",
     };
   }
 
@@ -391,7 +350,7 @@ export function addCartItem(
       amountToAdd < quantity
         ? {
             title: `Quantity limited to ${currentQuantity + amountToAdd}`,
-            description: `The order now contains the maximum available ${menuItem.name}.`,
+            description: `The order now contains the maximum quantity of ${menuItem.name}.`,
           }
         : undefined,
   };
@@ -401,11 +360,9 @@ export function setCartLineQuantity(
   current: POSCartLine[],
   lineId: string,
   quantity: number,
-  menuItems: MenuItem[],
 ) {
   return current.map((entry) => {
     if (entry.lineId !== lineId) return entry;
-    const menuItem = menuItems.find((item) => item.id === entry.menuItemId);
     const otherQuantity = current
       .filter(
         (candidate) =>
@@ -413,13 +370,7 @@ export function setCartLineQuantity(
           candidate.lineId !== lineId,
       )
       .reduce((sum, candidate) => sum + candidate.quantity, 0);
-    const maximum = Math.max(
-      1,
-      Math.min(
-        MAX_POS_ITEM_QUANTITY - otherQuantity,
-        (menuItem?.inventoryRemaining ?? MAX_POS_ITEM_QUANTITY) - otherQuantity,
-      ),
-    );
+    const maximum = Math.max(1, MAX_POS_ITEM_QUANTITY - otherQuantity);
     return {
       ...entry,
       quantity: Math.min(maximum, Math.max(1, Math.round(quantity))),
@@ -442,17 +393,11 @@ export function duplicateCartLine(
   const currentQuantity = current
     .filter((entry) => entry.menuItemId === source.menuItemId)
     .reduce((sum, entry) => sum + entry.quantity, 0);
-  const capacity = Math.max(
-    0,
-    Math.min(
-      MAX_POS_ITEM_QUANTITY - currentQuantity,
-      (menuItem.inventoryRemaining ?? MAX_POS_ITEM_QUANTITY) - currentQuantity,
-    ),
-  );
+  const capacity = Math.max(0, MAX_POS_ITEM_QUANTITY - currentQuantity);
   if (!capacity) {
     return {
       cart: current,
-      error: `No additional ${source.name} inventory is available.`,
+      error: "Maximum quantity reached",
     };
   }
   const quantity = Math.min(source.quantity, capacity);
@@ -470,7 +415,7 @@ export function duplicateCartLine(
       quantity < source.quantity
         ? {
             title: `Duplicated ${quantity} only`,
-            description: "The duplicate was limited by available inventory.",
+            description: `The duplicate was limited by the ${MAX_POS_ITEM_QUANTITY}-item maximum.`,
           }
         : undefined,
   };

@@ -34,13 +34,7 @@ export function ModifierDrawer({
   const [note, setNote] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const groups = useMemo(() => modifierGroupsFor(item), [item]);
-  const remaining = Math.max(
-    0,
-    Math.min(
-      MAX_POS_ITEM_QUANTITY - currentQuantity,
-      (item.inventoryRemaining ?? MAX_POS_ITEM_QUANTITY) - currentQuantity,
-    ),
-  );
+  const remaining = Math.max(0, MAX_POS_ITEM_QUANTITY - currentQuantity);
 
   useEffect(() => {
     setQuantity(initialLine?.quantity ?? 1);

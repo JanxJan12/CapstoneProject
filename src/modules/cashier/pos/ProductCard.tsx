@@ -1,6 +1,6 @@
 import { memo } from "react";
-import { AlertTriangle, Flame, Plus, SlidersHorizontal } from "lucide-react";
-import { POS_LOW_INVENTORY_THRESHOLD, formatMoney } from "../constants";
+import { Flame, Plus, SlidersHorizontal } from "lucide-react";
+import { formatMoney } from "../constants";
 import { modifierGroupsFor } from "../constants/modifiers";
 import type { MenuItem } from "../types";
 
@@ -38,10 +38,7 @@ export const ProductCard = memo(function ProductCard({
   onQuickAdd,
 }: ProductCardProps) {
   const modifierCount = modifierGroupsFor(item).length;
-  const lowInventory =
-    item.inventoryRemaining !== undefined &&
-    item.inventoryRemaining <= POS_LOW_INVENTORY_THRESHOLD;
-  const soldOut = !item.available || item.inventoryRemaining === 0;
+  const soldOut = !item.available;
 
   return (
     <article
@@ -85,12 +82,6 @@ export const ProductCard = memo(function ProductCard({
             {bestSeller ? (
               <em>
                 <Flame className="h-3 w-3" /> Popular
-              </em>
-            ) : null}
-            {lowInventory && !soldOut ? (
-              <em className="is-warning">
-                <AlertTriangle className="h-3 w-3" /> {item.inventoryRemaining}{" "}
-                left
               </em>
             ) : null}
           </span>

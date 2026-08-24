@@ -43,7 +43,6 @@ export interface MenuItem {
   price: number;
   available: boolean;
   preparationMinutes?: number;
-  inventoryRemaining?: number;
 }
 
 export interface OrderItemModifier {

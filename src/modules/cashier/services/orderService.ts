@@ -1,5 +1,6 @@
 import {
   DISCOUNT_RATE,
+  MAX_POS_ITEM_QUANTITY,
   POS_ITEM_NOTE_MAX_LENGTH,
   POS_TAX_ENABLED,
   POS_TAX_RATE,
@@ -61,19 +62,30 @@ export function createWalkInOrder(
     throw new Error(`Table ${tableNumber} already has an active order.`);
   if (input.discountType && !input.discountReference?.trim())
     throw new Error("ID or reference is required for this discount.");
+  const requestedQuantities = new Map<string, number>();
   const validatedItems = input.items.map((entry) => {
     if (
       !Number.isInteger(entry.quantity) ||
       entry.quantity < 1 ||
-      entry.quantity > 99
+      entry.quantity > MAX_POS_ITEM_QUANTITY
     )
-      throw new Error("Item quantities must be whole numbers from 1 to 99.");
+      throw new Error(
+        `Item quantities must be whole numbers from 1 to ${MAX_POS_ITEM_QUANTITY}.`,
+      );
     const menuItem = state.menuItems.find(
       (item) => item.id === entry.menuItemId,
     );
     if (!menuItem) throw new Error(`${entry.name} is no longer on the menu.`);
     if (!menuItem.available)
       throw new Error(`${menuItem.name} is currently unavailable.`);
+    const requestedQuantity =
+      (requestedQuantities.get(menuItem.id) ?? 0) + entry.quantity;
+    if (requestedQuantity > MAX_POS_ITEM_QUANTITY) {
+      throw new Error(
+        `Total quantity for ${menuItem.name} cannot exceed ${MAX_POS_ITEM_QUANTITY}.`,
+      );
+    }
+    requestedQuantities.set(menuItem.id, requestedQuantity);
     const modifiers = validateMenuModifiers(menuItem, entry.modifiers);
     return {
       menuItemId: menuItem.id,
@@ -86,24 +98,6 @@ export function createWalkInOrder(
       modifiers: modifiers.length ? modifiers : undefined,
     };
   });
-  const requestedInventory = new Map<string, number>();
-  for (const item of validatedItems) {
-    requestedInventory.set(
-      item.menuItemId,
-      (requestedInventory.get(item.menuItemId) ?? 0) + item.quantity,
-    );
-  }
-  for (const [menuItemId, quantity] of requestedInventory) {
-    const menuItem = state.menuItems.find((item) => item.id === menuItemId);
-    if (
-      menuItem?.inventoryRemaining !== undefined &&
-      quantity > menuItem.inventoryRemaining
-    ) {
-      throw new Error(
-        `Only ${menuItem.inventoryRemaining} ${menuItem.name} remaining. Adjust the quantity to continue.`,
-      );
-    }
-  }
   const subtotal = validatedItems.reduce(
     (sum, entry) => sum + entry.unitPrice * entry.quantity,
     0,
@@ -173,15 +167,6 @@ export function createWalkInOrder(
     ],
   };
   state.orders.unshift(order);
-  for (const [menuItemId, quantity] of requestedInventory) {
-    const menuItem = state.menuItems.find((item) => item.id === menuItemId);
-    if (menuItem?.inventoryRemaining === undefined) continue;
-    menuItem.inventoryRemaining = Math.max(
-      0,
-      menuItem.inventoryRemaining - quantity,
-    );
-    if (menuItem.inventoryRemaining === 0) menuItem.available = false;
-  }
   state.payments.unshift({
     id: paymentId,
     orderId,

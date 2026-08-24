@@ -13,7 +13,6 @@ import {
   duplicateCartLine,
   filterMenuItems,
   getBestSellerIds,
-  getInventoryIssue,
   getMealRecommendations,
   getNextOrderNumber,
   getOrderSummaryAvailability,
@@ -104,10 +103,6 @@ export function useWalkInPOSController(
     () => calculatePOSTotals(cart, values),
     [cart, values],
   );
-  const inventoryIssue = useMemo(
-    () => getInventoryIssue(cart, state.menuItems),
-    [cart, state.menuItems],
-  );
   const availability = useMemo(
     () =>
       getPlaceOrderAvailability(
@@ -116,11 +111,9 @@ export function useWalkInPOSController(
         state.menuItems,
         totals.total,
         totals.tendered,
-        inventoryIssue,
       ),
     [
       cart,
-      inventoryIssue,
       state.menuItems,
       totals.tendered,
       totals.total,
@@ -128,14 +121,8 @@ export function useWalkInPOSController(
     ],
   );
   const summaryAvailability = useMemo(
-    () =>
-      getOrderSummaryAvailability(
-        cart,
-        values,
-        state.menuItems,
-        inventoryIssue,
-      ),
-    [cart, inventoryIssue, state.menuItems, values],
+    () => getOrderSummaryAvailability(cart, values, state.menuItems),
+    [cart, state.menuItems, values],
   );
   const mealRecommendations = useMemo(
     () => getMealRecommendations(cart, state.menuItems),
@@ -357,11 +344,9 @@ export function useWalkInPOSController(
 
   const setLineQuantity = useCallback(
     (lineId: string, quantity: number) => {
-      setCart((current) =>
-        setCartLineQuantity(current, lineId, quantity, state.menuItems),
-      );
+      setCart((current) => setCartLineQuantity(current, lineId, quantity));
     },
-    [state.menuItems],
+    [],
   );
   const adjust = useCallback(
     (lineId: string, delta: number) => {
@@ -375,11 +360,10 @@ export function useWalkInPOSController(
           current,
           lineId,
           line.quantity + delta,
-          state.menuItems,
         );
       });
     },
-    [state.menuItems],
+    [],
   );
   const undoLastAdd = useCallback(() => {
     setCart((current) => {
