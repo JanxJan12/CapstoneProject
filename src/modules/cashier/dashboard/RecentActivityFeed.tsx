@@ -3,7 +3,6 @@ import {
   CheckCircle2,
   ChefHat,
   CreditCard,
-  Printer,
   ReceiptText,
   ShoppingCart,
   XCircle,
@@ -21,7 +20,6 @@ const ICONS = {
   rider_accepted: Bike,
   transaction_completed: ReceiptText,
   order_cancelled: XCircle,
-  receipt_reprinted: Printer,
   shift_started: CheckCircle2,
   shift_closed: CheckCircle2,
 };
@@ -38,13 +36,13 @@ export function RecentActivityFeed({
     <section className="rrj-card p-4 sm:p-5">
       <SectionHeading
         title="Recent Activity"
-        description="Latest operational events from the shared records"
+        description="Recent actions recorded on this cashier workstation"
         className="mb-4"
       />
       {activities.length === 0 ? (
         <EmptyState
           title="No recent activity"
-          description="Cashier, kitchen, and rider events will appear here."
+          description="Recent cashier actions on this workstation will appear here."
         />
       ) : (
         <ol className="space-y-2">

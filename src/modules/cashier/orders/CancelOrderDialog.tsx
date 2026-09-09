@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import {
   Dialog,
@@ -12,6 +13,7 @@ import {
   CashierButton,
   CashierDialogContent,
   CashierTextarea,
+  ErrorBanner,
   FieldError,
   Label,
 } from "../components";
@@ -29,6 +31,7 @@ export function CancelOrderDialog({
   onOpenChange: (open: boolean) => void;
   onConfirm: (reason: string) => Promise<void>;
 }) {
+  const [submissionError, setSubmissionError] = useState("");
   const {
     register,
     handleSubmit,
@@ -39,19 +42,33 @@ export function CancelOrderDialog({
     defaultValues: { reason: "" },
   });
   const submit = handleSubmit(async (values) => {
-    await onConfirm(values.reason);
-    reset();
+    setSubmissionError("");
+
+    try {
+      await onConfirm(values.reason);
+      reset();
+    } catch (caught) {
+      setSubmissionError(
+        caught instanceof Error
+          ? caught.message
+          : "Unable to cancel the order.",
+      );
+    }
   });
+
+  const handleOpenChange = (value: boolean) => {
+    if (!loading) {
+      onOpenChange(value);
+
+      if (!value) {
+        reset();
+        setSubmissionError("");
+      }
+    }
+  };
+
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(value) => {
-        if (!loading) {
-          onOpenChange(value);
-          if (!value) reset();
-        }
-      }}
-    >
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <CashierDialogContent>
         <DialogHeader>
           <DialogTitle>Cancel {orderId}?</DialogTitle>
@@ -61,6 +78,9 @@ export function CancelOrderDialog({
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={submit} className="space-y-4">
+          {submissionError ? (
+            <ErrorBanner message={submissionError} />
+          ) : null}
           <div>
             <Label htmlFor="cancel-reason">Cancellation reason</Label>
             <CashierTextarea
@@ -77,7 +97,7 @@ export function CancelOrderDialog({
               type="button"
               variant="secondary"
               disabled={loading}
-              onClick={() => onOpenChange(false)}
+              onClick={() => handleOpenChange(false)}
             >
               Keep order
             </CashierButton>

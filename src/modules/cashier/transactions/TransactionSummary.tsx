@@ -5,11 +5,9 @@ import {
   CreditCard,
   Percent,
   ReceiptText,
-  RotateCcw,
   ShoppingCart,
   TrendingUp,
   UtensilsCrossed,
-  XCircle,
 } from "lucide-react";
 import { SummaryCard } from "../components";
 import { formatMoney } from "../constants";
@@ -57,25 +55,11 @@ export function TransactionSummary({
       "bg-blue-50 text-blue-700",
     ),
     metric(
-      "Refunds",
-      formatMoney(summary.refunds),
-      `${summary.refundCount} records`,
-      RotateCcw,
-      "bg-sky-50 text-sky-700",
-    ),
-    metric(
       "Discounts",
       formatMoney(summary.discounts),
       "Completed sales only",
       Percent,
       "bg-violet-50 text-violet-700",
-    ),
-    metric(
-      "Voids",
-      formatMoney(summary.voids),
-      `${summary.voidCount} audit records`,
-      XCircle,
-      "bg-zinc-100 text-zinc-700",
     ),
     metric(
       "Average Order",
@@ -115,7 +99,7 @@ export function TransactionSummary({
 
   return (
     <section aria-label="Filtered transaction summary">
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {cards.map((card) => (
           <SummaryCard key={card.label} {...card} />
         ))}

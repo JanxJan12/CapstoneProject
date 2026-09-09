@@ -2,13 +2,10 @@ import { Fragment, memo } from "react";
 import {
   ChevronDown,
   ChevronRight,
-  Copy,
   Eye,
   History,
   MoreHorizontal,
   Pencil,
-  Printer,
-  UserPlus,
   XCircle,
 } from "lucide-react";
 import {
@@ -41,6 +38,14 @@ const TONE_STYLE: Record<BadgeTone, string> = {
   red: "border-red-200 bg-red-50 text-red-800",
 };
 
+const EDITABLE_ORDER_STATUSES = new Set<Order["status"]>([
+  "Awaiting Payment",
+  "Confirmed",
+  "Preparing",
+  "Ready",
+  "Waiting for Rider",
+]);
+
 export interface OrderTableRowProps {
   order: Order;
   delayedThreshold: number;
@@ -51,10 +56,7 @@ export interface OrderTableRowProps {
   onToggleExpand: (orderId: string) => void;
   onView: (order: Order) => void;
   onEdit: (order: Order) => void;
-  onPrint: (order: Order) => void;
-  onAssignRider: (order: Order) => void;
   onCancel: (order: Order) => void;
-  onDuplicate: (order: Order) => void;
 }
 
 export const OrderTableRow = memo(function OrderTableRow(
@@ -154,9 +156,6 @@ export const OrderTableRow = memo(function OrderTableRow(
 
 function OrderActions(props: OrderTableRowProps) {
   const { order } = props;
-  const deliveryActive =
-    order.type === "Delivery" &&
-    !["Delivered", "Completed", "Cancelled"].includes(order.status);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -171,28 +170,13 @@ function OrderActions(props: OrderTableRowProps) {
           label="Quick view"
           onSelect={() => props.onToggleExpand(order.id)}
         />
-        <Action
-          icon={Pencil}
-          label="Edit"
-          onSelect={() => props.onEdit(order)}
-        />
-        <Action
-          icon={Printer}
-          label="Print"
-          onSelect={() => props.onPrint(order)}
-        />
-        {deliveryActive ? (
+        {EDITABLE_ORDER_STATUSES.has(order.status) ? (
           <Action
-            icon={UserPlus}
-            label="Assign rider"
-            onSelect={() => props.onAssignRider(order)}
+            icon={Pencil}
+            label="Edit"
+            onSelect={() => props.onEdit(order)}
           />
         ) : null}
-        <Action
-          icon={Copy}
-          label="Duplicate"
-          onSelect={() => props.onDuplicate(order)}
-        />
         <Action
           icon={History}
           label="Timeline"

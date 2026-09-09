@@ -8,39 +8,6 @@ interface ProvisionedKdsTerminal {
   terminal_secret: string;
 }
 
-const SETTINGS_GROUPS = [
-  {
-    section: "Store Information",
-    fields: [
-      {
-        label: "Store Name",
-        value: "RRJ Food-House",
-      },
-      {
-        label: "Contact",
-        value: "09171234567",
-      },
-      {
-        label: "Address",
-        value: "123 Main St., Manila",
-      },
-    ],
-  },
-  {
-    section: "Operating Hours",
-    fields: [
-      {
-        label: "Opening",
-        value: "07:00 AM",
-      },
-      {
-        label: "Closing",
-        value: "09:00 PM",
-      },
-    ],
-  },
-];
-
 export function SettingsPage() {
   const [terminalName, setTerminalName] =
     useState("RRJ Kitchen KDS 1");
@@ -118,41 +85,6 @@ export function SettingsPage() {
       <h1 className="mb-4 text-base font-bold text-foreground">
         Settings
       </h1>
-
-      {SETTINGS_GROUPS.map((group) => (
-        <div
-          key={group.section}
-          className="mb-4 rounded-xl border border-border bg-card p-5"
-        >
-          <p className="mb-3 text-xs font-bold text-foreground">
-            {group.section}
-          </p>
-
-          <div className="flex flex-col gap-3">
-            {group.fields.map((field) => (
-              <div
-                key={field.label}
-                className="flex flex-col gap-1"
-              >
-                <label className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground">
-                  {field.label}
-                </label>
-
-                <input
-                  defaultValue={field.value}
-                  className="rounded-lg border border-border bg-input-background px-3 py-2 text-xs focus:outline-none"
-                />
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-4">
-            <Button variant="primary" size="sm">
-              Save Changes
-            </Button>
-          </div>
-        </div>
-      ))}
 
       <div className="mb-4 rounded-xl border border-border bg-card p-5">
         <div className="mb-4">

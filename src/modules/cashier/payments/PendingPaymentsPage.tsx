@@ -7,8 +7,13 @@ import { PaymentDetails } from "./PaymentDetails";
 import { PaymentQueue } from "./PaymentQueue";
 import { RejectPaymentDialog } from "./RejectPaymentDialog";
 import { VerifyPaymentDialog } from "./VerifyPaymentDialog";
+import type { CashierNavigationIntent } from "../types";
 
-export function PendingPaymentsPage() {
+export function PendingPaymentsPage({
+  intent,
+}: {
+  intent?: CashierNavigationIntent;
+}) {
   const { state, activeShift, verifyPayment, rejectPayment } =
     useCashierStore();
   const pending = useMemo(
@@ -27,10 +32,27 @@ export function PendingPaymentsPage() {
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
-  useEffect(() => {
-    if (!selectedId || !pending.some((entry) => entry.id === selectedId))
-      setSelectedId(pending[0]?.id);
-  }, [pending, selectedId]);
+useEffect(() => {
+  const requestedPayment = intent?.paymentOrderId
+    ? pending.find(
+        (entry) => entry.orderId === intent.paymentOrderId,
+      )
+    : undefined;
+
+  if (requestedPayment) {
+    if (selectedId !== requestedPayment.id) {
+      setSelectedId(requestedPayment.id);
+    }
+    return;
+  }
+
+  if (
+    !selectedId ||
+    !pending.some((entry) => entry.id === selectedId)
+  ) {
+    setSelectedId(pending[0]?.id);
+  }
+}, [intent?.paymentOrderId, pending, selectedId]);
   const payment = pending.find((entry) => entry.id === selectedId);
   const order = state.orders.find((entry) => entry.id === payment?.orderId);
   const nextPendingPaymentId = (currentPaymentId: string) => {
@@ -51,7 +73,7 @@ export function PendingPaymentsPage() {
     }, DATA_REFRESH_FEEDBACK_MS);
   };
 
-  const handleVerify = async (override: boolean) => {
+  const handleVerify = async () => {
     if (!order || !payment) return;
     const currentPaymentId = payment.id;
     const nextPaymentId = nextPendingPaymentId(payment.id);
@@ -60,7 +82,7 @@ export function PendingPaymentsPage() {
     setVerifyOpen(false);
     setSelectedId(nextPaymentId);
     try {
-      await verifyPayment(payment.id, override);
+      await verifyPayment(payment.id);
       Toast.success(`Payment verified for ${order.id}`, {
         description: nextPaymentId
           ? "Order, kitchen, dashboard, reports, and transaction records updated. Next payment opened."
@@ -135,7 +157,6 @@ export function PendingPaymentsPage() {
           </div>
           <PaymentQueue
             payments={pending}
-            allPayments={state.payments}
             orders={state.orders}
             selectedId={selectedId}
             onSelect={setSelectedId}
@@ -145,7 +166,6 @@ export function PendingPaymentsPage() {
           <PaymentDetails
             payment={payment}
             order={order}
-            payments={state.payments}
             shiftOpen={Boolean(activeShift)}
             onVerify={() => setVerifyOpen(true)}
             onReject={() => setRejectOpen(true)}
@@ -156,7 +176,6 @@ export function PendingPaymentsPage() {
         open={verifyOpen}
         order={order}
         payment={payment}
-        payments={state.payments}
         loading={loading}
         onOpenChange={setVerifyOpen}
         onConfirm={handleVerify}

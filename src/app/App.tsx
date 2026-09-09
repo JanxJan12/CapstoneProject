@@ -5,10 +5,10 @@ import { router } from "./routes";
 
 export default function App() {
   return (
-    <CashierProvider>
-      <AuthProvider>
+    <AuthProvider>
+      <CashierProvider>
         <RouterProvider router={router} />
-      </AuthProvider>
-    </CashierProvider>
+      </CashierProvider>
+    </AuthProvider>
   );
 }

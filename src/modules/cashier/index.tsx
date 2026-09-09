@@ -26,7 +26,7 @@ import { WalkInPOSPage } from "./pos/WalkInPOSPage";
 import { CashierOrderListPage } from "./orders/CashierOrderListPage";
 import { TransactionHistoryPage } from "./transactions/TransactionHistoryPage";
 import { ShiftSettlementPage } from "./shifts/ShiftSettlementPage";
-import { ConfirmationDialog } from "./components";
+import { ConfirmationDialog, ErrorBanner } from "./components";
 
 export function CashierApp() {
   return <CashierModule />;
@@ -35,6 +35,9 @@ export function CashierApp() {
 function CashierModule() {
   const {
     state,
+    isHydrating,
+    databaseError,
+    refreshDatabaseState,
     markNotificationRead,
     markNotificationsRead,
   } = useCashierStore();
@@ -280,7 +283,7 @@ function CashierModule() {
       />
     ) : page ===
       "pending-payments" ? (
-      <PendingPaymentsPage />
+<PendingPaymentsPage intent={intent} />
     ) : page === "walkin-pos" ? (
       <WalkInPOSPage
         onDirtyChange={
@@ -322,7 +325,28 @@ function CashierModule() {
         }
         onLogout={logout}
       >
-        {content}
+        <div className="flex h-full min-h-0 flex-col">
+          {databaseError ? (
+            <div className={page === "walkin-pos" ? "p-4 pb-0" : "mb-4"}>
+              <ErrorBanner
+                message={databaseError}
+                onRetry={refreshDatabaseState}
+              />
+            </div>
+          ) : null}
+          <div className="min-h-0 flex-1">
+            {isHydrating && page !== "dashboard" ? (
+              <div
+                role="status"
+                className="rounded-xl border border-border bg-card px-4 py-10 text-center text-xs font-semibold text-muted-foreground"
+              >
+                Loading cashier operations…
+              </div>
+            ) : (
+              content
+            )}
+          </div>
+        </div>
       </AppShell>
 
       <ConfirmationDialog

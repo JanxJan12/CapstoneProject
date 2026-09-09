@@ -33,10 +33,7 @@ export interface OrderTableProps {
   onToggleExpand: (orderId: string) => void;
   onView: (order: Order) => void;
   onEdit: (order: Order) => void;
-  onPrint: (order: Order) => void;
-  onAssignRider: (order: Order) => void;
   onCancel: (order: Order) => void;
-  onDuplicate: (order: Order) => void;
 }
 
 export function OrderTable(props: OrderTableProps) {
@@ -100,10 +97,7 @@ export function OrderTable(props: OrderTableProps) {
               onToggleExpand={props.onToggleExpand}
               onView={props.onView}
               onEdit={props.onEdit}
-              onPrint={props.onPrint}
-              onAssignRider={props.onAssignRider}
               onCancel={props.onCancel}
-              onDuplicate={props.onDuplicate}
             />
           ))}
         </tbody>

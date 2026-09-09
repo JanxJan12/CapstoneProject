@@ -1,10 +1,8 @@
 import {
-  AlertTriangle,
   CalendarDays,
   Clock3,
   CreditCard,
   Hash,
-  ReceiptText,
   ShieldCheck,
   Upload,
   UserRound,
@@ -13,19 +11,16 @@ import { formatDateOnly, formatMoney, formatTimeOnly } from "../constants";
 import type { Order, Payment } from "../types";
 import { CashierButton, StatusBadge, EmptyState } from "../components";
 import { ProofViewer } from "./ProofViewer";
-import { getPaymentVerificationIssues } from "./paymentVerification";
 
 export function PaymentDetails({
   payment,
   order,
-  payments,
   shiftOpen,
   onVerify,
   onReject,
 }: {
   payment?: Payment;
   order?: Order;
-  payments: Payment[];
   shiftOpen: boolean;
   onVerify: () => void;
   onReject: () => void;
@@ -39,14 +34,13 @@ export function PaymentDetails({
         description="Choose a pending GCash submission from the queue to review its proof and order details."
       />
     );
-  const issues = getPaymentVerificationIssues(payment, order, payments);
-  const amountMismatch =
-    Math.abs(payment.submittedAmount - order.total) >= 0.01;
-  const difference = payment.submittedAmount - order.total;
-  const mismatch = issues.length > 0;
-  const senderName = payment.senderName ?? order.customerName;
-  const receiverName = payment.receiverName ?? "RRJ Food-House";
-  const uploadedBy = payment.uploadedBy ?? senderName;
+  const canRejectWithoutShift = Boolean(
+    payment.proofImagePath &&
+      order.databaseId &&
+      order.orderChannel === "online",
+  );
+  const uploadedBy =
+    payment.uploadedBy ?? payment.senderName ?? order.customerName;
   return (
     <div className="space-y-5 p-4 sm:p-6">
       <div className="rrj-card flex flex-wrap items-start justify-between gap-3 bg-gradient-to-r from-white to-amber-50/45 p-4">
@@ -62,24 +56,9 @@ export function PaymentDetails({
       </div>
       {!shiftOpen && (
         <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-bold text-amber-900">
-          Start a cashier shift before processing this payment.
-        </div>
-      )}
-      {mismatch && (
-        <div
-          role="alert"
-          className="flex gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs font-semibold text-red-800"
-        >
-          <AlertTriangle className="h-4 w-4 shrink-0" />
-          <span>
-            <strong>
-              Automatic review found {issues.length} mismatch
-              {issues.length === 1 ? "" : "es"}.
-            </strong>
-            <span className="mt-1 block">
-              {issues.map((issue) => issue.detail).join(" ")}
-            </span>
-          </span>
+          {canRejectWithoutShift
+            ? "Start a cashier shift before verifying this payment. Secure rejection remains available."
+            : "Start a cashier shift before processing this payment."}
         </div>
       )}
       <div className="payment-review-grid grid gap-4 lg:grid-cols-[minmax(280px,0.9fr)_minmax(330px,1.1fr)]">
@@ -88,62 +67,55 @@ export function PaymentDetails({
         </div>
         <div className="min-w-0 space-y-4">
           <section
-            className={`grid grid-cols-3 gap-3 rounded-2xl border p-4 shadow-sm ${mismatch ? "border-red-200 bg-red-50/60" : "border-emerald-200 bg-emerald-50/55"}`}
-            aria-label="Payment amount comparison"
+            className="rounded-2xl border border-amber-200 bg-amber-50/60 p-4 shadow-sm"
+            aria-label="Manual GCash proof review"
           >
-            <div>
-              <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">
-                Order total
-              </p>
-              <p className="mt-1 text-xl font-black text-foreground">
-                {formatMoney(order.total)}
-              </p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">
+                  Order total
+                </p>
+                <p className="mt-1 text-xl font-black text-foreground">
+                  {formatMoney(order.total)}
+                </p>
+              </div>
+              <div className="sm:border-l sm:border-current/10 sm:pl-3">
+                <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">
+                  Recorded payment amount
+                </p>
+                <p className="mt-1 text-xl font-black text-foreground">
+                  {formatMoney(payment.amount)}
+                </p>
+              </div>
             </div>
-            <div className="border-l border-current/10 pl-3">
-              <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">
-                Proof amount
-              </p>
-              <p
-                className={`mt-1 text-xl font-black ${amountMismatch ? "text-red-700" : "text-emerald-700"}`}
-              >
-                {formatMoney(payment.submittedAmount)}
-              </p>
-            </div>
-            <div className="border-l border-current/10 pl-3">
-              <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">
-                Difference
-              </p>
-              <p
-                className={`mt-1 text-xl font-black ${amountMismatch ? "text-red-700" : "text-emerald-700"}`}
-              >
-                {difference > 0 ? "+" : difference < 0 ? "−" : ""}
-                {formatMoney(Math.abs(difference))}
-              </p>
-            </div>
-            <p
-              className={`col-span-3 text-[10px] font-black ${mismatch ? "text-red-700" : "text-emerald-700"}`}
-            >
-              {mismatch
-                ? `Review required · ${issues.map((issue) => issue.label).join(" · ")}`
-                : "Amounts match · ready for verification"}
+            <p className="mt-3 text-xs font-black text-amber-900">
+              Proof review: Manual verification required
+            </p>
+            <p className="mt-1 text-xs font-semibold text-amber-900/90">
+              Inspect the screenshot itself, the GCash reference, the amount
+              shown in the proof, and the recipient/details before confirming.
             </p>
           </section>
           <section className="rrj-card grid gap-4 p-4 sm:grid-cols-2">
             <Detail
               icon={Hash}
-              label="Reference Number"
+              label="Recorded GCash Reference"
               value={payment.referenceNumber ?? "Not found"}
             />
-            <Detail icon={UserRound} label="Sender Name" value={senderName} />
             <Detail
-              icon={ReceiptText}
-              label="Receiver Name"
-              value={receiverName}
+              icon={UserRound}
+              label="Customer"
+              value={order.customerName}
             />
             <Detail
               icon={CreditCard}
-              label="Amount"
-              value={formatMoney(payment.submittedAmount)}
+              label="Recorded Payment Amount"
+              value={formatMoney(payment.amount)}
+            />
+            <Detail
+              icon={Upload}
+              label="Proof Source"
+              value="Customer-uploaded screenshot"
             />
             <Detail
               icon={CalendarDays}
@@ -196,7 +168,7 @@ export function PaymentDetails({
       <div className="payment-review-actions sticky bottom-0 z-10 flex flex-col gap-2 border-t border-border bg-background/95 py-3 backdrop-blur sm:flex-row sm:justify-end">
         <CashierButton
           variant="danger"
-          disabled={!shiftOpen}
+          disabled={!shiftOpen && !canRejectWithoutShift}
           onClick={onReject}
         >
           Reject payment

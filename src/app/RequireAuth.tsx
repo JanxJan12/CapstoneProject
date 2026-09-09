@@ -1,7 +1,7 @@
 import { Navigate, useNavigate } from "react-router";
 
 import { useAuth } from "@/app/providers/AuthProvider";
-import type { AccountRole } from "@/data/authAccounts";
+import type { AccountRole } from "@/data/accountRole";
 
 export const MAINTENANCE_MODE = false;
 

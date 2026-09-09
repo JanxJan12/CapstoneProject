@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { OrderType } from "../types";
 
 export const rejectionSchema = z
   .object({
@@ -33,11 +34,37 @@ export const orderOperationalEditSchema = z.object({
     .string()
     .trim()
     .min(1, "Phone number is required.")
-    .max(30, "Phone number must be 30 characters or fewer."),
-  tableNumber: z.string().trim().max(30).optional(),
-  deliveryAddress: z.string().trim().max(200).optional(),
-  orderInstructions: z.string().trim().max(300).optional(),
+    .max(20, "Phone number must be 20 characters or fewer."),
+  tableNumber: z
+    .string()
+    .trim()
+    .max(20, "Table number must be 20 characters or fewer.")
+    .optional(),
+  deliveryAddress: z
+    .string()
+    .trim()
+    .max(200, "Delivery address must be 200 characters or fewer.")
+    .optional(),
+  orderInstructions: z
+    .string()
+    .trim()
+    .max(500, "Order instructions must be 500 characters or fewer.")
+    .optional(),
 });
+
+export function createOrderOperationalEditSchema(
+  orderType: OrderType,
+) {
+  return orderOperationalEditSchema.superRefine((value, ctx) => {
+    if (orderType === "Delivery" && !value.deliveryAddress?.trim()) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["deliveryAddress"],
+        message: "Delivery address is required.",
+      });
+    }
+  });
+}
 
 export const voidSchema = z.object({
   reason: z.string().trim().min(3, "Enter a void reason.").max(200),
@@ -59,14 +86,6 @@ export const endShiftSchema = z.object({
     .trim()
     .max(500, "Notes must be 500 characters or fewer.")
     .optional(),
-  managerName: z
-    .string()
-    .trim()
-    .min(2, "Manager name is required for approval.")
-    .max(80),
-  managerApproved: z
-    .boolean()
-    .refine((approved) => approved, "Manager approval is required."),
 });
 
 export const posSchema = z

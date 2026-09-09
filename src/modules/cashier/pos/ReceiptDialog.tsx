@@ -17,7 +17,6 @@ export function ReceiptDialog({
   open,
   onClose,
   placed = false,
-  onPrint,
 }: {
   order?: Order;
   payment?: Payment;
@@ -25,7 +24,6 @@ export function ReceiptDialog({
   open: boolean;
   onClose: () => void;
   placed?: boolean;
-  onPrint?: () => void | Promise<void>;
 }) {
   if (!order) return null;
   return (
@@ -61,7 +59,6 @@ export function ReceiptDialog({
             variant="secondary"
             onClick={() => {
               window.print();
-              void onPrint?.();
               Toast.success("Receipt sent to the print dialog.");
             }}
           >

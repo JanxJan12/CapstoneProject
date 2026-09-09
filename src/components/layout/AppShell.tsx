@@ -3,7 +3,6 @@ import {
   Bell,
   CheckCheck,
   ChevronDown,
-  CircleDot,
   Clock3,
   LogOut,
   Menu,
@@ -262,10 +261,6 @@ export function AppShell<T extends string>({
               <p className="truncate text-sm font-black tracking-[-0.01em] text-foreground sm:mt-0.5">
                 {activeLabel}
               </p>
-              <span className="hidden h-1 w-1 rounded-full bg-border lg:block" />
-              <span className="hidden items-center gap-1.5 text-[9px] font-bold text-emerald-700 lg:flex">
-                <CircleDot className="h-3 w-3" /> Live operations
-              </span>
             </div>
           </div>
 

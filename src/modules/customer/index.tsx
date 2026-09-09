@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { gcashMerchantConfig } from "@/config/paymentConfig";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useNavigate } from "react-router";
@@ -15,7 +16,6 @@ import {
   User,
   Phone,
   Search,
-  Star,
   Menu as MenuIcon,
   X,
   BadgeCheck,
@@ -52,6 +52,11 @@ interface DatabaseMenuItem {
   image_path: string | null;
   is_available: boolean;
   is_active: boolean;
+}
+
+interface DatabaseMenuEffectiveAvailability {
+  menu_item_id: string;
+  effective_available: boolean;
 }
 
 interface CustomerDatabaseMenuItem {
@@ -177,6 +182,50 @@ function FoodCard({
         </button>
       </div>
     </article>
+  );
+}
+
+function CustomerMenuFeedback({
+  loading,
+  error,
+  onRetry,
+}: {
+  loading: boolean;
+  error: string | null;
+  onRetry: () => void;
+}) {
+  return (
+    <div
+      role={error ? "alert" : "status"}
+      className={`flex min-h-44 flex-col items-center justify-center rounded-2xl border px-6 text-center ${
+        error
+          ? "border-red-200 bg-red-50"
+          : "border-border bg-card"
+      }`}
+    >
+      {loading ? (
+        <>
+          <Loader2 className="h-7 w-7 animate-spin text-primary" />
+          <p className="mt-3 text-sm font-semibold text-muted-foreground">
+            Loading menu…
+          </p>
+        </>
+      ) : (
+        <>
+          <p className="text-sm font-bold text-red-700">
+            Unable to load the menu
+          </p>
+          <p className="mt-1 text-xs text-red-600">{error}</p>
+          <button
+            type="button"
+            onClick={onRetry}
+            className="mt-4 min-h-10 rounded-xl border border-red-300 bg-white px-4 text-xs font-bold text-red-700 hover:bg-red-100"
+          >
+            Try Again
+          </button>
+        </>
+      )}
+    </div>
   );
 }
 
@@ -576,13 +625,21 @@ function HomePage({
   cart,
   menuItems,
   categories,
+  menuLoading,
+  menuError,
   onNav,
+  onBrowseCategory,
+  onRetryMenu,
   onAddToCart,
 }: {
   cart: CartItem[];
   menuItems: CustomerDatabaseMenuItem[];
   categories: DatabaseMenuCategory[];
+  menuLoading: boolean;
+  menuError: string | null;
   onNav: (page: CustomerPage) => void;
+  onBrowseCategory: (category: string) => void;
+  onRetryMenu: () => void;
   onAddToCart: (
     item: CustomerDatabaseMenuItem,
   ) => void;
@@ -631,6 +688,14 @@ function HomePage({
             ))}
           </div>
 
+          {menuLoading || menuError ? (
+            <CustomerMenuFeedback
+              loading={menuLoading}
+              error={menuError}
+              onRetry={onRetryMenu}
+            />
+          ) : (
+            <>
           <div className="mb-3 flex items-end justify-between sm:mb-4">
             <div><p className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-primary/70">Find your craving</p><h2 className="font-['Fraunces'] text-xl font-semibold text-foreground sm:text-2xl">Browse by category</h2></div>
           </div>
@@ -648,7 +713,7 @@ function HomePage({
                 return (
                   <button
                     key={cat}
-                    onClick={() => onNav("menu")}
+                    onClick={() => onBrowseCategory(cat)}
                     className="group flex min-h-[5.8rem] flex-col items-center justify-center gap-1.5 rounded-2xl border border-border/80 bg-card p-2 shadow-sm transition-all hover:-translate-y-1 hover:border-primary/25 hover:shadow-lg sm:min-h-[7rem] sm:gap-2"
                   >
                     <div
@@ -668,7 +733,7 @@ function HomePage({
           </div>
 
           <div className="mb-3 flex items-end justify-between sm:mb-4">
-            <div><p className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-primary/70">Guest favorites</p><h2 className="font-['Fraunces'] text-xl font-semibold text-foreground sm:text-2xl">Popular right now</h2></div>
+            <div><p className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-primary/70">From our menu</p><h2 className="font-['Fraunces'] text-xl font-semibold text-foreground sm:text-2xl">Available dishes</h2></div>
             <button onClick={() => onNav("menu")} className="flex min-h-10 items-center gap-1 rounded-lg px-2 text-[10px] font-extrabold text-primary hover:bg-primary/5 sm:text-xs">View all <ChevronRight className="h-3.5 w-3.5" /></button>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
@@ -676,6 +741,8 @@ function HomePage({
               <FoodCard key={item.id} item={item} onAdd={onAddToCart} />
             ))}
           </div>
+            </>
+          )}
         </div>
       </div>
     </div>
@@ -687,14 +754,24 @@ function MenuPage({
   cart,
   menuItems,
   categories,
+  menuLoading,
+  menuError,
+  selectedCategory,
   onNav,
+  onCategoryChange,
+  onRetryMenu,
   onAddToCart,
   onViewDetail,
 }: {
   cart: CartItem[];
   menuItems: CustomerDatabaseMenuItem[];
   categories: DatabaseMenuCategory[];
+  menuLoading: boolean;
+  menuError: string | null;
+  selectedCategory: string;
   onNav: (page: CustomerPage) => void;
+  onCategoryChange: (category: string) => void;
+  onRetryMenu: () => void;
   onAddToCart: (
     item: CustomerDatabaseMenuItem,
   ) => void;
@@ -702,14 +779,16 @@ function MenuPage({
     item: CustomerDatabaseMenuItem,
   ) => void;
 }) {
-  const [cat, setCat]       = useState("All");
   const [search, setSearch] = useState("");
   const cats = [
   "All",
   ...categories.map(
     (category) => category.name,
   ),
-];
+  ];
+  const cat = cats.includes(selectedCategory)
+    ? selectedCategory
+    : "All";
   const filtered = menuItems.filter(
     (m) => m.available &&
     (cat === "All" || m.category === cat) &&
@@ -726,8 +805,18 @@ function MenuPage({
             <p className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-primary/70">Fresh from our halal kitchen</p>
             <h1 className="font-['Fraunces'] text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">What are you craving?</h1>
           </div>
-          <span className="hidden rounded-full border border-border bg-card px-3 py-1.5 text-[10px] font-bold text-muted-foreground sm:block">{filtered.length} dishes available</span>
+          {!menuLoading && !menuError ? (
+            <span className="hidden rounded-full border border-border bg-card px-3 py-1.5 text-[10px] font-bold text-muted-foreground sm:block">{filtered.length} dishes available</span>
+          ) : null}
         </div>
+        {menuLoading || menuError ? (
+          <CustomerMenuFeedback
+            loading={menuLoading}
+            error={menuError}
+            onRetry={onRetryMenu}
+          />
+        ) : (
+          <>
         {/* Search + filters */}
         <div className="mb-5 flex flex-col items-stretch gap-3 sm:mb-7 sm:flex-row sm:items-center">
           <div className="relative flex-1 sm:max-w-sm">
@@ -738,7 +827,7 @@ function MenuPage({
           </div>
           <div className="flex flex-shrink-0 gap-1 overflow-x-auto rounded-xl border border-border bg-card p-1 shadow-sm">
             {cats.map((c) => (
-              <button key={c} onClick={() => setCat(c)}
+              <button key={c} onClick={() => onCategoryChange(c)}
                 className={`min-h-10 whitespace-nowrap rounded-lg px-3 text-[10px] font-extrabold transition-all sm:text-xs ${cat === c ? "bg-[#211914] text-white shadow-sm" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}>
                 {c}
               </button>
@@ -754,8 +843,10 @@ function MenuPage({
             <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-2xl">🍽️</div>
             <h2 className="text-sm font-extrabold text-foreground">No dishes found</h2>
             <p className="mt-1 text-xs text-muted-foreground">Try a different search or category.</p>
-            <button onClick={() => { setSearch(""); setCat("All"); }} className="mt-4 min-h-10 rounded-xl bg-[#211914] px-4 text-xs font-extrabold text-white">Clear filters</button>
+            <button onClick={() => { setSearch(""); onCategoryChange("All"); }} className="mt-4 min-h-10 rounded-xl bg-[#211914] px-4 text-xs font-extrabold text-white">Clear filters</button>
           </div>
+        )}
+          </>
         )}
         </div>
       </div>
@@ -792,10 +883,6 @@ function MenuDetailPage({
               <div className="mb-2 flex items-center gap-2"><span className="text-xs font-extrabold uppercase tracking-wide text-primary">{item.category}</span><span className="h-1 w-1 rounded-full bg-border" /><span className="inline-flex items-center gap-1 text-[9px] font-extrabold uppercase tracking-wider text-emerald-700"><BadgeCheck className="h-3 w-3" /> Halal</span></div>
               <h1 className="mb-3 font-['Fraunces'] text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">{item.name}</h1>
               <p className="text-muted-foreground mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base">{item.desc}</p>
-              <div className="flex items-center gap-1 mb-4 sm:mb-6">
-                {[1,2,3,4,5].map((s) => <Star key={s} className="w-4 h-4 fill-amber-400 text-amber-400" />)}
-                <span className="text-xs text-muted-foreground ml-1">(128 orders)</span>
-              </div>
               <p className="text-2xl sm:text-3xl font-bold text-primary mb-4 sm:mb-6">₱{item.price}</p>
               <div className="flex items-center gap-3 sm:gap-4">
                 <div className="flex min-h-12 items-center gap-3 rounded-xl border border-border px-2">
@@ -866,9 +953,10 @@ function CartPage({ cart, onNav, onQtyChange, onRemove }: { cart: CartItem[]; on
                         <span className="font-semibold flex-shrink-0">₱{c.price * c.qty}</span>
                       </div>
                     ))}
-                    <div className="flex justify-between pt-2 border-t border-border"><span className="text-muted-foreground">Delivery Fee</span><span className="font-semibold">₱50</span></div>
-                    <div className="flex justify-between font-bold text-base pt-2 border-t border-border"><span>Total</span><span className="text-primary">₱{subtotal + 50}</span></div>
+                    <div className="flex justify-between pt-2 border-t border-border"><span className="text-muted-foreground">Estimated delivery fee</span><span className="font-semibold">₱50</span></div>
+                    <div className="flex justify-between font-bold text-base pt-2 border-t border-border"><span>Estimated total</span><span className="text-primary">₱{subtotal + 50}</span></div>
                   </div>
+                  <p className="mb-4 text-[11px] leading-4 text-muted-foreground">The final delivery fee and total will be confirmed when your order is created at checkout.</p>
                   <button onClick={() => onNav("checkout")} className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-bold hover:bg-amber-800">Proceed to Checkout</button>
                 </div>
               </div>
@@ -893,6 +981,88 @@ interface PlacedCustomerOrder {
   delivery_fee: number;
   grand_total: number;
   current_status: string;
+}
+
+interface PendingCustomerPaymentSubmission {
+  order: PlacedCustomerOrder;
+  proofImagePath?: string;
+}
+
+function parsePlacedCustomerOrder(value: unknown): PlacedCustomerOrder {
+  if (!value || typeof value !== "object") {
+    throw new Error(
+      "The server returned invalid order information.",
+    );
+  }
+
+  const row = value as Record<string, unknown>;
+  const subtotal = Number(row.subtotal);
+  const deliveryFee = Number(row.delivery_fee);
+  const grandTotal = Number(row.grand_total);
+  const hasNumericTotals = [
+    row.subtotal,
+    row.delivery_fee,
+    row.grand_total,
+  ].every(
+    (amount) =>
+      (typeof amount === "number" ||
+        (typeof amount === "string" && amount.trim().length > 0)),
+  );
+
+  if (
+    typeof row.order_id !== "string" ||
+    row.order_id.trim().length === 0 ||
+    typeof row.order_number !== "string" ||
+    row.order_number.trim().length === 0 ||
+    typeof row.current_status !== "string" ||
+    row.current_status.trim().length === 0 ||
+    !hasNumericTotals ||
+    !Number.isFinite(subtotal) ||
+    subtotal < 0 ||
+    !Number.isFinite(deliveryFee) ||
+    deliveryFee < 0 ||
+    !Number.isFinite(grandTotal) ||
+    grandTotal < 0
+  ) {
+    throw new Error(
+      "The server returned incomplete order information.",
+    );
+  }
+
+  return {
+    order_id: row.order_id,
+    order_number: row.order_number,
+    subtotal,
+    delivery_fee: deliveryFee,
+    grand_total: grandTotal,
+    current_status: row.current_status,
+  };
+}
+
+interface SubmittedCustomerPayment {
+  payment_id: string;
+  order_id: string;
+  amount: number | string;
+  payment_method: "gcash";
+  gcash_reference_number: string;
+  proof_image_path: string;
+  status: "pending";
+  created_at: string;
+}
+
+function getPaymentProofExtension(file: File): string {
+  const originalExtension = file.name
+    .split(".")
+    .pop()
+    ?.toLowerCase();
+
+  if (file.type === "image/png") {
+    return "png";
+  }
+
+  return originalExtension === "jpeg"
+    ? "jpeg"
+    : "jpg";
 }
 
 // ── Checkout ─────────────────────────────────────────────────────
@@ -920,7 +1090,7 @@ function CheckoutPage({
 
   const [googleLoading, setGoogleLoading] =
     useState(false);
-  
+
   const [fullName, setFullName] =
   useState("");
 
@@ -950,6 +1120,23 @@ const [placedOrder, setPlacedOrder] =
     null,
   );
 
+  const [
+    pendingPaymentSubmission,
+    setPendingPaymentSubmission,
+  ] = useState<PendingCustomerPaymentSubmission | null>(
+    null,
+  );
+
+  const [
+    gcashReferenceNumber,
+    setGcashReferenceNumber,
+  ] = useState("");
+
+  const [
+    gcashReferenceError,
+    setGcashReferenceError,
+  ] = useState<string | null>(null);
+
   const [paymentProof, setPaymentProof] =
   useState<File | null>(null);
 
@@ -958,6 +1145,8 @@ const [placedOrder, setPlacedOrder] =
 
   const paymentProofInputRef =
   useRef<HTMLInputElement | null>(null);
+
+  const orderCreationInFlightRef = useRef(false);
 
   const isCustomerSignedIn =
     session?.role === "customer";
@@ -1099,7 +1288,11 @@ useEffect(() => {
     }
   };
 
-  const handleContinueToPayment = () => {
+  const handleContinueToPayment = async () => {
+  if (placingOrder || orderCreationInFlightRef.current) {
+    return;
+  }
+
   const cleanName = fullName.trim();
   const cleanContact = contactNumber.trim();
   const cleanAddress = deliveryAddress.trim();
@@ -1120,7 +1313,7 @@ useEffect(() => {
 
   if (!/^09\d{9}$/.test(cleanContact)) {
     setDeliveryError(
-      "Please enter a valid Philippine mobile number, for example 09171234567.",
+      "Enter an 11-digit Philippine mobile number starting with 09.",
     );
     return;
   }
@@ -1132,13 +1325,99 @@ useEffect(() => {
     return;
   }
 
+  if (!gcashMerchantConfig.isConfigured) {
+    setDeliveryError(
+      "GCash payment is temporarily unavailable. Please contact the store.",
+    );
+    return;
+  }
+
+  if (!isCustomerSignedIn) {
+    setDeliveryError(
+      "Please sign in before creating your order.",
+    );
+    return;
+  }
+
+  if (pendingPaymentSubmission?.order) {
+    setDeliveryError(null);
+    setStep("upload");
+    return;
+  }
+
+  if (cart.length === 0) {
+    setDeliveryError("Your cart is empty.");
+    return;
+  }
+
   setDeliveryError(null);
-  setStep("upload");
+  setPlaceOrderError(null);
+  setPlacingOrder(true);
+  orderCreationInFlightRef.current = true;
+
+  try {
+    const rpcItems = cart.map((item) => ({
+      id: item.id,
+      qty: item.qty,
+    }));
+
+    const {
+      data: orderData,
+      error: orderError,
+    } = await supabase.rpc(
+      "place_customer_order",
+      {
+        p_customer_name: cleanName,
+        p_contact_number: cleanContact,
+        p_delivery_address: cleanAddress,
+        p_landmark: landmark.trim() || null,
+        p_items: rpcItems,
+      },
+    );
+
+    if (orderError) {
+      throw new Error(
+        `Unable to place your order: ${orderError.message}`,
+      );
+    }
+
+    const orderResult =
+      Array.isArray(orderData) && orderData.length === 1
+        ? orderData[0]
+        : null;
+
+    if (!orderResult) {
+      throw new Error(
+        "The order was submitted but no complete order information was returned.",
+      );
+    }
+
+    const createdOrder = parsePlacedCustomerOrder(orderResult);
+
+    setPendingPaymentSubmission({ order: createdOrder });
+    setStep("upload");
+  } catch (error) {
+    console.error("Unable to create customer order:", error);
+
+    setDeliveryError(
+      error instanceof Error
+        ? error.message
+        : "Unable to create your order.",
+    );
+  } finally {
+    orderCreationInFlightRef.current = false;
+    setPlacingOrder(false);
+  }
 };
 
 const handlePaymentProofChange = (
   event: React.ChangeEvent<HTMLInputElement>,
 ) => {
+  if (pendingPaymentSubmission?.proofImagePath) {
+    event.target.value = "";
+    return;
+  }
+
   const file = event.target.files?.[0];
 
   if (!file) {
@@ -1176,11 +1455,17 @@ const handlePaymentProofChange = (
 
   setPaymentProof(file);
   setPaymentProofError(null);
+  setPlaceOrderError(null);
 };
 
 const handleRemovePaymentProof = () => {
+  if (pendingPaymentSubmission?.proofImagePath) {
+    return;
+  }
+
   setPaymentProof(null);
   setPaymentProofError(null);
+  setPlaceOrderError(null);
 
   if (paymentProofInputRef.current) {
     paymentProofInputRef.current.value = "";
@@ -1194,101 +1479,172 @@ const handlePlaceOrder = async () => {
 
   setPlaceOrderError(null);
 
-  if (!isCustomerSignedIn) {
+  const existingSubmission = pendingPaymentSubmission;
+
+  if (!existingSubmission?.order) {
     setPlaceOrderError(
-      "Please sign in before placing your order.",
+      "Create your order before submitting a GCash payment.",
     );
     return;
   }
 
-  if (cart.length === 0) {
+  if (!isCustomerSignedIn) {
     setPlaceOrderError(
-      "Your cart is empty.",
+      `Order ${existingSubmission.order.order_number} exists, but your signed-in customer account could not be confirmed. Please sign in and retry this payment submission.`,
     );
     return;
   }
+
+  const normalizedReference =
+    gcashReferenceNumber.trim();
+
+  if (!normalizedReference) {
+    setGcashReferenceError(
+      "Please enter the GCash reference number.",
+    );
+    return;
+  }
+
+  setGcashReferenceError(null);
+
+  if (
+    !paymentProof &&
+    !pendingPaymentSubmission?.proofImagePath
+  ) {
+    setPaymentProofError(
+      "Please select your GCash payment screenshot.",
+    );
+    return;
+  }
+
+  setPaymentProofError(null);
 
   setPlacingOrder(true);
 
-  const rpcItems = cart.map((item) => ({
-    id: item.id,
-    qty: item.qty,
-  }));
+  try {
+    let submission = existingSubmission;
 
-  const {
-    data,
-    error,
-  } = await supabase.rpc(
-    "place_customer_order",
-    {
-      p_customer_name:
-        fullName.trim(),
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
 
-      p_contact_number:
-        contactNumber.trim(),
+    if (userError || !user) {
+      throw new Error(
+        `Order ${submission.order.order_number} was created, but your signed-in customer account could not be confirmed. Please sign in and retry this payment submission.`,
+      );
+    }
 
-      p_delivery_address:
-        deliveryAddress.trim(),
+    let proofImagePath =
+      submission.proofImagePath;
 
-      p_landmark:
-        landmark.trim() || null,
+    if (!proofImagePath) {
+      if (!paymentProof) {
+        throw new Error(
+          `Order ${submission.order.order_number} was created. Select your payment screenshot, then retry the payment submission.`,
+        );
+      }
 
-      p_items: rpcItems,
-    },
-  );
+      const proofExtension =
+        getPaymentProofExtension(paymentProof);
 
-  if (error) {
+      proofImagePath = [
+        user.id,
+        submission.order.order_id,
+        `${crypto.randomUUID()}.${proofExtension}`,
+      ].join("/");
+
+      const { error: uploadError } =
+        await supabase.storage
+          .from("payment-proofs")
+          .upload(
+            proofImagePath,
+            paymentProof,
+            {
+              cacheControl: "3600",
+              contentType: paymentProof.type,
+              upsert: false,
+            },
+          );
+
+      if (uploadError) {
+        throw new Error(
+          `Order ${submission.order.order_number} was created, but the payment screenshot upload failed: ${uploadError.message}. Retry to continue with the same order.`,
+        );
+      }
+
+      submission = {
+        ...submission,
+        proofImagePath,
+      };
+
+      setPendingPaymentSubmission(submission);
+    }
+
+    const {
+      data: paymentData,
+      error: paymentError,
+    } = await supabase.rpc(
+      "submit_customer_payment",
+      {
+        p_order_id:
+          submission.order.order_id,
+        p_gcash_reference_number:
+          normalizedReference,
+        p_proof_image_path:
+          proofImagePath,
+      },
+    );
+
+    if (paymentError) {
+      throw new Error(
+        `Order ${submission.order.order_number} and its screenshot were saved, but the payment submission failed: ${paymentError.message}. Retry to continue with the same order.`,
+      );
+    }
+
+    const paymentResult =
+      Array.isArray(paymentData) &&
+      paymentData.length > 0
+        ? paymentData[0] as SubmittedCustomerPayment
+        : null;
+
+    if (
+      !paymentResult ||
+      !paymentResult.payment_id ||
+      paymentResult.order_id !==
+        submission.order.order_id ||
+      paymentResult.payment_method !== "gcash" ||
+      paymentResult.status !== "pending" ||
+      paymentResult.gcash_reference_number.trim().toLowerCase() !==
+        normalizedReference.toLowerCase() ||
+      paymentResult.proof_image_path !==
+        proofImagePath ||
+      !paymentResult.created_at ||
+      Number(paymentResult.amount) !==
+        submission.order.grand_total
+    ) {
+      throw new Error(
+        `Order ${submission.order.order_number} was created, but the server returned an invalid payment confirmation. Retry to confirm the same order payment.`,
+      );
+    }
+
+    setPlacedOrder(submission.order);
+    setPendingPaymentSubmission(null);
+    onOrderPlaced(submission.order.order_id);
+  } catch (error) {
     console.error(
-      "Unable to place customer order:",
+      "Unable to complete customer payment submission:",
       error,
     );
 
     setPlaceOrderError(
-      `Unable to place your order: ${error.message}`,
+      error instanceof Error
+        ? error.message
+        : "Unable to complete your payment submission.",
     );
-
+  } finally {
     setPlacingOrder(false);
-    return;
   }
-
-  const result =
-    Array.isArray(data) &&
-    data.length > 0
-      ? data[0]
-      : null;
-
-  if (!result) {
-    setPlaceOrderError(
-      "The order was submitted but no order information was returned.",
-    );
-
-    setPlacingOrder(false);
-    return;
-  }
-
-  const createdOrder: PlacedCustomerOrder = {
-    order_id: result.order_id,
-    order_number: result.order_number,
-    subtotal: Number(result.subtotal),
-    delivery_fee: Number(
-      result.delivery_fee,
-    ),
-    grand_total: Number(
-      result.grand_total,
-    ),
-    current_status:
-      result.current_status,
-  };
-
-  console.log(
-    "Customer order created:",
-    createdOrder,
-  );
-
-setPlacedOrder(createdOrder);
-setPlacingOrder(false);
-
-onOrderPlaced(createdOrder.order_id);
 };
 
 return (
@@ -1442,34 +1798,93 @@ return (
 
 <button
   type="button"
-  onClick={handleContinueToPayment}
-  className="mt-5 w-full rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground hover:bg-amber-800"
+  onClick={() => {
+    void handleContinueToPayment();
+  }}
+  disabled={placingOrder}
+  className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground hover:bg-amber-800 disabled:cursor-wait disabled:opacity-60"
 >
-  Continue to Payment
+  {placingOrder && (
+    <Loader2 className="h-4 w-4 animate-spin" />
+  )}
+  {placingOrder
+    ? "Creating Order…"
+    : pendingPaymentSubmission?.order
+      ? "Continue to Payment"
+      : "Create Order & Continue to Payment"}
 </button>
                 </div>
               )}
-              {step === "upload" && (
+              {step === "upload" &&
+                pendingPaymentSubmission?.order &&
+                gcashMerchantConfig.isConfigured && (
                 <div className="bg-card border border-border rounded-xl p-5 sm:p-6">
                   <h2 className="font-bold text-foreground text-base mb-1">Upload GCash Proof of Payment</h2>
+                  <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+                    <p className="font-mono text-sm font-extrabold text-amber-900">
+                      Order {pendingPaymentSubmission.order.order_number}
+                    </p>
+                    <p className="mt-1 text-xs font-semibold text-amber-800">
+                      Amount to pay: ₱{pendingPaymentSubmission.order.grand_total}
+                    </p>
+                  </div>
                   <p className="text-sm text-muted-foreground mb-2">Send your payment to:</p>
                   <div className="flex items-center gap-3 px-4 py-3 bg-green-50 border border-green-200 rounded-xl mb-5">
                     <div className="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">G</div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-bold text-foreground">09171234567</p>
-                      <p className="text-xs text-muted-foreground">RRJ's Food-Haus</p>
+                      <p className="font-bold text-foreground">{gcashMerchantConfig.number}</p>
+                      <p className="text-xs text-muted-foreground">{gcashMerchantConfig.name}</p>
                     </div>
                     <div className="text-right flex-shrink-0">
-                      <p className="text-sm font-bold text-green-700">₱{subtotal + 50}</p>
+                      <p className="text-sm font-bold text-green-700">₱{pendingPaymentSubmission.order.grand_total}</p>
                       <p className="text-[10px] text-muted-foreground">Total</p>
                     </div>
                   </div>
+
+                  <div className="mb-4 flex flex-col gap-1.5">
+                    <label
+                      htmlFor="checkout-gcash-reference"
+                      className="text-xs font-semibold text-foreground"
+                    >
+                      GCash Reference Number
+                    </label>
+
+                    <input
+                      id="checkout-gcash-reference"
+                      type="text"
+                      value={gcashReferenceNumber}
+                      onChange={(event) => {
+                        setGcashReferenceNumber(
+                          event.target.value,
+                        );
+                        setGcashReferenceError(null);
+                        setPlaceOrderError(null);
+                      }}
+                      placeholder="Enter the reference from your GCash receipt"
+                      autoComplete="off"
+                      disabled={placingOrder}
+                      className="rounded-lg border border-border bg-input-background px-3 py-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary/50 disabled:cursor-wait disabled:opacity-60"
+                    />
+
+                    {gcashReferenceError && (
+                      <p className="text-xs font-semibold text-red-700">
+                        {gcashReferenceError}
+                      </p>
+                    )}
+                  </div>
+
                   <div className="mb-4">
                     <input
                       ref={paymentProofInputRef}
                       type="file"
                       accept="image/png,image/jpeg"
                       onChange={handlePaymentProofChange}
+                      disabled={
+                        placingOrder ||
+                        Boolean(
+                          pendingPaymentSubmission?.proofImagePath,
+                        )
+                      }
                       className="hidden"
                     />
 
@@ -1479,7 +1894,8 @@ return (
                         onClick={() =>
                           paymentProofInputRef.current?.click()
                         }
-                        className="flex w-full cursor-pointer flex-col items-center gap-3 rounded-xl border-2 border-dashed border-border p-6 transition-colors hover:border-primary/40 hover:bg-primary/[0.02] sm:p-8"
+                        disabled={placingOrder}
+                        className="flex w-full cursor-pointer flex-col items-center gap-3 rounded-xl border-2 border-dashed border-border p-6 transition-colors hover:border-primary/40 hover:bg-primary/[0.02] disabled:cursor-wait disabled:opacity-60 sm:p-8"
                       >
                         <Upload className="h-8 w-8 text-muted-foreground/50 sm:h-10 sm:w-10" />
 
@@ -1502,7 +1918,9 @@ return (
 
                           <div className="min-w-0 flex-1">
                             <p className="text-xs font-bold text-emerald-800">
-                              Payment screenshot selected
+                              {pendingPaymentSubmission?.proofImagePath
+                                ? "Payment screenshot uploaded"
+                                : "Payment screenshot selected"}
                             </p>
 
                             <p className="mt-1 truncate text-sm font-semibold text-foreground">
@@ -1524,7 +1942,13 @@ return (
                             onClick={() =>
                               paymentProofInputRef.current?.click()
                             }
-                            className="min-h-10 flex-1 rounded-lg border border-border bg-white px-3 text-xs font-bold text-foreground hover:bg-muted"
+                            disabled={
+                              placingOrder ||
+                              Boolean(
+                                pendingPaymentSubmission?.proofImagePath,
+                              )
+                            }
+                            className="min-h-10 flex-1 rounded-lg border border-border bg-white px-3 text-xs font-bold text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
                           >
                             Change
                           </button>
@@ -1532,7 +1956,13 @@ return (
                           <button
                             type="button"
                             onClick={handleRemovePaymentProof}
-                            className="min-h-10 flex-1 rounded-lg border border-red-200 bg-white px-3 text-xs font-bold text-red-600 hover:bg-red-50"
+                            disabled={
+                              placingOrder ||
+                              Boolean(
+                                pendingPaymentSubmission?.proofImagePath,
+                              )
+                            }
+                            className="min-h-10 flex-1 rounded-lg border border-red-200 bg-white px-3 text-xs font-bold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                           >
                             Remove
                           </button>
@@ -1548,6 +1978,15 @@ return (
                       </div>
                     )}
                   </div>
+
+                  {!placedOrder && (
+                      <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5">
+                        <p className="text-xs font-semibold text-amber-800">
+                          Payment retries will continue against order {pendingPaymentSubmission.order.order_number} without creating another order.
+                        </p>
+                      </div>
+                    )}
+
                   {placeOrderError && (
   <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5">
     <p className="text-xs font-semibold text-red-700">
@@ -1591,15 +2030,30 @@ return (
     {placingOrder ? (
       <>
         <Loader2 className="h-4 w-4 animate-spin" />
-        Creating Order…
+        {pendingPaymentSubmission
+          ? "Submitting Payment…"
+          : "Creating Order…"}
       </>
     ) : (
-      "Place Order"
+      placeOrderError
+        ? "Retry Payment Submission"
+        : "Submit Payment"
     )}
   </button>
 )}
                 </div>
               )}
+              {step === "upload" &&
+                (!pendingPaymentSubmission?.order ||
+                  !gcashMerchantConfig.isConfigured) && (
+                  <div className="rounded-xl border border-red-200 bg-red-50 p-5 sm:p-6">
+                    <p className="text-sm font-bold text-red-800">
+                      {!gcashMerchantConfig.isConfigured
+                        ? "GCash payment is temporarily unavailable. Please contact the store."
+                        : "No created order is available for this payment. Return to delivery details and create your order first."}
+                    </p>
+                  </div>
+                )}
             </div>
             {/* Order summary sidebar */}
             <div className="lg:col-span-2">
@@ -1612,9 +2066,22 @@ return (
                       <span className="font-semibold flex-shrink-0">₱{c.price * c.qty}</span>
                     </div>
                   ))}
-                  <div className="flex justify-between pt-2 border-t border-border"><span className="text-muted-foreground">Delivery</span><span>₱50</span></div>
-                  <div className="flex justify-between font-bold text-base pt-2 border-t border-border"><span>Total</span><span className="text-primary">₱{subtotal + 50}</span></div>
+                  {pendingPaymentSubmission?.order ? (
+                    <>
+                      <div className="flex justify-between pt-2 border-t border-border"><span className="text-muted-foreground">Subtotal</span><span>₱{pendingPaymentSubmission.order.subtotal}</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Delivery fee</span><span>₱{pendingPaymentSubmission.order.delivery_fee}</span></div>
+                      <div className="flex justify-between font-bold text-base pt-2 border-t border-border"><span>Total</span><span className="text-primary">₱{pendingPaymentSubmission.order.grand_total}</span></div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex justify-between pt-2 border-t border-border"><span className="text-muted-foreground">Estimated delivery fee</span><span>₱50</span></div>
+                      <div className="flex justify-between font-bold text-base pt-2 border-t border-border"><span>Estimated total</span><span className="text-primary">₱{subtotal + 50}</span></div>
+                    </>
+                  )}
                 </div>
+                {!pendingPaymentSubmission?.order && (
+                  <p className="mt-3 text-[11px] leading-4 text-muted-foreground">The final delivery fee and total will be confirmed when your order is created.</p>
+                )}
               </div>
             </div>
           </div>
@@ -1639,6 +2106,126 @@ interface CustomerTrackingHistoryRow {
   created_at: string;
 }
 
+interface CustomerTrackingPaymentRow {
+  payment_id: string;
+  order_id: string;
+  amount: number;
+  payment_method: "gcash";
+  gcash_reference_number: string;
+  payment_status: "pending" | "verified" | "rejected";
+  rejection_reason: string | null;
+  rejection_notes: string | null;
+  rejected_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+const CUSTOMER_UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function isValidServerTimestamp(value: unknown): value is string {
+  return (
+    typeof value === "string" &&
+    value.length > 0 &&
+    Number.isFinite(Date.parse(value))
+  );
+}
+
+function parseCustomerTrackingPayment(
+  value: unknown,
+  expectedOrderId: string,
+): CustomerTrackingPaymentRow {
+  if (!value || typeof value !== "object") {
+    throw new Error("The server returned an invalid payment record.");
+  }
+
+  const row = value as Record<string, unknown>;
+  const amount = Number(row.amount);
+  const paymentStatus = row.payment_status;
+  const rejectionReason = row.rejection_reason;
+  const rejectionNotes = row.rejection_notes;
+  const rejectedAt = row.rejected_at;
+
+  if (
+    typeof row.payment_id !== "string" ||
+    !CUSTOMER_UUID_PATTERN.test(row.payment_id) ||
+    row.order_id !== expectedOrderId ||
+    row.payment_method !== "gcash" ||
+    !Number.isFinite(amount) ||
+    amount < 0 ||
+    typeof row.gcash_reference_number !== "string" ||
+    row.gcash_reference_number.trim().length === 0 ||
+    !["pending", "verified", "rejected"].includes(
+      String(paymentStatus),
+    ) ||
+    (rejectionReason !== null &&
+      typeof rejectionReason !== "string") ||
+    (rejectionNotes !== null &&
+      typeof rejectionNotes !== "string") ||
+    (rejectedAt !== null && !isValidServerTimestamp(rejectedAt)) ||
+    !isValidServerTimestamp(row.created_at) ||
+    !isValidServerTimestamp(row.updated_at)
+  ) {
+    throw new Error("The server returned malformed payment data.");
+  }
+
+  if (
+    paymentStatus === "rejected" &&
+    (typeof rejectionReason !== "string" ||
+      rejectionReason.trim().length === 0 ||
+      !isValidServerTimestamp(rejectedAt))
+  ) {
+    throw new Error("The rejected payment record is incomplete.");
+  }
+
+  return {
+    payment_id: row.payment_id,
+    order_id: expectedOrderId,
+    amount,
+    payment_method: "gcash",
+    gcash_reference_number: row.gcash_reference_number.trim(),
+    payment_status: paymentStatus as CustomerTrackingPaymentRow["payment_status"],
+    rejection_reason:
+      typeof rejectionReason === "string"
+        ? rejectionReason.trim()
+        : null,
+    rejection_notes:
+      typeof rejectionNotes === "string" && rejectionNotes.trim()
+        ? rejectionNotes.trim()
+        : null,
+    rejected_at: rejectedAt as string | null,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+  };
+}
+
+async function fetchCustomerTrackingPayment(
+  orderId: string,
+): Promise<CustomerTrackingPaymentRow | null> {
+  const { data, error } = await supabase.rpc(
+    "get_customer_order_payment",
+    { p_order_id: orderId },
+  );
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!Array.isArray(data)) {
+    throw new Error("The server returned an invalid payment response.");
+  }
+
+  if (data.length === 0) {
+    return null;
+  }
+
+  if (data.length !== 1) {
+    throw new Error("The server returned multiple payments for one order.");
+  }
+
+  return parseCustomerTrackingPayment(data[0], orderId);
+}
+
 // ── Order Tracking ────────────────────────────────────────────────
 function TrackingPage({
   cart,
@@ -1657,11 +2244,42 @@ function TrackingPage({
   const [statusHistory, setStatusHistory] =
     useState<CustomerTrackingHistoryRow[]>([]);
 
+  const [payment, setPayment] =
+    useState<CustomerTrackingPaymentRow | null>(null);
+
+  const [resubmissionReference, setResubmissionReference] =
+    useState("");
+
+  const [resubmissionProof, setResubmissionProof] =
+    useState<File | null>(null);
+
+  const [resubmissionProofError, setResubmissionProofError] =
+    useState<string | null>(null);
+
+  const [resubmissionError, setResubmissionError] =
+    useState<string | null>(null);
+
+  const [resubmissionSuccess, setResubmissionSuccess] =
+    useState<string | null>(null);
+
+  const [resubmittingPayment, setResubmittingPayment] =
+    useState(false);
+
+  const [uploadedResubmission, setUploadedResubmission] =
+    useState<{
+      fileKey: string;
+      proofImagePath: string;
+    } | null>(null);
+
+  const resubmissionProofInputRef =
+    useRef<HTMLInputElement | null>(null);
+
   const [loading, setLoading] =
     useState(true);
 
   const [errorMessage, setErrorMessage] =
     useState<string | null>(null);
+  const [loadAttempt, setLoadAttempt] = useState(0);
 
   useEffect(() => {
     let isMounted = true;
@@ -1737,42 +2355,48 @@ function TrackingPage({
       if (!selectedOrder) {
         setOrder(null);
         setStatusHistory([]);
+        setPayment(null);
         setLoading(false);
         return;
       }
 
-      const {
-        data: historyData,
-        error: historyError,
-      } = await supabase
-        .from("order_status_history")
-        .select(
-          `
-            status,
-            notes,
-            created_at
-          `,
-        )
-        .eq(
-          "order_id",
+      const [
+        historyResult,
+        selectedPayment,
+      ] = await Promise.all([
+        supabase
+          .from("order_status_history")
+          .select(
+            `
+              status,
+              notes,
+              created_at
+            `,
+          )
+          .eq(
+            "order_id",
+            selectedOrder.id,
+          )
+          .order("created_at", {
+            ascending: true,
+          }),
+        fetchCustomerTrackingPayment(
           selectedOrder.id,
-        )
-        .order("created_at", {
-          ascending: true,
-        });
+        ),
+      ]);
 
       if (!isMounted) {
         return;
       }
 
-      if (historyError) {
+      if (historyResult.error) {
         console.error(
           "Unable to load order status history:",
-          historyError,
+          historyResult.error,
         );
 
         setErrorMessage(
-          historyError.message,
+          historyResult.error.message,
         );
 
         setLoading(false);
@@ -1782,19 +2406,37 @@ function TrackingPage({
       setOrder(selectedOrder);
 
       setStatusHistory(
-        (historyData ??
+        (historyResult.data ??
           []) as CustomerTrackingHistoryRow[],
       );
+
+      setPayment(selectedPayment);
 
       setLoading(false);
     }
 
-    void loadTrackingOrder();
+    void loadTrackingOrder().catch((error) => {
+      if (!isMounted) {
+        return;
+      }
+
+      console.error(
+        "Unable to load customer payment:",
+        error,
+      );
+
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Unable to load payment details.",
+      );
+      setLoading(false);
+    });
 
     return () => {
       isMounted = false;
     };
-  }, [orderId]);
+  }, [loadAttempt, orderId]);
 
   useEffect(() => {
   if (!order?.id) {
@@ -1865,6 +2507,21 @@ function TrackingPage({
     );
   };
 
+  const refreshPayment = async () => {
+    try {
+      setPayment(
+        await fetchCustomerTrackingPayment(
+          trackedOrderId,
+        ),
+      );
+    } catch (error) {
+      console.error(
+        "Unable to refresh tracked payment:",
+        error,
+      );
+    }
+  };
+
   const channel = supabase
     .channel(
       `customer-order-tracking-${trackedOrderId}`,
@@ -1881,6 +2538,7 @@ function TrackingPage({
       () => {
         void refreshOrder();
         void refreshStatusHistory();
+        void refreshPayment();
       },
     )
 
@@ -1895,6 +2553,7 @@ function TrackingPage({
       () => {
         void refreshOrder();
         void refreshStatusHistory();
+        void refreshPayment();
       },
     )
 
@@ -1916,6 +2575,270 @@ function TrackingPage({
   };
 }, [order?.id]);
 
+  useEffect(() => {
+    setResubmissionReference("");
+    setResubmissionProof(null);
+    setResubmissionProofError(null);
+    setResubmissionError(null);
+    setResubmissionSuccess(null);
+    setUploadedResubmission(null);
+
+    if (resubmissionProofInputRef.current) {
+      resubmissionProofInputRef.current.value = "";
+    }
+  }, [order?.id]);
+
+  const handleResubmissionProofChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0] ?? null;
+
+    setResubmissionProof(null);
+    setResubmissionProofError(null);
+    setResubmissionError(null);
+    setResubmissionSuccess(null);
+    setUploadedResubmission(null);
+
+    if (!file) {
+      return;
+    }
+
+    if (!["image/jpeg", "image/png"].includes(file.type)) {
+      setResubmissionProofError(
+        "Upload a JPG or PNG payment screenshot.",
+      );
+      event.target.value = "";
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setResubmissionProofError(
+        "The payment screenshot must not exceed 5 MB.",
+      );
+      event.target.value = "";
+      return;
+    }
+
+    setResubmissionProof(file);
+  };
+
+  const handlePaymentResubmission = async () => {
+    if (
+      !order ||
+      order.current_status !== "waiting_payment_verification" ||
+      !payment ||
+      payment.payment_status !== "rejected"
+    ) {
+      setResubmissionError(
+        "This payment is no longer eligible for resubmission.",
+      );
+      return;
+    }
+
+    const normalizedReference = resubmissionReference.trim();
+
+    setResubmissionError(null);
+    setResubmissionSuccess(null);
+
+    if (!normalizedReference) {
+      setResubmissionError("Enter the GCash reference number.");
+      return;
+    }
+
+    if (normalizedReference.length > 100) {
+      setResubmissionError(
+        "The GCash reference number must be 100 characters or fewer.",
+      );
+      return;
+    }
+
+    if (!resubmissionProof) {
+      setResubmissionError("Upload the new GCash payment screenshot.");
+      return;
+    }
+
+    setResubmittingPayment(true);
+
+    try {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        throw new Error(
+          "Your signed-in customer account could not be confirmed. Sign in and try again.",
+        );
+      }
+
+      const fileKey = [
+        resubmissionProof.name,
+        resubmissionProof.type,
+        resubmissionProof.size,
+        resubmissionProof.lastModified,
+      ].join(":");
+
+      let proofImagePath =
+        uploadedResubmission?.fileKey === fileKey
+          ? uploadedResubmission.proofImagePath
+          : null;
+
+      if (!proofImagePath) {
+        proofImagePath = [
+          user.id,
+          order.id,
+          `${crypto.randomUUID()}.${getPaymentProofExtension(
+            resubmissionProof,
+          )}`,
+        ].join("/");
+
+        const { error: uploadError } =
+          await supabase.storage
+            .from("payment-proofs")
+            .upload(
+              proofImagePath,
+              resubmissionProof,
+              {
+                cacheControl: "3600",
+                contentType: resubmissionProof.type,
+                upsert: false,
+              },
+            );
+
+        if (uploadError) {
+          throw new Error(
+            `The new payment screenshot could not be uploaded: ${uploadError.message}`,
+          );
+        }
+
+        setUploadedResubmission({
+          fileKey,
+          proofImagePath,
+        });
+      }
+
+      const { data: paymentData, error: paymentError } =
+        await supabase.rpc(
+          "submit_customer_payment",
+          {
+            p_order_id: order.id,
+            p_gcash_reference_number: normalizedReference,
+            p_proof_image_path: proofImagePath,
+          },
+        );
+
+      if (paymentError) {
+        throw new Error(paymentError.message);
+      }
+
+      const paymentResult =
+        Array.isArray(paymentData) && paymentData.length === 1
+          ? (paymentData[0] as Partial<SubmittedCustomerPayment>)
+          : null;
+
+      if (
+        !paymentResult ||
+        paymentResult.payment_id !== payment.payment_id ||
+        paymentResult.order_id !== order.id ||
+        paymentResult.payment_method !== "gcash" ||
+        paymentResult.status !== "pending" ||
+        typeof paymentResult.gcash_reference_number !== "string" ||
+        paymentResult.gcash_reference_number.trim() !==
+          normalizedReference ||
+        paymentResult.proof_image_path !== proofImagePath ||
+        Number(paymentResult.amount) !== Number(order.grand_total) ||
+        paymentResult.created_at !== payment.created_at
+      ) {
+        throw new Error(
+          "The server returned an invalid payment resubmission confirmation.",
+        );
+      }
+
+      const [
+        refreshedOrderResult,
+        refreshedHistoryResult,
+        refreshedPayment,
+      ] = await Promise.all([
+        supabase
+          .from("orders")
+          .select(
+            `
+              id,
+              order_number,
+              current_status,
+              fulfillment_type,
+              grand_total,
+              created_at
+            `,
+          )
+          .eq("id", order.id)
+          .single<CustomerTrackingOrderRow>(),
+        supabase
+          .from("order_status_history")
+          .select(
+            `
+              status,
+              notes,
+              created_at
+            `,
+          )
+          .eq("order_id", order.id)
+          .order("created_at", { ascending: true }),
+        fetchCustomerTrackingPayment(order.id),
+      ]);
+
+      if (refreshedOrderResult.error) {
+        throw new Error(refreshedOrderResult.error.message);
+      }
+
+      if (refreshedHistoryResult.error) {
+        throw new Error(refreshedHistoryResult.error.message);
+      }
+
+      if (
+        !refreshedPayment ||
+        refreshedPayment.payment_id !== payment.payment_id ||
+        refreshedPayment.payment_status !== "pending" ||
+        refreshedPayment.gcash_reference_number !== normalizedReference ||
+        refreshedPayment.amount !== Number(order.grand_total)
+      ) {
+        throw new Error(
+          "The refreshed payment does not confirm the pending resubmission.",
+        );
+      }
+
+      setOrder(refreshedOrderResult.data);
+      setStatusHistory(
+        (refreshedHistoryResult.data ??
+          []) as CustomerTrackingHistoryRow[],
+      );
+      setPayment(refreshedPayment);
+      setResubmissionReference("");
+      setResubmissionProof(null);
+      setUploadedResubmission(null);
+      setResubmissionSuccess(
+        "Payment resubmitted and awaiting verification",
+      );
+
+      if (resubmissionProofInputRef.current) {
+        resubmissionProofInputRef.current.value = "";
+      }
+    } catch (error) {
+      console.error(
+        "Unable to resubmit customer payment:",
+        error,
+      );
+
+      setResubmissionError(
+        error instanceof Error
+          ? error.message
+          : "Unable to resubmit the payment.",
+      );
+    } finally {
+      setResubmittingPayment(false);
+    }
+  };
+
   const historyByStatus = new Map(
     statusHistory.map((history) => [
       history.status,
@@ -1931,6 +2854,14 @@ function TrackingPage({
 
   const isCompleted =
     order?.current_status === "completed";
+
+  const isDelivered =
+  order?.current_status === "delivered";
+
+  const paymentNeedsResubmission =
+    order?.current_status ===
+      "waiting_payment_verification" &&
+    payment?.payment_status === "rejected";
 
   const formattedPlacedDate =
     order
@@ -1999,6 +2930,14 @@ function TrackingPage({
               <p className="mt-1 text-xs text-red-600">
                 {errorMessage}
               </p>
+
+              <button
+                type="button"
+                onClick={() => setLoadAttempt((attempt) => attempt + 1)}
+                className="mt-4 min-h-10 rounded-xl border border-red-300 bg-white px-4 text-xs font-bold text-red-700 hover:bg-red-100"
+              >
+                Try Again
+              </button>
             </div>
           )}
 
@@ -2075,6 +3014,141 @@ function TrackingPage({
                 </div>
 
                 <div className="p-4 sm:p-6">
+                  {resubmissionSuccess && (
+                    <div className="mb-6 flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+                      <Check className="h-5 w-5 flex-shrink-0 text-emerald-600" />
+
+                      <p className="text-sm font-bold text-emerald-800">
+                        {resubmissionSuccess}
+                      </p>
+                    </div>
+                  )}
+
+                  {paymentNeedsResubmission && payment && (
+                    <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 sm:p-5">
+                      <div className="flex items-start gap-3">
+                        <X className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-600" />
+
+                        <div>
+                          <p className="text-sm font-extrabold text-red-800">
+                            Payment needs resubmission
+                          </p>
+
+                          <p className="mt-1 text-xs leading-5 text-red-700">
+                            Confirm your GCash reference and upload a new payment screenshot for this same order.
+                          </p>
+                        </div>
+                      </div>
+
+                      <dl className="mt-4 grid gap-2 rounded-lg border border-red-100 bg-white/70 p-3 text-xs">
+                        <div>
+                          <dt className="font-bold text-muted-foreground">
+                            Rejection reason
+                          </dt>
+                          <dd className="mt-0.5 font-semibold text-foreground">
+                            {payment.rejection_reason}
+                          </dd>
+                        </div>
+
+                        {payment.rejection_notes && (
+                          <div>
+                            <dt className="font-bold text-muted-foreground">
+                              Cashier notes
+                            </dt>
+                            <dd className="mt-0.5 whitespace-pre-wrap text-foreground">
+                              {payment.rejection_notes}
+                            </dd>
+                          </div>
+                        )}
+                      </dl>
+
+                      <div className="mt-4 grid gap-4">
+                      <label className="grid gap-1.5 text-xs font-bold text-foreground">
+                        GCash reference
+                        <input
+                          type="text"
+                          value={resubmissionReference}
+                          maxLength={100}
+                          disabled={resubmittingPayment}
+                          onChange={(event) => {
+                            setResubmissionReference(event.target.value);
+                            setResubmissionError(null);
+                            setResubmissionSuccess(null);
+                          }}
+                          placeholder="Enter the GCash reference number"
+                          className="min-h-11 rounded-xl border border-border bg-white px-3 text-sm font-medium text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:opacity-60"
+                        />
+                      </label>
+
+                        <div>
+                          <p className="mb-1.5 text-xs font-bold text-foreground">
+                            New payment proof
+                          </p>
+
+                          <input
+                            ref={resubmissionProofInputRef}
+                            type="file"
+                            accept="image/jpeg,image/png"
+                            disabled={resubmittingPayment}
+                            onChange={handleResubmissionProofChange}
+                            className="sr-only"
+                          />
+
+                          <button
+                            type="button"
+                            disabled={resubmittingPayment}
+                            onClick={() =>
+                              resubmissionProofInputRef.current?.click()
+                            }
+                            className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-dashed border-red-300 bg-white px-3 text-xs font-bold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            <Upload className="h-4 w-4" />
+                            {resubmissionProof
+                              ? resubmissionProof.name
+                              : "Choose JPG or PNG proof (max 5 MB)"}
+                          </button>
+
+                          {resubmissionProof && (
+                            <p className="mt-1 text-[11px] text-muted-foreground">
+                              {(resubmissionProof.size / 1024 / 1024).toFixed(2)} MB
+                            </p>
+                          )}
+
+                          {resubmissionProofError && (
+                            <p className="mt-1 text-xs font-semibold text-red-700">
+                              {resubmissionProofError}
+                            </p>
+                          )}
+                        </div>
+
+                        {resubmissionError && (
+                          <p className="rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-semibold text-red-700">
+                            {resubmissionError}
+                          </p>
+                        )}
+
+                        <button
+                          type="button"
+                          disabled={
+                            resubmittingPayment ||
+                            !resubmissionReference.trim() ||
+                            !resubmissionProof ||
+                            Boolean(resubmissionProofError)
+                          }
+                          onClick={() => void handlePaymentResubmission()}
+                          className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground hover:bg-amber-800 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {resubmittingPayment && (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          )}
+                          {resubmittingPayment
+                            ? "Resubmitting…"
+                            : "Resubmit Payment"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Current status */}
                   {(isCancelled ||
                     isRejected) ? (
@@ -2150,7 +3224,7 @@ function TrackingPage({
                               !isCurrent;
 
                             const completedOrderStep =
-                              isCompleted &&
+                              (isCompleted || isDelivered) &&
                               trackingStep.status ===
                                 "delivered";
 
@@ -2228,11 +3302,13 @@ function TrackingPage({
                                     </p>
                                   )}
 
-                                  {isCurrent && (
-                                    <p className="mt-0.5 text-xs font-semibold text-primary">
-                                      In progress…
-                                    </p>
-                                  )}
+                                {isCurrent && (
+                                  <p className="mt-0.5 text-xs font-semibold text-primary">
+                                    {completedOrderStep
+                                      ? "Completed"
+                                      : "In progress…"}
+                                  </p>
+                                )}
                                 </div>
                               </div>
                             );
@@ -2298,6 +3374,7 @@ function HistoryPage({
 
   const [errorMessage, setErrorMessage] =
     useState<string | null>(null);
+  const [loadAttempt, setLoadAttempt] = useState(0);
 
   useEffect(() => {
     let isMounted = true;
@@ -2433,7 +3510,7 @@ async function loadCustomerOrders() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [loadAttempt]);
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
@@ -2476,6 +3553,14 @@ async function loadCustomerOrders() {
               <p className="mt-1 text-xs text-red-600">
                 {errorMessage}
               </p>
+
+              <button
+                type="button"
+                onClick={() => setLoadAttempt((attempt) => attempt + 1)}
+                className="mt-4 min-h-10 rounded-xl border border-red-300 bg-white px-4 text-xs font-bold text-red-700 hover:bg-red-100"
+              >
+                Try Again
+              </button>
             </div>
           )}
 
@@ -2648,6 +3733,7 @@ function ProfilePage({
 
   const [errorMessage, setErrorMessage] =
     useState<string | null>(null);
+  const [loadAttempt, setLoadAttempt] = useState(0);
 
   const [saveError, setSaveError] =
     useState<string | null>(null);
@@ -2761,7 +3847,7 @@ function ProfilePage({
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [loadAttempt]);
 
   const handleSavePhone = async () => {
     if (saving) {
@@ -2783,7 +3869,7 @@ function ProfilePage({
 
     if (!/^09\d{9}$/.test(cleanPhone)) {
       setSaveError(
-        "Please enter a valid Philippine mobile number, for example 09171234567.",
+        "Enter an 11-digit Philippine mobile number starting with 09.",
       );
       return;
     }
@@ -2893,6 +3979,14 @@ function ProfilePage({
                 <p className="mt-1 text-xs text-red-600">
                   {errorMessage}
                 </p>
+
+                <button
+                  type="button"
+                  onClick={() => setLoadAttempt((attempt) => attempt + 1)}
+                  className="mt-4 min-h-10 rounded-xl border border-red-300 bg-white px-4 text-xs font-bold text-red-700 hover:bg-red-100"
+                >
+                  Try Again
+                </button>
               </div>
             )}
 
@@ -3096,6 +4190,10 @@ export function CustomerApp() {
 
   const [databaseMenuError, setDatabaseMenuError] =
   useState<string | null>(null);
+  const [databaseMenuLoadAttempt, setDatabaseMenuLoadAttempt] =
+  useState(0);
+  const [selectedMenuCategory, setSelectedMenuCategory] =
+  useState("All");
   const isCustomerSignedIn =session?.role === "customer";
   const [page, setPage] =
   useState<CustomerPage>(() => {
@@ -3163,6 +4261,7 @@ export function CustomerApp() {
     const [
       { data: categories, error: categoriesError },
       { data: items, error: itemsError },
+      { data: availability, error: availabilityError },
     ] = await Promise.all([
       supabase
         .from("menu_categories")
@@ -3184,6 +4283,8 @@ export function CustomerApp() {
           `,
         )
         .order("name"),
+
+      supabase.rpc("get_menu_effective_availability"),
     ]);
 
     if (!isMounted) {
@@ -3218,6 +4319,20 @@ export function CustomerApp() {
       return;
     }
 
+    if (availabilityError) {
+      console.error(
+        "Unable to load effective menu availability:",
+        availabilityError.message,
+      );
+
+      setDatabaseMenuError(
+        availabilityError.message,
+      );
+
+      setDatabaseMenuLoading(false);
+      return;
+    }
+
     const categoryRows =
       (categories ??
         []) as DatabaseMenuCategory[];
@@ -3227,12 +4342,38 @@ export function CustomerApp() {
     const itemRows =
       (items ?? []) as DatabaseMenuItem[];
 
+    const availabilityRows =
+      (availability ??
+        []) as DatabaseMenuEffectiveAvailability[];
+
     const categoryNameById = new Map(
       categoryRows.map((category) => [
         category.id,
         category.name,
       ]),
     );
+
+    const effectiveAvailabilityByItemId = new Map(
+      availabilityRows.map((entry) => [
+        entry.menu_item_id,
+        entry.effective_available,
+      ]),
+    );
+
+    const itemWithoutAvailability = itemRows.find(
+      (item) =>
+        !effectiveAvailabilityByItemId.has(item.id),
+    );
+
+    if (itemWithoutAvailability) {
+      const message =
+        `Menu item ${itemWithoutAvailability.id} has no effective availability result.`;
+
+      console.error(message);
+      setDatabaseMenuError(message);
+      setDatabaseMenuLoading(false);
+      return;
+    }
 
     const mappedItems: CustomerDatabaseMenuItem[] =
       itemRows.map((item) => ({
@@ -3244,7 +4385,8 @@ export function CustomerApp() {
           categoryNameById.get(
             item.category_id,
           ) ?? "Other",
-        available: item.is_available,
+        available:
+          effectiveAvailabilityByItemId.get(item.id) ?? false,
         imagePath: item.image_path,
       }));
 
@@ -3262,7 +4404,7 @@ export function CustomerApp() {
   return () => {
     isMounted = false;
   };
-}, []);
+}, [databaseMenuLoadAttempt]);
 
   useEffect(() => {
     try {
@@ -3309,7 +4451,18 @@ export function CustomerApp() {
   setTrackingOrderId(null);
   }
 
+    if (nextPage === "menu" && page !== "menu-detail") {
+      setSelectedMenuCategory("All");
+    }
+
     setPage(nextPage);
+  };
+  const handleBrowseCategory = (category: string) => {
+    setSelectedMenuCategory(category);
+    setPage("menu");
+  };
+  const retryDatabaseMenu = () => {
+    setDatabaseMenuLoadAttempt((attempt) => attempt + 1);
   };
 
   const addToCart = (
@@ -3353,7 +4506,11 @@ if (page === "home") {
     cart={cart}
     menuItems={databaseMenuItems}
     categories={databaseMenuCategories}
+    menuLoading={databaseMenuLoading}
+    menuError={databaseMenuError}
     onNav={handleNavigation}
+    onBrowseCategory={handleBrowseCategory}
+    onRetryMenu={retryDatabaseMenu}
     onAddToCart={addToCart}
   />
   );
@@ -3363,7 +4520,12 @@ if (page === "home") {
     cart={cart}
     menuItems={databaseMenuItems}
     categories={databaseMenuCategories}
+    menuLoading={databaseMenuLoading}
+    menuError={databaseMenuError}
+    selectedCategory={selectedMenuCategory}
     onNav={handleNavigation}
+    onCategoryChange={setSelectedMenuCategory}
+    onRetryMenu={retryDatabaseMenu}
     onAddToCart={addToCart}
     onViewDetail={viewDetail}
   />
@@ -3432,7 +4594,11 @@ if (page === "home") {
       cart={cart}
       menuItems={databaseMenuItems}
       categories={databaseMenuCategories}
+      menuLoading={databaseMenuLoading}
+      menuError={databaseMenuError}
       onNav={handleNavigation}
+      onBrowseCategory={handleBrowseCategory}
+      onRetryMenu={retryDatabaseMenu}
       onAddToCart={addToCart}
     />
   );

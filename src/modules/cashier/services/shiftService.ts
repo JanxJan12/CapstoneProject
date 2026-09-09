@@ -1,42 +1,40 @@
 import { formatMoney } from "../constants";
+import type { CloseCashierShiftResult } from "../api/shiftApi";
 import type {
   CashierShift,
   CashierState,
-  ShiftClosureInput,
   ShiftTotals,
 } from "../types";
-import {
-  addActivity,
-  cloneState,
-  requireOpenShift,
-  timestampNow,
-} from "./serviceUtils";
+import { addActivity, cloneState } from "./serviceUtils";
 
 export function startShift(
   current: CashierState,
-  openingCash: number,
-  terminal: string,
+  startedShift: Pick<
+    CashierShift,
+    "id" | "cashierId" | "terminal" | "openingCash" | "startedAt"
+  >,
 ): CashierState {
   const state = cloneState(current);
-  if (state.shifts.some((entry) => entry.status === "Open"))
-    throw new Error("A cashier shift is already open.");
-  const timestamp = timestampNow();
+
+  // PostgreSQL is authoritative. A successful start_cashier_shift()
+  // means any browser-only open shift is stale.
+  state.shifts = state.shifts.filter((entry) => entry.status !== "Open");
+
   const shift: CashierShift = {
-    id: `SHIFT-${Date.now()}`,
-    cashierId: state.cashier.id,
+    ...startedShift,
     cashierName: state.cashier.name,
-    terminal,
-    openingCash,
-    startedAt: timestamp,
     status: "Open",
   };
+
   state.shifts.unshift(shift);
-  state.cashier.terminal = terminal;
+  state.cashier.terminal = shift.terminal;
+
   addActivity(
     state,
     "shift_started",
-    `${state.cashier.name} started a shift at ${terminal}`,
+    `${state.cashier.name} started a shift at ${shift.terminal}`,
   );
+
   return state;
 }
 
@@ -97,55 +95,67 @@ export function calculateShiftTotals(
 
 export function endShift(
   current: CashierState,
-  input: ShiftClosureInput,
+  closedShift: CloseCashierShiftResult,
+  notes?: string,
 ): CashierState {
   const state = cloneState(current);
-  const shift = requireOpenShift(state);
-  const pendingPayments = state.payments.filter(
-    (payment) => payment.status === "Pending",
+
+  const existingIndex = state.shifts.findIndex(
+    (entry) =>
+      entry.id === closedShift.id ||
+      entry.status === "Open",
   );
-  if (pendingPayments.length)
-    throw new Error(
-      `Resolve ${pendingPayments.length} pending payment${pendingPayments.length === 1 ? "" : "s"} before ending the shift.`,
-    );
-  if (!Number.isFinite(input.actualCash) || input.actualCash < 0)
-    throw new Error("Enter a valid actual cash count.");
-  const managerName = input.managerName.trim();
-  if (!input.managerApproved || !managerName)
-    throw new Error("Manager approval is required before ending the shift.");
-  const totals = calculateShiftTotals(state, shift.id);
-  const variance = input.actualCash - totals.expectedCash;
-  const varianceReason = input.varianceReason?.trim();
-  if (variance !== 0 && !varianceReason)
-    throw new Error("Select a variance reason for an over or short drawer.");
-  const outcome = variance === 0 ? "Balanced" : variance > 0 ? "Over" : "Short";
-  const timestamp = timestampNow();
-  shift.actualCash = input.actualCash;
-  shift.expectedCash = totals.expectedCash;
-  shift.variance = variance;
-  shift.varianceReason = varianceReason || undefined;
-  shift.notes = input.notes?.trim() || undefined;
-  shift.managerApprovedBy = managerName;
-  shift.managerApprovedAt = timestamp;
-  shift.pendingPaymentCountAtClose = 0;
-  shift.endedAt = timestamp;
-  shift.status = "Closed";
+
+  const outcome =
+    closedShift.variance === 0
+      ? "Balanced"
+      : closedShift.variance > 0
+        ? "Over"
+        : "Short";
+
+  const settledShift: CashierShift = {
+    id: closedShift.id,
+    cashierId: closedShift.cashierId,
+    cashierName: state.cashier.name,
+    terminal: closedShift.terminal,
+    openingCash: closedShift.openingCash,
+    startedAt: closedShift.startedAt,
+    endedAt: closedShift.endedAt,
+    actualCash: closedShift.actualCash,
+    expectedCash: closedShift.expectedCash,
+    variance: closedShift.variance,
+    varianceReason: closedShift.varianceReason,
+    notes: notes?.trim() || undefined,
+    pendingPaymentCountAtClose: 0,
+    status: "Closed",
+  };
+
+  if (existingIndex >= 0) {
+    state.shifts[existingIndex] = settledShift;
+  } else {
+    state.shifts.unshift(settledShift);
+  }
+
   addActivity(
     state,
     "shift_closed",
-    `${state.cashier.name} ended ${shift.id} as ${outcome}; approved by ${managerName}`,
+    `${state.cashier.name} ended ${closedShift.id} as ${outcome}`,
   );
-  if (variance !== 0) {
+
+  if (closedShift.variance !== 0) {
     state.notifications.unshift({
       id: `NOTE-${Date.now()}`,
       title: "Shift variance detected",
-      message: `${shift.id} closed ${outcome.toLowerCase()} by ${formatVariance(variance)} with manager approval.`,
-      createdAt: timestamp,
+      message: `${closedShift.id} closed ${outcome.toLowerCase()} by ${formatVariance(
+        closedShift.variance,
+      )}.`,
+      createdAt: closedShift.endedAt,
       read: false,
       kind: "shift_variance",
       page: "shift-settlement",
     });
   }
+
   return state;
 }
 

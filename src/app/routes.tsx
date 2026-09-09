@@ -51,12 +51,6 @@ const RiderApp = lazy(() =>
   })),
 );
 
-const SystemStates = lazy(() =>
-  import("../modules/states").then((module) => ({
-    default: module.SystemStates,
-  })),
-);
-
 function RouteLoader() {
   return (
     <div className="flex h-full items-center justify-center bg-background p-6">
@@ -180,16 +174,6 @@ export const router = createBrowserRouter([
               <RiderApp />
             </RouteBoundary>
           </RequireAuth>
-        ),
-      },
-
-      // Development/prototype route
-      {
-        path: "states",
-        element: (
-          <RouteBoundary>
-            <SystemStates />
-          </RouteBoundary>
         ),
       },
 

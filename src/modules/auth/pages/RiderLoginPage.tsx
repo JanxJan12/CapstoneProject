@@ -6,7 +6,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import type { AccountRole } from "../../../data/authAccounts";
+import type { AccountRole } from "../../../data/accountRole";
 import { ImageWithFallback } from "@/components/media/ImageWithFallback";
 import rrjLogo from "@/assets/brand/rrj-logo.jpg";
 

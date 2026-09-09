@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import {
   Dialog,
@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  orderOperationalEditSchema,
+  createOrderOperationalEditSchema,
   type OrderOperationalEditForm,
 } from "../schemas";
 import type { Order, OrderOperationalEditInput } from "../types";
@@ -35,13 +35,17 @@ export function EditOrderDialog({
   onOpenChange: (open: boolean) => void;
   onConfirm: (input: OrderOperationalEditInput) => Promise<void>;
 }) {
+  const validationSchema = useMemo(
+    () => createOrderOperationalEditSchema(order?.type ?? "Take-out"),
+    [order?.type],
+  );
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors },
   } = useForm<OrderOperationalEditForm>({
-    resolver: zodResolver(orderOperationalEditSchema),
+    resolver: zodResolver(validationSchema),
   });
 
   useEffect(() => {
@@ -98,8 +102,10 @@ export function EditOrderDialog({
               <Label htmlFor="edit-order-table">Table number</Label>
               <CashierInput
                 id="edit-order-table"
+                aria-invalid={Boolean(errors.tableNumber)}
                 {...register("tableNumber")}
               />
+              <FieldError>{errors.tableNumber?.message}</FieldError>
             </div>
           )}
           {order.type === "Delivery" && (
@@ -107,8 +113,10 @@ export function EditOrderDialog({
               <Label htmlFor="edit-order-address">Delivery address</Label>
               <CashierTextarea
                 id="edit-order-address"
+                aria-invalid={Boolean(errors.deliveryAddress)}
                 {...register("deliveryAddress")}
               />
+              <FieldError>{errors.deliveryAddress?.message}</FieldError>
             </div>
           )}
           <div>

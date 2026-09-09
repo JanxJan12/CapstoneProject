@@ -68,6 +68,8 @@ export function useWalkInPOSController(
   const [receiptPrinted, setReceiptPrinted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const checkoutRequestIdRef = useRef<string | undefined>(undefined);
   const [pendingAction, setPendingAction] = useState<PendingPOSAction>();
   const [optionsOpen, setOptionsOpen] = useState(false);
   const menuSearchRef = useRef<HTMLInputElement>(null);
@@ -508,8 +510,10 @@ export function useWalkInPOSController(
     setOrderTypeSelected(true);
   }, []);
 
-  const resetPOS = useCallback(() => {
-    setCart([]);
+const resetPOS = useCallback(() => {
+  checkoutRequestIdRef.current = undefined;
+
+  setCart([]);
     setCategory("All");
     setSearch("");
     setEditingLineId(undefined);
@@ -524,9 +528,11 @@ export function useWalkInPOSController(
     setError("");
     clearPOSDraft();
   }, [form]);
-  const clearCartDraft = useCallback(() => {
-    const currentOrderType =
-      form.getValues("orderType") === "Take-out" ? "Take-out" : "Dine-in";
+const clearCartDraft = useCallback(() => {
+  checkoutRequestIdRef.current = undefined;
+
+  const currentOrderType =
+    form.getValues("orderType") === "Take-out" ? "Take-out" : "Dine-in";
     setCart([]);
     setEditingLineId(undefined);
     setSelectedItem(undefined);
@@ -616,43 +622,96 @@ export function useWalkInPOSController(
   );
 
   const placeOrder = useCallback(async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const order = await createWalkInOrder({
+  setLoading(true);
+  setError("");
+
+  try {
+    if (!checkoutRequestIdRef.current) {
+      checkoutRequestIdRef.current = crypto.randomUUID();
+    }
+
+    const order = await createWalkInOrder(
+      checkoutRequestIdRef.current,
+      {
         customerName: values.customerName,
         contactNumber: values.contactNumber,
         deliveryAddress: values.deliveryAddress,
         type: values.orderType,
         tableNumber: values.tableNumber,
-        items: cart.map(({ lineId: _lineId, ...entry }) => entry),
+
+        items: cart.map(
+          ({ lineId: _lineId, ...entry }) => entry,
+        ),
+
         discountType:
-          values.discountType === "None" ? null : values.discountType,
-        discountReference: values.discountReference,
-        orderInstructions: values.orderInstructions,
-        paymentMethod: values.paymentMethod,
-        amountTendered: totals.tendered,
-        gcashReference: values.gcashReference,
-      });
-      resetPOS();
-      setReceiptOrder(order);
-      setTransactionState((current) =>
-        transitionTransactionState(current, "showReceipt", false),
-      );
-      Toast.success(`${order.id} created`, {
-        description:
-          "Payment, transaction, and kitchen records were created together.",
-      });
-    } catch (caught) {
-      const message =
-        caught instanceof Error ? caught.message : "Unable to place the order.";
-      setError(message);
-      setTransactionState(POSTransactionState.PAYMENT);
-      Toast.error("Order could not be placed", { description: message });
-    } finally {
-      setLoading(false);
-    }
-  }, [cart, createWalkInOrder, resetPOS, totals.tendered, values]);
+          values.discountType === "None"
+            ? null
+            : values.discountType,
+
+        discountReference:
+          values.discountReference,
+
+        orderInstructions:
+          values.orderInstructions,
+
+        paymentMethod:
+          values.paymentMethod,
+
+        amountTendered:
+          totals.tendered,
+
+        gcashReference:
+          values.gcashReference,
+      },
+    );
+
+    resetPOS();
+
+    setReceiptOrder(order);
+
+    setTransactionState((current) =>
+      transitionTransactionState(
+        current,
+        "showReceipt",
+        false,
+      ),
+    );
+
+    Toast.success(`${order.id} created`, {
+      description:
+        "Payment, transaction, and kitchen records were created together.",
+    });
+  } catch (caught) {
+    const message =
+      caught instanceof Error
+        ? caught.message
+        : "Unable to place the order.";
+
+    setError(message);
+
+    setTransactionState(
+      POSTransactionState.PAYMENT,
+    );
+
+    Toast.error(
+      "Order could not be placed",
+      {
+        description: message,
+      },
+    );
+  } finally {
+    setLoading(false);
+  }
+}, [
+  cart,
+  createWalkInOrder,
+  resetPOS,
+  totals.tendered,
+  values,
+]);
+
+
+
   const submitOrder = form.handleSubmit(() => {
     setError("");
     if (!activeShift) {

@@ -1,36 +1,39 @@
-import { useCallback, useMemo, type MutableRefObject } from "react";
-import { OPTIMISTIC_DELAY_MS } from "../constants";
+import {
+  useCallback,
+  useMemo,
+  useRef,
+  type MutableRefObject,
+} from "react";
+import { verifyCustomerGcashPayment } from "../api/customerGcashVerificationApi";
+import { rejectCustomerGcashPayment } from "../api/customerGcashRejectionApi";
+import { fetchCashierOnlinePayments } from "../api/onlinePaymentApi";
+import {
+  closeCashierShift,
+  startCashierShift,
+} from "../api/shiftApi";
+
+import { createWalkInSale } from "../api/walkInSaleApi";
+import { fetchCashierSale } from "../api/cashierSaleHydrationApi";
+import { clearPOSDraft } from "../pos/posPersistence";
 import {
   cancelCashierOrder,
-  confirmCashierOrder,
   fetchCashierOrders,
   offerOrderToNextRider,
   releaseReadyCashierOrder,
+  updateCashierOrderOperationalDetails,
 } from "../services/supabaseOrderService";
 import {
-  assignOrderRider,
-  cancelOrder,
-  createWalkInOrder,
-  duplicateOrder,
   endShift,
   holdOrder,
   markNotificationRead,
   markNotificationsRead,
-  rejectOnlinePayment,
-  recordReceiptReprint,
-  releaseReadyOrder,
   removeHeldOrder,
   startShift,
-  updateKitchenStatus,
-  updateOrderDetails,
-  verifyOnlinePayment,
-  voidDraftOrder,
 } from "../services/cashierService";
 import type {
   CashierState,
   HeldOrder,
   OrderOperationalEditInput,
-  OrderStatus,
   ShiftClosureInput,
   WalkInOrderInput,
 } from "../types";
@@ -45,69 +48,318 @@ export function useCashierActions(
   commit: CashierCommit,
   commitOptimistically: OptimisticCommit,
 ): CashierActions {
+  const verificationRequestIds = useRef(
+    new Map<string, string>(),
+  );
+
   const verifyPayment = useCallback(
-    async (paymentId: string, override: boolean) => {
-      const previous = stateRef.current;
-      await commitOptimistically(
-        verifyOnlinePayment(previous, paymentId, override),
-        previous,
-        OPTIMISTIC_DELAY_MS.standard,
+    async (paymentId: string) => {
+      const current = stateRef.current;
+      const payment = current.payments.find(
+        (entry) => entry.id === paymentId,
       );
+      const order = current.orders.find(
+        (entry) => entry.id === payment?.orderId,
+      );
+
+      if (!payment || !order) {
+        throw new Error(
+          "Payment record could not be found.",
+        );
+      }
+
+      if (!order.databaseId) {
+        throw new Error(
+          "This payment is not linked to a database order and cannot be verified.",
+        );
+      }
+
+      if (!payment.proofImagePath) {
+        throw new Error(
+          "This database-backed customer payment is missing its uploaded GCash proof.",
+        );
+      }
+
+      if (payment.method !== "GCash") {
+        throw new Error(
+          "Only a database-backed GCash proof may use this verification path.",
+        );
+      }
+
+      if (order.orderChannel !== "online") {
+        throw new Error(
+          "Only an online customer order may use manual GCash proof verification.",
+        );
+      }
+
+      let requestId = verificationRequestIds.current.get(
+        payment.id,
+      );
+
+      if (!requestId) {
+        requestId = globalThis.crypto.randomUUID();
+        verificationRequestIds.current.set(
+          payment.id,
+          requestId,
+        );
+      }
+
+      const verified = await verifyCustomerGcashPayment(
+        requestId,
+        payment.id,
+      );
+
+      if (
+        verified.databaseOrderId !== order.databaseId ||
+        verified.orderNumber !== order.id
+      ) {
+        throw new Error(
+          "The verified payment did not match its linked order.",
+        );
+      }
+
+      const hydratedSale = await fetchCashierSale(
+        order.databaseId,
+        stateRef.current.cashier.name,
+      );
+
+      if (
+        hydratedSale.order.databaseId !==
+          verified.databaseOrderId ||
+        hydratedSale.order.id !== verified.orderNumber ||
+        hydratedSale.order.status !== "Confirmed" ||
+        hydratedSale.payment.id !== verified.paymentId ||
+        hydratedSale.payment.status !== "Verified" ||
+        hydratedSale.transaction.id !==
+          verified.transactionId ||
+        hydratedSale.transaction.transactionNumber !==
+          verified.transactionNumber ||
+        hydratedSale.transaction.receiptNumber !==
+          verified.receiptNumber ||
+        hydratedSale.transaction.shiftId !==
+          verified.shiftId ||
+        hydratedSale.transaction.cashierId !==
+          verified.cashierId
+      ) {
+        throw new Error(
+          "The verified sale hydration did not match the authoritative verification result.",
+        );
+      }
+
+      const latest = stateRef.current;
+
+      commit({
+        ...latest,
+        orders: [
+          hydratedSale.order,
+          ...latest.orders.filter(
+            (entry) =>
+              entry.databaseId !==
+                hydratedSale.order.databaseId &&
+              entry.id !== hydratedSale.order.id,
+          ),
+        ],
+        payments: [
+          hydratedSale.payment,
+          ...latest.payments.filter(
+            (entry) =>
+              entry.id !== hydratedSale.payment.id &&
+              entry.orderId !==
+                hydratedSale.payment.orderId,
+          ),
+        ],
+        transactions: [
+          hydratedSale.transaction,
+          ...latest.transactions.filter(
+            (entry) =>
+              entry.id !== hydratedSale.transaction.id &&
+              entry.orderId !==
+                hydratedSale.transaction.orderId,
+          ),
+        ],
+      });
+
+      verificationRequestIds.current.delete(payment.id);
     },
-    [commitOptimistically, stateRef],
+    [commit, stateRef],
   );
 
   const rejectPayment = useCallback(
     async (paymentId: string, reason: string, notes?: string) => {
-      const previous = stateRef.current;
-      await commitOptimistically(
-        rejectOnlinePayment(previous, paymentId, reason, notes),
-        previous,
-        OPTIMISTIC_DELAY_MS.standard,
+      const current = stateRef.current;
+      const payment = current.payments.find(
+        (entry) => entry.id === paymentId,
       );
+      const order = current.orders.find(
+        (entry) => entry.id === payment?.orderId,
+      );
+
+      if (!payment || !order) {
+        throw new Error(
+          "Payment record could not be found.",
+        );
+      }
+
+      if (!order.databaseId) {
+        throw new Error(
+          "This payment is not linked to a database order and cannot be rejected.",
+        );
+      }
+
+      if (order.orderChannel !== "online") {
+        throw new Error(
+          "Only an online customer order may use manual GCash proof rejection.",
+        );
+      }
+
+      if (
+        payment.method !== "GCash" ||
+        !payment.proofImagePath
+      ) {
+        throw new Error(
+          "This database payment does not contain a customer-uploaded GCash proof.",
+        );
+      }
+
+      const rejected = await rejectCustomerGcashPayment(
+        payment.id,
+        reason,
+        notes,
+      );
+
+      if (
+        rejected.databaseOrderId !== order.databaseId ||
+        rejected.orderNumber !== order.id ||
+        rejected.rejectedBy !== current.cashier.id
+      ) {
+        throw new Error(
+          "The rejected payment did not match its linked order or authenticated cashier.",
+        );
+      }
+
+      const onlinePayments =
+        await fetchCashierOnlinePayments();
+      const authoritativeRejection = onlinePayments.find(
+        (entry) =>
+          entry.databaseOrderId ===
+            rejected.databaseOrderId &&
+          entry.payment.id === rejected.paymentId,
+      );
+
+      if (
+        !authoritativeRejection ||
+        authoritativeRejection.payment.status !== "Rejected" ||
+        authoritativeRejection.payment.rejectionReason !==
+          rejected.rejectionReason ||
+        authoritativeRejection.payment.rejectionNotes !==
+          rejected.rejectionNotes ||
+        authoritativeRejection.payment.rejectedBy !==
+          rejected.rejectedBy ||
+        authoritativeRejection.payment.rejectedAt !==
+          rejected.rejectedAt ||
+        authoritativeRejection.payment.updatedAt !==
+          rejected.updatedAt
+      ) {
+        throw new Error(
+          "The rejected payment could not be reconciled from PostgreSQL.",
+        );
+      }
+
+      const latest = stateRef.current;
+      const authoritativePaymentIds = new Set(
+        onlinePayments.map((entry) => entry.payment.id),
+      );
+      const authoritativePaymentOrderIds = new Set(
+        onlinePayments.map(
+          (entry) => entry.payment.orderId,
+        ),
+      );
+      const onlinePaymentByOrderId = new Map(
+        onlinePayments.map((entry) => [
+          entry.payment.orderId,
+          entry.payment,
+        ]),
+      );
+
+      commit({
+        ...latest,
+        orders: latest.orders.map((entry) => {
+          const onlinePayment =
+            onlinePaymentByOrderId.get(entry.id);
+
+          if (!onlinePayment) {
+            return entry;
+          }
+
+          return {
+            ...entry,
+            paymentId: onlinePayment.id,
+            paymentMethod: onlinePayment.method,
+            paymentStatus: onlinePayment.status,
+          };
+        }),
+        payments: [
+          ...onlinePayments.map((entry) => entry.payment),
+          ...latest.payments.filter(
+            (entry) =>
+              !authoritativePaymentIds.has(entry.id) &&
+              !authoritativePaymentOrderIds.has(
+                entry.orderId,
+              ),
+          ),
+        ],
+      });
     },
-    [commitOptimistically, stateRef],
+    [commit, stateRef],
   );
 
-  const createOrder = useCallback(
-    async (input: WalkInOrderInput) => {
-      const previous = stateRef.current;
-      const result = createWalkInOrder(previous, input);
-      await commitOptimistically(
-        result.state,
-        previous,
-        OPTIMISTIC_DELAY_MS.extended,
-      );
-      return result.order;
-    },
-    [commitOptimistically, stateRef],
-  );
+const createOrder = useCallback(
+  async (
+    requestId: string,
+    input: WalkInOrderInput,
+  ) => {
+    const createdSale = await createWalkInSale(
+      requestId,
+      input,
+    );
 
-  const confirm = useCallback(
-  async (databaseOrderId: string, notes?: string) => {
-    await confirmCashierOrder(databaseOrderId, notes);
-
-    const databaseOrders = await fetchCashierOrders();
+    const hydratedSale = await fetchCashierSale(
+      createdSale.orderId,
+      stateRef.current.cashier.name,
+    );
 
     const current = stateRef.current;
 
-    const databaseOrderNumbers = new Set(
-      databaseOrders.map((order) => order.id),
-    );
-
-    const localOnlyOrders = current.orders.filter(
-      (order) =>
-        !order.databaseId &&
-        !databaseOrderNumbers.has(order.id),
-    );
-
     commit({
       ...current,
+
       orders: [
-        ...databaseOrders,
-        ...localOnlyOrders,
+        hydratedSale.order,
+        ...current.orders.filter(
+          (order) =>
+            order.databaseId !== hydratedSale.order.databaseId &&
+            order.id !== hydratedSale.order.id,
+        ),
+      ],
+
+      payments: [
+        hydratedSale.payment,
+        ...current.payments.filter(
+          (payment) =>
+            payment.id !== hydratedSale.payment.id,
+        ),
+      ],
+
+      transactions: [
+        hydratedSale.transaction,
+        ...current.transactions.filter(
+          (transaction) =>
+            transaction.id !== hydratedSale.transaction.id,
+        ),
       ],
     });
+
+    return hydratedSale.order;
   },
   [commit, stateRef],
 );
@@ -168,24 +420,56 @@ export function useCashierActions(
 
   const updateOrder = useCallback(
     async (orderId: string, input: OrderOperationalEditInput) => {
-      const previous = stateRef.current;
-      await commitOptimistically(
-        updateOrderDetails(previous, orderId, input),
-        previous,
-      );
-    },
-    [commitOptimistically, stateRef],
-  );
+      const current = stateRef.current;
 
-  const assignRider = useCallback(
-    async (orderId: string, riderId: string) => {
-      const previous = stateRef.current;
-      await commitOptimistically(
-        assignOrderRider(previous, orderId, riderId),
-        previous,
+      const order = current.orders.find(
+        (entry) => entry.id === orderId,
       );
+
+      if (!order) {
+        throw new Error("Order not found.");
+      }
+
+      if (!order.databaseId) {
+        throw new Error(
+          "This order is not connected to a database order.",
+        );
+      }
+
+      await updateCashierOrderOperationalDetails(
+        order.databaseId,
+        input,
+      );
+
+      const databaseOrders =
+        await fetchCashierOrders();
+
+      const latest = stateRef.current;
+
+      const databaseOrderNumbers = new Set(
+        databaseOrders.map(
+          (entry) => entry.id,
+        ),
+      );
+
+      const localOnlyOrders =
+        latest.orders.filter(
+          (entry) =>
+            !entry.databaseId &&
+            !databaseOrderNumbers.has(
+              entry.id,
+            ),
+        );
+
+      commit({
+        ...latest,
+        orders: [
+          ...databaseOrders,
+          ...localOnlyOrders,
+        ],
+      });
     },
-    [commitOptimistically, stateRef],
+    [commit, stateRef],
   );
 
   const offerNextRider = useCallback(
@@ -212,20 +496,6 @@ export function useCashierActions(
   },
   [stateRef],
 );
-
-  const duplicate = useCallback(
-    async (orderId: string) => {
-      const previous = stateRef.current;
-      const result = duplicateOrder(previous, orderId);
-      await commitOptimistically(
-        result.state,
-        previous,
-        OPTIMISTIC_DELAY_MS.standard,
-      );
-      return result.order;
-    },
-    [commitOptimistically, stateRef],
-  );
 
 const releaseReadyOrderAction = useCallback(
   async (orderId: string) => {
@@ -276,20 +546,6 @@ const releaseReadyOrderAction = useCallback(
   [commit, stateRef],
 );
 
-  const updateKitchen = useCallback(
-    async (
-      orderId: string,
-      status: Extract<OrderStatus, "Preparing" | "Ready">,
-    ) => {
-      const previous = stateRef.current;
-      await commitOptimistically(
-        updateKitchenStatus(previous, orderId, status),
-        previous,
-      );
-    },
-    [commitOptimistically, stateRef],
-  );
-
   const hold = useCallback(
     async (held: Omit<HeldOrder, "id" | "heldAt">) => {
       const previous = stateRef.current;
@@ -307,53 +563,38 @@ const releaseReadyOrderAction = useCallback(
     [commit, stateRef],
   );
 
-  const voidDraft = useCallback(
-    async (input: Omit<WalkInOrderInput, "paymentMethod">, reason: string) => {
-      const previous = stateRef.current;
-      await commitOptimistically(
-        voidDraftOrder(previous, input, reason),
-        previous,
-        OPTIMISTIC_DELAY_MS.standard,
-      );
-    },
-    [commitOptimistically, stateRef],
-  );
-
   const start = useCallback(
     async (openingCash: number, terminal: string) => {
-      const previous = stateRef.current;
-      await commitOptimistically(
-        startShift(previous, openingCash, terminal),
-        previous,
-        OPTIMISTIC_DELAY_MS.standard,
-      );
+      const startedShift = await startCashierShift(openingCash, terminal);
+
+      commit(startShift(stateRef.current, startedShift));
     },
-    [commitOptimistically, stateRef],
+    [commit, stateRef],
   );
 
   const end = useCallback(
     async (input: ShiftClosureInput) => {
-      const previous = stateRef.current;
-      await commitOptimistically(
-        endShift(previous, input),
-        previous,
-        OPTIMISTIC_DELAY_MS.extended,
+      const closedShift = await closeCashierShift(
+        input.actualCash,
+        input.varianceReason,
+        input.notes,
       );
-    },
-    [commitOptimistically, stateRef],
-  );
 
-  const reprint = useCallback(
-    async (orderId: string) => {
-      const previous = stateRef.current;
-      await commitOptimistically(
-        recordReceiptReprint(previous, orderId),
-        previous,
-        OPTIMISTIC_DELAY_MS.fast,
+      clearPOSDraft();
+
+      const closedState = endShift(
+        stateRef.current,
+        closedShift,
+        input.notes,
       );
+
+      commit({
+        ...closedState,
+        heldOrders: [],
+      });
     },
-    [commitOptimistically, stateRef],
-  );
+    [commit, stateRef],
+);
 
   const markRead = useCallback(
     (notificationId: string) => {
@@ -370,30 +611,21 @@ const releaseReadyOrderAction = useCallback(
       verifyPayment,
       rejectPayment,
       createWalkInOrder: createOrder,
-      confirmOrder: confirm,
       cancelOrder: cancel,
       updateOrder,
-      assignRider,
       offerNextRider,
-      duplicateOrder: duplicate,
       releaseReadyOrder: releaseReadyOrderAction,
-      updateKitchenStatus: updateKitchen,
       holdOrder: hold,
       removeHeldOrder: removeHeld,
-      voidDraftOrder: voidDraft,
       startShift: start,
       endShift: end,
-      recordReceiptReprint: reprint,
       markNotificationRead: markRead,
       markNotificationsRead: markAllRead,
     }),
     [
-      assignRider,
       offerNextRider,
       cancel,
-      confirm,
       createOrder,
-      duplicate,
       end,
       hold,
       markAllRead,
@@ -401,12 +633,9 @@ const releaseReadyOrderAction = useCallback(
       rejectPayment,
       releaseReadyOrderAction,
       removeHeld,
-      reprint,
       start,
-      updateKitchen,
       updateOrder,
       verifyPayment,
-      voidDraft,
     ],
   );
 }

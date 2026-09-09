@@ -1,6 +1,4 @@
 import {
-  CASHIER_ID,
-  CASHIER_NAME,
   CASHIER_STATE_VERSION,
   CASHIER_TERMINAL,
   DEFAULT_DELAY_THRESHOLD_MINUTES,
@@ -13,8 +11,8 @@ export function createInitialCashierState(): CashierState {
     version: CASHIER_STATE_VERSION,
 
     cashier: {
-      id: CASHIER_ID,
-      name: CASHIER_NAME,
+      id: "",
+      name: "",
       terminal: CASHIER_TERMINAL,
     },
 

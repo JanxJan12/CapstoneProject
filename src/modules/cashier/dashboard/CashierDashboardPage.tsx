@@ -12,7 +12,6 @@ import type {
 import { useCashierStore } from "../hooks/CashierStore";
 import { useCashierDashboard } from "../hooks/useCashierDashboard";
 import { OrderDetailsDrawer } from "../orders/OrderDetailsDrawer";
-import { VerifyPaymentDialog } from "../payments/VerifyPaymentDialog";
 import { EndShiftDialog } from "../shifts/EndShiftDialog";
 import { AttentionSummary } from "./AttentionSummary";
 import { CashierWorkQueue } from "./CashierWorkQueue";
@@ -36,7 +35,6 @@ export function CashierDashboardPage({
     activeShift,
     shiftTotals,
     endShift,
-    verifyPayment,
     releaseReadyOrder,
   } = useCashierStore();
 
@@ -51,8 +49,6 @@ export function CashierDashboardPage({
     shiftSummary.cashierName,
 };
   const [selectedOrder, setSelectedOrder] = useState<Order>();
-  const [verificationOrder, setVerificationOrder] =
-    useState<Order>();
   const [lookupOpen, setLookupOpen] = useState(false);
   const [receiptsOpen, setReceiptsOpen] = useState(false);
   const [settlementOpen, setSettlementOpen] = useState(false);
@@ -108,36 +104,6 @@ export function CashierDashboardPage({
     setAttentionFilter(undefined);
   };
 
-  const handleVerifyPayment = async (override: boolean) => {
-    if (!verificationOrder?.paymentId) return;
-
-    const orderId = verificationOrder.id;
-    setLoadingOrderId(orderId);
-
-    try {
-      await verifyPayment(
-        verificationOrder.paymentId,
-        override,
-      );
-
-      Toast.success(`Payment verified for ${orderId}`, {
-        description:
-          "The order was released to the kitchen queue.",
-      });
-
-      setVerificationOrder(undefined);
-    } catch (caught) {
-      Toast.error("Verification failed", {
-        description:
-          caught instanceof Error
-            ? caught.message
-            : "Review the payment and try again.",
-      });
-    } finally {
-      setLoadingOrderId(undefined);
-    }
-  };
-
   const handleReleaseOrder = async (order: Order) => {
     setLoadingOrderId(order.id);
 
@@ -162,10 +128,6 @@ export function CashierDashboardPage({
     }
   };
 
-  const verificationPayment = state.payments.find(
-    (payment) =>
-      payment.id === verificationOrder?.paymentId,
-  );
 
   return (
     <>
@@ -214,7 +176,11 @@ export function CashierDashboardPage({
             setAttentionFilter(undefined)
           }
           onSelect={setSelectedOrder}
-          onVerify={setVerificationOrder}
+          onVerify={(order) =>
+            onNavigate("pending-payments", {
+              paymentOrderId: order.id,
+            })
+}
           onRelease={handleReleaseOrder}
         />
       </main>
@@ -238,22 +204,6 @@ export function CashierDashboardPage({
             setSelectedOrder(undefined);
           }
         }}
-      />
-
-      <VerifyPaymentDialog
-        open={Boolean(verificationOrder)}
-        order={verificationOrder}
-        payment={verificationPayment}
-        payments={state.payments}
-        loading={
-          loadingOrderId === verificationOrder?.id
-        }
-        onOpenChange={(open) => {
-          if (!open) {
-            setVerificationOrder(undefined);
-          }
-        }}
-        onConfirm={handleVerifyPayment}
       />
 
       {activeShift ? (

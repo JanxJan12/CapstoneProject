@@ -4,7 +4,6 @@ import {
   Bike,
   MapPin,
   Phone,
-  Printer,
   ReceiptText,
   UserRound,
   XCircle,
@@ -199,26 +198,6 @@ export function OrderDetailsDrawer({
           </section>
 
           <div className="sticky bottom-0 flex flex-wrap gap-2 border-t border-border bg-[#f8f4ef]/95 py-3 backdrop-blur-xl">
-          {currentOrder.databaseId &&
-            currentOrder.status === "Awaiting Payment" && (
-              <CashierButton
-                loading={drawer.loading}
-                disabled={drawer.loading}
-                onClick={drawer.handleConfirm}
-              >
-                Confirm order
-              </CashierButton>
-            )}
-
-          <CashierButton
-            variant="secondary"
-            onClick={drawer.printReceipt}
-            disabled={!currentOrder.transactionId}
-          >
-            <Printer className="h-4 w-4" />
-            Print receipt
-          </CashierButton>
-
           {currentOrder.status === "Ready" && (
             <CashierButton
               loading={drawer.loading}

@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/dialog";
 import { formatDateTime, formatMoney } from "../constants";
 import type {
-  ActivityEvent,
   CashierShift,
   Order,
   Payment,
@@ -30,7 +29,6 @@ export function TransactionDetailDrawer({
   order,
   payment,
   shift,
-  activities,
   open,
   onOpenChange,
   onReprint,
@@ -39,7 +37,6 @@ export function TransactionDetailDrawer({
   order?: Order;
   payment?: Payment;
   shift?: CashierShift;
-  activities: ActivityEvent[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onReprint: (transaction: Transaction) => void;
@@ -50,7 +47,6 @@ export function TransactionDetailDrawer({
     transaction,
     order,
     payment,
-    activities,
   );
 
   return (

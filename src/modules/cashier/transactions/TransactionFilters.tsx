@@ -134,8 +134,6 @@ export function TransactionFilters({
           >
             <option>All</option>
             <option>Completed</option>
-            <option>Refunded</option>
-            <option>Voided</option>
           </CashierSelect>
         </div>
         <div>

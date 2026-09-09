@@ -49,20 +49,6 @@ function PhoneShell({ children }: { children: React.ReactNode }) {
       <div
         className="rider-phone flex h-full w-full flex-col overflow-hidden md:h-[720px] md:w-[360px] md:flex-shrink-0 md:rounded-[2.7rem] md:border-[7px] md:border-[#17110e] md:shadow-[0_42px_90px_-32px_rgba(18,10,5,0.8)]"
       >
-        {/* Status bar — desktop phone chrome only */}
-        <div className="hidden md:flex items-center justify-between px-5 pt-3 pb-1 bg-zinc-900 flex-shrink-0">
-          <span className="text-white text-[10px] font-semibold">9:41</span>
-          <div className="flex items-center gap-1.5">
-            <div className="flex gap-0.5 items-end">
-              {[3, 5, 7, 9].map((h, i) => (
-                <div key={i} className={`w-1 rounded-sm ${i < 3 ? "bg-white" : "bg-white/40"}`} style={{ height: h }} />
-              ))}
-            </div>
-            <div className="w-5 h-2.5 rounded-sm border border-white/60 flex items-center px-0.5 ml-1">
-              <div className="h-1.5 bg-green-400 rounded-xs" style={{ width: "70%" }} />
-            </div>
-          </div>
-        </div>
         {/* Screen content */}
         <div className="rider-screen flex flex-1 flex-col overflow-hidden bg-background">
           {children}
@@ -103,6 +89,18 @@ function BottomNav({ active, onSelect }: { active: BottomTab; onSelect: (t: Bott
   );
 }
 
+function RiderRetryButton({ onRetry }: { onRetry: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onRetry}
+      className="mt-3 min-h-9 rounded-lg border border-red-300 bg-white px-3 text-[10px] font-bold text-red-700 hover:bg-red-100"
+    >
+      Try Again
+    </button>
+  );
+}
+
 
 // ── Home Tab ─────────────────────────────────────────────────────
 function HomeTab({ onNav }: { onNav: (s: RiderScreen) => void }) {
@@ -134,6 +132,7 @@ function HomeTab({ onNav }: { onNav: (s: RiderScreen) => void }) {
 
   const [activeDeliveryError, setActiveDeliveryError] =
     useState("");
+  const [homeLoadAttempt, setHomeLoadAttempt] = useState(0);
 
     useEffect(() => {
   let active = true;
@@ -219,7 +218,7 @@ function HomeTab({ onNav }: { onNav: (s: RiderScreen) => void }) {
     active = false;
     unsubscribe?.();
   };
-}, []);
+}, [homeLoadAttempt]);
 
   const handleToggleAvailability = async () => {
   if (
@@ -395,6 +394,9 @@ function HomeTab({ onNav }: { onNav: (s: RiderScreen) => void }) {
           <p className="text-[10px] font-semibold text-red-700">
             {activeDeliveryError}
           </p>
+          <RiderRetryButton
+            onRetry={() => setHomeLoadAttempt((attempt) => attempt + 1)}
+          />
         </div>
       )}
 
@@ -485,6 +487,7 @@ function DeliveryRequestsTab() {
 
   const [error, setError] =
     useState("");
+  const [offerLoadAttempt, setOfferLoadAttempt] = useState(0);
 
   const [acceptingId, setAcceptingId] =
     useState<string | null>(null);
@@ -564,7 +567,7 @@ function DeliveryRequestsTab() {
     active = false;
     unsubscribe?.();
   };
-}, []);
+}, [offerLoadAttempt]);
 
   const handleAccept = async (
     assignmentId: string,
@@ -660,6 +663,9 @@ function DeliveryRequestsTab() {
             <p className="text-[10px] font-semibold text-red-700">
               {error}
             </p>
+            <RiderRetryButton
+              onRetry={() => setOfferLoadAttempt((attempt) => attempt + 1)}
+            />
           </div>
         )}
 
@@ -828,6 +834,7 @@ function DeliveryDetailScreen({
 
   const [error, setError] =
     useState("");
+  const [deliveryLoadAttempt, setDeliveryLoadAttempt] = useState(0);
   
   const [updatingStatus, setUpdatingStatus] =
   useState(false);
@@ -866,7 +873,7 @@ function DeliveryDetailScreen({
     return () => {
       active = false;
     };
-  }, []);
+  }, [deliveryLoadAttempt]);
 
   const handleAdvanceStatus = async () => {
   if (!delivery || updatingStatus) {
@@ -941,6 +948,9 @@ function DeliveryDetailScreen({
             <p className="text-[10px] font-semibold text-red-700">
               {error}
             </p>
+            <RiderRetryButton
+              onRetry={() => setDeliveryLoadAttempt((attempt) => attempt + 1)}
+            />
           </div>
         )}
 
@@ -1135,6 +1145,7 @@ function NavAssistScreen({
 
   const [error, setError] =
     useState("");
+  const [navigationLoadAttempt, setNavigationLoadAttempt] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -1170,7 +1181,7 @@ function NavAssistScreen({
     return () => {
       active = false;
     };
-  }, []);
+  }, [navigationLoadAttempt]);
 
   const openGoogleMaps = () => {
     if (!delivery) {
@@ -1235,6 +1246,9 @@ function NavAssistScreen({
             <p className="text-[10px] font-semibold text-red-700">
               {error}
             </p>
+            <RiderRetryButton
+              onRetry={() => setNavigationLoadAttempt((attempt) => attempt + 1)}
+            />
           </div>
         )}
 
@@ -1339,6 +1353,7 @@ function UploadProofScreen({
 
   const [error, setError] =
     useState("");
+  const [proofLoadAttempt, setProofLoadAttempt] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -1388,7 +1403,7 @@ function UploadProofScreen({
     return () => {
       active = false;
     };
-  }, []);
+  }, [proofLoadAttempt]);
 
   const handleFileChange = (
     file: File | undefined,
@@ -1508,6 +1523,11 @@ function UploadProofScreen({
             <p className="text-[10px] font-semibold text-red-700">
               {error}
             </p>
+            {!delivery ? (
+              <RiderRetryButton
+                onRetry={() => setProofLoadAttempt((attempt) => attempt + 1)}
+              />
+            ) : null}
           </div>
         )}
 
@@ -1625,6 +1645,7 @@ function HistoryTab() {
 
   const [error, setError] =
     useState("");
+  const [historyLoadAttempt, setHistoryLoadAttempt] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -1660,7 +1681,7 @@ function HistoryTab() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [historyLoadAttempt]);
 
   const formatDeliveredAt = (
     value: string,
@@ -1703,6 +1724,9 @@ function HistoryTab() {
             <p className="text-[10px] font-semibold text-red-700">
               {error}
             </p>
+            <RiderRetryButton
+              onRetry={() => setHistoryLoadAttempt((attempt) => attempt + 1)}
+            />
           </div>
         )}
 
@@ -1789,6 +1813,7 @@ function ProfileTab() {
 
   const [error, setError] =
     useState("");
+  const [profileLoadAttempt, setProfileLoadAttempt] = useState(0);
 
   const [signingOut, setSigningOut] =
     useState(false);
@@ -1833,7 +1858,7 @@ function ProfileTab() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [profileLoadAttempt]);
 
   const handleSignOut = async () => {
     if (signingOut) {
@@ -1898,6 +1923,9 @@ function ProfileTab() {
             <p className="text-[10px] font-semibold text-red-700">
               {error}
             </p>
+            <RiderRetryButton
+              onRetry={() => setProfileLoadAttempt((attempt) => attempt + 1)}
+            />
           </div>
         )}
 

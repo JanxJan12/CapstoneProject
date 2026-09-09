@@ -2,6 +2,7 @@ import { supabase } from "@/lib/supabase";
 import type {
   Order,
   OrderItem,
+  OrderOperationalEditInput,
   OrderStatus,
   OrderTimelineEvent,
   OrderType,
@@ -39,6 +40,7 @@ interface DatabaseOrderRow {
   fulfillment_type: DatabaseFulfillmentType;
   customer_name: string | null;
   customer_contact_number: string | null;
+  table_number: string | null;
   delivery_address: string | null;
   landmark: string | null;
   current_status: DatabaseOrderStatus;
@@ -80,14 +82,6 @@ interface DatabaseOrderHistoryRow {
  * The returned records are converted into the existing cashier
  * Order model so the current cashier UI can be reused.
  */
-interface ConfirmOrderResult {
-  order_id: string;
-  order_number: string;
-  current_status: DatabaseOrderStatus;
-  confirmed_at: string;
-  processed_by: string;
-}
-
 interface ReleaseReadyOrderResult {
   order_id: string;
   order_number: string;
@@ -112,43 +106,11 @@ interface CancelOrderResult {
   cancelled_at: string;
 }
 
-export async function confirmCashierOrder(
-  databaseOrderId: string,
-  notes?: string,
-): Promise<ConfirmOrderResult> {
-  const normalizedId = databaseOrderId.trim();
-
-  if (!normalizedId) {
-    throw new Error(
-      "This order does not have a valid database ID.",
-    );
-  }
-
-  const { data, error } = await supabase.rpc(
-    "confirm_order",
-    {
-      p_order_id: normalizedId,
-      p_notes: notes?.trim() || null,
-    },
-  );
-
-  if (error) {
-    throw new Error(
-      `Unable to confirm order: ${error.message}`,
-    );
-  }
-
-  const result = (
-    data as ConfirmOrderResult[] | null
-  )?.[0];
-
-  if (!result) {
-    throw new Error(
-      "The order was confirmed but no updated order record was returned.",
-    );
-  }
-
-  return result;
+interface UpdateOrderOperationalDetailsResult {
+  order_id: string;
+  order_number: string;
+  current_status: DatabaseOrderStatus;
+  edited_at: string;
 }
 
 export async function releaseReadyCashierOrder(
@@ -279,6 +241,51 @@ export async function cancelCashierOrder(
   return result;
 }
 
+export async function updateCashierOrderOperationalDetails(
+  databaseOrderId: string,
+  input: OrderOperationalEditInput,
+): Promise<UpdateOrderOperationalDetailsResult> {
+  const normalizedId = databaseOrderId.trim();
+
+  if (!normalizedId) {
+    throw new Error(
+      "This order does not have a valid database ID.",
+    );
+  }
+
+  const { data, error } = await supabase.rpc(
+    "update_cashier_order_operational_details",
+    {
+      p_order_id: normalizedId,
+      p_customer_name: input.customerName.trim(),
+      p_contact_number: input.contactNumber.trim(),
+      p_table_number: input.tableNumber?.trim() || null,
+      p_delivery_address:
+        input.deliveryAddress?.trim() || null,
+      p_order_instructions:
+        input.orderInstructions?.trim() || null,
+    },
+  );
+
+  if (error) {
+    throw new Error(
+      `Unable to update order details: ${error.message}`,
+    );
+  }
+
+  const result = (
+    data as UpdateOrderOperationalDetailsResult[] | null
+  )?.[0];
+
+  if (!result) {
+    throw new Error(
+      "The order was updated, but no authoritative result was returned.",
+    );
+  }
+
+  return result;
+}
+
 export async function fetchCashierOrders(): Promise<Order[]> {
   const { data: orderData, error: orderError } = await supabase
     .from("orders")
@@ -291,6 +298,7 @@ export async function fetchCashierOrders(): Promise<Order[]> {
       fulfillment_type,
       customer_name,
       customer_contact_number,
+      table_number,
       delivery_address,
       landmark,
       current_status,
@@ -398,14 +406,24 @@ function mapDatabaseOrderToCashierOrder(
     // Real PostgreSQL orders.id UUID used for RPC/database operations.
     databaseId: order.id,
 
+    orderChannel: order.order_channel,
+
     customerName:
-      order.customer_name?.trim() || "Walk-in Customer",
+      order.customer_name?.trim() || "Customer",
 
     contactNumber:
       order.customer_contact_number?.trim() || "—",
 
+    tableNumber:
+      order.fulfillment_type === "dine_in"
+        ? order.table_number?.trim() || undefined
+        : undefined,
+
     deliveryAddress:
       order.delivery_address?.trim() || undefined,
+
+    landmark:
+      order.landmark?.trim() || undefined,
 
     type: mapFulfillmentType(order.fulfillment_type),
 
@@ -426,7 +444,7 @@ function mapDatabaseOrderToCashierOrder(
 
     paymentMethod: mapPaymentMethod(order.order_channel),
 
-    paymentStatus: mapPaymentStatus(order.current_status),
+    paymentStatus: getFallbackPaymentStatus(order.order_channel),
 
     status: mapOrderStatus(order.current_status),
 
@@ -550,18 +568,10 @@ function mapPaymentMethod(
   return orderChannel === "online" ? "GCash" : "Cash";
 }
 
-function mapPaymentStatus(
-  status: DatabaseOrderStatus,
+function getFallbackPaymentStatus(
+  orderChannel: DatabaseOrderChannel,
 ): PaymentStatus {
-  if (status === "waiting_payment_verification") {
-    return "Pending";
-  }
-
-  if (status === "rejected") {
-    return "Rejected";
-  }
-
-  return "Verified";
+  return orderChannel === "online" ? "Unpaid" : "Verified";
 }
 
 function mapRiderStatus(

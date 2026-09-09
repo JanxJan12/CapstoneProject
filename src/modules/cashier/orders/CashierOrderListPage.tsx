@@ -2,7 +2,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Download,
-  Printer,
   Radio,
   Trash2,
   X,
@@ -10,7 +9,6 @@ import {
 import { CashierButton, ErrorBanner, PageHeader } from "../components";
 import { PAGE_SIZE } from "../constants";
 import type { CashierNavigationIntent } from "../types";
-import { AssignRiderDialog } from "./AssignRiderDialog";
 import { CancelOrderDialog } from "./CancelOrderDialog";
 import { EditOrderDialog } from "./EditOrderDialog";
 import { OrderDetailsDrawer } from "./OrderDetailsDrawer";
@@ -79,14 +77,6 @@ export function CashierOrderListPage({
               <CashierButton
                 variant="secondary"
                 size="sm"
-                onClick={orders.handleBulkPrint}
-              >
-                <Printer className="h-4 w-4" aria-hidden="true" />
-                Print
-              </CashierButton>
-              <CashierButton
-                variant="secondary"
-                size="sm"
                 onClick={() => orders.exportCsv(true)}
               >
                 <Download className="h-4 w-4" aria-hidden="true" />
@@ -131,10 +121,7 @@ export function CashierOrderListPage({
           onToggleExpand={orders.toggleExpansion}
           onView={(order) => orders.setDrawerOrderId(order.id)}
           onEdit={orders.setEditTarget}
-          onPrint={orders.handlePrint}
-          onAssignRider={orders.setRiderTarget}
           onCancel={orders.setCancelTarget}
-          onDuplicate={(order) => void orders.handleDuplicate(order)}
         />
         <div className="cashier-table-footer flex flex-col gap-2 px-4 py-3 text-[10px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <span>
@@ -181,14 +168,6 @@ export function CashierOrderListPage({
         loading={orders.loading}
         onOpenChange={(open) => !open && orders.setEditTarget(undefined)}
         onConfirm={orders.handleEdit}
-      />
-      <AssignRiderDialog
-        order={orders.riderTarget}
-        riders={orders.state.riders}
-        open={Boolean(orders.riderTarget)}
-        loading={orders.loading}
-        onOpenChange={(open) => !open && orders.setRiderTarget(undefined)}
-        onConfirm={orders.handleAssignRider}
       />
       {orders.cancelTarget ? (
         <CancelOrderDialog

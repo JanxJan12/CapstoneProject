@@ -19,7 +19,7 @@ export function RecentReceiptsDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const { state, recordReceiptReprint } = useCashierStore();
+  const { state } = useCashierStore();
   const [receiptOrder, setReceiptOrder] = useState<Order>();
 
   const transactions = state.transactions
@@ -129,11 +129,6 @@ export function RecentReceiptsDialog({
         payment={payment}
         open={Boolean(receiptOrder)}
         onClose={() => setReceiptOrder(undefined)}
-        onPrint={() =>
-          receiptOrder
-            ? recordReceiptReprint(receiptOrder.id)
-            : undefined
-        }
       />
     </>
   );

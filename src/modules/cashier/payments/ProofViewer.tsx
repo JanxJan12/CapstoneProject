@@ -11,6 +11,7 @@ import {
   ZoomOut,
   X,
 } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 import { formatDateTime, formatMoney } from "../constants";
 import type { Payment } from "../types";
 import { CashierIconButton } from "../components";
@@ -19,12 +20,21 @@ import { renderProofPng } from "./proofImage";
 
 const PROOF_WIDTH = 238;
 const PROOF_HEIGHT = 398;
+const SIGNED_PROOF_EXPIRY_SECONDS = 300;
+
+interface PrivateProofState {
+  path: string;
+  signedUrl?: string;
+  error?: string;
+}
 
 export function ProofViewer({ payment }: { payment: Payment }) {
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [fullscreen, setFullscreen] = useState(false);
+  const [privateProof, setPrivateProof] =
+    useState<PrivateProofState>();
   const viewerRef = useRef<HTMLDivElement>(null);
   const pointer = useRef<
     | { pointerId: number; x: number; y: number; panX: number; panY: number }
@@ -60,6 +70,62 @@ export function ProofViewer({ payment }: { payment: Payment }) {
   useEffect(() => {
     reset();
   }, [payment.id, reset]);
+
+  useEffect(() => {
+    const proofImagePath = payment.proofImagePath;
+    let cancelled = false;
+
+    setPrivateProof(undefined);
+
+    if (!proofImagePath) {
+      return;
+    }
+
+    const loadPrivateProof = async () => {
+      try {
+        const { data, error } = await supabase.storage
+          .from("payment-proofs")
+          .createSignedUrl(
+            proofImagePath,
+            SIGNED_PROOF_EXPIRY_SECONDS,
+          );
+
+        if (cancelled) return;
+
+        if (error || !data?.signedUrl) {
+          setPrivateProof({
+            path: proofImagePath,
+            error:
+              error?.message ||
+              "The payment proof could not be loaded.",
+          });
+          return;
+        }
+
+        setPrivateProof({
+          path: proofImagePath,
+          signedUrl: data.signedUrl,
+        });
+      } catch (error) {
+        if (cancelled) return;
+
+        setPrivateProof({
+          path: proofImagePath,
+          error:
+            error instanceof Error
+              ? error.message
+              : "The payment proof could not be loaded.",
+        });
+      }
+    };
+
+    void loadPrivateProof();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [payment.id, payment.proofImagePath]);
+
   useEffect(() => {
     if (!fullscreen) return;
     const previousOverflow = document.body.style.overflow;
@@ -74,18 +140,50 @@ export function ProofViewer({ payment }: { payment: Payment }) {
     };
   }, [fullscreen]);
 
-  const proofUrl = () => payment.proofUrl ?? renderProofPng(payment);
+  const proofImagePath = payment.proofImagePath;
+  const currentPrivateProof =
+    proofImagePath && privateProof?.path === proofImagePath
+      ? privateProof
+      : undefined;
+  const signedProofUrl = currentPrivateProof?.signedUrl;
+  const proofError = currentPrivateProof?.error;
+  const displayedProofUrl = proofImagePath
+    ? signedProofUrl
+    : payment.proofUrl;
+  const privateProofLoading = Boolean(
+    proofImagePath && !currentPrivateProof,
+  );
+  const canExportProof = !proofImagePath || Boolean(signedProofUrl);
+
+  const proofUrl = () => {
+    if (proofImagePath) {
+      return signedProofUrl;
+    }
+
+    return payment.proofUrl ?? renderProofPng(payment);
+  };
+
   const downloadProof = () => {
+    const url = proofUrl();
+
+    if (!url) return;
+
     const link = document.createElement("a");
-    link.href = proofUrl();
-    link.download = `${payment.orderId}-${payment.id}-payment-proof.png`;
+    link.href = url;
+    link.download =
+      proofImagePath?.split("/").pop() ||
+      `${payment.orderId}-${payment.id}-payment-proof.png`;
     document.body.appendChild(link);
     link.click();
     link.remove();
   };
   const openOriginal = () => {
-    if (payment.proofUrl) {
-      const opened = window.open(payment.proofUrl, "_blank");
+    const url = proofUrl();
+
+    if (!url) return;
+
+    if (proofImagePath || payment.proofUrl) {
+      const opened = window.open(url, "_blank");
       if (opened) opened.opener = null;
       return;
     }
@@ -96,7 +194,7 @@ export function ProofViewer({ payment }: { payment: Payment }) {
     opened.document.body.style.cssText =
       "margin:0;min-height:100vh;display:grid;place-items:center;background:#17110e;padding:24px;box-sizing:border-box";
     const image = opened.document.createElement("img");
-    image.src = proofUrl();
+    image.src = url;
     image.alt = `${payment.orderId} original payment proof`;
     image.style.cssText =
       "max-width:100%;max-height:calc(100vh - 48px);object-fit:contain";
@@ -146,11 +244,13 @@ export function ProofViewer({ payment }: { payment: Payment }) {
             label="Download proof"
             icon={Download}
             onClick={downloadProof}
+            disabled={!canExportProof}
           />
           <Tool
             label="Open original"
             icon={ExternalLink}
             onClick={openOriginal}
+            disabled={!canExportProof}
           />
           <Tool
             label={fullscreen ? "Exit fullscreen" : "Fullscreen"}
@@ -200,38 +300,71 @@ export function ProofViewer({ payment }: { payment: Payment }) {
           style={{
             transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom}) rotate(${rotation}deg)`,
           }}
-          aria-label={`GCash proof showing ${formatMoney(payment.submittedAmount)} with reference ${payment.referenceNumber ?? "not found"}`}
+          aria-label={
+            proofImagePath
+              ? `Uploaded GCash payment proof for ${payment.orderId}`
+              : `GCash proof showing ${formatMoney(payment.submittedAmount)} with reference ${payment.referenceNumber ?? "not found"}`
+          }
         >
-          <div className="bg-[#0877e6] px-4 pb-5 pt-3 text-white">
-            <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-white/60" />
-            <p className="text-center text-xs font-black tracking-wide">
-              GCash
-            </p>
-          </div>
-          <div className="p-5 text-center">
-            <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-2xl font-black text-emerald-600">
-              ✓
-            </span>
-            <p className="mt-3 text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-              Payment sent
-            </p>
-            <p className="mt-1 text-2xl font-black text-zinc-900">
-              {formatMoney(payment.submittedAmount)}
-            </p>
-            <p className="mt-4 rounded-lg bg-white p-3 text-left text-[9px] leading-5 text-zinc-600 shadow-sm">
-              From: <strong>{payment.senderName ?? "GCash customer"}</strong>
-              <br />
-              To:{" "}
-              <strong>
-                {payment.receiverName ?? EXPECTED_PAYMENT_RECEIVER}
-              </strong>
-              <br />
-              Reference:{" "}
-              <strong>{payment.referenceNumber ?? "Not found"}</strong>
-              <br />
-              Date: <strong>{formatDateTime(payment.uploadedAt)}</strong>
-            </p>
-          </div>
+          {displayedProofUrl ? (
+            <img
+              src={displayedProofUrl}
+              alt={`${payment.orderId} payment proof`}
+              className="block h-[398px] w-[238px] object-contain"
+              onError={() => {
+                if (!proofImagePath) return;
+
+                setPrivateProof({
+                  path: proofImagePath,
+                  error: "The signed payment proof could not be displayed.",
+                });
+              }}
+            />
+          ) : proofImagePath ? (
+            <div
+              className="flex h-[398px] w-[238px] items-center justify-center p-6 text-center text-xs font-bold text-zinc-600"
+              role={proofError ? "alert" : "status"}
+            >
+              {proofError ||
+                (privateProofLoading
+                  ? "Loading private payment proof…"
+                  : "The payment proof is unavailable.")}
+            </div>
+          ) : (
+            <>
+              <div className="bg-[#0877e6] px-4 pb-5 pt-3 text-white">
+                <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-white/60" />
+                <p className="text-center text-xs font-black tracking-wide">
+                  GCash
+                </p>
+              </div>
+              <div className="p-5 text-center">
+                <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-2xl font-black text-emerald-600">
+                  ✓
+                </span>
+                <p className="mt-3 text-[10px] font-bold uppercase tracking-widest text-zinc-500">
+                  Payment sent
+                </p>
+                <p className="mt-1 text-2xl font-black text-zinc-900">
+                  {formatMoney(payment.submittedAmount)}
+                </p>
+                <p className="mt-4 rounded-lg bg-white p-3 text-left text-[9px] leading-5 text-zinc-600 shadow-sm">
+                  From:{" "}
+                  <strong>{payment.senderName ?? "GCash customer"}</strong>
+                  <br />
+                  To:{" "}
+                  <strong>
+                    {payment.receiverName ?? EXPECTED_PAYMENT_RECEIVER}
+                  </strong>
+                  <br />
+                  Reference:{" "}
+                  <strong>{payment.referenceNumber ?? "Not found"}</strong>
+                  <br />
+                  Date: <strong>{formatDateTime(payment.uploadedAt)}</strong>
+                </p>
+              </div>
+            </>
+          )}
         </div>
         <span className="pointer-events-none absolute bottom-3 rounded-full bg-black/55 px-3 py-1 text-[9px] font-bold text-white/75">
           Drag to pan · {Math.round(zoom * 100)}%
@@ -245,16 +378,19 @@ function Tool({
   label,
   icon: Icon,
   onClick,
+  disabled,
 }: {
   label: string;
   icon: React.ElementType;
   onClick: () => void;
+  disabled?: boolean;
 }) {
   return (
     <CashierIconButton
       label={label}
       icon={Icon}
       onClick={onClick}
+      disabled={disabled}
       className="border-white/10 bg-white text-zinc-700 hover:bg-zinc-100"
     />
   );

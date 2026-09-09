@@ -13,7 +13,6 @@ import {
   type POSCartLine,
 } from "../src/modules/cashier/pos/types";
 import {
-  createWalkInOrder,
   holdOrder,
   removeHeldOrder,
 } from "../src/modules/cashier/services/cashierService";
@@ -163,19 +162,6 @@ assert(
   "Resuming a held order must recover its items and remove the hold record.",
 );
 
-const tablelessOrder = createWalkInOrder(state, {
-  type: "Dine-in",
-  items: resumedCart.slice(0, 1).map(({ id: _id, ...item }) => item),
-  discountType: null,
-  paymentMethod: "Cash",
-  amountTendered: 500,
-}).order;
-assert(
-  tablelessOrder.tableNumber === undefined &&
-    tablelessOrder.customerName === "Walk-in Customer",
-  "Tableless dine-in orders must use the automatic walk-in identity.",
-);
-
 const orderCountBeforeDraftCancel = state.orders.length;
 cart = [];
 assert(
@@ -185,34 +171,15 @@ assert(
   "Cancelling an unsubmitted draft must not create a voided order record.",
 );
 
-const confirmed = createWalkInOrder(state, {
-  customerName: "Walk-in Test",
-  type: "Take-out",
-  items: resumedCart.map(({ id: _id, ...item }) => item),
-  discountType: null,
-  paymentMethod: "Cash",
-  amountTendered: 500,
-});
-state = confirmed.state;
-assert(
-  confirmed.order.status === "Confirmed" &&
-    state.payments.some(
-      (payment) => payment.id === confirmed.order.paymentId,
-    ) &&
-    state.transactions.some(
-      (transaction) => transaction.id === confirmed.order.transactionId,
-    ),
-  "Confirm Order must create connected kitchen, payment, and transaction records.",
-);
 assert(
   transitionTransactionState(
     POSTransactionState.PAYMENT,
     "showReceipt",
     false,
   ) === POSTransactionState.RECEIPT,
-  "Successful confirmation must move the transaction into receipt state.",
+  "Successful checkout must move the transaction into receipt state.",
 );
 
 console.log(
-  `Verified Walk-in POS: ${confirmed.order.id}, ${resumedCart.length} order lines, ${state.transactions.length} transactions.`,
+  `Verified Walk-in POS utilities: ${resumedCart.length} order lines.`,
 );

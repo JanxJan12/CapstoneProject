@@ -3,7 +3,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   AlertTriangle,
   Banknote,
-  ShieldCheck,
   StickyNote,
 } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -61,18 +60,14 @@ export function EndShiftDialog({
     formState: { errors },
   } = useForm<EndShiftForm>({
     resolver: zodResolver(endShiftSchema),
-    defaultValues: {
-      actualCash: totals.expectedCash,
-      varianceReason: "",
-      notes: "",
-      managerName: "",
-      managerApproved: false,
-    },
+  defaultValues: {
+    actualCash: totals.expectedCash,
+    varianceReason: "",
+    notes: "",
+  },
   });
 
   const actual = Number(watch("actualCash") ?? 0);
-  const managerName = watch("managerName");
-  const managerApproved = watch("managerApproved");
 
   const variance = actual - totals.expectedCash;
   const outcome = getVarianceOutcomeFromAmount(variance);
@@ -87,13 +82,11 @@ export function EndShiftDialog({
   const resetForm = () => {
     setReviewValues(undefined);
 
-    reset({
-      actualCash: totals.expectedCash,
-      varianceReason: "",
-      notes: "",
-      managerName: "",
-      managerApproved: false,
-    });
+  reset({
+    actualCash: totals.expectedCash,
+    varianceReason: "",
+    notes: "",
+  });
   };
 
   const closeDialog = () => {
@@ -168,11 +161,10 @@ export function EndShiftDialog({
                   End and settle shift
                 </DialogTitle>
 
-                <DialogDescription className="max-w-lg leading-5">
-                  Review the drawer totals, record the actual cash
-                  count, and obtain manager approval before closing
-                  the shift.
-                </DialogDescription>
+              <DialogDescription className="max-w-lg leading-5">
+                Review the drawer totals and record the actual cash
+                count before closing the shift.
+              </DialogDescription>
               </DialogHeader>
             </div>
           </div>
@@ -430,85 +422,6 @@ export function EndShiftDialog({
                 </FieldError>
               </section>
 
-              {/* Manager approval */}
-              <section
-                className="
-                  rounded-2xl border border-primary/15
-                  bg-[#fffaf5] p-4
-                  shadow-[0_3px_12px_rgba(36,26,19,0.04)]
-                "
-              >
-                <div className="flex items-start gap-3">
-                  <span
-                    className="
-                      flex h-9 w-9 shrink-0 items-center
-                      justify-center rounded-xl
-                      bg-primary/10 text-primary
-                    "
-                  >
-                    <ShieldCheck
-                      className="h-4 w-4"
-                      aria-hidden="true"
-                    />
-                  </span>
-
-                  <div>
-                    <p className="text-xs font-black text-foreground">
-                      Manager approval
-                    </p>
-
-                    <p className="mt-1 text-[10px] font-medium leading-4 text-muted-foreground">
-                      A manager must review and approve the settlement
-                      before the shift can be closed.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-4">
-                  <Label htmlFor="manager-name">
-                    Approving manager
-                  </Label>
-
-                  <CashierInput
-                    id="manager-name"
-                    placeholder="Enter manager full name"
-                    autoComplete="off"
-                    aria-invalid={Boolean(errors.managerName)}
-                    {...register("managerName")}
-                  />
-
-                  <FieldError>
-                    {errors.managerName?.message}
-                  </FieldError>
-                </div>
-
-                <label
-                  className="
-                    mt-3 flex cursor-pointer items-start gap-3
-                    rounded-xl border border-transparent
-                    bg-white/80 p-3
-                    text-xs font-semibold leading-5
-                    transition
-                    hover:border-primary/15 hover:bg-white
-                  "
-                >
-                  <input
-                    type="checkbox"
-                    className="mt-0.5 h-5 w-5 shrink-0 accent-primary"
-                    {...register("managerApproved")}
-                  />
-
-                  <span>
-                    I confirm that the manager reviewed the expected
-                    cash, actual count, variance, and supporting
-                    notes.
-                  </span>
-                </label>
-
-                <FieldError>
-                  {errors.managerApproved?.message}
-                </FieldError>
-              </section>
             </div>
 
             {/* Fixed footer */}
@@ -538,12 +451,7 @@ export function EndShiftDialog({
                 className="w-full sm:w-auto sm:min-w-[190px]"
                 loading={loading}
                 loadingLabel="Closing shift…"
-                disabled={
-                  loading ||
-                  pendingPaymentCount > 0 ||
-                  !managerName?.trim() ||
-                  !managerApproved
-                }
+                disabled={loading || pendingPaymentCount > 0}
               >
                 Review and confirm
               </CashierButton>
@@ -566,22 +474,18 @@ export function EndShiftDialog({
           actual,
         )}, variance ${formatMoney(
           variance,
-        )}. Approved by ${
-          managerName || "manager"
-        }. This closes the drawer and blocks new transactions until another shift starts.`}
+        )}. This closes the drawer and blocks new transactions until another shift starts.`}
         confirmLabel="End shift"
         cancelLabel="Back to review"
         danger
         onConfirm={() => {
           if (!reviewValues) return;
 
-          void onConfirm({
-            actualCash: reviewValues.actualCash,
-            varianceReason: reviewValues.varianceReason,
-            notes: reviewValues.notes,
-            managerName: reviewValues.managerName,
-            managerApproved: reviewValues.managerApproved,
-          });
+        void onConfirm({
+          actualCash: reviewValues.actualCash,
+          varianceReason: reviewValues.varianceReason,
+          notes: reviewValues.notes,
+        });
         }}
       />
     </>

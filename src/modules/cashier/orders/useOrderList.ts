@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Toast } from "../components";
 import {
   CANCELLABLE_STATUSES,
-  DATA_REFRESH_FEEDBACK_MS,
   ORDER_REFRESH_INTERVAL_MS,
   PAGE_SIZE,
   SEARCH_FOCUS_DELAY_MS,
@@ -57,9 +56,8 @@ export function useOrderList(intent?: CashierNavigationIntent) {
     state,
     cancelOrder,
     updateOrder,
-    assignRider,
-    duplicateOrder,
-    recordReceiptReprint,
+    databaseLoading,
+    refreshDatabaseState,
   } = useCashierStore();
   const searchRef = useRef<HTMLInputElement>(null);
   const hasOpenedReady = useRef(false);
@@ -77,12 +75,10 @@ export function useOrderList(intent?: CashierNavigationIntent) {
   const [drawerOrderId, setDrawerOrderId] = useState<string>();
   const [cancelTarget, setCancelTarget] = useState<Order>();
   const [editTarget, setEditTarget] = useState<Order>();
-  const [riderTarget, setRiderTarget] = useState<Order>();
   const [bulkCancelOpen, setBulkCancelOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
   const [loading, setLoading] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
   useSearchShortcut(searchRef);
 
@@ -120,7 +116,7 @@ export function useOrderList(intent?: CashierNavigationIntent) {
         (filters.quick === "Delayed" &&
           isOrderDelayed(order, state.delayedThresholdMinutes, now)) ||
         (filters.quick === "Needs Payment" &&
-          order.paymentStatus === "Pending") ||
+          ["Pending", "Unpaid"].includes(order.paymentStatus)) ||
         (filters.quick === "Kitchen Active" &&
           ["Confirmed", "Preparing", "Ready"].includes(order.status)) ||
         (filters.quick === "Needs Rider" &&
@@ -199,6 +195,7 @@ export function useOrderList(intent?: CashierNavigationIntent) {
         setCancelTarget(undefined);
       } catch (caught) {
         reportError(caught, "Unable to cancel the order.");
+        throw caught;
       } finally {
         setLoading(false);
       }
@@ -224,6 +221,7 @@ export function useOrderList(intent?: CashierNavigationIntent) {
         setSelectedIds(new Set());
       } catch (caught) {
         reportError(caught, "Unable to complete the bulk cancellation.");
+        throw caught;
       } finally {
         setLoading(false);
       }
@@ -247,59 +245,6 @@ export function useOrderList(intent?: CashierNavigationIntent) {
     },
     [editTarget, reportError, updateOrder],
   );
-  const handleAssignRider = useCallback(
-    async (riderId: string) => {
-      if (!riderTarget) return;
-      setLoading(true);
-      setError("");
-      try {
-        await assignRider(riderTarget.id, riderId);
-        Toast.success(`Rider assigned to ${riderTarget.id}`);
-        setRiderTarget(undefined);
-      } catch (caught) {
-        reportError(caught, "Unable to assign the rider.");
-      } finally {
-        setLoading(false);
-      }
-    },
-    [assignRider, reportError, riderTarget],
-  );
-  const handleDuplicate = useCallback(
-    async (order: Order) => {
-      setError("");
-      try {
-        const duplicate = await duplicateOrder(order.id);
-        setExpandedIds((current) => new Set(current).add(duplicate.id));
-        Toast.success(`${duplicate.id} created`, {
-          description: `Duplicated from ${order.id} and queued for payment.`,
-        });
-      } catch (caught) {
-        reportError(caught, "Unable to duplicate the order.");
-      }
-    },
-    [duplicateOrder, reportError],
-  );
-  const handlePrint = useCallback(
-    (order: Order) => {
-      window.print();
-      if (order.transactionId) void recordReceiptReprint(order.id);
-      Toast.success(
-        `${order.transactionId ? "Receipt" : "Order ticket"} sent to the print dialog.`,
-      );
-    },
-    [recordReceiptReprint],
-  );
-  const handleBulkPrint = useCallback(async () => {
-    window.print();
-    await Promise.all(
-      selectedOrders
-        .filter((order) => order.transactionId)
-        .map((order) => recordReceiptReprint(order.id)),
-    );
-    Toast.success(
-      `${selectedOrders.length} selected order records prepared for printing.`,
-    );
-  }, [recordReceiptReprint, selectedOrders]);
   const exportCsv = useCallback(
     (selectedOnly = false) => {
       const orders =
@@ -327,13 +272,9 @@ export function useOrderList(intent?: CashierNavigationIntent) {
     [filtered, now, selectedOrders, state.delayedThresholdMinutes],
   );
   const refresh = useCallback(() => {
-    setRefreshing(true);
     setNow(Date.now());
-    window.setTimeout(() => {
-      setRefreshing(false);
-      Toast.success("Order operations are up to date");
-    }, DATA_REFRESH_FEEDBACK_MS);
-  }, []);
+    refreshDatabaseState();
+  }, [refreshDatabaseState]);
   const toggleSelection = useCallback((orderId: string) => {
     setSelectedIds((current) => toggleSetEntry(current, orderId));
   }, []);
@@ -370,26 +311,20 @@ export function useOrderList(intent?: CashierNavigationIntent) {
     drawerOrder: state.orders.find((order) => order.id === drawerOrderId),
     cancelTarget,
     editTarget,
-    riderTarget,
     bulkCancelOpen,
     loading,
-    refreshing,
+    refreshing: databaseLoading,
     error,
     setError,
     setDrawerOrderId,
     setCancelTarget,
     setEditTarget,
-    setRiderTarget,
     setBulkCancelOpen,
     setSelectedIds,
     handleSort,
     handleCancel,
     handleBulkCancel,
     handleEdit,
-    handleAssignRider,
-    handleDuplicate,
-    handlePrint,
-    handleBulkPrint,
     exportCsv,
     refresh,
     toggleSelection,

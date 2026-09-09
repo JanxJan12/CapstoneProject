@@ -5,8 +5,6 @@ export const POS_DRAFT_STORAGE_KEY = "rrj_cashier_pos_draft_v3";
 export const POS_RECENT_SEARCHES_STORAGE_KEY =
   "rrj_cashier_pos_recent_searches_v1";
 export const CASHIER_STATE_VERSION = 6;
-export const CASHIER_ID = "USR-CASHIER-001";
-export const CASHIER_NAME = "Juan Santos";
 export const CASHIER_TERMINAL = "Counter Terminal 01";
 export const CASHIER_LOCALE = "en-PH";
 export const CASHIER_CURRENCY = "PHP";

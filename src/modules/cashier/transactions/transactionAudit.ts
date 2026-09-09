@@ -1,18 +1,17 @@
-import type { ActivityEvent, Order, Payment, Transaction } from "../types";
+import type { Order, Payment, Transaction } from "../types";
 
 export interface TransactionAuditEntry {
   id: string;
   label: string;
   timestamp: string;
   actor: string;
-  source: "Transaction" | "Order" | "Audit" | "Payment";
+  source: "Transaction" | "Order" | "Payment";
 }
 
 export function buildTransactionAudit(
   transaction: Transaction,
   order: Order | undefined,
   payment: Payment | undefined,
-  activities: ActivityEvent[],
 ) {
   const entries: TransactionAuditEntry[] = [
     {
@@ -29,19 +28,6 @@ export function buildTransactionAudit(
       actor: event.actor,
       source: "Order",
     })) ?? []),
-    ...activities
-      .filter(
-        (activity) =>
-          activity.transactionId === transaction.id ||
-          activity.orderId === transaction.orderId,
-      )
-      .map((activity): TransactionAuditEntry => ({
-        id: `activity-${activity.id}`,
-        label: activity.message,
-        timestamp: activity.timestamp,
-        actor: activity.actor,
-        source: "Audit",
-      })),
   ];
   if (payment) {
     entries.push({

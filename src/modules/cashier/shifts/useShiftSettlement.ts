@@ -51,10 +51,10 @@ export function useShiftSettlement() {
       try {
         await endShift(input);
         setEndOpen(false);
-        Toast.success("Shift settled and closed", {
-          description:
-            "The manager approval and closing audit record were saved.",
-        });
+      Toast.success("Shift settled and closed", {
+        description:
+          "The closing cash count and settlement were saved.",
+      });
       } catch (caught) {
         setError(
           caught instanceof Error ? caught.message : "Unable to settle shift.",

@@ -18,10 +18,16 @@ interface DatabaseMenuItemRow {
   is_available: boolean;
 }
 
+interface DatabaseMenuEffectiveAvailabilityRow {
+  menu_item_id: string;
+  effective_available: boolean;
+}
+
 export async function fetchCashierMenuItems(): Promise<MenuItem[]> {
   const [
     { data: categories, error: categoriesError },
     { data: items, error: itemsError },
+    { data: availability, error: availabilityError },
   ] = await Promise.all([
     supabase
       .from("menu_categories")
@@ -44,6 +50,7 @@ export async function fetchCashierMenuItems(): Promise<MenuItem[]> {
       )
       .eq("is_active", true)
       .order("name"),
+    supabase.rpc("get_menu_effective_availability"),
   ]);
 
   if (categoriesError) {
@@ -58,10 +65,24 @@ export async function fetchCashierMenuItems(): Promise<MenuItem[]> {
     );
   }
 
+  if (availabilityError) {
+    throw new Error(
+      `Unable to fetch effective cashier menu availability: ${availabilityError.message}`,
+    );
+  }
+
   const categoryRows = (categories ?? []) as DatabaseMenuCategoryRow[];
   const itemRows = (items ?? []) as DatabaseMenuItemRow[];
+  const availabilityRows = (availability ??
+    []) as DatabaseMenuEffectiveAvailabilityRow[];
   const categoryNameById = new Map(
     categoryRows.map((category) => [category.id, category.name]),
+  );
+  const effectiveAvailabilityByItemId = new Map(
+    availabilityRows.map((entry) => [
+      entry.menu_item_id,
+      entry.effective_available,
+    ]),
   );
 
   return itemRows.map((item) => {
@@ -77,6 +98,13 @@ export async function fetchCashierMenuItems(): Promise<MenuItem[]> {
       throw new Error(`Cashier menu item ${item.id} has an invalid price.`);
     }
 
+    const effectiveAvailable = effectiveAvailabilityByItemId.get(item.id);
+    if (effectiveAvailable === undefined) {
+      throw new Error(
+        `Cashier menu item ${item.id} has no effective availability result.`,
+      );
+    }
+
     return {
       id: item.id,
       code: item.code,
@@ -85,7 +113,7 @@ export async function fetchCashierMenuItems(): Promise<MenuItem[]> {
       category,
       description: item.description ?? "",
       price,
-      available: item.is_available,
+      available: effectiveAvailable,
     };
   });
 }

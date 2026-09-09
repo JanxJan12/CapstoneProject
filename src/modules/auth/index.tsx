@@ -17,7 +17,7 @@ import { CustomerLoginPage } from "./pages/CustomerLoginPage";
 import { RiderLoginPage } from "./pages/RiderLoginPage";
 import { ImageWithFallback } from "@/components/media/ImageWithFallback";
 import { useAuth } from "@/app/providers/AuthProvider";
-import type { AccountRole, } from "../../data/authAccounts";
+import type { AccountRole } from "../../data/accountRole";
 import rrjLogo from "@/assets/brand/rrj-logo.jpg";
 import rrjPhoto from "@/assets/brand/rrj-restaurant.jpg";
 

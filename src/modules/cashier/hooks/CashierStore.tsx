@@ -8,12 +8,26 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useAuth } from "@/app/providers/AuthProvider";
 import { supabase } from "@/lib/supabase";
 import { fetchCashierMenuItems } from "../api/menuApi";
+import {
+  fetchCashierOnlinePayments,
+  type HydratedOnlinePayment,
+} from "../api/onlinePaymentApi";
+import {
+  fetchOpenCashierShift,
+  type OpenCashierShiftResult,
+} from "../api/shiftApi";
+import {
+  fetchCurrentShiftCashierSales,
+  type HydratedCashierSale,
+} from "../api/cashierSaleHydrationApi";
 import { fetchCashierOrders } from "../services/supabaseOrderService";
 import { OPTIMISTIC_DELAY_MS } from "../constants";
+import { clearPOSDraft } from "../pos/posPersistence";
 import { calculateShiftTotals } from "../services/cashierService";
-import type { CashierState, ShiftTotals } from "../types";
+import type { CashierState, Payment, ShiftTotals } from "../types";
 import { loadCashierState, saveCashierState } from "./cashierPersistence";
 import type {
   CashierCommit,
@@ -36,15 +50,308 @@ const EMPTY_SHIFT_TOTALS: ShiftTotals = {
 
 const CashierStore = createContext<CashierStoreValue | null>(null);
 
+function mergePaymentMetadata(
+  existing: Payment,
+  incoming: Payment,
+): Payment {
+  return {
+    ...existing,
+    ...incoming,
+    referenceNumber:
+      incoming.referenceNumber ?? existing.referenceNumber,
+    proofLabel:
+      incoming.proofLabel ?? existing.proofLabel,
+    proofUrl:
+      incoming.proofUrl ?? existing.proofUrl,
+    proofImagePath:
+      incoming.proofImagePath ?? existing.proofImagePath,
+    senderName:
+      incoming.senderName ?? existing.senderName,
+    receiverName:
+      incoming.receiverName ?? existing.receiverName,
+    uploadedBy:
+      incoming.uploadedBy ?? existing.uploadedBy,
+    updatedAt:
+      incoming.updatedAt ?? existing.updatedAt,
+  };
+}
+
+function mergeAuthoritativePayments(
+  hydratedSales: HydratedCashierSale[],
+  onlinePayments: HydratedOnlinePayment[],
+): Payment[] {
+  const paymentsById = new Map<string, Payment>();
+  const paymentIdByOrderId = new Map<string, string>();
+
+  const mergePayment = (payment: Payment) => {
+    const existingById = paymentsById.get(payment.id);
+    const existingPaymentId = paymentIdByOrderId.get(
+      payment.orderId,
+    );
+
+    if (
+      existingById &&
+      existingById.orderId !== payment.orderId
+    ) {
+      throw new Error(
+        "Authoritative cashier payment sources returned one payment ID for different orders.",
+      );
+    }
+
+    if (
+      existingPaymentId &&
+      existingPaymentId !== payment.id
+    ) {
+      throw new Error(
+        "Authoritative cashier payment sources returned multiple payment IDs for one order.",
+      );
+    }
+
+    paymentsById.set(
+      payment.id,
+      existingById
+        ? mergePaymentMetadata(existingById, payment)
+        : payment,
+    );
+    paymentIdByOrderId.set(payment.orderId, payment.id);
+  };
+
+  for (const sale of hydratedSales) {
+    mergePayment(sale.payment);
+  }
+
+  // Online hydration is applied second so its proof/reference metadata wins.
+  for (const { payment } of onlinePayments) {
+    mergePayment(payment);
+  }
+
+  return [...paymentsById.values()];
+}
+
+function mergeDatabaseRefresh(
+  current: CashierState,
+  databaseOrders: CashierState["orders"],
+  hydratedSales: HydratedCashierSale[],
+  onlinePayments: HydratedOnlinePayment[],
+  openShift: OpenCashierShiftResult | null,
+  cashierName: string,
+): CashierState {
+  if (!openShift && hydratedSales.length) {
+    throw new Error(
+      "Current-shift sales were returned without an open cashier shift.",
+    );
+  }
+
+  const salesByDatabaseOrderId = new Map<
+    string,
+    HydratedCashierSale
+  >();
+
+  for (const sale of hydratedSales) {
+    const databaseOrderId = sale.order.databaseId;
+
+    if (!databaseOrderId) {
+      throw new Error(
+        "A hydrated cashier sale did not include its database order ID.",
+      );
+    }
+
+    if (
+      openShift &&
+      sale.transaction.shiftId !== openShift.id
+    ) {
+      throw new Error(
+        "A hydrated cashier sale did not belong to the recovered open shift.",
+      );
+    }
+
+    salesByDatabaseOrderId.set(
+      databaseOrderId,
+      sale,
+    );
+  }
+
+  const onlinePaymentsByDatabaseOrderId = new Map(
+    onlinePayments.map((onlinePayment) => [
+      onlinePayment.databaseOrderId,
+      onlinePayment.payment,
+    ]),
+  );
+
+  const enrichedDatabaseOrders = databaseOrders.map((order) => {
+    const databaseOrderId = order.databaseId;
+    const hydratedOrder = databaseOrderId
+      ? salesByDatabaseOrderId.get(databaseOrderId)?.order
+      : undefined;
+    const authoritativeOrder = hydratedOrder ?? order;
+    const onlinePayment = databaseOrderId
+      ? onlinePaymentsByDatabaseOrderId.get(databaseOrderId)
+      : undefined;
+
+    if (!onlinePayment) {
+      return authoritativeOrder;
+    }
+
+    if (onlinePayment.orderId !== order.id) {
+      throw new Error(
+        "An online payment did not match its database order number.",
+      );
+    }
+
+    return {
+      ...authoritativeOrder,
+      paymentId: onlinePayment.id,
+      paymentMethod: onlinePayment.method,
+      paymentStatus: onlinePayment.status,
+    };
+  });
+
+  const databaseOrderIds = new Set(
+    databaseOrders.flatMap((order) =>
+      order.databaseId ? [order.databaseId] : [],
+    ),
+  );
+
+  const missingHydratedOrders = [
+    ...salesByDatabaseOrderId.entries(),
+  ]
+    .filter(
+      ([databaseOrderId]) =>
+        !databaseOrderIds.has(databaseOrderId),
+    )
+    .map(([, sale]) => sale.order);
+
+  const authoritativeOrderNumbers = new Set(
+    [
+      ...enrichedDatabaseOrders,
+      ...missingHydratedOrders,
+    ].map((order) => order.id),
+  );
+
+  const localOnlyOrders = current.orders.filter(
+    (order) =>
+      !order.databaseId &&
+      !authoritativeOrderNumbers.has(order.id),
+  );
+
+  const authoritativePayments = mergeAuthoritativePayments(
+    hydratedSales,
+    onlinePayments,
+  );
+  const authoritativePaymentIds = new Set(
+    authoritativePayments.map((payment) => payment.id),
+  );
+  const authoritativePaymentOrderIds = new Set(
+    authoritativePayments.map((payment) => payment.orderId),
+  );
+
+  const databaseOrdersNeedingPayment = new Set(
+    databaseOrders
+      .filter((order) =>
+        ["Pending", "Unpaid"].includes(order.paymentStatus),
+      )
+      .map((order) => order.id),
+  );
+
+  const cachedClosedShifts = current.shifts.filter(
+    (shift) => shift.status !== "Open",
+  );
+
+  return {
+    ...current,
+    orders: [
+      ...enrichedDatabaseOrders,
+      ...missingHydratedOrders,
+      ...localOnlyOrders,
+    ],
+    payments: [
+      ...authoritativePayments,
+      ...current.payments.filter(
+        (payment) =>
+          !authoritativePaymentIds.has(payment.id) &&
+          !authoritativePaymentOrderIds.has(payment.orderId) &&
+          !databaseOrdersNeedingPayment.has(payment.orderId),
+      ),
+    ],
+    transactions: openShift
+      ? [
+          ...hydratedSales.map(
+            (sale) => sale.transaction,
+          ),
+          ...current.transactions.filter(
+            (transaction) =>
+              transaction.shiftId !== openShift.id,
+          ),
+        ]
+      : current.transactions,
+    shifts: openShift
+      ? [
+          {
+            id: openShift.id,
+            cashierId: openShift.cashierId,
+            cashierName,
+            terminal: openShift.terminal,
+            openingCash: openShift.openingCash,
+            startedAt: openShift.startedAt,
+            status: "Open",
+          },
+          ...cachedClosedShifts,
+        ]
+      : cachedClosedShifts,
+  };
+}
+
 export function CashierProvider({ children }: { children: ReactNode }) {
+  const { session, loading: authLoading } = useAuth();
+
   const [state, setState] = useState<CashierState>(loadCashierState);
   const [isHydrating, setIsHydrating] = useState(true);
+  const [databaseLoading, setDatabaseLoading] = useState(true);
+  const [databaseError, setDatabaseError] = useState("");
+  const [databaseRefreshRequest, setDatabaseRefreshRequest] = useState(0);
+  const hydratedCashierIdRef = useRef<string | undefined>(undefined);
   const stateRef = useRef(state);
 
   const commit = useCallback<CashierCommit>((next) => {
     stateRef.current = next;
     setState(next);
   }, []);
+
+  useEffect(() => {
+    if (!session || session.role !== "cashier") {
+      return;
+    }
+
+    const current = stateRef.current;
+    const cashierChanged =
+      current.cashier.id !== session.id;
+
+    if (
+      !cashierChanged &&
+      current.cashier.name === session.name
+    ) {
+      return;
+    }
+
+    if (cashierChanged) {
+      clearPOSDraft();
+    }
+
+    commit({
+      ...current,
+      cashier: {
+        ...current.cashier,
+        id: session.id,
+        name: session.name,
+      },
+      heldOrders: cashierChanged
+        ? []
+        : current.heldOrders,
+      notifications: cashierChanged
+        ? []
+        : current.notifications,
+    });
+  }, [commit, session]);
 
   const commitOptimistically = useCallback<OptimisticCommit>(
     async (next, previous, milliseconds = OPTIMISTIC_DELAY_MS.default) => {
@@ -62,6 +369,9 @@ export function CashierProvider({ children }: { children: ReactNode }) {
   );
 
   const actions = useCashierActions(stateRef, commit, commitOptimistically);
+  const refreshDatabaseState = useCallback(() => {
+    setDatabaseRefreshRequest((current) => current + 1);
+  }, []);
 
   useEffect(() => {
     stateRef.current = state;
@@ -69,160 +379,148 @@ export function CashierProvider({ children }: { children: ReactNode }) {
   }, [state]);
 
   useEffect(() => {
-    const frame = window.requestAnimationFrame(() => setIsHydrating(false));
-    return () => window.cancelAnimationFrame(frame);
-  }, []);
+    if (authLoading) {
+      return;
+    }
 
-  useEffect(() => {
+    if (!session || session.role !== "cashier") {
+      hydratedCashierIdRef.current = undefined;
+      setIsHydrating(false);
+      setDatabaseLoading(false);
+      setDatabaseError("");
+      return;
+    }
+
     let cancelled = false;
+    let latestRefreshId = 0;
 
-    const loadDatabaseMenu = async () => {
+    if (hydratedCashierIdRef.current !== session.id) {
+      setIsHydrating(true);
+    }
+
+    setDatabaseLoading(true);
+    setDatabaseError("");
+
+    const loadDatabaseState = async () => {
+      const refreshId = ++latestRefreshId;
+
       try {
-        const menuItems = await fetchCashierMenuItems();
+        const [
+          databaseOrders,
+          hydratedSales,
+          onlinePayments,
+          openShift,
+          menuItems,
+        ] = await Promise.all([
+          fetchCashierOrders(),
+          fetchCurrentShiftCashierSales(
+            session.name,
+          ),
+          fetchCashierOnlinePayments(),
+          fetchOpenCashierShift(),
+          fetchCashierMenuItems(),
+        ]);
 
-        if (cancelled) return;
+        if (
+          cancelled ||
+          refreshId !== latestRefreshId
+        ) {
+          return;
+        }
 
-        const current = stateRef.current;
         commit({
-          ...current,
+          ...mergeDatabaseRefresh(
+            stateRef.current,
+            databaseOrders,
+            hydratedSales,
+            onlinePayments,
+            openShift,
+            session.name,
+          ),
           menuItems,
         });
+        setDatabaseError("");
       } catch (error) {
+        if (cancelled || refreshId !== latestRefreshId) return;
+
         console.error(
-          "Unable to load PostgreSQL cashier menu:",
+          "Unable to refresh PostgreSQL cashier state:",
           error,
         );
+
+        setDatabaseError(
+          "Unable to load cashier operations. Please try again.",
+        );
+      } finally {
+        if (cancelled || refreshId !== latestRefreshId) return;
+
+        hydratedCashierIdRef.current = session.id;
+        setDatabaseLoading(false);
+        setIsHydrating(false);
       }
     };
 
-    void loadDatabaseMenu();
+    void loadDatabaseState();
+
+    const channel = supabase
+      .channel("cashier-orders-live")
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "orders",
+        },
+        () => {
+          void loadDatabaseState();
+        },
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "orders",
+        },
+        () => {
+          void loadDatabaseState();
+        },
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "order_status_history",
+        },
+        () => {
+          void loadDatabaseState();
+        },
+      )
+      .subscribe((status, error) => {
+        if (
+          status === "CHANNEL_ERROR" ||
+          status === "TIMED_OUT"
+        ) {
+          console.error(
+            "Cashier order realtime error:",
+            status,
+            error,
+          );
+
+          if (!cancelled) {
+            setDatabaseError(
+              "Cashier live updates are unavailable. Please try again.",
+            );
+          }
+        }
+      });
 
     return () => {
       cancelled = true;
+      void supabase.removeChannel(channel);
     };
-  }, [commit]);
-
-  useEffect(() => {
-  let cancelled = false;
-
-  const loadDatabaseOrders = async () => {
-    try {
-      const databaseOrders = await fetchCashierOrders();
-
-      if (cancelled) return;
-
-      const current = stateRef.current;
-
-      const databaseOrderNumbers = new Set(
-        databaseOrders.map((order) => order.id),
-      );
-
-      const localOnlyOrders = current.orders.filter(
-        (order) =>
-          !order.databaseId &&
-          !databaseOrderNumbers.has(order.id),
-      );
-
-      commit({
-        ...current,
-        orders: [
-          ...databaseOrders,
-          ...localOnlyOrders,
-        ],
-      });
-    } catch (error) {
-      console.error(
-        "Unable to load Supabase cashier orders:",
-        error,
-      );
-    }
-  };
-
-  void loadDatabaseOrders();
-
-  return () => {
-    cancelled = true;
-  };
-}, [commit]);
-
-  useEffect(() => {
-  let cancelled = false;
-
-  const refreshDatabaseOrders = async () => {
-    try {
-      const databaseOrders = await fetchCashierOrders();
-
-      if (cancelled) return;
-
-      const current = stateRef.current;
-
-      const databaseOrderNumbers = new Set(
-        databaseOrders.map((order) => order.id),
-      );
-
-      const localOnlyOrders = current.orders.filter(
-        (order) =>
-          !order.databaseId &&
-          !databaseOrderNumbers.has(order.id),
-      );
-
-      commit({
-        ...current,
-        orders: [
-          ...databaseOrders,
-          ...localOnlyOrders,
-        ],
-      });
-    } catch (error) {
-      console.error(
-        "Unable to refresh Supabase cashier orders:",
-        error,
-      );
-    }
-  };
-
-  const channel = supabase
-    .channel("cashier-orders-live")
-  .on(
-    "postgres_changes",
-    {
-      event: "UPDATE",
-      schema: "public",
-      table: "orders",
-    },
-    () => {
-      void refreshDatabaseOrders();
-    },
-  )
-  .on(
-    "postgres_changes",
-    {
-      event: "INSERT",
-      schema: "public",
-      table: "orders",
-    },
-    () => {
-      void refreshDatabaseOrders();
-    },
-  )
-  .subscribe((status, error) => {
-    if (
-      status === "CHANNEL_ERROR" ||
-      status === "TIMED_OUT"
-    ) {
-      console.error(
-        "Cashier order realtime error:",
-        status,
-        error,
-      );
-    }
-  });
-
-  return () => {
-    cancelled = true;
-    void supabase.removeChannel(channel);
-  };
-}, [commit]);
+  }, [authLoading, commit, databaseRefreshRequest, session]);
 
   const activeShift = useMemo(
     () => state.shifts.find((entry) => entry.status === "Open"),
@@ -237,8 +535,26 @@ export function CashierProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo<CashierStoreValue>(
-    () => ({ state, isHydrating, activeShift, shiftTotals, ...actions }),
-    [actions, activeShift, isHydrating, shiftTotals, state],
+    () => ({
+      state,
+      isHydrating,
+      databaseLoading,
+      databaseError,
+      refreshDatabaseState,
+      activeShift,
+      shiftTotals,
+      ...actions,
+    }),
+    [
+      actions,
+      activeShift,
+      databaseError,
+      databaseLoading,
+      isHydrating,
+      refreshDatabaseState,
+      shiftTotals,
+      state,
+    ],
   );
 
   return (

@@ -39,7 +39,7 @@ export function ReceiptContent({
           </p>
         </div>
         <div className="mb-3 flex justify-between text-[10px] text-muted-foreground">
-          <span>{transaction?.id ?? order.transactionId ?? order.id}</span>
+          <span> {transaction?.transactionNumber ?? transaction?.id ?? order.transactionId ?? order.id} </span>
           <span>
             {formatDateTime(transaction?.createdAt ?? order.createdAt)}
           </span>

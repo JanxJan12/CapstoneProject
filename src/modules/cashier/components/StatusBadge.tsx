@@ -63,6 +63,10 @@ const STATUS_PRESENTATION: Record<CashierStatus, StatusPresentation> = {
     className: "border-red-200 bg-red-50 text-red-800",
     icon: XCircle,
   },
+  Unpaid: {
+    className: "border-amber-200 bg-amber-50 text-amber-800",
+    icon: AlertCircle,
+  },
   Pending: {
     className: "border-amber-200 bg-amber-50 text-amber-800",
     icon: AlertCircle,

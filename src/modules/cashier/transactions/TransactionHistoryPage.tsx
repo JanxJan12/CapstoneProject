@@ -1,5 +1,5 @@
-import { Download, Printer } from "lucide-react";
-import { CashierButton, PageHeader, Toast } from "../components";
+import { Download } from "lucide-react";
+import { CashierButton, PageHeader } from "../components";
 import type { CashierNavigationIntent } from "../types";
 import { ReceiptDialog } from "../pos/ReceiptDialog";
 import { TransactionDetailDrawer } from "./TransactionDetailDrawer";
@@ -29,19 +29,6 @@ export function TransactionHistoryPage({
             >
               <Download className="h-4 w-4" aria-hidden="true" />
               Export CSV
-            </CashierButton>
-            <CashierButton
-              variant="secondary"
-              disabled={!history.filtered.length}
-              onClick={() => {
-                window.print();
-                Toast.success(
-                  "Filtered transaction report sent to the print dialog.",
-                );
-              }}
-            >
-              <Printer className="h-4 w-4" aria-hidden="true" />
-              Print
             </CashierButton>
           </>
         }
@@ -79,7 +66,6 @@ export function TransactionHistoryPage({
         order={history.selectedOrder}
         payment={history.selectedPayment}
         shift={history.selectedShift}
-        activities={history.state.activities}
         open={Boolean(history.selectedTransaction)}
         onOpenChange={(open) => {
           if (!open) history.closeTransaction();
@@ -92,11 +78,6 @@ export function TransactionHistoryPage({
         transaction={history.receiptTransaction}
         open={Boolean(history.receiptTransaction && history.receiptOrder)}
         onClose={history.closeReceipt}
-        onPrint={() =>
-          history.receiptOrder
-            ? history.recordReceiptReprint(history.receiptOrder.id)
-            : undefined
-        }
       />
     </div>
   );

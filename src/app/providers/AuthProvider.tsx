@@ -19,16 +19,15 @@ import {
 
 import type {
   AccountRole,
-} from "@/data/authAccounts";
+} from "@/data/accountRole";
 
-type DatabaseRole =
-  Exclude<AccountRole, "kitchen">;
+
 
 interface ProfileRow {
   id: string;
   first_name: string | null;
   last_name: string | null;
-  role: DatabaseRole;
+  role: AccountRole;
   is_active: boolean;
 }
 
@@ -42,7 +41,7 @@ interface AuthContextValue {
 const AuthContext =
   createContext<AuthContextValue | null>(null);
 
-const DATABASE_ROLES: DatabaseRole[] = [
+const DATABASE_ROLES: AccountRole[] = [
   "customer",
   "cashier",
   "manager",
@@ -51,9 +50,9 @@ const DATABASE_ROLES: DatabaseRole[] = [
 
 function isDatabaseRole(
   value: unknown,
-): value is DatabaseRole {
+): value is AccountRole {
   return DATABASE_ROLES.includes(
-    value as DatabaseRole,
+    value as AccountRole,
   );
 }
 
@@ -215,19 +214,21 @@ export function AuthProvider({
           : Date.now() +
             60 * 60 * 1000;
 
-      setSession({
-        role: profile.role,
+    setSession({
+      id: profile.id,
 
-        name: getDisplayName(
-          profile,
-          authSession,
-        ),
+      role: profile.role,
 
-        email:
-          authSession.user.email ?? "",
+      name: getDisplayName(
+        profile,
+        authSession,
+      ),
 
-        expiresAt,
-      });
+      email:
+        authSession.user.email ?? "",
+
+      expiresAt,
+    });
 
       setAuthError(null);
       setLoading(false);

@@ -7,6 +7,7 @@ export type CashierPageId =
   | "shift-settlement";
 
 export type OrderType = "Dine-in" | "Take-out" | "Delivery";
+export type OrderChannel = "online" | "walk_in";
 export type OrderStatus =
   | "Awaiting Payment"
   | "Confirmed"
@@ -20,7 +21,11 @@ export type OrderStatus =
   | "Completed"
   | "Cancelled";
 export type PaymentMethod = "Cash" | "GCash";
-export type PaymentStatus = "Pending" | "Verified" | "Rejected";
+export type PaymentStatus =
+  | "Unpaid"
+  | "Pending"
+  | "Verified"
+  | "Rejected";
 export type TransactionStatus = "Completed" | "Refunded" | "Voided";
 export type ShiftStatus = "Open" | "Pending Review" | "Closed";
 export type DiscountType = "Senior Citizen" | "PWD" | null;
@@ -87,9 +92,13 @@ export interface Order {
    */
   databaseId?: string;
 
+  /** PostgreSQL orders.order_channel for database-backed orders. */
+  orderChannel?: OrderChannel;
+
   customerName: string;
   contactNumber: string;
   deliveryAddress?: string;
+  landmark?: string;
   type: OrderType;
   tableNumber?: string;
   items: OrderItem[];
@@ -127,21 +136,23 @@ export interface Payment {
   referenceNumber?: string;
   proofLabel?: string;
   proofUrl?: string;
+  proofImagePath?: string;
   senderName?: string;
   receiverName?: string;
   uploadedBy?: string;
   uploadedAt: string;
+  updatedAt?: string;
   verifiedBy?: string;
   verifiedAt?: string;
   rejectedBy?: string;
   rejectedAt?: string;
   rejectionReason?: string;
   rejectionNotes?: string;
-  overrideMismatch?: boolean;
 }
 
 export interface Transaction {
   id: string;
+  transactionNumber?: string;
   receiptNumber?: string;
   orderId: string;
   customerName: string;
@@ -214,7 +225,6 @@ export type ActivityKind =
   | "rider_accepted"
   | "transaction_completed"
   | "order_cancelled"
-  | "receipt_reprinted"
   | "shift_started"
   | "shift_closed";
 
@@ -295,6 +305,7 @@ export interface CashierNavigationIntent {
   openFirstReady?: boolean;
   openMostRecentReceipt?: boolean;
   search?: string;
+  paymentOrderId?: string;
 }
 
 export interface ShiftTotals {
@@ -313,8 +324,6 @@ export interface ShiftClosureInput {
   actualCash: number;
   varianceReason?: string;
   notes?: string;
-  managerName: string;
-  managerApproved: boolean;
 }
 
 export type CashierQueueStage =

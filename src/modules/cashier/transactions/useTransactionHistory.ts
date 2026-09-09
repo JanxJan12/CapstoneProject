@@ -31,7 +31,6 @@ const CSV_HEADERS = [
   "Basket Quantity",
   "Amount",
   "Discount",
-  "Refund",
   "Payment",
   "Payment Reference",
   "Status",
@@ -42,7 +41,7 @@ const CSV_HEADERS = [
 ] as const;
 
 export function useTransactionHistory(intent?: CashierNavigationIntent) {
-  const { state, recordReceiptReprint } = useCashierStore();
+  const { state } = useCashierStore();
   const searchRef = useRef<HTMLInputElement>(null);
   const openedRecent = useRef(false);
   const [filters, setFilters] = useState<TransactionFilterValue>(() => ({
@@ -154,7 +153,6 @@ export function useTransactionHistory(intent?: CashierNavigationIntent) {
         getBasketQuantity(order),
         transaction.amount.toFixed(2),
         transaction.discountAmount.toFixed(2),
-        (transaction.refundAmount ?? 0).toFixed(2),
         transaction.method,
         payment?.referenceNumber ?? "",
         transaction.status,
@@ -218,6 +216,5 @@ export function useTransactionHistory(intent?: CashierNavigationIntent) {
     ),
     openReceipt,
     exportRecords,
-    recordReceiptReprint,
   };
 }
