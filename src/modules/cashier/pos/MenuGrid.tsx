@@ -128,6 +128,7 @@ export function MenuGrid({
                 icon={Search}
                 title="No menu items found"
                 description="Try another name, alias, or category."
+                className="pos-empty-state w-full max-w-md"
               />
             </div>
           )}

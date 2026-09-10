@@ -13,7 +13,10 @@ export function LoadingSkeleton({
 }: LoadingSkeletonProps) {
   return (
     <Skeleton
-      className={cn("cashier-loading-skeleton", className)}
+      className={cn(
+        "cashier-loading-skeleton overflow-hidden bg-muted/65",
+        className,
+      )}
       role={label ? "status" : undefined}
       aria-label={label}
       {...props}

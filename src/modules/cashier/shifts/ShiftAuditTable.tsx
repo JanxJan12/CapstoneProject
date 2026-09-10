@@ -26,9 +26,9 @@ export function ShiftAuditTable({
 }) {
   return (
     <section className="rrj-card overflow-hidden">
-      <div className="border-b border-border px-4 py-4 sm:px-5">
+      <div className="border-b border-border/80 bg-gradient-to-r from-amber-50/40 to-transparent px-4 py-3.5 sm:px-5">
         <SectionHeading
-          title="Settlement audit trail"
+          title="Settlement Audit Trail"
           description="Drawer counts, variance outcomes, approvals, and printable reports"
         />
       </div>
@@ -52,9 +52,12 @@ export function ShiftAuditTable({
           </thead>
           <tbody className="divide-y divide-border">
             {shifts.map((shift) => (
-              <tr key={shift.id} className="text-xs">
+              <tr key={shift.id} className="text-xs hover:bg-muted/20">
                 <td className="px-3 py-3">
-                  <p className="font-mono text-[10px] font-black text-primary">
+                  <p
+                    className="max-w-[150px] truncate font-mono text-[10px] font-black text-primary"
+                    title={shift.id}
+                  >
                     {shift.id}
                   </p>
                   <p className="mt-1 text-[9px] text-muted-foreground">

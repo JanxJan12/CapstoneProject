@@ -151,10 +151,10 @@ export function CashierWorkQueue({
 
   return (
     <section
-      className="rrj-card min-h-[300px] overflow-hidden"
+      className="rrj-card overflow-hidden"
       aria-labelledby="cashier-work-queue-title"
     >
-      <div className="border-b border-border/80 bg-[#fffaf5]/65 px-4 py-4 sm:px-5">
+      <div className="border-b border-border/80 bg-[#fffaf5]/65 px-4 py-3 sm:px-5">
         <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
           <div>
             <h2
@@ -242,15 +242,15 @@ export function CashierWorkQueue({
       </div>
 
       {visibleItems.length === 0 ? (
-        <div className="flex min-h-[240px] flex-col items-center justify-center px-6 py-10 text-center">
-          <div className="grid h-12 w-12 place-items-center rounded-2xl border border-border bg-white shadow-sm">
+        <div className="flex min-h-[154px] flex-col items-center justify-center px-6 py-6 text-center">
+          <div className="grid h-10 w-10 place-items-center rounded-xl border border-border bg-white shadow-sm">
             <CheckCircle2
-              className="h-5 w-5 text-muted-foreground"
+              className="h-4.5 w-4.5 text-muted-foreground"
               aria-hidden="true"
             />
           </div>
 
-          <h3 className="mt-4 text-sm font-black text-foreground">
+          <h3 className="mt-3 text-sm font-black text-foreground">
             {emptyState.title}
           </h3>
 
@@ -263,7 +263,7 @@ export function CashierWorkQueue({
               type="button"
               variant="secondary"
               size="sm"
-              className="mt-4"
+              className="mt-3"
               onClick={resetEmptyState}
             >
               {attentionFilter

@@ -67,7 +67,7 @@ export function EditOrderDialog({
       open={open}
       onOpenChange={(value) => !loading && onOpenChange(value)}
     >
-      <CashierDialogContent className="max-w-xl">
+      <CashierDialogContent className="max-w-xl sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>Edit {order.id}</DialogTitle>
           <DialogDescription>
@@ -127,7 +127,7 @@ export function EditOrderDialog({
             />
             <FieldError>{errors.orderInstructions?.message}</FieldError>
           </div>
-          <DialogFooter>
+          <DialogFooter className="border-t border-border/70 pt-4">
             <CashierButton
               variant="secondary"
               disabled={loading}

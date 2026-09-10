@@ -61,6 +61,7 @@ export function OrderLookupDialog({
           max-h-[calc(100dvh-2rem)]
           w-[calc(100vw-2rem)]
           max-w-2xl
+          sm:max-w-2xl
           flex-col
           overflow-hidden
           p-0

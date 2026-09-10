@@ -27,7 +27,7 @@ export function Drawer({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <CashierDialogContent
         className={cn(
-          "cashier-drawer left-auto right-0 top-0 h-dvh max-h-dvh w-full translate-x-0 translate-y-0 overflow-y-auto rounded-none bg-[#f8f4ef] p-0 shadow-[-18px_0_50px_rgba(36,26,19,0.16)]",
+          "cashier-drawer left-auto right-0 top-0 h-dvh max-h-dvh w-full translate-x-0 translate-y-0 overflow-y-auto overscroll-contain rounded-none bg-[#f8f4ef] p-0 shadow-[-18px_0_50px_rgba(36,26,19,0.16)] sm:rounded-l-2xl",
           SIZE_STYLES[size],
           className,
         )}

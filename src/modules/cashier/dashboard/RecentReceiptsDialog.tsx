@@ -26,8 +26,7 @@ export function RecentReceiptsDialog({
     .filter((transaction) => transaction.status === "Completed")
     .sort(
       (a, b) =>
-        new Date(b.createdAt).getTime() -
-        new Date(a.createdAt).getTime(),
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     )
     .slice(0, 8);
 
@@ -38,16 +37,13 @@ export function RecentReceiptsDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <CashierDialogContent className="max-w-xl">
+        <CashierDialogContent className="max-w-xl gap-0 overflow-hidden p-0 sm:max-w-xl">
           {/* Fixed modal header */}
           <DialogHeader className="shrink-0 border-b border-border/80 px-6 py-5 pr-12">
-            <DialogTitle>
-              Recent printable transactions
-            </DialogTitle>
+            <DialogTitle>Recent printable transactions</DialogTitle>
 
             <DialogDescription>
-              Choose a completed transaction to preview and reprint
-              its receipt.
+              Choose a completed transaction to preview and reprint its receipt.
             </DialogDescription>
           </DialogHeader>
 
@@ -61,8 +57,7 @@ export function RecentReceiptsDialog({
                     type="button"
                     onClick={() => {
                       const order = state.orders.find(
-                        (entry) =>
-                          entry.id === transaction.orderId,
+                        (entry) => entry.id === transaction.orderId,
                       );
 
                       if (!order) return;
@@ -87,10 +82,7 @@ export function RecentReceiptsDialog({
                         bg-amber-50 text-primary
                       "
                     >
-                      <Printer
-                        className="h-4 w-4"
-                        aria-hidden="true"
-                      />
+                      <Printer className="h-4 w-4" aria-hidden="true" />
                     </span>
 
                     <span className="min-w-0 flex-1">
@@ -99,8 +91,7 @@ export function RecentReceiptsDialog({
                       </strong>
 
                       <span className="mt-1 block truncate text-[10px] font-medium text-muted-foreground">
-                        {transaction.customerName} ·{" "}
-                        {transaction.method} ·{" "}
+                        {transaction.customerName} · {transaction.method} ·{" "}
                         {formatDateTime(transaction.createdAt)}
                       </span>
                     </span>
@@ -112,7 +103,7 @@ export function RecentReceiptsDialog({
                 ))}
               </div>
             ) : (
-              <div className="flex min-h-[220px] items-center justify-center">
+              <div className="flex min-h-[160px] items-center justify-center">
                 <EmptyState
                   icon={Printer}
                   title="No printable transactions"

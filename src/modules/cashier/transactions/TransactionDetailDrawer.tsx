@@ -13,12 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { formatDateTime, formatMoney } from "../constants";
-import type {
-  CashierShift,
-  Order,
-  Payment,
-  Transaction,
-} from "../types";
+import type { CashierShift, Order, Payment, Transaction } from "../types";
 import { CashierButton, Drawer, StatusBadge } from "../components";
 import { getBasketQuantity, getReceiptNumber } from "./transactionRecords";
 import { buildTransactionAudit } from "./transactionAudit";
@@ -43,15 +38,11 @@ export function TransactionDetailDrawer({
 }) {
   if (!transaction) return null;
 
-  const auditEntries = buildTransactionAudit(
-    transaction,
-    order,
-    payment,
-  );
+  const auditEntries = buildTransactionAudit(transaction, order, payment);
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange} size="lg">
-      <DialogHeader className="sticky top-0 z-10 border-b border-border bg-white/95 p-5 pr-14 shadow-sm backdrop-blur-xl">
+      <DialogHeader className="sticky top-0 z-10 border-b border-border/80 bg-white/95 px-4 py-3.5 pr-14 shadow-[0_4px_14px_rgba(36,26,19,0.05)] backdrop-blur-xl sm:px-5">
         <div className="flex flex-wrap items-center gap-2">
           <DialogTitle className="font-mono text-lg font-black text-primary">
             {getReceiptNumber(transaction)}
@@ -63,7 +54,7 @@ export function TransactionDetailDrawer({
         </DialogDescription>
       </DialogHeader>
 
-      <div className="space-y-5 p-5">
+      <div className="space-y-4 p-4 sm:p-5">
         <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <TransactionDetailCard
             icon={ReceiptText}
@@ -208,7 +199,7 @@ export function TransactionDetailDrawer({
                   <p className="text-sm font-bold text-foreground">
                     {entry.label}
                   </p>
-                  <span className="rounded-full bg-muted px-2 py-0.5 text-[8px] font-black uppercase tracking-wider text-muted-foreground">
+                  <span className="cashier-status-badge rounded-full border border-border/70 bg-muted/70 px-2 py-0.5 text-[8px] font-black uppercase tracking-wider text-muted-foreground shadow-[0_1px_2px_rgba(36,26,19,0.03)]">
                     {entry.source}
                   </span>
                 </div>
@@ -220,7 +211,7 @@ export function TransactionDetailDrawer({
           </ol>
         </section>
 
-        <div className="sticky bottom-0 flex flex-wrap gap-2 border-t border-border bg-[#f8f4ef]/95 py-3 backdrop-blur-xl">
+        <div className="sticky bottom-0 -mx-4 -mb-4 flex flex-wrap gap-2 border-t border-border/80 bg-[#f8f4ef]/95 px-4 py-3 backdrop-blur-xl sm:-mx-5 sm:-mb-5 sm:justify-end sm:px-5">
           <CashierButton
             variant="secondary"
             disabled={transaction.status !== "Completed" || !order}

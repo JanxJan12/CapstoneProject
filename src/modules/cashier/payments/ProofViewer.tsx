@@ -215,7 +215,7 @@ export function ProofViewer({ payment }: { payment: Payment }) {
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2 text-white">
         <div>
           <p className="text-xs font-black">Proof of payment</p>
-          <p className="text-[10px] text-white/55">{payment.proofLabel}</p>
+          <p className="text-[10px] text-white/70">{payment.proofLabel}</p>
         </div>
         <div className="flex flex-wrap items-center justify-end gap-1">
           <Tool
@@ -261,7 +261,7 @@ export function ProofViewer({ payment }: { payment: Payment }) {
       </div>
       <div
         ref={viewerRef}
-        className={`relative flex select-none items-center justify-center overflow-hidden rounded-xl bg-black/30 ring-1 ring-white/5 ${fullscreen ? "flex-1" : "h-[330px]"} ${pointer.current ? "cursor-grabbing" : "cursor-grab"}`}
+        className={`relative flex select-none items-center justify-center overflow-hidden rounded-xl bg-black/30 ring-1 ring-white/5 ${fullscreen ? "flex-1" : "h-[360px] sm:h-[430px]"} ${pointer.current ? "cursor-grabbing" : "cursor-grab"}`}
         onWheel={(event) => {
           event.preventDefault();
           setZoom((value) =>
@@ -391,7 +391,7 @@ function Tool({
       icon={Icon}
       onClick={onClick}
       disabled={disabled}
-      className="border-white/10 bg-white text-zinc-700 hover:bg-zinc-100"
+      className="h-9 w-9 rounded-[10px] border-white/10 bg-white/95 text-zinc-700 shadow-none hover:bg-white"
     />
   );
 }

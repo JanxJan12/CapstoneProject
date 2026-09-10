@@ -41,7 +41,10 @@ export function POSOrderHeader({
   const OrderTypeIcon = orderType === "Dine-in" ? Utensils : ShoppingBag;
 
   return (
-    <div className="pos-order-header border-b border-border bg-gradient-to-r from-white via-[#fffaf5] to-orange-50/30 p-2 shadow-[0_4px_14px_rgba(67,42,23,0.035)]">
+    <div
+      className="pos-order-header border-b border-border bg-gradient-to-r from-white via-[#fffaf5] to-orange-50/30 p-2 shadow-[0_4px_14px_rgba(67,42,23,0.035)]"
+      data-has-items={hasItems || undefined}
+    >
       <div className="pos-order-fields flex flex-wrap items-center gap-2.5">
         <div
           className="pos-workstation-status hidden items-center gap-2 lg:flex"

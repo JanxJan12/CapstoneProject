@@ -52,7 +52,7 @@ export function ShiftReportDialog({
         if (!value) onClose();
       }}
     >
-      <CashierDialogContent className="max-w-2xl bg-[#fbf8f4]">
+      <CashierDialogContent className="max-w-2xl bg-[#fbf8f4] sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Printable shift report</DialogTitle>
           <DialogDescription>
@@ -198,7 +198,7 @@ export function ShiftReportDialog({
           </div>
         </article>
 
-        <DialogFooter>
+        <DialogFooter className="border-t border-border/70 pt-4">
           <CashierButton
             variant="secondary"
             onClick={() => {

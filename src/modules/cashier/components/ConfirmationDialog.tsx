@@ -33,8 +33,8 @@ export function ConfirmationDialog({
 }: ConfirmationDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="cashier-confirm-dialog max-w-md rounded-[20px] border-border/80 bg-[#fffdf9] p-5 shadow-[0_24px_70px_rgba(36,26,19,0.22)] sm:p-6">
-        <AlertDialogHeader>
+      <AlertDialogContent className="cashier-confirm-dialog max-h-[calc(100dvh-2rem)] max-w-md overflow-y-auto overscroll-contain rounded-2xl border-border/80 bg-[#fffdf9] p-5 shadow-[0_24px_70px_rgba(36,26,19,0.22)] sm:max-w-md sm:p-6">
+        <AlertDialogHeader className="gap-1.5">
           <AlertDialogTitle className="text-lg font-black tracking-tight text-foreground">
             {title}
           </AlertDialogTitle>
@@ -42,7 +42,7 @@ export function ConfirmationDialog({
             {description}
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter>
+        <AlertDialogFooter className="mt-1 border-t border-border/70 pt-4">
           <AlertDialogCancel className="cashier-action min-h-11 rounded-[11px] border border-border bg-white px-4 text-xs font-black text-foreground shadow-sm transition-all hover:border-primary/25 hover:bg-amber-50/40 focus-visible:ring-primary">
             {cancelLabel}
           </AlertDialogCancel>

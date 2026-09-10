@@ -6,17 +6,14 @@ import { OrderTableRow } from "./OrderTableRow";
 
 const HEADERS: { label: string; sortKey?: OrderSortKey; className?: string }[] =
   [
-    { label: "Order Number", sortKey: "orderNumber" },
+    { label: "Order", sortKey: "orderNumber" },
     { label: "Customer", sortKey: "customer" },
-    { label: "Phone", sortKey: "phone" },
-    { label: "Items", sortKey: "items", className: "min-w-[220px]" },
-    { label: "Order Type", sortKey: "type" },
-    { label: "Kitchen Status", sortKey: "kitchen" },
-    { label: "Payment Status", sortKey: "payment" },
-    { label: "Rider Status", sortKey: "rider" },
-    { label: "Elapsed Time", sortKey: "elapsed" },
-    { label: "Priority", sortKey: "priority" },
+    { label: "Type", sortKey: "type" },
     { label: "Total", sortKey: "total" },
+    { label: "Order Status" },
+    { label: "Payment", sortKey: "payment" },
+    { label: "Rider", sortKey: "rider" },
+    { label: "Created", sortKey: "created" },
     { label: "Actions" },
   ];
 
@@ -57,7 +54,7 @@ export function OrderTable(props: OrderTableProps) {
   return (
     <div className="overflow-x-auto">
       <table
-        className="rrj-table w-full min-w-[1920px]"
+        className="rrj-table w-full min-w-[1240px]"
         aria-label="Central order operations table"
       >
         <thead>

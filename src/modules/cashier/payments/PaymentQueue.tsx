@@ -34,7 +34,7 @@ export function PaymentQueue({
             type="button"
             aria-pressed={selectedId === payment.id}
             onClick={() => onSelect(payment.id)}
-            className={`group min-h-[116px] w-full p-4 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary ${selectedId === payment.id ? "border-l-4 border-l-primary bg-gradient-to-r from-amber-50 to-white shadow-[inset_0_0_0_1px_rgba(184,79,10,0.05)]" : "hover:bg-white hover:shadow-[inset_3px_0_0_rgba(184,79,10,0.18)]"}`}
+            className={`group min-h-[104px] w-full p-3.5 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary ${selectedId === payment.id ? "border-l-4 border-l-primary bg-gradient-to-r from-amber-50 to-white shadow-[inset_0_0_0_1px_rgba(184,79,10,0.05)]" : "hover:bg-white hover:shadow-[inset_3px_0_0_rgba(184,79,10,0.18)]"}`}
           >
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -47,16 +47,16 @@ export function PaymentQueue({
               </div>
               <StatusBadge status={payment.status} />
             </div>
-            <div className="mt-3 flex items-center justify-between gap-3 text-[11px]">
-              <span className="flex items-center gap-1.5 font-semibold text-muted-foreground">
+            <div className="mt-2.5 flex items-center justify-between gap-3 text-[11px]">
+              <span className="flex items-center gap-1.5 font-semibold text-foreground/65">
                 <CreditCard className="h-3.5 w-3.5" />
                 {payment.method}
               </span>
-              <strong className="text-sm text-foreground">
+              <strong className="text-[15px] font-black text-foreground">
                 {formatMoney(order.total)}
               </strong>
             </div>
-            <p className="mt-1 flex items-center gap-1 text-[10px] font-semibold text-muted-foreground">
+            <p className="mt-1 flex items-center gap-1 text-[10px] font-semibold text-foreground/60">
               <Clock3 className="h-3 w-3" />
               Uploaded {formatElapsed(payment.uploadedAt)} ago
             </p>

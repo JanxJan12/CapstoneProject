@@ -44,28 +44,51 @@ export const TransactionTable = memo(function TransactionTable({
     () => [
       {
         id: "receipt",
-        header: "Receipt Number",
+        header: "Receipt",
+        cellClassName: "max-w-[190px]",
         cell: (transaction) => (
-          <button
-            type="button"
-            onClick={() => onView(transaction)}
-            className="min-h-11 font-mono text-xs font-black text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-          >
-            {getReceiptNumber(transaction)}
-          </button>
+          <div className="min-w-0">
+            <button
+              type="button"
+              onClick={() => onView(transaction)}
+              className="min-h-9 font-mono text-xs font-black text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            >
+              {getReceiptNumber(transaction)}
+            </button>
+            <p
+              className="max-w-[170px] truncate font-mono text-[9px] text-muted-foreground/70"
+              title={transaction.id}
+            >
+              {transaction.id}
+            </p>
+          </div>
         ),
       },
       {
-        id: "transaction",
-        header: "Transaction ID",
-        cellClassName: "font-mono text-[10px] text-muted-foreground",
-        cell: (transaction) => transaction.id,
-      },
-      {
         id: "order",
-        header: "Order ID",
-        cellClassName: "font-mono text-xs font-black text-foreground",
-        cell: (transaction) => transaction.orderId,
+        header: "Order",
+        cellClassName: "max-w-[245px]",
+        cell: (transaction) => {
+          const order = orderById.get(transaction.orderId);
+          const basketSummary = order?.items
+            .map((item) => `${item.quantity}× ${item.name}`)
+            .join(", ");
+          return (
+            <>
+              <p className="font-mono text-xs font-black text-foreground">
+                {transaction.orderId}
+              </p>
+              <p
+                className="mt-1 max-w-[225px] truncate text-[9px] text-muted-foreground"
+                title={basketSummary}
+              >
+                {order
+                  ? `${getBasketQuantity(order)} items · ${basketSummary}`
+                  : "Order record unavailable"}
+              </p>
+            </>
+          );
+        },
       },
       {
         id: "customer",
@@ -77,26 +100,6 @@ export const TransactionTable = memo(function TransactionTable({
               <p className="text-xs font-bold">{transaction.customerName}</p>
               <p className="mt-0.5 text-[10px] text-muted-foreground">
                 {order?.contactNumber ?? "No linked contact"}
-              </p>
-            </>
-          );
-        },
-      },
-      {
-        id: "basket",
-        header: "Basket",
-        cellClassName: "max-w-[240px]",
-        cell: (transaction) => {
-          const order = orderById.get(transaction.orderId);
-          return (
-            <>
-              <p className="text-xs font-bold">
-                {getBasketQuantity(order)} items
-              </p>
-              <p className="mt-0.5 truncate text-[10px] text-muted-foreground">
-                {order?.items
-                  .map((item) => `${item.quantity}× ${item.name}`)
-                  .join(", ") ?? "Order record unavailable"}
               </p>
             </>
           );
@@ -120,23 +123,21 @@ export const TransactionTable = memo(function TransactionTable({
         cell: (transaction) => <StatusBadge status={transaction.status} />,
       },
       {
-        id: "cashier",
-        header: "Cashier",
-        cellClassName: "text-xs",
-        cell: (transaction) => transaction.cashierName,
-      },
-      {
-        id: "terminal",
-        header: "Terminal",
-        cellClassName: "text-[11px] text-muted-foreground",
-        cell: (transaction) =>
-          shiftById.get(transaction.shiftId)?.terminal ?? "Unlinked terminal",
-      },
-      {
         id: "created",
-        header: "Date and Time",
-        cellClassName: "text-[10px] text-muted-foreground",
-        cell: (transaction) => formatDateTime(transaction.createdAt),
+        header: "Date",
+        cellClassName: "whitespace-nowrap",
+        cell: (transaction) => (
+          <>
+            <p className="text-[11px] font-semibold text-foreground/75">
+              {formatDateTime(transaction.createdAt)}
+            </p>
+            <p className="mt-1 text-[9px] text-muted-foreground">
+              {transaction.cashierName} ·{" "}
+              {shiftById.get(transaction.shiftId)?.terminal ??
+                "Unlinked terminal"}
+            </p>
+          </>
+        ),
       },
       {
         id: "actions",
@@ -179,7 +180,7 @@ export const TransactionTable = memo(function TransactionTable({
       label="Linked financial transaction records"
       emptyTitle="No matching transactions"
       emptyDescription="Adjust the date, cashier, payment, shift, terminal, customer, order, or receipt filters."
-      minWidthClassName="min-w-[1500px]"
+      minWidthClassName="min-w-[1080px]"
     />
   );
 });

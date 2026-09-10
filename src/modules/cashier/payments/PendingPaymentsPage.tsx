@@ -1,7 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import { RefreshCw } from "lucide-react";
+import { CreditCard, RefreshCw } from "lucide-react";
 import { useCashierStore } from "../hooks/CashierStore";
-import { CashierButton, ErrorBanner, PageHeader, Toast } from "../components";
+import {
+  CashierButton,
+  EmptyState,
+  ErrorBanner,
+  PageHeader,
+  Toast,
+} from "../components";
 import { DATA_REFRESH_FEEDBACK_MS } from "../constants";
 import { PaymentDetails } from "./PaymentDetails";
 import { PaymentQueue } from "./PaymentQueue";
@@ -142,36 +148,46 @@ useEffect(() => {
         }
       />
       {error && <ErrorBanner message={error} onRetry={() => setError("")} />}
-      <div
-        className="payment-review-shell rrj-card grid min-h-[590px] overflow-hidden lg:grid-cols-[320px_1fr]"
-        aria-label="Payment review workspace"
-      >
-        <aside className="border-b border-border bg-[#fffaf5]/70 lg:border-b-0 lg:border-r">
-          <div className="border-b border-border bg-gradient-to-r from-amber-50 to-orange-50/40 px-4 py-4">
-            <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">
-              Payment queue
-            </p>
-            <p className="mt-1 text-[10px] text-muted-foreground">
-              Oldest submission shown first
-            </p>
-          </div>
-          <PaymentQueue
-            payments={pending}
-            orders={state.orders}
-            selectedId={selectedId}
-            onSelect={setSelectedId}
-          />
-        </aside>
-        <main className="min-w-0">
-          <PaymentDetails
-            payment={payment}
-            order={order}
-            shiftOpen={Boolean(activeShift)}
-            onVerify={() => setVerifyOpen(true)}
-            onReject={() => setRejectOpen(true)}
-          />
-        </main>
-      </div>
+      {pending.length === 0 ? (
+        <EmptyState
+          compact
+          icon={CreditCard}
+          title="No pending payments"
+          description="New customer GCash submissions will appear here automatically."
+          className="rrj-card mx-auto min-h-[196px] w-full max-w-xl border-solid border-border bg-white px-6 py-8"
+        />
+      ) : (
+        <div
+          className="payment-review-shell rrj-card grid min-h-[560px] overflow-hidden lg:grid-cols-[300px_1fr]"
+          aria-label="Payment review workspace"
+        >
+          <aside className="border-b border-border bg-[#fffaf5]/70 lg:border-b-0 lg:border-r">
+            <div className="border-b border-border bg-gradient-to-r from-amber-50 to-orange-50/40 px-4 py-3.5">
+              <p className="text-[10px] font-black uppercase tracking-widest text-foreground/65">
+                Payment queue
+              </p>
+              <p className="mt-1 text-[10px] font-medium text-muted-foreground">
+                Oldest submission shown first
+              </p>
+            </div>
+            <PaymentQueue
+              payments={pending}
+              orders={state.orders}
+              selectedId={selectedId}
+              onSelect={setSelectedId}
+            />
+          </aside>
+          <main className="min-w-0">
+            <PaymentDetails
+              payment={payment}
+              order={order}
+              shiftOpen={Boolean(activeShift)}
+              onVerify={() => setVerifyOpen(true)}
+              onReject={() => setRejectOpen(true)}
+            />
+          </main>
+        </div>
+      )}
       <VerifyPaymentDialog
         open={verifyOpen}
         order={order}

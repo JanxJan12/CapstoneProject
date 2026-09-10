@@ -33,7 +33,7 @@ export function ShiftOutcomeBadge({ shift }: { shift: CashierShift }) {
   const Icon = presentation.icon;
   return (
     <span
-      className={`inline-flex min-h-6 items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.08em] ${presentation.className}`}
+      className={`cashier-status-badge inline-flex min-h-6 items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.08em] shadow-[0_1px_2px_rgba(36,26,19,0.03)] ${presentation.className}`}
     >
       <Icon className="h-3 w-3" aria-hidden="true" />
       {outcome}

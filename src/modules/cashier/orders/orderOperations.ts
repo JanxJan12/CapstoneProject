@@ -12,6 +12,7 @@ export type OrderSortKey =
   | "kitchen"
   | "payment"
   | "rider"
+  | "created"
   | "elapsed"
   | "priority"
   | "total";
@@ -176,6 +177,10 @@ function compareByKey(
     return left.paymentStatus.localeCompare(right.paymentStatus);
   if (key === "rider")
     return getRiderStatus(left).localeCompare(getRiderStatus(right));
+  if (key === "created")
+    return (
+      new Date(left.createdAt).getTime() - new Date(right.createdAt).getTime()
+    );
   if (key === "elapsed")
     return elapsedOrderMinutes(left, now) - elapsedOrderMinutes(right, now);
   if (key === "priority")

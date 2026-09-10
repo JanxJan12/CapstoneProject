@@ -16,10 +16,17 @@ export function OrderExpandedContent({
         : "Take-out counter";
 
   return (
-    <td colSpan={13} className="px-6 py-4">
+    <td colSpan={10} className="px-6 py-4">
       <div className="grid gap-5 lg:grid-cols-[1.3fr_1fr_1fr]">
         <div>
-          <Label>Fulfillment detail</Label>
+          <Label>Customer details</Label>
+          <p className="mt-2 text-xs font-bold">{order.customerName}</p>
+          <p className="mt-1 text-[11px] font-semibold text-foreground/65">
+            {order.contactNumber || "No phone number provided"}
+          </p>
+          <div className="mt-4">
+            <Label>Fulfillment detail</Label>
+          </div>
           <p className="mt-2 text-xs font-bold">{fulfillment}</p>
           <p className="mt-1 text-[11px] text-muted-foreground">
             {order.orderInstructions || "No special instructions"}

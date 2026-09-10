@@ -36,14 +36,14 @@ export function PaymentDetails({
     );
   const canRejectWithoutShift = Boolean(
     payment.proofImagePath &&
-      order.databaseId &&
-      order.orderChannel === "online",
+    order.databaseId &&
+    order.orderChannel === "online",
   );
   const uploadedBy =
     payment.uploadedBy ?? payment.senderName ?? order.customerName;
   return (
-    <div className="space-y-5 p-4 sm:p-6">
-      <div className="rrj-card flex flex-wrap items-start justify-between gap-3 bg-gradient-to-r from-white to-amber-50/45 p-4">
+    <div className="space-y-4 p-4 sm:p-5">
+      <div className="rrj-card grid gap-4 bg-gradient-to-r from-white to-amber-50/45 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
         <div>
           <p className="font-mono text-sm font-black text-primary">
             {order.id}
@@ -51,8 +51,21 @@ export function PaymentDetails({
           <h2 className="mt-1 text-lg font-black text-foreground">
             Payment verification
           </h2>
+          <p className="mt-1 text-xs font-semibold text-foreground/60">
+            {order.customerName} · {payment.method}
+          </p>
         </div>
-        <StatusBadge status={payment.status} />
+        <div className="flex items-center gap-4 sm:justify-end">
+          <div className="text-left sm:text-right">
+            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">
+              Recorded amount
+            </p>
+            <p className="mt-0.5 text-2xl font-black tracking-tight text-foreground">
+              {formatMoney(payment.amount)}
+            </p>
+          </div>
+          <StatusBadge status={payment.status} />
+        </div>
       </div>
       {!shiftOpen && (
         <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-bold text-amber-900">
@@ -61,21 +74,21 @@ export function PaymentDetails({
             : "Start a cashier shift before processing this payment."}
         </div>
       )}
-      <div className="payment-review-grid grid gap-4 lg:grid-cols-[minmax(280px,0.9fr)_minmax(330px,1.1fr)]">
+      <div className="payment-review-grid grid gap-4 lg:grid-cols-[minmax(360px,1.2fr)_minmax(300px,0.8fr)]">
         <div className="payment-proof-column min-w-0">
           <ProofViewer payment={payment} />
         </div>
-        <div className="min-w-0 space-y-4">
+        <aside className="min-w-0 space-y-4">
           <section
-            className="rounded-2xl border border-amber-200 bg-amber-50/60 p-4 shadow-sm"
+            className="rounded-2xl border border-amber-200 bg-amber-50/70 p-4 shadow-[0_4px_14px_rgba(120,70,20,0.06)]"
             aria-label="Manual GCash proof review"
           >
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
               <div>
                 <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">
                   Order total
                 </p>
-                <p className="mt-1 text-xl font-black text-foreground">
+                <p className="mt-1 text-2xl font-black tracking-tight text-foreground">
                   {formatMoney(order.total)}
                 </p>
               </div>
@@ -83,7 +96,7 @@ export function PaymentDetails({
                 <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">
                   Recorded payment amount
                 </p>
-                <p className="mt-1 text-xl font-black text-foreground">
+                <p className="mt-1 text-2xl font-black tracking-tight text-foreground">
                   {formatMoney(payment.amount)}
                 </p>
               </div>
@@ -96,7 +109,7 @@ export function PaymentDetails({
               shown in the proof, and the recipient/details before confirming.
             </p>
           </section>
-          <section className="rrj-card grid gap-4 p-4 sm:grid-cols-2">
+          <section className="grid gap-3 rounded-2xl border border-border/80 bg-white/70 p-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
             <Detail
               icon={Hash}
               label="Recorded GCash Reference"
@@ -109,8 +122,8 @@ export function PaymentDetails({
             />
             <Detail
               icon={CreditCard}
-              label="Recorded Payment Amount"
-              value={formatMoney(payment.amount)}
+              label="Payment Method"
+              value={payment.method}
             />
             <Detail
               icon={Upload}
@@ -138,7 +151,7 @@ export function PaymentDetails({
             <p className="mb-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
               Order items
             </p>
-            <div className="rrj-card overflow-hidden">
+            <div className="overflow-hidden rounded-2xl border border-border/80 bg-white/70">
               {order.items.map((item) => (
                 <div
                   key={item.id}
@@ -163,11 +176,12 @@ export function PaymentDetails({
               </div>
             </div>
           </section>
-        </div>
+        </aside>
       </div>
       <div className="payment-review-actions sticky bottom-0 z-10 flex flex-col gap-2 border-t border-border bg-background/95 py-3 backdrop-blur sm:flex-row sm:justify-end">
         <CashierButton
           variant="danger"
+          className="bg-none bg-red-50 text-red-700 shadow-none hover:bg-red-100"
           disabled={!shiftOpen && !canRejectWithoutShift}
           onClick={onReject}
         >

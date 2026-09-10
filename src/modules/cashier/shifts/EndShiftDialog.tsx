@@ -125,7 +125,7 @@ export function EndShiftDialog({
         }}
       >
         <CashierDialogContent
-          className="max-w-2xl"
+          className="max-w-2xl sm:max-w-2xl"
           style={{
             padding: 0,
             gap: 0,
@@ -448,7 +448,7 @@ export function EndShiftDialog({
               <CashierButton
                 type="submit"
                 variant="danger"
-                className="w-full sm:w-auto sm:min-w-[190px]"
+                className="w-full bg-none bg-red-50 text-red-700 shadow-none hover:bg-red-100 sm:w-auto sm:min-w-[190px]"
                 loading={loading}
                 loadingLabel="Closing shift…"
                 disabled={loading || pendingPaymentCount > 0}

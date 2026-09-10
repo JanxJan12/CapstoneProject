@@ -20,7 +20,7 @@ export function ShiftSettlementPage() {
     <div className="cashier-page">
       <PageHeader
         title="Shift Settlement"
-        description="Complete cashier opening, drawer count, manager approval, variance review, and closing audit workflow"
+        description="Reconcile the cash drawer first, then review supporting financial activity and the settlement audit trail"
         actions={
           settlement.activeShift ? (
             <CashierButton
@@ -50,7 +50,7 @@ export function ShiftSettlementPage() {
       ) : null}
       {settlement.activeShift && pendingCount ? (
         <section
-          className="flex flex-col gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-800 sm:flex-row sm:items-center sm:justify-between"
+          className="flex flex-col gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-red-800 shadow-[0_2px_10px_rgba(153,27,27,0.04)] sm:flex-row sm:items-center sm:justify-between"
           role="alert"
         >
           <div className="flex gap-3">

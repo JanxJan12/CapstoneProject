@@ -35,14 +35,14 @@ export function VerifyPaymentDialog({
         }
       }}
     >
-      <CashierDialogContent>
+      <CashierDialogContent className="max-w-lg sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Verify {order.id}?</DialogTitle>
           <DialogDescription>
             Confirm only after manually inspecting the uploaded GCash proof.
           </DialogDescription>
         </DialogHeader>
-        <div className="rounded-xl border border-border bg-muted/30 p-4">
+        <div className="rounded-xl border border-border/80 bg-muted/25 p-3.5">
           <div className="flex justify-between text-xs text-muted-foreground">
             <span>Order total</span>
             <strong className="text-foreground">
@@ -63,7 +63,7 @@ export function VerifyPaymentDialog({
             </span>
           </div>
         </div>
-        <DialogFooter>
+        <DialogFooter className="border-t border-border/70 pt-4">
           <CashierButton
             variant="secondary"
             disabled={loading}
@@ -71,10 +71,7 @@ export function VerifyPaymentDialog({
           >
             Go back
           </CashierButton>
-          <CashierButton
-            loading={loading}
-            onClick={() => onConfirm()}
-          >
+          <CashierButton loading={loading} onClick={() => onConfirm()}>
             <CheckCircle2 className="h-4 w-4" />
             {loading ? "Verifying..." : "Confirm verification"}
           </CashierButton>

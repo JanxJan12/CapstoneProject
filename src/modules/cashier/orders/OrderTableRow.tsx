@@ -15,19 +15,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { CashierIconButton, StatusBadge } from "../components";
-import { CANCELLABLE_STATUSES, formatMoney } from "../constants";
+import {
+  CANCELLABLE_STATUSES,
+  formatDateTime,
+  formatMoney,
+} from "../constants";
 import type { Order } from "../types";
 import { OrderExpandedContent } from "./OrderExpandedContent";
-import {
-  elapsedOrderMinutes,
-  formatElapsedMinutes,
-  getItemsSummary,
-  getKitchenStatus,
-  getOrderPriority,
-  getRiderStatus,
-  isOrderDelayed,
-  type OrderPriority,
-} from "./orderOperations";
+import { getRiderStatus, isOrderDelayed } from "./orderOperations";
 
 type BadgeTone = "neutral" | "amber" | "blue" | "green" | "red";
 const TONE_STYLE: Record<BadgeTone, string> = {
@@ -64,9 +59,7 @@ export const OrderTableRow = memo(function OrderTableRow(
 ) {
   const { order, delayedThreshold, now, selected, expanded } = props;
   const delayed = isOrderDelayed(order, delayedThreshold, now);
-  const kitchen = getKitchenStatus(order);
   const rider = getRiderStatus(order);
-  const priority = getOrderPriority(order, delayedThreshold, now);
   return (
     <Fragment>
       <tr
@@ -112,17 +105,12 @@ export const OrderTableRow = memo(function OrderTableRow(
           </div>
         </td>
         <td className="px-3 py-3 text-xs font-bold">{order.customerName}</td>
-        <td className="px-3 py-3 text-[11px] font-semibold text-muted-foreground">
-          {order.contactNumber}
-        </td>
-        <td className="max-w-[260px] px-3 py-3">
-          <p className="line-clamp-2 text-[10px] leading-4 text-muted-foreground">
-            {getItemsSummary(order)}
-          </p>
-        </td>
         <td className="px-3 py-3 text-xs font-semibold">{order.type}</td>
+        <td className="px-3 py-3 text-xs font-black">
+          {formatMoney(order.total)}
+        </td>
         <td className="px-3 py-3">
-          <OperationalBadge label={kitchen} tone={kitchenTone(kitchen)} />
+          <StatusBadge status={order.status} />
         </td>
         <td className="px-3 py-3">
           <StatusBadge status={order.paymentStatus} />
@@ -130,16 +118,8 @@ export const OrderTableRow = memo(function OrderTableRow(
         <td className="px-3 py-3">
           <OperationalBadge label={rider} tone={riderTone(rider)} />
         </td>
-        <td
-          className={`px-3 py-3 text-[11px] font-black ${delayed ? "text-red-700" : "text-muted-foreground"}`}
-        >
-          {formatElapsedMinutes(elapsedOrderMinutes(order, now))}
-        </td>
-        <td className="px-3 py-3">
-          <OperationalBadge label={priority} tone={priorityTone(priority)} />
-        </td>
-        <td className="px-3 py-3 text-xs font-black">
-          {formatMoney(order.total)}
+        <td className="whitespace-nowrap px-3 py-3 text-[11px] font-semibold text-foreground/65">
+          {formatDateTime(order.createdAt)}
         </td>
         <td className="px-3 py-3">
           <OrderActions {...props} />
@@ -215,21 +195,13 @@ function Action({
 function OperationalBadge({ label, tone }: { label: string; tone: BadgeTone }) {
   return (
     <span
-      className={`inline-flex min-h-6 items-center rounded-full border px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.08em] ${TONE_STYLE[tone]}`}
+      className={`cashier-status-badge inline-flex min-h-6 items-center rounded-full border px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.08em] shadow-[0_1px_2px_rgba(36,26,19,0.03)] ${TONE_STYLE[tone]}`}
     >
       {label}
     </span>
   );
 }
 
-const kitchenTone = (value: string): BadgeTone =>
-  value === "Cancelled"
-    ? "red"
-    : value === "Ready" || value === "Complete"
-      ? "green"
-      : value === "Preparing"
-        ? "amber"
-        : "blue";
 const riderTone = (value: string): BadgeTone =>
   value === "Unassigned"
     ? "red"
@@ -238,11 +210,3 @@ const riderTone = (value: string): BadgeTone =>
       : value.includes("Delivered")
         ? "green"
         : "blue";
-const priorityTone = (value: OrderPriority): BadgeTone =>
-  value === "Critical"
-    ? "red"
-    : value === "High"
-      ? "amber"
-      : value === "Normal"
-        ? "blue"
-        : "neutral";

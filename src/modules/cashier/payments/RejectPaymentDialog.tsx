@@ -56,7 +56,7 @@ export function RejectPaymentDialog({
         }
       }}
     >
-      <CashierDialogContent>
+      <CashierDialogContent className="max-w-lg sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Reject payment for {orderId}?</DialogTitle>
           <DialogDescription>
@@ -93,7 +93,7 @@ export function RejectPaymentDialog({
             />
             <FieldError>{errors.notes?.message}</FieldError>
           </div>
-          <DialogFooter>
+          <DialogFooter className="border-t border-border/70 pt-4">
             <CashierButton
               type="button"
               variant="secondary"

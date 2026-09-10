@@ -36,8 +36,8 @@ export function PrimaryCashierActions({
   return (
     <section
       className="
-        rrj-card grid gap-2.5 p-2.5
-        lg:grid-cols-[minmax(270px,0.9fr)_minmax(0,1.65fr)]
+        rrj-card grid gap-2 p-2
+        lg:grid-cols-[minmax(280px,0.95fr)_minmax(0,1.75fr)]
       "
       aria-labelledby="cashier-actions-title"
     >
@@ -50,7 +50,7 @@ export function PrimaryCashierActions({
         disabled={!shiftActive}
         onClick={onNewOrder}
         className="
-          cashier-action group flex min-h-[64px] items-center gap-3
+          cashier-action group flex min-h-[60px] items-center gap-3
           rounded-xl bg-gradient-to-r from-primary to-orange-600
           px-4 text-left text-white
           shadow-[0_6px_16px_rgba(184,79,10,0.18)]
@@ -85,7 +85,7 @@ export function PrimaryCashierActions({
         </kbd>
       </button>
 
-      <div className="grid grid-cols-2 gap-2 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-1.5 xl:grid-cols-4">
         <SecondaryAction
           label="Verify Payments"
           detail={
@@ -142,32 +142,30 @@ function SecondaryAction({
       type="button"
       onClick={onClick}
       className="
-        cashier-action group flex min-h-[64px] items-center gap-2.5
-        rounded-xl border border-border/75 bg-white/75
-        px-3 text-left transition
-        hover:border-primary/25
-        hover:bg-amber-50/45
+        cashier-action group flex min-h-[52px] items-center gap-2
+        rounded-[10px] border border-border/60 bg-white/45
+        px-2.5 text-left transition
+        hover:border-primary/20
+        hover:bg-white/80
         focus-visible:outline-none
         focus-visible:ring-2
         focus-visible:ring-primary
         focus-visible:ring-offset-1
       "
-      aria-label={
-        hasCount ? `${label}, ${count} requiring attention` : label
-      }
+      aria-label={hasCount ? `${label}, ${count} requiring attention` : label}
     >
       <span
         className="
-          flex h-9 w-9 shrink-0 items-center justify-center
-          rounded-lg bg-amber-50 text-primary
-          transition group-hover:bg-primary/10
+          flex h-8 w-8 shrink-0 items-center justify-center
+          rounded-lg bg-muted/65 text-primary/80
+          transition group-hover:bg-primary/10 group-hover:text-primary
         "
       >
-        <Icon className="h-4 w-4" aria-hidden="true" />
+        <Icon className="h-3.5 w-3.5" aria-hidden="true" />
       </span>
 
       <span className="min-w-0 flex-1">
-        <span className="block text-[10px] font-black leading-4 text-foreground">
+        <span className="block text-[10px] font-black leading-4 text-foreground/90">
           {label}
         </span>
 
@@ -184,9 +182,9 @@ function SecondaryAction({
       {hasCount ? (
         <span
           className="
-            flex h-6 min-w-6 shrink-0 items-center justify-center
-            rounded-full bg-primary px-1.5
-            text-[9px] font-black text-white
+            flex h-5 min-w-5 shrink-0 items-center justify-center
+            rounded-full bg-primary/10 px-1.5
+            text-[9px] font-black text-primary
           "
         >
           {count}

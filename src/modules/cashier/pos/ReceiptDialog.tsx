@@ -33,7 +33,7 @@ export function ReceiptDialog({
         if (!value) onClose();
       }}
     >
-      <CashierDialogContent className="max-w-md bg-[#fbf8f4]">
+      <CashierDialogContent className="max-w-md bg-[#fbf8f4] sm:max-w-md">
         <DialogHeader className="text-center sm:text-center">
           {placed ? (
             <div className="pos-receipt-ready mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
@@ -54,7 +54,7 @@ export function ReceiptDialog({
           payment={payment}
           transaction={transaction}
         />
-        <DialogFooter>
+        <DialogFooter className="border-t border-border/70 pt-4">
           <CashierButton
             variant="secondary"
             onClick={() => {

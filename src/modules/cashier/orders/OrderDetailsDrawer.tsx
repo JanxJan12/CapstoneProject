@@ -41,14 +41,14 @@ export function OrderDetailsDrawer({
   return (
     <>
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DialogHeader className="sticky top-0 z-10 border-b border-border bg-white/95 p-5 pr-14 shadow-sm backdrop-blur-xl">
+        <DialogHeader className="sticky top-0 z-10 border-b border-border/80 bg-white/95 px-4 py-3.5 pr-14 shadow-[0_4px_14px_rgba(36,26,19,0.05)] backdrop-blur-xl sm:px-5">
           <div className="flex flex-wrap items-center gap-2">
             <DialogTitle className="font-mono text-lg font-black text-primary">
               {currentOrder.id}
             </DialogTitle>
             <StatusBadge status={currentOrder.status} />
             {delayed && (
-              <span className="inline-flex items-center gap-1 rounded-full border border-red-200 bg-red-50 px-2 py-1 text-[9px] font-black uppercase tracking-wider text-red-700">
+              <span className="cashier-status-badge inline-flex min-h-6 items-center gap-1 rounded-full border border-red-200 bg-red-50 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-red-700 shadow-[0_1px_2px_rgba(36,26,19,0.03)]">
                 <AlertTriangle className="h-3 w-3" /> Delayed ·{" "}
                 {formatElapsed(currentOrder.createdAt)}
               </span>
@@ -59,7 +59,7 @@ export function OrderDetailsDrawer({
             {currentOrder.type}
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-5 p-5">
+        <div className="space-y-4 p-4 sm:p-5">
           {drawer.error ? <ErrorBanner message={drawer.error} /> : null}
           <section className="rrj-card grid gap-4 p-4 sm:grid-cols-2">
             <OrderDetailInfo
@@ -197,45 +197,42 @@ export function OrderDetailsDrawer({
             </ol>
           </section>
 
-          <div className="sticky bottom-0 flex flex-wrap gap-2 border-t border-border bg-[#f8f4ef]/95 py-3 backdrop-blur-xl">
-          {currentOrder.status === "Ready" && (
-            <CashierButton
-              loading={drawer.loading}
-              disabled={drawer.loading}
-              onClick={drawer.handleRelease}
-            >
-              Release ready order
-            </CashierButton>
-          )}
-
-          {currentOrder.databaseId &&
-            currentOrder.type === "Delivery" &&
-            currentOrder.status === "Waiting for Rider" && (
+          <div className="sticky bottom-0 -mx-4 -mb-4 flex flex-wrap gap-2 border-t border-border/80 bg-[#f8f4ef]/95 px-4 py-3 backdrop-blur-xl sm:-mx-5 sm:-mb-5 sm:justify-end sm:px-5">
+            {currentOrder.status === "Ready" && (
               <CashierButton
                 loading={drawer.loading}
                 disabled={drawer.loading}
-                onClick={drawer.handleOfferNextRider}
+                onClick={drawer.handleRelease}
               >
-                <Bike className="h-4 w-4" />
-                Offer to next rider
+                Release ready order
               </CashierButton>
             )}
 
-          {CANCELLABLE_STATUSES.includes(
-            currentOrder.status,
-          ) && (
-            <CashierButton
-              variant="danger"
-              disabled={drawer.loading}
-              onClick={() =>
-                drawer.setCancelOpen(true)
-              }
-            >
-              <XCircle className="h-4 w-4" />
-              Cancel order
-            </CashierButton>
-          )}
-        </div>
+            {currentOrder.databaseId &&
+              currentOrder.type === "Delivery" &&
+              currentOrder.status === "Waiting for Rider" && (
+                <CashierButton
+                  loading={drawer.loading}
+                  disabled={drawer.loading}
+                  onClick={drawer.handleOfferNextRider}
+                >
+                  <Bike className="h-4 w-4" />
+                  Offer to next rider
+                </CashierButton>
+              )}
+
+            {CANCELLABLE_STATUSES.includes(currentOrder.status) && (
+              <CashierButton
+                variant="danger"
+                className="bg-none bg-red-50 text-red-700 shadow-none hover:bg-red-100"
+                disabled={drawer.loading}
+                onClick={() => drawer.setCancelOpen(true)}
+              >
+                <XCircle className="h-4 w-4" />
+                Cancel order
+              </CashierButton>
+            )}
+          </div>
         </div>
       </Drawer>
       <CancelOrderDialog

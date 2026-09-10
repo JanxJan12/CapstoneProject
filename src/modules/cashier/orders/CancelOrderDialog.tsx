@@ -69,7 +69,7 @@ export function CancelOrderDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <CashierDialogContent>
+      <CashierDialogContent className="max-w-lg sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Cancel {orderId}?</DialogTitle>
           <DialogDescription>
@@ -78,9 +78,7 @@ export function CancelOrderDialog({
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={submit} className="space-y-4">
-          {submissionError ? (
-            <ErrorBanner message={submissionError} />
-          ) : null}
+          {submissionError ? <ErrorBanner message={submissionError} /> : null}
           <div>
             <Label htmlFor="cancel-reason">Cancellation reason</Label>
             <CashierTextarea
@@ -92,7 +90,7 @@ export function CancelOrderDialog({
             />
             <FieldError>{errors.reason?.message}</FieldError>
           </div>
-          <DialogFooter>
+          <DialogFooter className="border-t border-border/70 pt-4">
             <CashierButton
               type="button"
               variant="secondary"
