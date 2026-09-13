@@ -157,7 +157,7 @@ function FoodCard({
   ) => void;
 }) {
   return (
-    <article className="customer-food-card group overflow-hidden rounded-2xl border border-border/80 bg-card">
+    <article className="customer-food-card group flex min-h-full flex-col overflow-hidden rounded-2xl border border-border/80 bg-card">
       <button
         type="button"
         onClick={() => onView?.(item)}
@@ -167,18 +167,42 @@ function FoodCard({
       >
         <MenuVisual item={item} />
       </button>
-      <div className="p-3.5 sm:p-4">
-        <div className="mb-1 flex items-start justify-between gap-2">
-          <h3 className="line-clamp-1 text-xs font-extrabold text-foreground sm:text-sm">{item.name}</h3>
-          <span className="flex-none text-sm font-extrabold text-primary sm:text-base">₱{item.price}</span>
+      <div className="flex flex-1 flex-col p-4">
+        <div className="mb-2 flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <span
+              className={`mb-1.5 inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                item.available
+                  ? "bg-emerald-50 text-emerald-700"
+                  : "bg-stone-100 text-stone-600"
+              }`}
+            >
+              {item.available ? "Available" : "Unavailable today"}
+            </span>
+            <h3 className="line-clamp-2 text-base font-extrabold leading-5 text-foreground">
+              {item.name}
+            </h3>
+          </div>
+          <span className="flex-none text-lg font-black tracking-tight text-primary">
+            ₱{item.price}
+          </span>
         </div>
-        <p className="mb-3 line-clamp-2 min-h-8 text-[10px] leading-4 text-muted-foreground sm:text-xs">{item.desc}</p>
+        <p className="mb-4 line-clamp-2 min-h-10 text-sm leading-5 text-muted-foreground">
+          {item.desc || "No description provided."}
+        </p>
         <button
           type="button"
           onClick={() => onAdd(item)}
-          className="flex min-h-10 w-full items-center justify-center gap-1.5 rounded-xl bg-[#211914] px-3 text-[10px] font-extrabold text-white shadow-sm hover:bg-primary sm:text-xs"
+          disabled={!item.available}
+          className="mt-auto flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#211914] px-4 text-sm font-extrabold text-white shadow-sm transition-colors hover:bg-primary disabled:cursor-not-allowed disabled:bg-stone-200 disabled:text-stone-500"
         >
-          <Plus className="h-3.5 w-3.5" /> Add to order
+          {item.available ? (
+            <>
+              <Plus className="h-4 w-4" /> Add to order
+            </>
+          ) : (
+            "Unavailable today"
+          )}
         </button>
       </div>
     </article>
@@ -197,7 +221,7 @@ function CustomerMenuFeedback({
   return (
     <div
       role={error ? "alert" : "status"}
-      className={`flex min-h-44 flex-col items-center justify-center rounded-2xl border px-6 text-center ${
+      className={`flex min-h-40 flex-col items-center justify-center rounded-2xl border px-5 py-8 text-center ${
         error
           ? "border-red-200 bg-red-50"
           : "border-border bg-card"
@@ -205,21 +229,26 @@ function CustomerMenuFeedback({
     >
       {loading ? (
         <>
-          <Loader2 className="h-7 w-7 animate-spin text-primary" />
-          <p className="mt-3 text-sm font-semibold text-muted-foreground">
+          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-50 text-primary">
+            <Loader2 className="h-5 w-5 animate-spin" />
+          </span>
+          <p className="mt-3 text-base font-bold text-foreground">
             Loading menu…
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Getting today&apos;s available dishes.
           </p>
         </>
       ) : (
         <>
-          <p className="text-sm font-bold text-red-700">
+          <p className="text-base font-bold text-red-700">
             Unable to load the menu
           </p>
-          <p className="mt-1 text-xs text-red-600">{error}</p>
+          <p className="mt-1 max-w-md text-sm leading-5 text-red-600">{error}</p>
           <button
             type="button"
             onClick={onRetry}
-            className="mt-4 min-h-10 rounded-xl border border-red-300 bg-white px-4 text-xs font-bold text-red-700 hover:bg-red-100"
+            className="mt-4 min-h-11 rounded-xl border border-red-300 bg-white px-4 text-sm font-bold text-red-700 hover:bg-red-100"
           >
             Try Again
           </button>
@@ -277,7 +306,7 @@ function CustNav({
   };
 
   return (
-    <header className="customer-nav sticky top-0 z-30 flex flex-shrink-0 items-center justify-between border-b border-border/70 bg-card/85 px-4 py-2.5 shadow-[0_8px_30px_rgba(64,40,25,0.04)] backdrop-blur-xl sm:px-6">
+    <header className="customer-nav sticky top-0 z-30 flex flex-shrink-0 items-center justify-between gap-2 border-b border-border/70 bg-card/85 px-3 py-2.5 shadow-[0_8px_30px_rgba(64,40,25,0.04)] backdrop-blur-xl sm:px-5 lg:px-6">
       {/* Logo */}
       <button
         type="button"
@@ -292,20 +321,20 @@ function CustNav({
           />
         </div>
 
-        <span className="hidden sm:block">
+        <span className="hidden lg:block">
           <span className="block font-['Fraunces'] text-sm font-bold leading-none text-foreground">
             RRJ&apos;s Food-Haus
           </span>
 
-          <span className="mt-1 flex items-center gap-1 text-[8px] font-extrabold uppercase tracking-[0.15em] text-emerald-700">
-            <BadgeCheck className="h-2.5 w-2.5" />
+          <span className="mt-1 flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-[0.12em] text-emerald-700">
+            <BadgeCheck className="h-3 w-3" />
             Halal kitchen
           </span>
         </span>
       </button>
 
       {/* Desktop navigation */}
-      <nav className="hidden items-center gap-1 rounded-xl border border-border/70 bg-background/60 p-1 md:flex">
+      <nav className="hidden min-w-0 items-center gap-1 rounded-xl border border-border/70 bg-background/60 p-1 md:flex">
         {NAV_LINKS.map((navItem) => (
           <button
             key={navItem.id}
@@ -316,7 +345,7 @@ function CustNav({
                 ? "page"
                 : undefined
             }
-            className={`min-h-9 rounded-lg px-3 text-[11px] font-extrabold transition-all ${
+            className={`min-h-10 rounded-lg px-3 text-sm font-extrabold transition-all lg:px-4 ${
               currentPage === navItem.id
                 ? "bg-[#211914] text-white shadow-sm"
                 : "text-muted-foreground hover:bg-white hover:text-foreground"
@@ -333,7 +362,8 @@ function CustNav({
         <button
           type="button"
           onClick={() => onNav("cart")}
-          className="relative flex min-h-11 items-center gap-1.5 rounded-xl bg-primary px-3.5 text-sm font-extrabold text-primary-foreground shadow-md shadow-orange-900/10 hover:bg-amber-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          aria-current={currentPage === "cart" || currentPage === "checkout" ? "page" : undefined}
+          className={`relative flex min-h-11 items-center gap-1.5 rounded-xl px-3.5 text-sm font-extrabold text-white shadow-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${currentPage === "cart" || currentPage === "checkout" ? "bg-[#211914] shadow-black/10" : "bg-primary shadow-orange-900/10 hover:bg-amber-800"}`}
         >
           <ShoppingCart className="h-4 w-4" />
 
@@ -346,7 +376,7 @@ function CustNav({
               key={totalItems}
               initial={{ scale: 0.55 }}
               animate={{ scale: 1 }}
-              className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#211914] px-1 text-[9px] font-extrabold text-white ring-2 ring-white"
+              className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-300 px-1 text-[10px] font-black text-[#211914] ring-2 ring-white"
             >
               {totalItems}
             </motion.span>
@@ -363,16 +393,17 @@ function CustNav({
                   (currentValue) => !currentValue,
                 )
               }
-              aria-label="Open account menu"
+              aria-label="Open profile menu"
               aria-haspopup="menu"
               aria-expanded={accountMenuOpen}
-              className={`flex h-11 w-11 items-center justify-center rounded-xl border bg-white transition-colors ${
+              className={`flex min-h-11 items-center justify-center gap-2 rounded-xl border bg-white px-3 text-sm font-extrabold transition-colors ${
                 accountMenuOpen
                   ? "border-primary text-primary"
                   : "border-border text-muted-foreground hover:bg-muted hover:text-foreground"
               }`}
             >
               <User className="h-4 w-4" />
+              <span className="hidden lg:inline">Profile</span>
             </button>
 
             <AnimatePresence>
@@ -452,7 +483,7 @@ function CustNav({
           <button
             type="button"
             onClick={handleSignIn}
-            className="hidden min-h-11 items-center gap-2 rounded-xl border border-border bg-white px-4 text-xs font-extrabold text-foreground shadow-sm hover:border-primary/30 hover:bg-amber-50/40 sm:flex"
+            className="hidden min-h-11 items-center gap-2 rounded-xl border border-border bg-white px-4 text-sm font-extrabold text-foreground shadow-sm hover:border-primary/30 hover:bg-amber-50/40 sm:flex"
           >
             <User className="h-4 w-4 text-primary" />
             Sign In
@@ -539,6 +570,7 @@ function CustNav({
                       onNav(navItem.id);
                       setMenuOpen(false);
                     }}
+                    aria-current={currentPage === navItem.id ? "page" : undefined}
                     className={`flex min-h-12 items-center justify-between rounded-xl px-4 text-left text-sm font-bold transition-colors ${
                       currentPage === navItem.id
                         ? "bg-primary text-white"
@@ -558,13 +590,14 @@ function CustNav({
                       onNav("profile");
                       setMenuOpen(false);
                     }}
+                    aria-current={currentPage === "profile" ? "page" : undefined}
                     className={`flex min-h-12 items-center justify-between rounded-xl px-4 text-left text-sm font-bold transition-colors ${
                       currentPage === "profile"
                         ? "bg-primary text-white"
                         : "text-white/65 hover:bg-white/[0.07] hover:text-white"
                     }`}
                   >
-                    My Profile
+                    Profile
 
                     <ChevronRight className="h-4 w-4 opacity-50" />
                   </button>
@@ -654,7 +687,7 @@ function HomePage({
           <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(20,14,11,.94)_0%,rgba(23,16,12,.66)_52%,rgba(20,14,11,.16)_100%)]" />
           <div className="absolute inset-0 flex items-center px-5 sm:px-10 lg:px-16">
             <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }} className="max-w-xl">
-              <p className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-emerald-300/20 bg-emerald-300/10 px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-[0.15em] text-emerald-200 backdrop-blur sm:text-[10px]"><BadgeCheck className="h-3 w-3" /> Halal kitchen · Open until 9 PM</p>
+              <p className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-emerald-300/20 bg-emerald-300/10 px-2.5 py-1 text-xs font-extrabold uppercase tracking-[0.12em] text-emerald-200 backdrop-blur"><BadgeCheck className="h-3.5 w-3.5" /> Halal kitchen</p>
               <h1 className="mb-2 font-['Fraunces'] text-3xl font-semibold leading-[0.98] tracking-[-0.04em] text-white sm:mb-4 sm:text-5xl lg:text-6xl">
                 Comfort food,<br /><span className="text-amber-300">made for sharing.</span>
               </h1>
@@ -694,12 +727,18 @@ function HomePage({
               error={menuError}
               onRetry={onRetryMenu}
             />
+          ) : menuItems.length === 0 ? (
+            <div className="flex min-h-44 flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card/75 px-6 py-8 text-center">
+              <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-xl">🍽️</div>
+              <h2 className="text-base font-extrabold text-foreground">The menu is empty right now</h2>
+              <p className="mt-1 max-w-sm text-sm leading-5 text-muted-foreground">Please check again when dishes have been added to the menu.</p>
+            </div>
           ) : (
             <>
           <div className="mb-3 flex items-end justify-between sm:mb-4">
             <div><p className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-primary/70">Find your craving</p><h2 className="font-['Fraunces'] text-xl font-semibold text-foreground sm:text-2xl">Browse by category</h2></div>
           </div>
-          <div className="mb-8 grid grid-cols-3 gap-2 sm:mb-11 sm:grid-cols-6 sm:gap-3">
+          <div className="mb-8 grid grid-cols-2 gap-2 min-[480px]:grid-cols-3 sm:mb-11 sm:grid-cols-6 sm:gap-3">
             {[
                 "All",
                 ...categories.map(
@@ -724,7 +763,7 @@ function HomePage({
                       </span>
                     </div>
 
-                    <span className="text-[9px] font-extrabold text-foreground sm:text-xs">
+                    <span className="text-xs font-extrabold text-foreground">
                       {cat}
                     </span>
                   </button>
@@ -736,7 +775,7 @@ function HomePage({
             <div><p className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-primary/70">From our menu</p><h2 className="font-['Fraunces'] text-xl font-semibold text-foreground sm:text-2xl">Available dishes</h2></div>
             <button onClick={() => onNav("menu")} className="flex min-h-10 items-center gap-1 rounded-lg px-2 text-[10px] font-extrabold text-primary hover:bg-primary/5 sm:text-xs">View all <ChevronRight className="h-3.5 w-3.5" /></button>
           </div>
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 lg:grid-cols-4">
             {menuItems.filter((m) => m.available).slice(0, 4).map((item) => (
               <FoodCard key={item.id} item={item} onAdd={onAddToCart} />
             ))}
@@ -790,23 +829,22 @@ function MenuPage({
     ? selectedCategory
     : "All";
   const filtered = menuItems.filter(
-    (m) => m.available &&
-    (cat === "All" || m.category === cat) &&
+    (m) => (cat === "All" || m.category === cat) &&
     m.name.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <CustNav cart={cart} onNav={onNav} currentPage="menu" />
-      <div className="customer-storefront flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-7 md:px-10">
+      <div className="customer-storefront flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-8 md:px-10">
         <div className="mx-auto max-w-7xl">
-        <div className="mb-5 flex items-end justify-between gap-3 sm:mb-6">
+        <div className="mb-5 flex items-end justify-between gap-3 sm:mb-7">
           <div>
-            <p className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-primary/70">Fresh from our halal kitchen</p>
-            <h1 className="font-['Fraunces'] text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">What are you craving?</h1>
+            <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-primary/75">Order from our kitchen</p>
+            <h1 className="mt-1 font-['Fraunces'] text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">Browse the menu</h1>
           </div>
           {!menuLoading && !menuError ? (
-            <span className="hidden rounded-full border border-border bg-card px-3 py-1.5 text-[10px] font-bold text-muted-foreground sm:block">{filtered.length} dishes available</span>
+            <span className="hidden rounded-full border border-border bg-card px-3 py-1.5 text-xs font-bold text-muted-foreground shadow-sm sm:block">{filtered.length} dishes shown</span>
           ) : null}
         </div>
         {menuLoading || menuError ? (
@@ -818,32 +856,70 @@ function MenuPage({
         ) : (
           <>
         {/* Search + filters */}
-        <div className="mb-5 flex flex-col items-stretch gap-3 sm:mb-7 sm:flex-row sm:items-center">
-          <div className="relative flex-1 sm:max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input placeholder="Search menu items…" value={search} onChange={(e) => setSearch(e.target.value)}
-              aria-label="Search menu"
-              className="h-12 w-full rounded-xl border border-border bg-card pl-10 pr-4 text-sm shadow-sm outline-none transition-all placeholder:text-muted-foreground/60 focus:border-primary/45 focus:ring-4 focus:ring-primary/10" />
+        <section className="customer-menu-toolbar sticky top-0 z-20 mb-6 rounded-2xl border border-border/80 bg-background/95 p-3 shadow-[0_10px_30px_rgba(64,40,25,0.07)] backdrop-blur sm:mb-8 sm:p-4">
+          <div className="flex flex-col gap-3 md:flex-row md:items-end">
+          <label className="min-w-0 flex-1 md:max-w-md">
+            <span className="mb-1.5 block text-sm font-bold text-foreground">Search the menu</span>
+            <span className="relative block">
+              <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <input placeholder="Search by dish name" value={search} onChange={(e) => setSearch(e.target.value)}
+                aria-label="Search menu"
+                className="h-12 w-full rounded-xl border border-border bg-card pl-10 pr-11 text-base shadow-sm outline-none transition-all placeholder:text-muted-foreground/60 focus:border-primary/45 focus:ring-4 focus:ring-primary/10" />
+              {search ? (
+                <button
+                  type="button"
+                  onClick={() => setSearch("")}
+                  aria-label="Clear search"
+                  className="absolute right-1.5 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              ) : null}
+            </span>
+          </label>
+          <div className="min-w-0 flex-1">
+            <p className="mb-1.5 text-sm font-bold text-foreground">Category</p>
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              {cats.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => onCategoryChange(c)}
+                  aria-pressed={cat === c}
+                  className={`min-h-11 flex-none whitespace-nowrap rounded-xl border px-4 text-sm font-extrabold transition-all ${cat === c ? "border-[#211914] bg-[#211914] text-white shadow-sm" : "border-border bg-card text-muted-foreground hover:border-primary/25 hover:text-foreground"}`}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="flex flex-shrink-0 gap-1 overflow-x-auto rounded-xl border border-border bg-card p-1 shadow-sm">
-            {cats.map((c) => (
-              <button key={c} onClick={() => onCategoryChange(c)}
-                className={`min-h-10 whitespace-nowrap rounded-lg px-3 text-[10px] font-extrabold transition-all sm:text-xs ${cat === c ? "bg-[#211914] text-white shadow-sm" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}>
-                {c}
+          </div>
+          <div className="mt-3 flex min-h-8 flex-wrap items-center justify-between gap-2 border-t border-border/70 pt-3">
+            <p className="text-sm text-muted-foreground">
+              Showing <span className="font-bold text-foreground">{filtered.length}</span> {filtered.length === 1 ? "dish" : "dishes"} in <span className="font-bold text-foreground">{cat}</span>
+              {search ? <> for <span className="font-bold text-foreground">“{search}”</span></> : null}
+            </p>
+            {(search || cat !== "All") ? (
+              <button
+                type="button"
+                onClick={() => { setSearch(""); onCategoryChange("All"); }}
+                className="min-h-10 rounded-lg px-3 text-sm font-bold text-primary hover:bg-primary/5"
+              >
+                Clear filters
               </button>
-            ))}
+            ) : null}
           </div>
-        </div>
+        </section>
         {filtered.length > 0 ? (
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filtered.map((item) => <FoodCard key={item.id} item={item} onAdd={onAddToCart} onView={onViewDetail} />)}
           </div>
         ) : (
-          <div className="flex flex-col items-center rounded-2xl border border-dashed border-border bg-card/60 px-6 py-14 text-center">
-            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-2xl">🍽️</div>
-            <h2 className="text-sm font-extrabold text-foreground">No dishes found</h2>
-            <p className="mt-1 text-xs text-muted-foreground">Try a different search or category.</p>
-            <button onClick={() => { setSearch(""); onCategoryChange("All"); }} className="mt-4 min-h-10 rounded-xl bg-[#211914] px-4 text-xs font-extrabold text-white">Clear filters</button>
+          <div className="flex min-h-44 flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card/70 px-6 py-8 text-center">
+            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-xl">🍽️</div>
+            <h2 className="text-base font-extrabold text-foreground">No matching dishes</h2>
+            <p className="mt-1 max-w-sm text-sm leading-5 text-muted-foreground">Try another dish name or return to all categories.</p>
+            <button onClick={() => { setSearch(""); onCategoryChange("All"); }} className="mt-4 min-h-11 rounded-xl bg-[#211914] px-4 text-sm font-extrabold text-white hover:bg-primary">Clear filters</button>
           </div>
         )}
           </>
@@ -880,7 +956,7 @@ function MenuDetailPage({
           <div className="grid grid-cols-1 gap-5 overflow-hidden rounded-3xl border border-border/80 bg-card p-3 shadow-[0_24px_70px_rgba(65,42,26,.09)] sm:gap-8 sm:p-5 md:grid-cols-2">
             <div className="overflow-hidden rounded-2xl"><MenuVisual item={item} large /></div>
             <div className="flex flex-col">
-              <div className="mb-2 flex items-center gap-2"><span className="text-xs font-extrabold uppercase tracking-wide text-primary">{item.category}</span><span className="h-1 w-1 rounded-full bg-border" /><span className="inline-flex items-center gap-1 text-[9px] font-extrabold uppercase tracking-wider text-emerald-700"><BadgeCheck className="h-3 w-3" /> Halal</span></div>
+              <div className="mb-2 flex flex-wrap items-center gap-2"><span className="text-xs font-extrabold uppercase tracking-wide text-primary">{item.category}</span><span className="h-1 w-1 rounded-full bg-border" /><span className="inline-flex items-center gap-1 text-xs font-extrabold text-emerald-700"><BadgeCheck className="h-3.5 w-3.5" /> Halal</span><span className={`rounded-full px-2 py-0.5 text-xs font-bold ${item.available ? "bg-emerald-50 text-emerald-700" : "bg-stone-100 text-stone-600"}`}>{item.available ? "Available" : "Unavailable today"}</span></div>
               <h1 className="mb-3 font-['Fraunces'] text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">{item.name}</h1>
               <p className="text-muted-foreground mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base">{item.desc}</p>
               <p className="text-2xl sm:text-3xl font-bold text-primary mb-4 sm:mb-6">₱{item.price}</p>
@@ -892,8 +968,9 @@ function MenuDetailPage({
                 </div>
                 <button
                   onClick={() => { for (let i = 0; i < qty; i++) onAddToCart(item); onNav("cart"); }}
-                  className="min-h-12 flex-1 rounded-xl bg-primary px-3 text-sm font-extrabold text-primary-foreground shadow-lg shadow-orange-900/10 hover:bg-amber-800">
-                  Add to Cart · ₱{item.price * qty}
+                  disabled={!item.available}
+                  className="min-h-12 flex-1 rounded-xl bg-primary px-3 text-sm font-extrabold text-primary-foreground shadow-lg shadow-orange-900/10 hover:bg-amber-800 disabled:cursor-not-allowed disabled:bg-stone-200 disabled:text-stone-500 disabled:shadow-none">
+                  {item.available ? `Add to Cart · ₱${item.price * qty}` : "Unavailable today"}
                 </button>
               </div>
             </div>
@@ -910,56 +987,78 @@ function CartPage({ cart, onNav, onQtyChange, onRemove }: { cart: CartItem[]; on
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <CustNav cart={cart} onNav={onNav} currentPage="cart" />
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-4xl mx-auto w-full px-4 sm:px-6 py-5 sm:py-8">
-          <h1 className="text-lg sm:text-xl font-bold text-foreground mb-4 sm:mb-6">My Cart</h1>
+      <div className="customer-storefront flex-1 overflow-y-auto">
+        <div className="mx-auto w-full max-w-5xl px-4 py-5 sm:px-6 sm:py-8">
+          <div className="mb-5 flex items-end justify-between gap-3 sm:mb-7">
+            <div>
+              <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-primary/75">Review your order</p>
+              <h1 className="mt-1 font-['Fraunces'] text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">Your cart</h1>
+            </div>
+            {cart.length > 0 ? (
+              <span className="rounded-full border border-border bg-card px-3 py-1.5 text-xs font-bold text-muted-foreground shadow-sm">
+                {cart.reduce((sum, item) => sum + item.qty, 0)} {cart.reduce((sum, item) => sum + item.qty, 0) === 1 ? "item" : "items"}
+              </span>
+            ) : null}
+          </div>
           {cart.length === 0 ? (
-            <div className="flex flex-col items-center gap-4 py-16">
-              <ShoppingCart className="w-14 h-14 text-muted-foreground/25" />
-              <p className="text-base font-bold text-muted-foreground">Your cart is empty</p>
-              <button onClick={() => onNav("menu")} className="px-5 py-2.5 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:bg-amber-800">Browse Menu</button>
+            <div className="flex min-h-52 flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card/75 px-6 py-10 text-center">
+              <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-primary">
+                <ShoppingCart className="h-5 w-5" />
+              </span>
+              <h2 className="text-base font-extrabold text-foreground">Your cart is empty</h2>
+              <p className="mt-1 max-w-sm text-sm leading-5 text-muted-foreground">Choose a dish from the menu to start your order.</p>
+              <button onClick={() => onNav("menu")} className="mt-4 min-h-11 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground hover:bg-amber-800">Browse the menu</button>
             </div>
           ) : (
-            <div className="flex flex-col lg:grid lg:grid-cols-5 gap-4 sm:gap-6">
+            <div className="grid gap-5 lg:grid-cols-[minmax(0,1.45fr)_minmax(19rem,0.75fr)] lg:items-start">
               {/* Items */}
-              <div className="lg:col-span-3 flex flex-col gap-3">
+              <section aria-labelledby="cart-items-heading" className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_10px_30px_rgba(64,40,25,0.05)]">
+                <div className="flex items-center justify-between border-b border-border/80 px-4 py-3.5 sm:px-5">
+                  <h2 id="cart-items-heading" className="text-base font-extrabold text-foreground">Order items</h2>
+                  <button type="button" onClick={() => onNav("menu")} className="min-h-10 rounded-lg px-3 text-sm font-bold text-primary hover:bg-primary/5">Add more</button>
+                </div>
+                <div className="divide-y divide-border/80">
                 {cart.map((item) => (
-                  <div key={item.id} className="bg-card border border-border rounded-xl p-3 sm:p-4 flex items-center gap-3 sm:gap-4">
-                    <div className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br text-2xl sm:h-16 sm:w-16 sm:text-3xl ${CATEGORY_META[item.category]?.gradient ?? CATEGORY_META.All.gradient}`}>
+                  <div key={item.id} className="grid grid-cols-[3.5rem_minmax(0,1fr)] gap-3 p-4 sm:grid-cols-[4rem_minmax(0,1fr)_auto] sm:items-center sm:gap-4 sm:px-5">
+                    <div className={`flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br text-2xl sm:h-16 sm:w-16 sm:text-3xl ${CATEGORY_META[item.category]?.gradient ?? CATEGORY_META.All.gradient}`}>
                       <span aria-hidden="true">{CATEGORY_META[item.category]?.emoji ?? CATEGORY_META.All.emoji}</span>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-foreground text-sm truncate">{item.name}</p>
-                      <p className="text-xs text-muted-foreground">₱{item.price} each</p>
-                      <button onClick={() => onRemove(item.id)} className="mt-1 min-h-7 text-[9px] font-bold text-red-600 hover:underline">Remove</button>
+                    <div className="min-w-0">
+                      <p className="text-base font-extrabold leading-5 text-foreground">{item.name}</p>
+                      <p className="mt-1 text-sm text-muted-foreground">₱{item.price} each</p>
+                      <div className="mt-3 flex flex-wrap items-center gap-3 sm:mt-2">
+                        <div className="flex items-center rounded-xl border border-border bg-background p-1" aria-label={`Quantity for ${item.name}`}>
+                          <button onClick={() => onQtyChange(item.id, item.qty - 1)} aria-label={`Decrease ${item.name} quantity`} className="flex h-9 w-9 items-center justify-center rounded-lg text-foreground hover:bg-muted"><Minus className="h-3.5 w-3.5" /></button>
+                          <span className="w-8 text-center text-sm font-extrabold" aria-live="polite">{item.qty}</span>
+                          <button onClick={() => onQtyChange(item.id, item.qty + 1)} aria-label={`Increase ${item.name} quantity`} className="flex h-9 w-9 items-center justify-center rounded-lg text-foreground hover:bg-muted"><Plus className="h-3.5 w-3.5" /></button>
+                        </div>
+                        <button onClick={() => onRemove(item.id)} className="min-h-10 rounded-lg px-2 text-sm font-bold text-red-600 hover:bg-red-50">Remove</button>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-                      <button onClick={() => onQtyChange(item.id, item.qty - 1)} className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-muted flex items-center justify-center"><Minus className="w-3 h-3" /></button>
-                      <span className="w-5 text-center font-bold text-sm">{item.qty}</span>
-                      <button onClick={() => onQtyChange(item.id, item.qty + 1)} className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-muted flex items-center justify-center"><Plus className="w-3 h-3" /></button>
+                    <div className="col-start-2 text-left sm:col-auto sm:text-right">
+                      <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Line total</p>
+                      <p className="mt-1 text-lg font-black text-foreground">₱{item.price * item.qty}</p>
                     </div>
-                    <p className="w-14 text-right font-bold text-foreground text-sm flex-shrink-0">₱{item.price * item.qty}</p>
                   </div>
                 ))}
-              </div>
-              {/* Summary */}
-              <div className="lg:col-span-2">
-                <div className="bg-card border border-border rounded-xl p-4 sm:p-5 lg:sticky lg:top-4">
-                  <p className="font-bold text-foreground mb-3 sm:mb-4">Order Summary</p>
-                  <div className="flex flex-col gap-2 text-sm mb-4">
-                    {cart.map((c) => (
-                      <div key={c.id} className="flex justify-between">
-                        <span className="text-muted-foreground truncate mr-2">{c.name} ×{c.qty}</span>
-                        <span className="font-semibold flex-shrink-0">₱{c.price * c.qty}</span>
-                      </div>
-                    ))}
-                    <div className="flex justify-between pt-2 border-t border-border"><span className="text-muted-foreground">Estimated delivery fee</span><span className="font-semibold">₱50</span></div>
-                    <div className="flex justify-between font-bold text-base pt-2 border-t border-border"><span>Estimated total</span><span className="text-primary">₱{subtotal + 50}</span></div>
-                  </div>
-                  <p className="mb-4 text-[11px] leading-4 text-muted-foreground">The final delivery fee and total will be confirmed when your order is created at checkout.</p>
-                  <button onClick={() => onNav("checkout")} className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-bold hover:bg-amber-800">Proceed to Checkout</button>
                 </div>
-              </div>
+              </section>
+              {/* Summary */}
+              <aside>
+                <div className="rounded-2xl border border-border bg-card p-4 shadow-[0_10px_30px_rgba(64,40,25,0.05)] sm:p-5 lg:sticky lg:top-4">
+                  <div className="mb-4 flex items-center justify-between gap-3">
+                    <h2 className="text-base font-extrabold text-foreground">Estimated total</h2>
+                    <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-800">Estimate</span>
+                  </div>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between gap-3"><span className="text-muted-foreground">Estimated subtotal</span><span className="font-bold text-foreground">₱{subtotal}</span></div>
+                    <div className="flex justify-between gap-3"><span className="text-muted-foreground">Estimated delivery fee</span><span className="font-bold text-foreground">₱50</span></div>
+                    <div className="flex items-end justify-between gap-3 border-t border-border pt-4"><span className="font-extrabold text-foreground">Estimated total</span><span className="text-2xl font-black tracking-tight text-primary">₱{subtotal + 50}</span></div>
+                  </div>
+                  <p className="mt-4 rounded-xl bg-muted/70 px-3 py-2.5 text-sm leading-5 text-muted-foreground">The server will confirm the delivery fee and final amount when your order is created.</p>
+                  <button onClick={() => onNav("checkout")} className="mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-extrabold text-primary-foreground shadow-sm hover:bg-amber-800">Continue to checkout <ChevronRight className="h-4 w-4" /></button>
+                </div>
+              </aside>
             </div>
           )}
         </div>
@@ -1650,50 +1749,62 @@ const handlePlaceOrder = async () => {
 return (
   <div className="flex flex-col h-full overflow-hidden">
       <CustNav cart={cart} onNav={onNav} currentPage="checkout" />
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-5 sm:py-8">
-          <div className="flex items-center gap-2 mb-5 sm:mb-6">
-            <button onClick={() => onNav("cart")} className="flex items-center gap-1.5 text-sm font-semibold text-muted-foreground hover:text-foreground"><ArrowLeft className="w-4 h-4" /> Cart</button>
-            <span className="text-muted-foreground">/</span>
-            <span className="text-sm font-bold text-foreground">Checkout</span>
+      <div className="customer-storefront flex-1 overflow-y-auto">
+        <div className="mx-auto max-w-6xl px-4 py-5 sm:px-6 sm:py-8">
+          <button onClick={() => onNav("cart")} className="mb-4 flex min-h-11 items-center gap-1.5 rounded-xl pr-3 text-sm font-bold text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4" /> Back to cart</button>
+          <div className="mb-5 sm:mb-7">
+            <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-primary/75">Complete your order</p>
+            <h1 className="mt-1 font-['Fraunces'] text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">Checkout</h1>
+            <p className="mt-1.5 max-w-xl text-sm leading-5 text-muted-foreground">Enter your delivery details, review the server-confirmed amount, then submit your GCash payment.</p>
           </div>
 
           {/* Steps */}
-          <div className="flex items-center gap-1.5 sm:gap-2 mb-5 sm:mb-8 overflow-x-auto pb-1">
+          <div className="mb-5 grid grid-cols-3 overflow-hidden rounded-2xl border border-border bg-card p-1 shadow-sm sm:mb-7">
             {[{ key: "login", label: "Sign In" }, { key: "details", label: "Delivery" }, { key: "upload", label: "Payment" }].map((s, i) => (
-              <div key={s.key} className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-                <div className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap ${step === s.key ? "bg-primary text-primary-foreground" : i < ["login","details","upload"].indexOf(step) ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"}`}>
-                  <span className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-bold">{i + 1}</span>
-                  {s.label}
-                </div>
-                {i < 2 && <div className="h-px w-4 sm:w-8 bg-border flex-shrink-0" />}
+              <div key={s.key} className={`flex min-h-12 items-center justify-center gap-2 rounded-xl px-2 text-xs font-extrabold sm:text-sm ${step === s.key ? "bg-[#211914] text-white shadow-sm" : i < ["login","details","upload"].indexOf(step) ? "text-emerald-700" : "text-muted-foreground"}`}>
+                <span className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-black ${step === s.key ? "bg-white/15 text-white" : i < ["login","details","upload"].indexOf(step) ? "bg-emerald-100 text-emerald-700" : "bg-muted text-muted-foreground"}`}>{i < ["login","details","upload"].indexOf(step) ? <Check className="h-3.5 w-3.5" /> : i + 1}</span>
+                <span className="truncate">{s.label}</span>
               </div>
             ))}
           </div>
 
-          <div className="flex flex-col lg:grid lg:grid-cols-5 gap-4 sm:gap-6">
-            <div className="lg:col-span-3">
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,1.3fr)_minmax(19rem,0.7fr)] lg:items-start">
+            <div>
               {step === "login" && (
-                <div className="bg-card border border-border rounded-xl p-5 sm:p-6">
-                  <h2 className="font-bold text-foreground text-base mb-4">Sign In to Continue</h2>
-                  <p className="text-sm text-muted-foreground mb-5">A Google account is required to place orders and track deliveries.</p>
-                  <button type="button" onClick={handleCheckoutGoogleLogin} disabled={googleLoading} className="w-full flex items-center justify-center gap-3 py-3 rounded-xl border border-border bg-white hover:bg-muted/60 text-sm font-semibold shadow-sm disabled:cursor-wait disabled:opacity-70">
-                    <svg className="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-                    {googleLoading ? "Connecting to Google…" : "Continue with Google"}
-                  </button>
-                </div>
+                <section className="rounded-2xl border border-border bg-card p-5 shadow-[0_10px_30px_rgba(64,40,25,0.05)] sm:p-6">
+                  <span className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-50 text-primary"><User className="h-5 w-5" /></span>
+                  <h2 className="text-xl font-extrabold text-foreground">Sign in to continue</h2>
+                  <p className="mb-5 mt-1.5 text-sm leading-5 text-muted-foreground">Your account keeps this order connected to tracking and payment updates.</p>
+                  {profileLoading && isCustomerSignedIn ? (
+                    <div role="status" className="flex min-h-24 items-center justify-center gap-3 rounded-xl border border-border bg-background px-4 text-sm font-bold text-muted-foreground">
+                      <Loader2 className="h-4 w-4 animate-spin text-primary" /> Loading your saved details…
+                    </div>
+                  ) : (
+                    <button type="button" onClick={handleCheckoutGoogleLogin} disabled={googleLoading} className="flex min-h-12 w-full items-center justify-center gap-3 rounded-xl border border-border bg-white px-4 text-sm font-bold shadow-sm hover:bg-muted/60 disabled:cursor-wait disabled:opacity-70">
+                      <svg className="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                      {googleLoading ? "Connecting to Google…" : "Continue with Google"}
+                    </button>
+                  )}
+                </section>
               )}
               {step === "details" && (
-                <div className="bg-card border border-border rounded-xl p-5 sm:p-6">
-                  <h2 className="font-bold text-foreground text-base mb-4">Delivery Details</h2>
-                  <div className="flex flex-col gap-3">
+                <section className="rounded-2xl border border-border bg-card p-5 shadow-[0_10px_30px_rgba(64,40,25,0.05)] sm:p-6">
+                  <div className="mb-5 flex items-start gap-3 border-b border-border pb-4">
+                    <span className="flex h-11 w-11 flex-none items-center justify-center rounded-2xl bg-amber-50 text-primary"><MapPin className="h-5 w-5" /></span>
+                    <div><h2 className="text-xl font-extrabold text-foreground">Delivery details</h2><p className="mt-1 text-sm leading-5 text-muted-foreground">All fields are required unless marked optional.</p></div>
+                  </div>
+                  <div className="mb-5 flex items-center gap-3 rounded-xl border border-border bg-background px-4 py-3">
+                    <span className="flex h-9 w-9 flex-none items-center justify-center rounded-xl bg-amber-50 text-primary"><Truck className="h-4 w-4" /></span>
+                    <div><p className="text-sm font-extrabold text-foreground">Delivery order</p><p className="mt-0.5 text-xs leading-4 text-muted-foreground">Your address is used for this order&apos;s delivery.</p></div>
+                  </div>
+                  <div className="grid gap-4 sm:grid-cols-2">
                     {/* Full Name */}
                     <div className="flex flex-col gap-1.5">
                       <label
                         htmlFor="checkout-full-name"
-                        className="text-xs font-semibold text-foreground"
+                        className="text-sm font-bold text-foreground"
                       >
-                        Full Name
+                        Full name <span className="text-primary" aria-hidden="true">*</span>
                       </label>
 
                       <input
@@ -1710,7 +1821,7 @@ return (
                         }
                         disabled={profileLoading}
                         autoComplete="name"
-                        className="rounded-lg border border-border bg-input-background px-3 py-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary/50 disabled:cursor-wait disabled:opacity-60"
+                        className="min-h-12 rounded-xl border border-border bg-input-background px-3.5 text-base outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary/50 disabled:cursor-wait disabled:opacity-60"
                       />
                     </div>
 
@@ -1718,9 +1829,9 @@ return (
                     <div className="flex flex-col gap-1.5">
                       <label
                         htmlFor="checkout-contact-number"
-                        className="text-xs font-semibold text-foreground"
+                        className="text-sm font-bold text-foreground"
                       >
-                        Contact Number
+                        Contact number <span className="text-primary" aria-hidden="true">*</span>
                       </label>
 
                       <input
@@ -1738,17 +1849,17 @@ return (
                         disabled={profileLoading}
                         autoComplete="tel"
                         inputMode="tel"
-                        className="rounded-lg border border-border bg-input-background px-3 py-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary/50 disabled:cursor-wait disabled:opacity-60"
+                        className="min-h-12 rounded-xl border border-border bg-input-background px-3.5 text-base outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary/50 disabled:cursor-wait disabled:opacity-60"
                       />
                     </div>
 
                     {/* Delivery Address */}
-                    <div className="flex flex-col gap-1.5">
+                    <div className="flex flex-col gap-1.5 sm:col-span-2">
                       <label
                         htmlFor="checkout-delivery-address"
-                        className="text-xs font-semibold text-foreground"
+                        className="text-sm font-bold text-foreground"
                       >
-                        Delivery Address
+                        Delivery address <span className="text-primary" aria-hidden="true">*</span>
                       </label>
 
                       <input
@@ -1760,15 +1871,15 @@ return (
                         }
                         placeholder="House no., street, barangay, city"
                         autoComplete="street-address"
-                        className="rounded-lg border border-border bg-input-background px-3 py-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary/50"
+                        className="min-h-12 rounded-xl border border-border bg-input-background px-3.5 text-base outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary/50"
                       />
                     </div>
 
                     {/* Landmark */}
-                    <div className="flex flex-col gap-1.5">
+                    <div className="flex flex-col gap-1.5 sm:col-span-2">
                       <label
                         htmlFor="checkout-landmark"
-                        className="text-xs font-semibold text-foreground"
+                        className="text-sm font-bold text-foreground"
                       >
                         Landmark
                         <span className="ml-1 font-normal text-muted-foreground">
@@ -1784,13 +1895,13 @@ return (
                           setLandmark(event.target.value)
                         }
                         placeholder="e.g. Near Jollibee, blue gate"
-                        className="rounded-lg border border-border bg-input-background px-3 py-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary/50"
+                        className="min-h-12 rounded-xl border border-border bg-input-background px-3.5 text-base outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary/50"
                       />
                     </div>
                   </div>
                   {deliveryError && (
-  <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5">
-    <p className="text-xs font-semibold text-red-700">
+  <div role="alert" className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+    <p className="text-sm font-semibold leading-5 text-red-700">
       {deliveryError}
     </p>
   </div>
@@ -1802,7 +1913,7 @@ return (
     void handleContinueToPayment();
   }}
   disabled={placingOrder}
-  className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground hover:bg-amber-800 disabled:cursor-wait disabled:opacity-60"
+  className="mt-5 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-extrabold text-primary-foreground shadow-sm hover:bg-amber-800 disabled:cursor-wait disabled:opacity-60"
 >
   {placingOrder && (
     <Loader2 className="h-4 w-4 animate-spin" />
@@ -1813,40 +1924,51 @@ return (
       ? "Continue to Payment"
       : "Create Order & Continue to Payment"}
 </button>
-                </div>
+                  <p className="mt-3 text-center text-sm leading-5 text-muted-foreground">Continuing creates your order on the server, confirms the final amount, and opens GCash payment.</p>
+                </section>
               )}
               {step === "upload" &&
                 pendingPaymentSubmission?.order &&
                 gcashMerchantConfig.isConfigured && (
-                <div className="bg-card border border-border rounded-xl p-5 sm:p-6">
-                  <h2 className="font-bold text-foreground text-base mb-1">Upload GCash Proof of Payment</h2>
-                  <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
-                    <p className="font-mono text-sm font-extrabold text-amber-900">
-                      Order {pendingPaymentSubmission.order.order_number}
-                    </p>
-                    <p className="mt-1 text-xs font-semibold text-amber-800">
-                      Amount to pay: ₱{pendingPaymentSubmission.order.grand_total}
-                    </p>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-2">Send your payment to:</p>
-                  <div className="flex items-center gap-3 px-4 py-3 bg-green-50 border border-green-200 rounded-xl mb-5">
-                    <div className="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">G</div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-bold text-foreground">{gcashMerchantConfig.number}</p>
-                      <p className="text-xs text-muted-foreground">{gcashMerchantConfig.name}</p>
-                    </div>
-                    <div className="text-right flex-shrink-0">
-                      <p className="text-sm font-bold text-green-700">₱{pendingPaymentSubmission.order.grand_total}</p>
-                      <p className="text-[10px] text-muted-foreground">Total</p>
+                <section className="rounded-2xl border border-border bg-card p-5 shadow-[0_10px_30px_rgba(64,40,25,0.05)] sm:p-6">
+                  <div className="mb-5 flex items-start gap-3 border-b border-border pb-4">
+                    <span className="flex h-11 w-11 flex-none items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700"><BadgeCheck className="h-5 w-5" /></span>
+                    <div>
+                      <h2 className="text-xl font-extrabold text-foreground">Pay securely with GCash</h2>
+                      <p className="mt-1 text-sm leading-5 text-muted-foreground">Your order is created. Pay the confirmed amount, then submit the receipt details below.</p>
                     </div>
                   </div>
 
-                  <div className="mb-4 flex flex-col gap-1.5">
+                  <div className="mb-4 grid gap-3 sm:grid-cols-2">
+                    <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+                      <p className="text-xs font-bold uppercase tracking-wide text-amber-800">Order number</p>
+                      <p className="mt-1 font-mono text-lg font-black text-amber-950">{pendingPaymentSubmission.order.order_number}</p>
+                    </div>
+                    <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 sm:text-right">
+                      <p className="text-xs font-bold uppercase tracking-wide text-emerald-800">Server-confirmed payment amount</p>
+                      <p className="mt-1 text-2xl font-black tracking-tight text-emerald-800">₱{pendingPaymentSubmission.order.grand_total}</p>
+                    </div>
+                  </div>
+
+                  <div className="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4">
+                    <p className="mb-3 text-sm font-extrabold text-emerald-900">Send payment to this merchant</p>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div><p className="text-xs font-bold uppercase tracking-wide text-emerald-700">Merchant name</p><p className="mt-1 text-base font-extrabold text-foreground">{gcashMerchantConfig.name}</p></div>
+                      <div><p className="text-xs font-bold uppercase tracking-wide text-emerald-700">Merchant number</p><p className="mt-1 font-mono text-base font-extrabold text-foreground">{gcashMerchantConfig.number}</p></div>
+                    </div>
+                    <ol className="mt-4 grid gap-2 border-t border-emerald-200/80 pt-4 text-sm leading-5 text-emerald-900 sm:grid-cols-3">
+                      <li className="flex gap-2"><span className="font-black">1.</span><span>Send the exact confirmed amount.</span></li>
+                      <li className="flex gap-2"><span className="font-black">2.</span><span>Copy the GCash reference number.</span></li>
+                      <li className="flex gap-2"><span className="font-black">3.</span><span>Upload a clear receipt screenshot.</span></li>
+                    </ol>
+                  </div>
+
+                  <div className="mb-5 flex flex-col gap-1.5">
                     <label
                       htmlFor="checkout-gcash-reference"
-                      className="text-xs font-semibold text-foreground"
+                      className="text-sm font-bold text-foreground"
                     >
-                      GCash Reference Number
+                      GCash reference number <span className="text-primary" aria-hidden="true">*</span>
                     </label>
 
                     <input
@@ -1863,17 +1985,21 @@ return (
                       placeholder="Enter the reference from your GCash receipt"
                       autoComplete="off"
                       disabled={placingOrder}
-                      className="rounded-lg border border-border bg-input-background px-3 py-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary/50 disabled:cursor-wait disabled:opacity-60"
+                      className="min-h-12 rounded-xl border border-border bg-input-background px-3.5 text-base outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary/50 disabled:cursor-wait disabled:opacity-60"
                     />
 
                     {gcashReferenceError && (
-                      <p className="text-xs font-semibold text-red-700">
+                      <p className="text-sm font-semibold text-red-700">
                         {gcashReferenceError}
                       </p>
                     )}
                   </div>
 
-                  <div className="mb-4">
+                  <div className="mb-5">
+                    <div className="mb-2">
+                      <p className="text-sm font-bold text-foreground">Payment proof <span className="text-primary" aria-hidden="true">*</span></p>
+                      <p className="mt-0.5 text-sm text-muted-foreground">Upload the screenshot from this GCash payment.</p>
+                    </div>
                     <input
                       ref={paymentProofInputRef}
                       type="file"
@@ -1895,29 +2021,29 @@ return (
                           paymentProofInputRef.current?.click()
                         }
                         disabled={placingOrder}
-                        className="flex w-full cursor-pointer flex-col items-center gap-3 rounded-xl border-2 border-dashed border-border p-6 transition-colors hover:border-primary/40 hover:bg-primary/[0.02] disabled:cursor-wait disabled:opacity-60 sm:p-8"
+                        className="flex min-h-40 w-full cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-border bg-background/60 p-5 transition-colors hover:border-primary/40 hover:bg-primary/[0.02] disabled:cursor-wait disabled:opacity-60 sm:p-7"
                       >
                         <Upload className="h-8 w-8 text-muted-foreground/50 sm:h-10 sm:w-10" />
 
                         <div className="text-center">
-                          <p className="text-sm font-semibold text-foreground">
-                            Upload Screenshot
+                          <p className="text-base font-extrabold text-foreground">
+                            Choose payment screenshot
                           </p>
 
-                          <p className="mt-1 text-xs text-muted-foreground">
+                          <p className="mt-1 text-sm text-muted-foreground">
                             PNG or JPG, maximum 5 MB
                           </p>
                         </div>
                       </button>
                     ) : (
-                      <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-4">
+                      <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4">
                         <div className="flex items-start gap-3">
                           <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
                             <Check className="h-5 w-5" />
                           </div>
 
                           <div className="min-w-0 flex-1">
-                            <p className="text-xs font-bold text-emerald-800">
+                            <p className="text-sm font-bold text-emerald-800">
                               {pendingPaymentSubmission?.proofImagePath
                                 ? "Payment screenshot uploaded"
                                 : "Payment screenshot selected"}
@@ -1927,7 +2053,7 @@ return (
                               {paymentProof.name}
                             </p>
 
-                            <p className="mt-0.5 text-[10px] text-muted-foreground">
+                            <p className="mt-0.5 text-xs text-muted-foreground">
                               {(paymentProof.size / 1024 / 1024).toFixed(
                                 2,
                               )}{" "}
@@ -1948,7 +2074,7 @@ return (
                                 pendingPaymentSubmission?.proofImagePath,
                               )
                             }
-                            className="min-h-10 flex-1 rounded-lg border border-border bg-white px-3 text-xs font-bold text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
+                            className="min-h-11 flex-1 rounded-xl border border-border bg-white px-3 text-sm font-bold text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
                           >
                             Change
                           </button>
@@ -1962,7 +2088,7 @@ return (
                                 pendingPaymentSubmission?.proofImagePath,
                               )
                             }
-                            className="min-h-10 flex-1 rounded-lg border border-red-200 bg-white px-3 text-xs font-bold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                            className="min-h-11 flex-1 rounded-xl border border-red-200 bg-white px-3 text-sm font-bold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                           >
                             Remove
                           </button>
@@ -1971,8 +2097,8 @@ return (
                     )}
 
                     {paymentProofError && (
-                      <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5">
-                        <p className="text-xs font-semibold text-red-700">
+                      <div role="alert" className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+                        <p className="text-sm font-semibold leading-5 text-red-700">
                           {paymentProofError}
                         </p>
                       </div>
@@ -1980,39 +2106,39 @@ return (
                   </div>
 
                   {!placedOrder && (
-                      <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5">
-                        <p className="text-xs font-semibold text-amber-800">
-                          Payment retries will continue against order {pendingPaymentSubmission.order.order_number} without creating another order.
-                        </p>
-                      </div>
+                    <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+                      <p className="text-sm font-bold text-amber-900">Your order is protected during retries</p>
+                      <p className="mt-1 text-sm leading-5 text-amber-800">If submission fails, retrying continues with order {pendingPaymentSubmission.order.order_number}; it does not create another order.</p>
+                    </div>
                     )}
 
                   {placeOrderError && (
-  <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5">
-    <p className="text-xs font-semibold text-red-700">
+  <div role="alert" className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+    <p className="text-sm font-bold text-red-800">Payment submission needs attention</p>
+    <p className="mt-1 text-sm font-medium leading-5 text-red-700">
       {placeOrderError}
     </p>
   </div>
 )}
 
 {placedOrder ? (
-  <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+  <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
     <div className="flex items-start gap-3">
       <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
         <Check className="h-5 w-5" />
       </div>
 
       <div>
-        <p className="text-sm font-bold text-emerald-800">
-          Order created successfully
+        <p className="text-base font-bold text-emerald-800">
+          Payment submitted successfully
         </p>
 
         <p className="mt-1 font-mono text-base font-extrabold text-foreground">
           {placedOrder.order_number}
         </p>
 
-        <p className="mt-1 text-xs text-muted-foreground">
-          Total: ₱
+        <p className="mt-1 text-sm text-muted-foreground">
+          Server-confirmed total: ₱
           {placedOrder.grand_total}
         </p>
       </div>
@@ -2025,7 +2151,7 @@ return (
       void handlePlaceOrder();
     }}
     disabled={placingOrder}
-    className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground hover:bg-amber-800 disabled:cursor-wait disabled:opacity-60"
+    className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-extrabold text-primary-foreground shadow-sm hover:bg-amber-800 disabled:cursor-wait disabled:opacity-60"
   >
     {placingOrder ? (
       <>
@@ -2037,11 +2163,11 @@ return (
     ) : (
       placeOrderError
         ? "Retry Payment Submission"
-        : "Submit Payment"
+        : "Submit GCash Payment"
     )}
   </button>
 )}
-                </div>
+                </section>
               )}
               {step === "upload" &&
                 (!pendingPaymentSubmission?.order ||
@@ -2056,34 +2182,40 @@ return (
                 )}
             </div>
             {/* Order summary sidebar */}
-            <div className="lg:col-span-2">
-              <div className="bg-card border border-border rounded-xl p-4 sm:p-5 lg:sticky lg:top-4">
-                <p className="font-bold text-foreground mb-3 sm:mb-4">Your Order</p>
-                <div className="flex flex-col gap-2 text-sm">
+            <aside>
+              <div className="rounded-2xl border border-border bg-card p-4 shadow-[0_10px_30px_rgba(64,40,25,0.05)] sm:p-5 lg:sticky lg:top-4">
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <h2 className="text-base font-extrabold text-foreground">Order summary</h2>
+                  <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${pendingPaymentSubmission?.order ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-800"}`}>
+                    {pendingPaymentSubmission?.order ? "Confirmed" : "Estimate"}
+                  </span>
+                </div>
+                <div className="space-y-3 text-sm">
                   {cart.map((c) => (
-                    <div key={c.id} className="flex justify-between">
-                      <span className="text-muted-foreground truncate mr-2">{c.name} ×{c.qty}</span>
-                      <span className="font-semibold flex-shrink-0">₱{c.price * c.qty}</span>
+                    <div key={c.id} className="flex justify-between gap-3">
+                      <span className="min-w-0 text-muted-foreground"><span className="font-bold text-foreground">{c.qty}×</span> {c.name}</span>
+                      <span className="flex-shrink-0 font-bold text-foreground">₱{c.price * c.qty}</span>
                     </div>
                   ))}
                   {pendingPaymentSubmission?.order ? (
                     <>
-                      <div className="flex justify-between pt-2 border-t border-border"><span className="text-muted-foreground">Subtotal</span><span>₱{pendingPaymentSubmission.order.subtotal}</span></div>
-                      <div className="flex justify-between"><span className="text-muted-foreground">Delivery fee</span><span>₱{pendingPaymentSubmission.order.delivery_fee}</span></div>
-                      <div className="flex justify-between font-bold text-base pt-2 border-t border-border"><span>Total</span><span className="text-primary">₱{pendingPaymentSubmission.order.grand_total}</span></div>
+                      <div className="flex justify-between gap-3 border-t border-border pt-3"><span className="text-muted-foreground">Server-confirmed subtotal</span><span className="font-bold text-foreground">₱{pendingPaymentSubmission.order.subtotal}</span></div>
+                      <div className="flex justify-between gap-3"><span className="text-muted-foreground">Server-confirmed delivery fee</span><span className="font-bold text-foreground">₱{pendingPaymentSubmission.order.delivery_fee}</span></div>
+                      <div className="flex items-end justify-between gap-3 border-t border-border pt-4"><span className="font-extrabold text-foreground">Server-confirmed total</span><span className="text-2xl font-black tracking-tight text-primary">₱{pendingPaymentSubmission.order.grand_total}</span></div>
                     </>
                   ) : (
                     <>
-                      <div className="flex justify-between pt-2 border-t border-border"><span className="text-muted-foreground">Estimated delivery fee</span><span>₱50</span></div>
-                      <div className="flex justify-between font-bold text-base pt-2 border-t border-border"><span>Estimated total</span><span className="text-primary">₱{subtotal + 50}</span></div>
+                      <div className="flex justify-between gap-3 border-t border-border pt-3"><span className="text-muted-foreground">Estimated subtotal</span><span className="font-bold text-foreground">₱{subtotal}</span></div>
+                      <div className="flex justify-between gap-3"><span className="text-muted-foreground">Estimated delivery fee</span><span className="font-bold text-foreground">₱50</span></div>
+                      <div className="flex items-end justify-between gap-3 border-t border-border pt-4"><span className="font-extrabold text-foreground">Estimated total</span><span className="text-2xl font-black tracking-tight text-primary">₱{subtotal + 50}</span></div>
                     </>
                   )}
                 </div>
                 {!pendingPaymentSubmission?.order && (
-                  <p className="mt-3 text-[11px] leading-4 text-muted-foreground">The final delivery fee and total will be confirmed when your order is created.</p>
+                  <p className="mt-4 rounded-xl bg-muted/70 px-3 py-2.5 text-sm leading-5 text-muted-foreground">The server confirms the delivery fee and final amount when your order is created.</p>
                 )}
               </div>
-            </div>
+            </aside>
           </div>
         </div>
       </div>
@@ -2879,6 +3011,44 @@ function TrackingPage({
         )
       : "";
 
+  const formattedOrderStatus = order
+    ? order.current_status
+        .split("_")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ")
+    : "";
+
+  const currentTrackingStepIndex = order
+    ? ORDER_STEPS.findIndex(
+        (trackingStep) => trackingStep.status === order.current_status,
+      )
+    : -1;
+
+  const nextTrackingStep =
+    currentTrackingStepIndex >= 0 &&
+    currentTrackingStepIndex < ORDER_STEPS.length - 1
+      ? ORDER_STEPS[currentTrackingStepIndex + 1]
+      : null;
+
+  const paymentStatusLabel =
+    payment?.payment_status === "verified"
+      ? "Verified"
+      : payment?.payment_status === "rejected"
+        ? "Needs resubmission"
+        : payment?.payment_status === "pending"
+          ? "Awaiting verification"
+          : "Not available";
+
+  const nextStepLabel = paymentNeedsResubmission
+    ? "Resubmit your GCash payment for verification."
+    : isCancelled || isRejected
+      ? "This order has no further steps."
+      : isCompleted || isDelivered
+        ? "This order is complete."
+        : nextTrackingStep
+          ? `Next: ${nextTrackingStep.label}`
+          : "Watch this page for the next status update.";
+
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <CustNav
@@ -2887,54 +3057,56 @@ function TrackingPage({
         currentPage="tracking"
       />
 
-      <div className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-2xl px-4 py-5 sm:px-6 sm:py-8">
-          <div className="mb-4 flex items-center justify-between gap-3 sm:mb-6">
+      <div className="customer-storefront flex-1 overflow-y-auto">
+        <div className="mx-auto max-w-4xl px-4 py-5 sm:px-6 sm:py-8">
+          <div className="mb-5 flex items-end justify-between gap-3 sm:mb-7">
             <div>
-              <h1 className="text-lg font-bold text-foreground sm:text-xl">
-                Order Tracking
+              <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-primary/75">Live order progress</p>
+              <h1 className="mt-1 font-['Fraunces'] text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+                Track your order
               </h1>
 
-              <p className="mt-1 text-xs text-muted-foreground">
-                Follow the current status of your order.
+              <p className="mt-1 text-sm text-muted-foreground">
+                See the confirmed order, payment, and fulfillment status.
               </p>
             </div>
 
             <button
               type="button"
               onClick={() => onNav("history")}
-              className="min-h-10 rounded-xl border border-border bg-card px-3 text-xs font-bold text-foreground hover:bg-muted"
+              className="min-h-11 rounded-xl border border-border bg-card px-4 text-sm font-bold text-foreground shadow-sm hover:bg-muted"
             >
               All Orders
             </button>
           </div>
 
           {loading && (
-            <div className="flex min-h-60 items-center justify-center rounded-2xl border border-border bg-card">
+            <div className="flex min-h-40 items-center justify-center rounded-2xl border border-border bg-card px-5 py-8">
               <div className="flex flex-col items-center gap-3">
-                <Loader2 className="h-7 w-7 animate-spin text-primary" />
+                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-50 text-primary"><Loader2 className="h-5 w-5 animate-spin" /></span>
 
-                <p className="text-sm font-semibold text-muted-foreground">
+                <p className="text-base font-bold text-foreground">
                   Loading order…
                 </p>
+                <p className="text-sm text-muted-foreground">Checking the latest server status.</p>
               </div>
             </div>
           )}
 
           {!loading && errorMessage && (
-            <div className="rounded-xl border border-red-200 bg-red-50 p-4">
-              <p className="text-sm font-bold text-red-700">
+            <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-5">
+              <p className="text-base font-bold text-red-700">
                 Unable to load order
               </p>
 
-              <p className="mt-1 text-xs text-red-600">
+              <p className="mt-1 text-sm leading-5 text-red-600">
                 {errorMessage}
               </p>
 
               <button
                 type="button"
                 onClick={() => setLoadAttempt((attempt) => attempt + 1)}
-                className="mt-4 min-h-10 rounded-xl border border-red-300 bg-white px-4 text-xs font-bold text-red-700 hover:bg-red-100"
+                className="mt-4 min-h-11 rounded-xl border border-red-300 bg-white px-4 text-sm font-bold text-red-700 hover:bg-red-100"
               >
                 Try Again
               </button>
@@ -2944,14 +3116,14 @@ function TrackingPage({
           {!loading &&
             !errorMessage &&
             !order && (
-              <div className="flex min-h-60 flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card px-6 text-center">
-                <MapPin className="mb-3 h-10 w-10 text-muted-foreground/30" />
+              <div className="flex min-h-48 flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card/75 px-6 py-9 text-center">
+                <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-primary"><MapPin className="h-5 w-5" /></span>
 
-                <p className="text-sm font-bold text-foreground">
+                <p className="text-base font-bold text-foreground">
                   No order to track
                 </p>
 
-                <p className="mt-1 text-xs text-muted-foreground">
+                <p className="mt-1 max-w-sm text-sm leading-5 text-muted-foreground">
                   Place an order first or choose one
                   from your order history.
                 </p>
@@ -2959,7 +3131,7 @@ function TrackingPage({
                 <button
                   type="button"
                   onClick={() => onNav("history")}
-                  className="mt-4 min-h-10 rounded-xl bg-primary px-4 text-xs font-bold text-primary-foreground hover:bg-amber-800"
+                  className="mt-4 min-h-11 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground hover:bg-amber-800"
                 >
                   View Orders
                 </button>
@@ -2969,29 +3141,29 @@ function TrackingPage({
           {!loading &&
             !errorMessage &&
             order && (
-              <div className="mb-5 overflow-hidden rounded-2xl border border-border bg-card">
+              <article className="mb-5 overflow-hidden rounded-2xl border border-border bg-card shadow-[0_12px_36px_rgba(64,40,25,0.06)]">
                 {/* Header */}
-                <div className="flex items-start justify-between gap-4 bg-primary px-4 py-4 sm:px-6 sm:py-5">
+                <div className="grid gap-4 bg-[#211914] px-4 py-5 text-white sm:grid-cols-[minmax(0,1fr)_auto] sm:px-6">
                   <div>
-                    <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-primary-foreground/70">
-                      Order #
+                    <p className="mb-1 text-xs font-bold uppercase tracking-wide text-white/60">
+                      Order number
                     </p>
 
-                    <p className="font-mono text-xl font-extrabold text-primary-foreground">
+                    <p className="font-mono text-2xl font-black tracking-tight text-white sm:text-3xl">
                       {order.order_number}
                     </p>
 
-                    <p className="mt-1 text-xs text-primary-foreground/60">
-                      Placed · {formattedPlacedDate}
+                    <p className="mt-1 text-sm text-white/60">
+                      Placed {formattedPlacedDate}
                     </p>
                   </div>
 
-                  <div className="text-right">
-                    <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-primary-foreground/70">
-                      Total
+                  <div className="sm:text-right">
+                    <p className="mb-1 text-xs font-bold uppercase tracking-wide text-amber-200/80">
+                      Server-confirmed total
                     </p>
 
-                    <p className="font-bold text-primary-foreground">
+                    <p className="text-2xl font-black tracking-tight text-amber-300">
                       ₱
                       {Number(
                         order.grand_total,
@@ -3004,7 +3176,7 @@ function TrackingPage({
                       )}
                     </p>
 
-                    <p className="mt-1 text-xs capitalize text-primary-foreground/60">
+                    <p className="mt-1 text-sm capitalize text-white/60">
                       {order.fulfillment_type.replace(
                         /_/g,
                         " ",
@@ -3150,58 +3322,45 @@ function TrackingPage({
                   )}
 
                   {/* Current status */}
-                  {(isCancelled ||
-                    isRejected) ? (
-                    <div className="mb-6 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
-                      <X className="h-5 w-5 flex-shrink-0 text-red-600" />
-
-                      <div>
-                        <p className="text-sm font-bold text-red-800">
-                          {isCancelled
-                            ? "Order Cancelled"
-                            : "Order Rejected"}
-                        </p>
-
-                        <p className="mt-0.5 text-xs text-red-600">
-                          This order is no longer active.
-                        </p>
-                      </div>
+                  <section aria-label="Order overview" className="mb-5 grid gap-3 sm:grid-cols-3">
+                    <div className={`rounded-xl border px-4 py-3 ${isCancelled || isRejected ? "border-red-200 bg-red-50" : isCompleted || isDelivered ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`}>
+                      <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Order status</p>
+                      <p className={`mt-1 text-base font-extrabold ${isCancelled || isRejected ? "text-red-800" : isCompleted || isDelivered ? "text-emerald-800" : "text-amber-900"}`}>
+                        {isCompleted ? "Completed" : formattedOrderStatus}
+                      </p>
                     </div>
-                  ) : (
-                    <div className="mb-6 flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
-                      {isCompleted ? (
-                        <Check className="h-5 w-5 flex-shrink-0 text-emerald-600" />
-                      ) : (
-                        <ChefHat className="h-5 w-5 flex-shrink-0 text-amber-600" />
-                      )}
-
-                      <div>
-                        <p className="text-sm font-bold text-amber-800">
-                          {isCompleted
-                            ? "Order Completed"
-                            : order.current_status
-                                .split("_")
-                                .map(
-                                  (word) =>
-                                    word
-                                      .charAt(0)
-                                      .toUpperCase() +
-                                    word.slice(1),
-                                )
-                                .join(" ")}
-                        </p>
-
-                        <p className="mt-0.5 text-xs text-amber-600">
-                          Current order status
-                        </p>
-                      </div>
+                    <div className={`rounded-xl border px-4 py-3 ${payment?.payment_status === "rejected" ? "border-red-200 bg-red-50" : payment?.payment_status === "verified" ? "border-emerald-200 bg-emerald-50" : "border-border bg-background"}`}>
+                      <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Payment status</p>
+                      <p className={`mt-1 text-base font-extrabold ${payment?.payment_status === "rejected" ? "text-red-800" : payment?.payment_status === "verified" ? "text-emerald-800" : "text-foreground"}`}>{paymentStatusLabel}</p>
                     </div>
-                  )}
+                    <div className="rounded-xl border border-border bg-background px-4 py-3">
+                      <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Fulfillment</p>
+                      <p className="mt-1 text-base font-extrabold capitalize text-foreground">{order.fulfillment_type.replace(/_/g, " ")}</p>
+                    </div>
+                  </section>
+
+                  <div className={`mb-6 flex items-start gap-3 rounded-xl border px-4 py-3 ${isCancelled || isRejected || paymentNeedsResubmission ? "border-red-200 bg-red-50" : isCompleted || isDelivered ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`}>
+                    {isCancelled || isRejected || paymentNeedsResubmission ? (
+                      <X className="mt-0.5 h-5 w-5 flex-none text-red-600" />
+                    ) : isCompleted || isDelivered ? (
+                      <Check className="mt-0.5 h-5 w-5 flex-none text-emerald-600" />
+                    ) : (
+                      <ChefHat className="mt-0.5 h-5 w-5 flex-none text-amber-700" />
+                    )}
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">What happens next</p>
+                      <p className="mt-1 text-sm font-bold leading-5 text-foreground">{nextStepLabel}</p>
+                    </div>
+                  </div>
 
                   {/* Timeline */}
                   {!isCancelled &&
                     !isRejected && (
-                      <div>
+                      <section aria-labelledby="order-progress-heading" className="rounded-2xl border border-border bg-background/70 p-4 sm:p-5">
+                        <div className="mb-5">
+                          <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Status timeline</p>
+                          <h2 id="order-progress-heading" className="mt-1 text-lg font-extrabold text-foreground">Order progress</h2>
+                        </div>
                         {ORDER_STEPS.map(
                           (
                             trackingStep,
@@ -3271,7 +3430,7 @@ function TrackingPage({
 
                                 <div className="min-w-0 pb-4">
                                   <p
-                                    className={`text-xs font-semibold sm:text-sm ${
+                                  className={`text-sm font-semibold ${
                                       wasReached ||
                                       isCurrent
                                         ? "text-foreground"
@@ -3284,7 +3443,7 @@ function TrackingPage({
                                   </p>
 
                                   {history && (
-                                    <p className="mt-0.5 text-[10px] text-muted-foreground">
+                                    <p className="mt-0.5 text-xs text-muted-foreground">
                                       {new Date(
                                         history.created_at,
                                       ).toLocaleString(
@@ -3314,10 +3473,10 @@ function TrackingPage({
                             );
                           },
                         )}
-                      </div>
+                      </section>
                     )}
                 </div>
-              </div>
+              </article>
             )}
         </div>
       </div>
@@ -3354,6 +3513,37 @@ function formatCustomerOrderStatus(
         word.slice(1),
     )
     .join(" ");
+}
+
+function getCustomerOrderStatusPresentation(status: string) {
+  if (status === "completed" || status === "delivered") {
+    return {
+      badge: "border-stone-200 bg-stone-100 text-stone-700",
+      card: "border-stone-200 bg-stone-50/70",
+    };
+  }
+
+  if (status === "cancelled" || status === "rejected") {
+    return {
+      badge: "border-red-200 bg-red-50 text-red-700",
+      card: "border-red-200/80 bg-card",
+    };
+  }
+
+  if (
+    status === "waiting_payment_verification" ||
+    status === "waiting_for_rider"
+  ) {
+    return {
+      badge: "border-amber-200 bg-amber-50 text-amber-800",
+      card: "border-amber-200 bg-card",
+    };
+  }
+
+  return {
+    badge: "border-orange-200 bg-orange-50 text-orange-800",
+    card: "border-border bg-card",
+  };
 }
 
 // ── Order History ─────────────────────────────────────────────────
@@ -3520,175 +3710,175 @@ async function loadCustomerOrders() {
         currentPage="history"
       />
 
-      <div className="flex-1 overflow-y-auto">
-        <div className="mx-auto w-full max-w-3xl px-4 py-5 sm:px-6 sm:py-8">
-          <div className="mb-4 sm:mb-6">
-            <h1 className="text-lg font-bold text-foreground sm:text-xl">
-              Order History
-            </h1>
+      <div className="customer-storefront flex-1 overflow-y-auto">
+        <div className="mx-auto w-full max-w-4xl px-4 py-5 sm:px-6 sm:py-8">
+          <div className="mb-5 flex items-end justify-between gap-3 sm:mb-7">
+            <div>
+              <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-primary/75">Your orders</p>
+              <h1 className="mt-1 font-['Fraunces'] text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+                Order history
+              </h1>
 
-            <p className="mt-1 text-xs text-muted-foreground">
-              View your previous and current orders.
-            </p>
+              <p className="mt-1.5 text-sm leading-5 text-muted-foreground">
+                Review current and completed orders in one place.
+              </p>
+            </div>
+
+            {!loading && !errorMessage && orders.length > 0 ? (
+              <span className="flex-none rounded-full border border-border bg-card px-3 py-1.5 text-xs font-bold text-muted-foreground shadow-sm">
+                {orders.length} {orders.length === 1 ? "order" : "orders"}
+              </span>
+            ) : null}
           </div>
 
           {loading && (
-            <div className="flex min-h-52 items-center justify-center rounded-xl border border-border bg-card">
-              <div className="flex flex-col items-center gap-3">
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
-
-                <p className="text-sm font-semibold text-muted-foreground">
-                  Loading your orders…
-                </p>
+            <div role="status" className="flex min-h-40 items-center justify-center rounded-2xl border border-border bg-card px-5 py-8">
+              <div className="flex flex-col items-center gap-3 text-center">
+                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-50 text-primary">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                </span>
+                <div>
+                  <p className="text-base font-bold text-foreground">Loading your orders…</p>
+                  <p className="mt-1 text-sm text-muted-foreground">Getting the latest order history.</p>
+                </div>
               </div>
             </div>
           )}
 
           {!loading && errorMessage && (
-            <div className="rounded-xl border border-red-200 bg-red-50 p-4">
-              <p className="text-sm font-bold text-red-700">
-                Unable to load orders
-              </p>
-
-              <p className="mt-1 text-xs text-red-600">
-                {errorMessage}
-              </p>
-
+            <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-5">
+              <p className="text-base font-bold text-red-700">Unable to load orders</p>
+              <p className="mt-1 max-w-xl text-sm leading-5 text-red-600">{errorMessage}</p>
               <button
                 type="button"
                 onClick={() => setLoadAttempt((attempt) => attempt + 1)}
-                className="mt-4 min-h-10 rounded-xl border border-red-300 bg-white px-4 text-xs font-bold text-red-700 hover:bg-red-100"
+                className="mt-4 min-h-11 rounded-xl border border-red-300 bg-white px-4 text-sm font-bold text-red-700 hover:bg-red-100"
               >
                 Try Again
               </button>
             </div>
           )}
 
-          {!loading &&
-            !errorMessage &&
-            orders.length === 0 && (
-              <div className="flex min-h-52 flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card px-6 text-center">
-                <ShoppingCart className="mb-3 h-10 w-10 text-muted-foreground/30" />
+          {!loading && !errorMessage && orders.length === 0 && (
+            <div className="flex min-h-48 flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card/75 px-6 py-9 text-center">
+              <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-primary">
+                <ShoppingCart className="h-5 w-5" />
+              </span>
+              <h2 className="text-base font-extrabold text-foreground">No orders yet</h2>
+              <p className="mt-1 max-w-sm text-sm leading-5 text-muted-foreground">Orders you place will appear here with their current status.</p>
+              <button
+                type="button"
+                onClick={() => onNav("menu")}
+                className="mt-4 min-h-11 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground hover:bg-amber-800"
+              >
+                Browse the menu
+              </button>
+            </div>
+          )}
 
-                <p className="text-sm font-bold text-foreground">
-                  No orders yet
-                </p>
+          {!loading && !errorMessage && orders.length > 0 && (
+            <div className="grid gap-3 sm:gap-4">
+              {orders.map((order) => {
+                const formattedDate = new Date(order.created_at).toLocaleString(
+                  "en-PH",
+                  {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                    hour: "numeric",
+                    minute: "2-digit",
+                  },
+                );
+                const statusPresentation = getCustomerOrderStatusPresentation(
+                  order.current_status,
+                );
+                const visibleItems = order.items.slice(0, 3);
+                const remainingItems = order.items.slice(3);
 
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Your completed and active orders will
-                  appear here.
-                </p>
+                return (
+                  <article
+                    key={order.id}
+                    className={`overflow-hidden rounded-2xl border shadow-[0_8px_24px_rgba(64,40,25,0.045)] ${statusPresentation.card}`}
+                  >
+                    <div className="grid gap-4 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start sm:p-5">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-mono text-base font-black text-foreground">
+                            {order.order_number}
+                          </span>
+                          <span className={`rounded-full border px-2.5 py-1 text-xs font-extrabold ${statusPresentation.badge}`}>
+                            {formatCustomerOrderStatus(order.current_status)}
+                          </span>
+                        </div>
+                        <p className="mt-1.5 text-sm text-muted-foreground">{formattedDate}</p>
+                      </div>
 
-                <button
-                  type="button"
-                  onClick={() => onNav("menu")}
-                  className="mt-4 min-h-10 rounded-xl bg-primary px-4 text-xs font-bold text-primary-foreground hover:bg-amber-800"
-                >
-                  Browse Menu
-                </button>
-              </div>
-            )}
+                      <div className="sm:text-right">
+                        <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Order total</p>
+                        <p className="mt-1 text-xl font-black tracking-tight text-foreground">
+                          ₱{Number(order.grand_total).toLocaleString("en-PH", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}
+                        </p>
+                      </div>
+                    </div>
 
-          {!loading &&
-            !errorMessage &&
-            orders.length > 0 && (
-              <div className="flex flex-col gap-3">
-                {orders.map((order) => {
-                  const formattedDate =
-                    new Date(
-                      order.created_at,
-                    ).toLocaleString(
-                      "en-PH",
-                      {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                        hour: "numeric",
-                        minute: "2-digit",
-                      },
-                    );
-
-                  return (
-                    <div
-                      key={order.id}
-                      className="rounded-xl border border-border bg-card p-4 sm:p-5"
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="min-w-0">
-                          <div className="mb-2 flex flex-wrap items-center gap-2">
-                            <span className="font-mono text-sm font-extrabold text-primary">
-                              {order.order_number}
-                            </span>
-
-                            <span className="rounded-full bg-amber-100 px-2 py-1 text-[9px] font-extrabold text-amber-700">
-                              {formatCustomerOrderStatus(
-                                order.current_status,
-                              )}
-                            </span>
-                          </div>
-
-                          <p className="text-xs text-muted-foreground">
-                            {formattedDate}
-                          </p>
-                          <div className="mt-3 flex flex-col gap-1.5 border-t border-border/70 pt-3">
-                          {order.items.map((item, index) => (
-                            <div
-                              key={`${item.order_id}-${index}`}
-                              className="flex items-center justify-between gap-3 text-xs"
-                            >
-                              <span className="min-w-0 truncate font-semibold text-foreground">
+                    <div className="border-t border-border/80 bg-white/55 px-4 py-3.5 sm:px-5">
+                      <p className="mb-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">Items</p>
+                      {order.items.length > 0 ? (
+                        <div className="space-y-2">
+                          {visibleItems.map((item, index) => (
+                            <div key={`${item.order_id}-${index}`} className="flex items-start justify-between gap-3 text-sm">
+                              <span className="min-w-0 font-semibold text-foreground">
+                                <span className="mr-1 font-black text-primary">{item.quantity}×</span>
                                 {item.item_name ?? "Menu item"}
-                                <span className="ml-1 font-normal text-muted-foreground">
-                                  ×{item.quantity}
-                                </span>
                               </span>
-
-                              <span className="flex-shrink-0 font-bold text-muted-foreground">
-                                ₱
-                                {Number(
-                                  item.line_total,
-                                ).toLocaleString(
-                                  "en-PH",
-                                  {
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2,
-                                  },
-                                )}
+                              <span className="flex-none font-bold text-muted-foreground">
+                                ₱{Number(item.line_total).toLocaleString("en-PH", {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })}
                               </span>
                             </div>
                           ))}
-                        </div>
-                        </div>
 
-                        <div className="flex-shrink-0 text-right">
-                          <p className="text-base font-extrabold text-foreground sm:text-lg">
-                            ₱
-                            {Number(
-                              order.grand_total,
-                            ).toLocaleString(
-                              "en-PH",
-                              {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2,
-                              },
-                            )}
-                          </p>
-                          <button type="button"
-                          onClick={() =>
-                            onTrackOrder(order.id)
-                          }
-                          className="mt-2 inline-flex min-h-9 items-center gap-1 rounded-lg px-2 text-[10px] font-extrabold text-primary hover:bg-primary/5"
-                        >
-                          Track Order
-                          <ChevronRight className="h-3.5 w-3.5" />
-                        </button>
+                          {remainingItems.length > 0 ? (
+                            <details className="group rounded-xl border border-border bg-background/70 px-3 py-2">
+                              <summary className="cursor-pointer text-sm font-bold text-primary marker:text-primary">
+                                Show {remainingItems.length} more {remainingItems.length === 1 ? "item" : "items"}
+                              </summary>
+                              <div className="mt-2 space-y-2 border-t border-border pt-2">
+                                {remainingItems.map((item, index) => (
+                                  <div key={`${item.order_id}-more-${index}`} className="flex items-start justify-between gap-3 text-sm">
+                                    <span className="min-w-0 font-semibold text-foreground"><span className="mr-1 font-black text-primary">{item.quantity}×</span>{item.item_name ?? "Menu item"}</span>
+                                    <span className="flex-none font-bold text-muted-foreground">₱{Number(item.line_total).toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </details>
+                          ) : null}
                         </div>
-                      </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">Item details are unavailable for this order.</p>
+                      )}
                     </div>
-                  );
-                })}
-              </div>
-            )}
+
+                    <div className="flex justify-end border-t border-border/80 px-4 py-3 sm:px-5">
+                      <button
+                        type="button"
+                        onClick={() => onTrackOrder(order.id)}
+                        className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-[#211914] px-4 text-sm font-extrabold text-white hover:bg-primary sm:w-auto"
+                      >
+                        Track Order
+                        <ChevronRight className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -3945,216 +4135,145 @@ function ProfilePage({
         currentPage="profile"
       />
 
-      <div className="flex-1 overflow-y-auto">
-        <div className="mx-auto w-full max-w-2xl px-4 py-5 sm:px-6 sm:py-8">
-          <div className="mb-4 sm:mb-6">
-            <h1 className="text-lg font-bold text-foreground sm:text-xl">
-              My Profile
+      <div className="customer-storefront flex-1 overflow-y-auto">
+        <div className="mx-auto w-full max-w-4xl px-4 py-5 sm:px-6 sm:py-8">
+          <div className="mb-5 sm:mb-7">
+            <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-primary/75">Your account</p>
+            <h1 className="mt-1 font-['Fraunces'] text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+              Profile
             </h1>
 
-            <p className="mt-1 text-xs text-muted-foreground">
-              Manage your customer contact information.
+            <p className="mt-1.5 text-sm leading-5 text-muted-foreground">
+              Review your account details and keep your delivery contact number current.
             </p>
           </div>
 
-          <div className="mb-5 rounded-xl border border-border bg-card p-5 sm:p-6">
-            {loading && (
-              <div className="flex min-h-48 items-center justify-center">
-                <div className="flex flex-col items-center gap-3">
-                  <Loader2 className="h-7 w-7 animate-spin text-primary" />
-
-                  <p className="text-sm font-semibold text-muted-foreground">
-                    Loading your account…
-                  </p>
+          {loading && (
+            <div role="status" className="flex min-h-40 items-center justify-center rounded-2xl border border-border bg-card px-5 py-8">
+              <div className="flex flex-col items-center gap-3 text-center">
+                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-50 text-primary"><Loader2 className="h-5 w-5 animate-spin" /></span>
+                <div>
+                  <p className="text-base font-bold text-foreground">Loading your profile…</p>
+                  <p className="mt-1 text-sm text-muted-foreground">Getting your current account details.</p>
                 </div>
               </div>
-            )}
+            </div>
+          )}
 
-            {!loading && errorMessage && (
-              <div className="rounded-xl border border-red-200 bg-red-50 p-4">
-                <p className="text-sm font-semibold text-red-700">
-                  Unable to load profile
-                </p>
+          {!loading && errorMessage && (
+            <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-5">
+              <p className="text-base font-bold text-red-700">Unable to load profile</p>
+              <p className="mt-1 max-w-xl text-sm leading-5 text-red-600">{errorMessage}</p>
+              <button
+                type="button"
+                onClick={() => setLoadAttempt((attempt) => attempt + 1)}
+                className="mt-4 min-h-11 rounded-xl border border-red-300 bg-white px-4 text-sm font-bold text-red-700 hover:bg-red-100"
+              >
+                Try Again
+              </button>
+            </div>
+          )}
 
-                <p className="mt-1 text-xs text-red-600">
-                  {errorMessage}
-                </p>
+          {!loading && account && (
+            <div className="grid gap-5 lg:grid-cols-[minmax(16rem,0.75fr)_minmax(0,1.25fr)] lg:items-start">
+              <aside className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_10px_30px_rgba(64,40,25,0.05)]">
+                <div className="bg-[#211914] p-5 text-white sm:p-6">
+                  <div className="flex items-center gap-4 lg:flex-col lg:items-start">
+                    <div className="flex h-16 w-16 flex-none items-center justify-center overflow-hidden rounded-2xl bg-white/10 ring-1 ring-white/15 sm:h-20 sm:w-20">
+                      {account.avatarUrl ? (
+                        <ImageWithFallback
+                          src={account.avatarUrl}
+                          alt={`${account.fullName} profile`}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <User className="h-8 w-8 text-amber-300" />
+                      )}
+                    </div>
 
-                <button
-                  type="button"
-                  onClick={() => setLoadAttempt((attempt) => attempt + 1)}
-                  className="mt-4 min-h-10 rounded-xl border border-red-300 bg-white px-4 text-xs font-bold text-red-700 hover:bg-red-100"
-                >
-                  Try Again
-                </button>
-              </div>
-            )}
-
-            {!loading && account && (
-              <>
-                {/* Account header */}
-                <div className="mb-6 flex items-center gap-4">
-                  <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary/15 sm:h-16 sm:w-16">
-                    {account.avatarUrl ? (
-                      <ImageWithFallback
-                        src={account.avatarUrl}
-                        alt={`${account.fullName} profile`}
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      <User className="h-7 w-7 text-primary sm:h-8 sm:w-8" />
-                    )}
+                    <div className="min-w-0">
+                      <p className="break-words font-['Fraunces'] text-2xl font-semibold leading-tight text-white">{account.fullName}</p>
+                      <p className="mt-1 break-all text-sm leading-5 text-white/60">{account.email || "Email unavailable"}</p>
+                    </div>
                   </div>
 
-                  <div className="min-w-0">
-                    <p className="truncate text-base font-bold text-foreground sm:text-lg">
-                      {account.fullName}
-                    </p>
-
-                    <p className="truncate text-sm text-muted-foreground">
-                      {account.email}
-                    </p>
-
-                    {account.phone && (
-                      <p className="mt-1 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                        <Phone className="h-3.5 w-3.5" />
-                        {account.phone}
-                      </p>
-                    )}
+                  <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-300/10 px-3 py-1.5 text-xs font-bold text-emerald-200">
+                    <BadgeCheck className="h-4 w-4" /> Signed in
                   </div>
                 </div>
 
-                {/* Google account section */}
-                <div className="mb-6">
-                  <div className="mb-3">
-                    <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
-                      Google Account
-                    </p>
-
-                    <p className="mt-1 text-[11px] text-muted-foreground">
-                      Your name and email come from your
-                      signed-in Google account.
-                    </p>
+                <dl className="grid gap-4 p-5 text-sm sm:p-6">
+                  <div>
+                    <dt className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Customer name</dt>
+                    <dd className="mt-1 font-bold text-foreground">{account.fullName}</dd>
                   </div>
+                  <div>
+                    <dt className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Email</dt>
+                    <dd className="mt-1 break-all font-bold text-foreground">{account.email || "Not available"}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Current contact</dt>
+                    <dd className="mt-1 font-bold text-foreground">{account.phone || "Not provided"}</dd>
+                  </div>
+                </dl>
+              </aside>
 
-                  <div className="flex flex-col gap-3">
-                    <div className="flex flex-col gap-1.5">
-                      <label
-                        htmlFor="profile-name"
-                        className="text-xs font-semibold text-foreground"
-                      >
-                        Full Name
-                      </label>
-
-                      <input
-                        id="profile-name"
-                        type="text"
-                        value={account.fullName}
-                        readOnly
-                        className="rounded-lg border border-border bg-muted/40 px-3 py-2.5 text-sm text-muted-foreground outline-none"
-                      />
-                    </div>
-
-                    <div className="flex flex-col gap-1.5">
-                      <label
-                        htmlFor="profile-email"
-                        className="text-xs font-semibold text-foreground"
-                      >
-                        Email Address
-                      </label>
-
-                      <input
-                        id="profile-email"
-                        type="email"
-                        value={account.email}
-                        readOnly
-                        className="rounded-lg border border-border bg-muted/40 px-3 py-2.5 text-sm text-muted-foreground outline-none"
-                      />
-                    </div>
+              <section className="rounded-2xl border border-border bg-card p-5 shadow-[0_10px_30px_rgba(64,40,25,0.05)] sm:p-6">
+                <div className="mb-5 flex items-start gap-3 border-b border-border pb-4">
+                  <span className="flex h-11 w-11 flex-none items-center justify-center rounded-2xl bg-amber-50 text-primary"><Phone className="h-5 w-5" /></span>
+                  <div>
+                    <h2 className="text-xl font-extrabold text-foreground">Contact information</h2>
+                    <p className="mt-1 text-sm leading-5 text-muted-foreground">This number is used for delivery and order contact.</p>
                   </div>
                 </div>
 
-                <div className="border-t border-border" />
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor="profile-phone" className="text-sm font-bold text-foreground">Contact number</label>
+                  <div className="relative">
+                    <Phone className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                      id="profile-phone"
+                      type="tel"
+                      value={phoneInput}
+                      onChange={(event) => {
+                        const digits = event.target.value.replace(/\D/g, "").slice(0, 11);
 
-                {/* Contact information */}
-                <div className="pt-6">
-                  <div className="mb-3">
-                    <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
-                      Contact Information
-                    </p>
-
-                    <p className="mt-1 text-[11px] text-muted-foreground">
-                      This number will be used for your
-                      deliveries and future orders.
-                    </p>
+                        setPhoneInput(digits);
+                        setSaveError(null);
+                        setSaveMessage(null);
+                      }}
+                      placeholder="09XXXXXXXXX"
+                      inputMode="numeric"
+                      autoComplete="tel"
+                      maxLength={11}
+                      className="min-h-12 w-full rounded-xl border border-border bg-input-background pl-10 pr-3.5 text-base text-foreground outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-4 focus:ring-primary/10"
+                    />
                   </div>
+                  <p className="text-xs leading-4 text-muted-foreground">Use an 11-digit Philippine mobile number starting with 09.</p>
+                </div>
 
-                  <div className="flex flex-col gap-1.5">
-                    <label
-                      htmlFor="profile-phone"
-                      className="text-xs font-semibold text-foreground"
-                    >
-                      Contact Number
-                    </label>
-
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-
-                      <input
-                        id="profile-phone"
-                        type="tel"
-                        value={phoneInput}
-                        onChange={(event) => {
-                          const digits =
-                            event.target.value
-                              .replace(/\D/g, "")
-                              .slice(0, 11);
-
-                          setPhoneInput(digits);
-                          setSaveError(null);
-                          setSaveMessage(null);
-                        }}
-                        placeholder="09XXXXXXXXX"
-                        inputMode="numeric"
-                        autoComplete="tel"
-                        maxLength={11}
-                        className="w-full rounded-lg border border-border bg-input-background py-2.5 pl-10 pr-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-4 focus:ring-primary/10"
-                      />
-                    </div>
-
-                    <p className="text-[10px] text-muted-foreground">
-                      Use an 11-digit Philippine mobile
-                      number starting with 09.
-                    </p>
+                {saveError && (
+                  <div role="alert" className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
+                    <p className="text-sm font-bold text-red-800">Unable to save contact number</p>
+                    <p className="mt-1 text-sm font-medium leading-5 text-red-700">{saveError}</p>
                   </div>
+                )}
 
-                  {saveError && (
-                    <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5">
-                      <p className="text-xs font-semibold text-red-700">
-                        {saveError}
-                      </p>
-                    </div>
-                  )}
+                {saveMessage && (
+                  <div role="status" className="mt-4 flex items-start gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+                    <Check className="mt-0.5 h-4 w-4 flex-none text-emerald-700" />
+                    <p className="text-sm font-bold leading-5 text-emerald-700">{saveMessage}</p>
+                  </div>
+                )}
 
-                  {saveMessage && (
-                    <div className="mt-4 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2.5">
-                      <Check className="h-4 w-4 flex-shrink-0 text-emerald-700" />
-
-                      <p className="text-xs font-semibold text-emerald-700">
-                        {saveMessage}
-                      </p>
-                    </div>
-                  )}
-
+                <div className="mt-5 flex justify-end">
                   <button
                     type="button"
                     onClick={() => {
                       void handleSavePhone();
                     }}
-                    disabled={
-                      saving || !phoneChanged
-                    }
-                    className="mt-5 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground transition-colors hover:bg-amber-800 disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={saving || !phoneChanged}
+                    className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-extrabold text-primary-foreground shadow-sm transition-colors hover:bg-amber-800 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
                   >
                     {saving ? (
                       <>
@@ -4162,13 +4281,13 @@ function ProfilePage({
                         Saving…
                       </>
                     ) : (
-                      "Save Changes"
+                      "Save contact number"
                     )}
                   </button>
                 </div>
-              </>
-            )}
-          </div>
+              </section>
+            </div>
+          )}
         </div>
       </div>
     </div>

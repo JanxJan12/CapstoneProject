@@ -2796,6 +2796,7 @@
       transparent 26rem
     ),
     var(--background);
+  color-scheme: light;
 }
 
 .customer-nav {
@@ -2819,6 +2820,27 @@
   border-color: rgba(189, 84, 19, 0.48);
   box-shadow: 0 0 0 4px rgba(189, 84, 19, 0.09);
   outline: none;
+}
+
+.customer-app :where(button, a, input, select, textarea) {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.customer-app :where(button, a[href], input, select, textarea):focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--background),
+    0 0 0 4px rgba(189, 84, 19, 0.42);
+}
+
+.customer-menu-toolbar {
+  isolation: isolate;
+}
+
+@media (hover: none) {
+  .customer-food-card:hover {
+    transform: none;
+  }
 }
 
 /* Rider mobile experience */
