@@ -1,10 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  ChefHat,
-  KeyRound,
-  LogOut,
-  Monitor,
-} from "lucide-react";
+import { ChefHat, KeyRound, LogOut, Monitor } from "lucide-react";
 
 import { AppShell } from "../../components/layout/AppShell";
 import type { NavGroup } from "../../types";
@@ -36,23 +31,17 @@ const NAV_GROUPS: NavGroup<"queue">[] = [
 ];
 
 export function KitchenApp() {
-  const [terminal, setTerminal] =
-    useState<VerifiedKdsTerminal | null>(null);
+  const [terminal, setTerminal] = useState<VerifiedKdsTerminal | null>(null);
 
-  const [checkingSession, setCheckingSession] =
-    useState(true);
+  const [checkingSession, setCheckingSession] = useState(true);
 
-  const [terminalId, setTerminalId] =
-    useState("");
+  const [terminalId, setTerminalId] = useState("");
 
-  const [terminalSecret, setTerminalSecret] =
-    useState("");
+  const [terminalSecret, setTerminalSecret] = useState("");
 
-  const [activating, setActivating] =
-    useState(false);
+  const [activating, setActivating] = useState(false);
 
-  const [error, setError] =
-    useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -66,8 +55,7 @@ export function KitchenApp() {
       }
 
       try {
-        const verified =
-          await verifyKdsTerminal(savedCredential);
+        const verified = await verifyKdsTerminal(savedCredential);
 
         if (cancelled) return;
 
@@ -102,8 +90,7 @@ export function KitchenApp() {
     setError("");
 
     try {
-      const verified =
-        await verifyKdsTerminal(credential);
+      const verified = await verifyKdsTerminal(credential);
 
       saveKdsSession(credential);
 
@@ -162,16 +149,28 @@ export function KitchenApp() {
         role: "Kitchen Display System",
       }}
     >
-      <div className="mb-4 flex justify-end">
+      <div className="kitchen-terminal-bar mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-white px-4 py-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <Monitor
+            className="h-6 w-6 shrink-0 text-slate-700"
+            aria-hidden="true"
+          />
+          <div className="min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Kitchen terminal · activated
+            </p>
+            <p className="mt-0.5 break-words text-base font-bold text-foreground">
+              {terminal.terminalName}
+            </p>
+          </div>
+        </div>
         <CashierButton
           variant="secondary"
           size="sm"
+          className="kitchen-secondary-action"
           onClick={handleDeactivate}
         >
-          <LogOut
-            className="h-4 w-4"
-            aria-hidden="true"
-          />
+          <LogOut className="h-4 w-4" aria-hidden="true" />
           Deactivate terminal
         </CashierButton>
       </div>
@@ -199,29 +198,26 @@ function KitchenTerminalActivation({
   onActivate: () => void;
 }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#f8f4ef] p-6">
-      <div className="w-full max-w-md rounded-2xl border border-border bg-white p-6 shadow-lg">
-        <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-          <Monitor
-            className="h-6 w-6"
-            aria-hidden="true"
-          />
+    <div className="kitchen-terminal-entry flex min-h-screen items-center justify-center bg-slate-100 p-4 sm:p-6">
+      <div className="w-full max-w-md rounded-xl border border-border bg-white p-5 sm:p-6">
+        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-slate-700">
+          <Monitor className="h-6 w-6" aria-hidden="true" />
         </div>
 
-        <h1 className="font-['Fraunces'] text-2xl font-bold text-foreground">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">
           Activate Kitchen Terminal
         </h1>
 
-        <p className="mt-2 text-xs leading-5 text-muted-foreground">
-          Enter the terminal ID and private device secret
-          provided by an RRJ manager.
+        <p className="mt-2 text-base leading-6 text-muted-foreground">
+          Enter the terminal ID and private device secret provided by an RRJ
+          manager.
         </p>
 
         <div className="mt-6 space-y-4">
           <div>
             <label
               htmlFor="kds-terminal-id"
-              className="text-[10px] font-black uppercase tracking-wider text-muted-foreground"
+              className="text-sm font-semibold text-foreground"
             >
               Terminal ID
             </label>
@@ -231,18 +227,16 @@ function KitchenTerminalActivation({
               value={terminalId}
               disabled={activating}
               autoComplete="off"
-              onChange={(event) =>
-                onTerminalIdChange(event.target.value)
-              }
+              onChange={(event) => onTerminalIdChange(event.target.value)}
               placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-              className="mt-1.5 w-full rounded-lg border border-border bg-input-background px-3 py-2.5 font-mono text-xs outline-none focus:border-primary"
+              className="mt-1.5 min-h-12 w-full rounded-lg border border-border bg-input-background px-3 py-2.5 font-mono text-base outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>
 
           <div>
             <label
               htmlFor="kds-terminal-secret"
-              className="text-[10px] font-black uppercase tracking-wider text-muted-foreground"
+              className="text-sm font-semibold text-foreground"
             >
               Device Secret
             </label>
@@ -259,45 +253,39 @@ function KitchenTerminalActivation({
                 value={terminalSecret}
                 disabled={activating}
                 autoComplete="off"
-                onChange={(event) =>
-                  onTerminalSecretChange(
-                    event.target.value,
-                  )
-                }
+                onChange={(event) => onTerminalSecretChange(event.target.value)}
                 placeholder="kds_••••••••••••••••••••"
-                className="w-full rounded-lg border border-border bg-input-background py-2.5 pl-10 pr-3 font-mono text-xs outline-none focus:border-primary"
+                className="min-h-12 w-full rounded-lg border border-border bg-input-background py-2.5 pl-10 pr-3 font-mono text-base outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
             </div>
           </div>
 
           {error ? (
-            <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-xs text-red-700">
+            <div
+              role="alert"
+              className="break-words rounded-lg border border-red-200 bg-red-50 px-3 py-3 text-sm text-red-800"
+            >
               {error}
             </div>
           ) : null}
 
           <CashierButton
-            className="w-full justify-center"
+            className="kitchen-next-action min-h-12 w-full justify-center text-base"
+            loadingLabel="Activating terminal…"
             loading={activating}
             disabled={
-              activating ||
-              !terminalId.trim() ||
-              !terminalSecret.trim()
+              activating || !terminalId.trim() || !terminalSecret.trim()
             }
             onClick={onActivate}
           >
-            <ChefHat
-              className="h-4 w-4"
-              aria-hidden="true"
-            />
+            <ChefHat className="h-4 w-4" aria-hidden="true" />
             Activate Kitchen Terminal
           </CashierButton>
         </div>
 
-        <p className="mt-5 text-[10px] leading-4 text-muted-foreground">
-          Kitchen staff do not need individual accounts.
-          This credential identifies the authorized kitchen
-          terminal itself.
+        <p className="mt-5 text-sm leading-5 text-muted-foreground">
+          Kitchen staff do not need individual accounts. This credential
+          identifies the authorized kitchen terminal itself.
         </p>
       </div>
     </div>
@@ -306,12 +294,18 @@ function KitchenTerminalActivation({
 
 function KitchenTerminalLoading() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#f8f4ef]">
-      <div className="text-center">
+    <div className="kitchen-terminal-entry flex min-h-screen items-center justify-center bg-slate-100 p-4">
+      <div
+        role="status"
+        className="w-full max-w-md rounded-xl border border-border bg-white p-6 text-center"
+      >
         <ChefHat className="mx-auto h-7 w-7 animate-pulse text-primary" />
 
-        <p className="mt-3 text-xs font-bold text-foreground">
+        <p className="mt-3 text-base font-bold text-foreground">
           Checking kitchen terminal…
+        </p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Verifying this device before opening the queue.
         </p>
       </div>
     </div>

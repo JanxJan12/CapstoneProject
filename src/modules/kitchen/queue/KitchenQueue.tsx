@@ -1,8 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -13,12 +9,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-import {
-  CashierButton,
-  EmptyState,
-  ErrorBanner,
-  StatusBadge,
-} from "../../cashier/components";
+import { CashierButton, ErrorBanner } from "../../cashier/components";
 
 import {
   DEFAULT_DELAY_THRESHOLD_MINUTES,
@@ -36,22 +27,14 @@ import {
   type KdsQueueTicket,
 } from "../services/kdsTerminalService";
 
-const COLUMNS: KdsOrderStatus[] = [
-  "confirmed",
-  "preparing",
-  "ready",
-];
+const COLUMNS: KdsOrderStatus[] = ["confirmed", "preparing", "ready"];
 
 export function KitchenQueue() {
-  const [tickets, setTickets] = useState<
-    KdsQueueTicket[]
-  >([]);
+  const [tickets, setTickets] = useState<KdsQueueTicket[]>([]);
 
-  const [loadingQueue, setLoadingQueue] =
-    useState(true);
+  const [loadingQueue, setLoadingQueue] = useState(true);
 
-  const [loadingId, setLoadingId] =
-    useState<string>();
+  const [loadingId, setLoadingId] = useState<string>();
 
   const [error, setError] = useState("");
 
@@ -70,9 +53,7 @@ export function KitchenQueue() {
     setError("");
 
     try {
-      const queue = await fetchKdsQueue(
-        credential,
-      );
+      const queue = await fetchKdsQueue(credential);
 
       setTickets(queue);
     } catch (caught) {
@@ -87,20 +68,18 @@ export function KitchenQueue() {
   }, []);
 
   useEffect(() => {
-  void loadQueue();
-
-  const interval = window.setInterval(() => {
     void loadQueue();
-  }, 5000);
 
-  return () => {
-    window.clearInterval(interval);
-  };
-}, [loadQueue]);
+    const interval = window.setInterval(() => {
+      void loadQueue();
+    }, 5000);
 
-  const advance = async (
-    ticket: KdsQueueTicket,
-  ) => {
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, [loadQueue]);
+
+  const advance = async (ticket: KdsQueueTicket) => {
     const credential = loadKdsSession();
 
     if (!credential) {
@@ -114,15 +93,10 @@ export function KitchenQueue() {
     setError("");
 
     try {
-      const result = await advanceKdsOrder(
-        credential,
-        ticket.databaseId,
-      );
+      const result = await advanceKdsOrder(credential, ticket.databaseId);
 
       const nextStatus =
-        result.currentStatus === "preparing"
-          ? "Preparing"
-          : "Ready";
+        result.currentStatus === "preparing" ? "Preparing" : "Ready";
 
       toast.success(
         `${ticket.orderNumber} marked ${nextStatus.toLowerCase()}`,
@@ -153,40 +127,46 @@ export function KitchenQueue() {
   };
 
   return (
-    <div className="kitchen-queue flex flex-col gap-5">
-      <header className="kitchen-heading relative overflow-hidden rounded-[22px] border border-orange-200/70 bg-gradient-to-br from-[#fffaf2] via-white to-orange-50/70 p-5 shadow-[0_18px_40px_rgba(95,52,20,0.06)] sm:p-6">
-        <div className="absolute -right-8 -top-10 h-32 w-32 rounded-full bg-orange-200/35 blur-2xl" />
-
-        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="mb-2 flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.2em] text-primary/75">
-              <ChefHat className="h-3.5 w-3.5" />
-              Kitchen command board
-            </p>
-
-            <h1 className="font-['Fraunces'] text-3xl font-bold tracking-[-0.035em]">
+    <div className="kitchen-queue flex min-w-0 flex-col gap-4">
+      <header className="kitchen-heading">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight">
+              <ChefHat className="h-6 w-6 shrink-0" aria-hidden="true" />
               Kitchen Queue
             </h1>
 
-            <p className="mt-1.5 max-w-2xl text-xs leading-5 text-muted-foreground">
-              Confirmed restaurant orders ready for
-              kitchen preparation
+            <p className="mt-1 text-sm text-muted-foreground">
+              Oldest orders first in each queue.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[10px] font-black text-emerald-700">
-              <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.1)]" />
-              Kitchen online
+            <span
+              role="status"
+              className="kitchen-queue-health text-sm font-semibold text-muted-foreground"
+            >
+              {loadingQueue
+                ? "Refreshing queue…"
+                : error
+                  ? "Queue needs attention"
+                  : "Queue loaded"}
             </span>
 
-            <span className="rounded-full border border-border bg-white/80 px-3 py-1.5 text-[10px] font-black text-foreground">
-              {tickets.length} active
+            <span className="rounded-lg border border-border bg-white px-3 py-2 text-sm font-bold text-foreground">
+              {loadingQueue && !tickets.length
+                ? "—"
+                : error && !tickets.length
+                  ? "—"
+                  : tickets.length}{" "}
+              active
             </span>
 
             <CashierButton
               variant="secondary"
               size="sm"
+              className="kitchen-secondary-action"
+              loadingLabel="Refreshing…"
               loading={loadingQueue}
               disabled={loadingQueue}
               onClick={() => {
@@ -194,10 +174,7 @@ export function KitchenQueue() {
                 void loadQueue();
               }}
             >
-              <RefreshCw
-                className="h-3.5 w-3.5"
-                aria-hidden="true"
-              />
+              <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
               Refresh
             </CashierButton>
           </div>
@@ -214,69 +191,91 @@ export function KitchenQueue() {
         />
       ) : null}
 
-      <div className="kitchen-board grid gap-4 xl:grid-cols-3">
+      <div className="kitchen-board grid items-start gap-4">
         {COLUMNS.map((status) => {
           const columnTickets = tickets
-            .filter(
-              (ticket) =>
-                ticket.status === status,
-            )
+            .filter((ticket) => ticket.status === status)
             .sort(
               (a, b) =>
-                new Date(
-                  a.createdAt,
-                ).getTime() -
-                new Date(
-                  b.createdAt,
-                ).getTime(),
+                new Date(a.createdAt).getTime() -
+                new Date(b.createdAt).getTime(),
             );
 
           return (
             <section
               key={status}
               data-status={status}
-              className="kitchen-column overflow-hidden rounded-2xl border border-border bg-card shadow-[0_16px_36px_rgba(67,42,23,0.055)]"
+              aria-label={`${formatKitchenStatus(status)} orders`}
+              className="kitchen-column min-w-0 overflow-hidden rounded-xl border border-border"
             >
-              <div className="kitchen-column-heading flex items-center justify-between border-b border-border bg-muted/30 px-4 py-3.5">
-                <div className="flex items-center gap-2">
-                  <ChefHat className="h-4 w-4 text-primary" />
-
-                  <h2 className="text-sm font-black">
+              <div className="kitchen-column-heading flex items-start justify-between gap-3 border-b border-border px-4 py-3">
+                <div className="min-w-0">
+                  <h2 className="flex items-center gap-2 text-lg font-bold">
+                    {status === "confirmed" ? (
+                      <PlayCircle
+                        className="h-5 w-5 shrink-0"
+                        aria-hidden="true"
+                      />
+                    ) : status === "preparing" ? (
+                      <ChefHat
+                        className="h-5 w-5 shrink-0"
+                        aria-hidden="true"
+                      />
+                    ) : (
+                      <CheckCircle2
+                        className="h-5 w-5 shrink-0"
+                        aria-hidden="true"
+                      />
+                    )}
                     {formatKitchenStatus(status)}
                   </h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {status === "confirmed"
+                      ? "New kitchen work"
+                      : status === "preparing"
+                        ? "Preparation in progress"
+                        : "Preparation finished"}
+                  </p>
                 </div>
 
-                <span className="flex h-7 min-w-7 items-center justify-center rounded-full bg-primary/10 px-2 text-[10px] font-black text-primary">
-                  {columnTickets.length}
+                <span className="kitchen-column-count flex min-h-9 min-w-9 shrink-0 items-center justify-center rounded-lg px-2 text-lg font-bold tabular-nums">
+                  {(loadingQueue || error) && !tickets.length
+                    ? "—"
+                    : columnTickets.length}
                 </span>
               </div>
 
-              <div className="space-y-3 p-3">
+              <div className="kitchen-column-body space-y-3 p-3">
                 {columnTickets.length ? (
                   columnTickets.map((ticket) => (
                     <KitchenTicket
                       key={ticket.databaseId}
                       ticket={ticket}
-                      loading={
-                        loadingId ===
-                        ticket.databaseId
-                      }
-                      onAdvance={() =>
-                        void advance(ticket)
-                      }
+                      loading={loadingId === ticket.databaseId}
+                      onAdvance={() => void advance(ticket)}
                     />
                   ))
                 ) : (
-                  <EmptyState
-                    title={`No ${formatKitchenStatus(
-                      status,
-                    ).toLowerCase()} tickets`}
-                    description={
-                      loadingQueue
-                        ? "Loading kitchen tickets..."
-                        : "Orders will move here as the kitchen workflow advances."
-                    }
-                  />
+                  <div className="kitchen-column-empty" role="status">
+                    <p className="text-sm font-semibold">
+                      {loadingQueue
+                        ? "Loading orders…"
+                        : error
+                          ? "Queue unavailable"
+                          : `No ${formatKitchenStatus(status).toLowerCase()} orders`}
+                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {loadingQueue
+                        ? "Checking the kitchen queue."
+                        : error
+                          ? "Check the message above."
+                          : status === "confirmed"
+                            ? "New kitchen orders will appear here."
+                            : status === "preparing"
+                              ? "Start an order from Confirmed."
+                              : "Orders appear here when marked ready."}
+                    </p>
+                  </div>
                 )}
               </div>
             </section>
@@ -297,101 +296,122 @@ function KitchenTicket({
   onAdvance: () => void;
 }) {
   const delayed =
-    minutesSince(ticket.createdAt) >
-    DEFAULT_DELAY_THRESHOLD_MINUTES;
+    minutesSince(ticket.createdAt) > DEFAULT_DELAY_THRESHOLD_MINUTES;
 
-  const status =
-    formatKitchenStatus(ticket.status);
+  const ready = ticket.status === "ready";
+
+  const status = formatKitchenStatus(ticket.status);
 
   return (
     <article
-      className={`kitchen-ticket rounded-xl border p-4 ${
-        delayed
-          ? "border-red-200 bg-red-50/60"
-          : "border-border bg-white"
+      aria-label={`${ticket.orderNumber}, ${status}`}
+      className={`kitchen-ticket rounded-xl border bg-white p-4 ${
+        ready && delayed
+          ? "border-red-100 bg-red-50/20"
+          : delayed
+            ? "border-red-300"
+            : "border-border"
       }`}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="font-mono text-xs font-black text-primary">
+      <div className="kitchen-ticket-heading flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h3 className="kitchen-order-number font-mono text-xl font-bold tracking-tight text-foreground">
             {ticket.orderNumber}
-          </p>
+          </h3>
 
-          <p className="mt-1 text-xs font-bold">
-            {formatFulfillmentType(
-              ticket.fulfillmentType,
-            )}
+          <p className="mt-1 text-sm font-semibold text-muted-foreground">
+            {formatFulfillmentType(ticket.fulfillmentType)}
           </p>
         </div>
 
-        <div className="flex flex-col items-end gap-1">
-          <StatusBadge status={status} />
-
-          {delayed ? (
-            <span className="flex items-center gap-1 text-[10px] font-black text-red-700">
-              <AlertTriangle className="h-3 w-3" />
-              Delayed
-            </span>
-          ) : null}
+        <div
+          className={`kitchen-timer rounded-lg ${
+            ready ? "px-2.5 py-1.5" : "px-3 py-2"
+          } ${
+            ready
+              ? delayed
+                ? "bg-red-50/50 text-slate-600"
+                : "bg-slate-50 text-slate-600"
+              : delayed
+                ? "bg-red-50 text-red-800"
+                : "bg-slate-100 text-slate-700"
+          }`}
+        >
+          <p
+            className={`flex items-center gap-2 tabular-nums ${
+              ready ? "text-sm font-semibold" : "text-xl font-bold"
+            }`}
+          >
+            {delayed ? (
+              <AlertTriangle
+                className={`${ready ? "h-4 w-4" : "h-5 w-5"} shrink-0`}
+                aria-hidden="true"
+              />
+            ) : (
+              <Clock3
+                className={`${ready ? "h-4 w-4" : "h-5 w-5"} shrink-0`}
+                aria-hidden="true"
+              />
+            )}
+            {formatElapsed(ticket.createdAt)}
+          </p>
+          <p
+            className={`mt-0.5 text-xs ${
+              ready ? "font-medium text-slate-500" : "font-semibold"
+            }`}
+          >
+            {delayed ? "Delayed · since ordered" : "Since ordered"}
+          </p>
         </div>
       </div>
 
-      <ul className="mt-3 space-y-1 border-y border-border py-3">
+      <ul
+        className="kitchen-ticket-items mt-4 border-y border-border"
+        tabIndex={0}
+        aria-label={`Items for ${ticket.orderNumber}`}
+      >
         {ticket.items.map((item) => (
           <li
             key={item.id}
-            className="flex justify-between gap-3 text-xs"
+            className="kitchen-ticket-item grid gap-x-3 gap-y-1 py-3"
           >
-            <div>
-              <span>
-                <strong>
-                  {item.quantity}×
-                </strong>{" "}
+            <strong className="kitchen-item-quantity flex h-9 min-w-9 items-center justify-center rounded-lg bg-slate-100 px-1 text-lg tabular-nums">
+              {item.quantity}×
+            </strong>
+            <div className="min-w-0">
+              <span className="text-base font-semibold leading-snug">
                 {item.name}
               </span>
 
               {item.specialInstructions ? (
-                <p className="mt-1 text-[10px] font-semibold text-amber-800">
+                <p className="mt-1 rounded-md bg-amber-50 px-2 py-1 text-sm font-semibold text-amber-900">
                   {item.specialInstructions}
                 </p>
               ) : null}
             </div>
 
-            <span className="shrink-0 text-muted-foreground">
-              {formatMoney(
-                item.unitPrice *
-                  item.quantity,
-              )}
+            <span className="kitchen-item-price text-xs text-muted-foreground">
+              {formatMoney(item.unitPrice * item.quantity)}
             </span>
           </li>
         ))}
       </ul>
 
       {ticket.notes ? (
-        <p className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-[10px] font-semibold text-amber-900">
-          Instruction: {ticket.notes}
+        <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-900">
+          Order instructions: {ticket.notes}
         </p>
       ) : null}
 
-      <div className="mt-3 flex items-center justify-between gap-2">
-        <span
-          className={`flex items-center gap-1 text-[10px] font-bold ${
-            delayed
-              ? "text-red-700"
-              : "text-muted-foreground"
-          }`}
-        >
-          <Clock3 className="h-3 w-3" />
-
-          {formatElapsed(
-            ticket.createdAt,
-          )}{" "}
-          elapsed
-        </span>
-
+      <div className="mt-4">
         {ticket.status !== "ready" ? (
           <CashierButton
-            className="min-h-10 px-3"
+            className="kitchen-next-action min-h-12 w-full px-3 text-base"
+            loadingLabel={
+              ticket.status === "confirmed"
+                ? "Starting preparation…"
+                : "Marking ready…"
+            }
             loading={loading}
             disabled={loading}
             onClick={onAdvance}
@@ -402,11 +422,14 @@ function KitchenTicket({
               <CheckCircle2 className="h-4 w-4" />
             )}
 
-            {ticket.status === "confirmed"
-              ? "Start preparing"
-              : "Mark ready"}
+            {ticket.status === "confirmed" ? "Start Preparing" : "Mark Ready"}
           </CashierButton>
-        ) : null}
+        ) : (
+          <p className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-100 px-3 py-3 text-base font-bold text-emerald-900">
+            <CheckCircle2 className="h-5 w-5 shrink-0" aria-hidden="true" />
+            Preparation finished · awaiting handoff
+          </p>
+        )}
       </div>
     </article>
   );
@@ -427,9 +450,7 @@ function formatKitchenStatus(
   }
 }
 
-function formatFulfillmentType(
-  type: KdsFulfillmentType,
-) {
+function formatFulfillmentType(type: KdsFulfillmentType) {
   switch (type) {
     case "delivery":
       return "Delivery";
