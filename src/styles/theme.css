@@ -1208,6 +1208,48 @@
   letter-spacing: -0.035em;
 }
 
+.rrj-app-shell[data-role="manager"] {
+  --muted-foreground: #68574a;
+}
+
+.rrj-app-shell[data-role="manager"] .rrj-shell-nav {
+  padding-block: 0.75rem;
+}
+
+.rrj-app-shell[data-role="manager"] .rrj-shell-nav > div {
+  margin-bottom: 0.7rem;
+}
+
+.rrj-app-shell[data-role="manager"] .rrj-shell-nav > div > p {
+  padding: 0.3rem 0.75rem 0.4rem;
+  color: rgba(255, 255, 255, 0.46);
+  font-size: 0.6875rem;
+  letter-spacing: 0.16em;
+}
+
+.rrj-app-shell[data-role="manager"] .rrj-shell-nav-item {
+  min-height: 2.5rem;
+  margin-bottom: 0.125rem;
+  border-radius: 0.7rem;
+  padding: 0.45rem 0.75rem;
+}
+
+.rrj-app-shell[data-role="manager"] .rrj-shell-nav-item.is-active {
+  background: rgba(190, 84, 20, 0.92);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 215, 158, 0.12),
+    0 5px 14px rgba(0, 0, 0, 0.18);
+}
+
+.rrj-app-shell[data-role="manager"] .rrj-shell-nav-item span.flex-1 {
+  font-size: 0.875rem;
+}
+
+.rrj-app-shell[data-role="manager"] .rrj-shell-nav-item svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
 .rrj-app-shell[data-role="manager"] .app-shell-main > div > .flex:first-child,
 .rrj-app-shell[data-role="manager"] .app-shell-main > div > h1:first-child {
   margin-bottom: 1.25rem;
@@ -1232,6 +1274,212 @@
   background: white;
   box-shadow: 0 0 0 4px rgba(189, 84, 19, 0.09);
   outline: none;
+}
+
+.manager-dashboard > header,
+.manager-orders > .manager-page-header,
+.inventory-workspace-page > .manager-page-header,
+.manager-menu-page > .manager-page-header {
+  margin-bottom: 0 !important;
+}
+
+.manager-dashboard .rrj-card,
+.manager-orders .rrj-data-table,
+.manager-inventory-page .rrj-data-table,
+.inventory-transactions-page .rrj-data-table,
+.manager-menu-page .rrj-data-table,
+.manager-order-details {
+  box-shadow:
+    0 1px 2px rgba(67, 42, 23, 0.035),
+    0 8px 22px rgba(67, 42, 23, 0.035);
+}
+
+.manager-order-filters input,
+.manager-order-filters select {
+  border-radius: 0.5rem !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.manager-order-filters input:focus,
+.manager-order-filters select:focus {
+  background: rgba(248, 243, 237, 0.72) !important;
+  box-shadow: none !important;
+}
+
+.manager-orders .rrj-data-table {
+  border-radius: 1rem;
+}
+
+.manager-orders .rrj-data-table table {
+  min-width: 58rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.manager-orders .rrj-data-table th {
+  padding: 0.65rem 0.7rem;
+  font-size: 0.6875rem;
+}
+
+.manager-orders .rrj-data-table td {
+  padding: 0.7rem;
+  vertical-align: middle;
+}
+
+.manager-orders .rrj-data-table tbody tr {
+  transition:
+    background-color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.manager-orders .rrj-data-table .manager-order-row-warning {
+  background: rgba(255, 251, 235, 0.62);
+  box-shadow: inset 3px 0 0 rgba(217, 119, 6, 0.68);
+}
+
+.manager-orders .rrj-data-table .manager-order-row-danger {
+  background: rgba(254, 242, 242, 0.62);
+  box-shadow: inset 3px 0 0 rgba(220, 38, 38, 0.7);
+}
+
+.manager-orders .rrj-data-table .manager-order-row-selected {
+  background: rgba(255, 247, 237, 0.96);
+  box-shadow: inset 3px 0 0 var(--primary);
+}
+
+.manager-orders .rrj-data-table tbody tr:hover {
+  background: rgba(255, 247, 237, 0.82);
+}
+
+.inventory-workspace-nav {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(104, 87, 74, 0.28) transparent;
+}
+
+.manager-inventory-page .rrj-data-table,
+.inventory-transactions-page .rrj-data-table,
+.manager-menu-page .rrj-data-table {
+  border-radius: 1rem;
+}
+
+.manager-inventory-page .rrj-data-table table,
+.manager-menu-page .rrj-data-table table {
+  min-width: 58rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.inventory-transactions-page .rrj-data-table table {
+  min-width: 72rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.manager-inventory-page .rrj-data-table th,
+.inventory-transactions-page .rrj-data-table th,
+.manager-menu-page .rrj-data-table th {
+  padding: 0.65rem 0.75rem;
+  font-size: 0.6875rem;
+}
+
+.manager-inventory-page .rrj-data-table td,
+.inventory-transactions-page .rrj-data-table td,
+.manager-menu-page .rrj-data-table td {
+  padding: 0.7rem 0.75rem;
+  vertical-align: middle;
+}
+
+.manager-inventory-page .rrj-data-table .inventory-row-warning {
+  background: rgba(255, 251, 235, 0.58);
+  box-shadow: inset 3px 0 0 rgba(217, 119, 6, 0.62);
+}
+
+.manager-inventory-page .rrj-data-table .inventory-row-critical {
+  background: rgba(254, 242, 242, 0.34);
+  box-shadow: inset 3px 0 0 rgba(220, 38, 38, 0.5);
+}
+
+.manager-inventory-page .rrj-data-table tbody tr:hover,
+.inventory-transactions-page .rrj-data-table tbody tr:hover,
+.manager-menu-page .rrj-data-table tbody tr:hover {
+  background: rgba(255, 247, 237, 0.8);
+}
+
+.manager-menu-filters input {
+  border-radius: 0.5rem !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.manager-menu-filters input:focus {
+  background: rgba(248, 243, 237, 0.72) !important;
+  box-shadow: none !important;
+}
+
+.inventory-action-form input,
+.inventory-action-form select {
+  min-height: 2.5rem;
+}
+
+.manager-report-toolbar,
+.manager-customer-toolbar,
+.manager-riders .rrj-data-table,
+.manager-customers .rrj-data-table,
+.manager-kitchen-monitor article,
+.manager-terminal-page > div:last-child {
+  box-shadow:
+    0 1px 2px rgba(67, 42, 23, 0.03),
+    0 8px 22px rgba(67, 42, 23, 0.035);
+}
+
+.manager-report-metrics .rrj-stat-card,
+.manager-rider-metrics .rrj-stat-card {
+  min-height: 0;
+  gap: 0.55rem;
+  border-radius: 1rem;
+  padding: 0.8rem;
+}
+
+.manager-report-metrics .rrj-stat-card > div:first-of-type > div,
+.manager-rider-metrics .rrj-stat-card > div:first-of-type > div {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.65rem;
+}
+
+.manager-report-metrics .rrj-stat-card:hover,
+.manager-rider-metrics .rrj-stat-card:hover {
+  transform: translateY(-1px);
+}
+
+.manager-riders .rrj-data-table,
+.manager-customers .rrj-data-table {
+  border-radius: 1rem;
+}
+
+.manager-riders .rrj-data-table table {
+  min-width: 48rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.manager-customers .rrj-data-table table {
+  min-width: 44rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.manager-riders .rrj-data-table th,
+.manager-customers .rrj-data-table th {
+  padding: 0.65rem 0.75rem;
+  font-size: 0.6875rem;
+}
+
+.manager-riders .rrj-data-table td,
+.manager-customers .rrj-data-table td {
+  padding: 0.7rem 0.75rem;
+  vertical-align: middle;
+}
+
+.manager-kitchen-board {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(104, 87, 74, 0.28) transparent;
 }
 
 .rrj-stat-card {
@@ -3787,8 +4035,7 @@
 .tablet-pos .pos-menu-item-card.is-selected {
   border-color: rgba(255, 173, 85, 0.9);
   background:
-    linear-gradient(145deg, rgba(237, 116, 28, 0.1), transparent 48%),
-    #24201b;
+    linear-gradient(145deg, rgba(237, 116, 28, 0.1), transparent 48%), #24201b;
   box-shadow:
     0 0 0 2px rgba(237, 116, 28, 0.16),
     0 14px 28px rgba(0, 0, 0, 0.3);

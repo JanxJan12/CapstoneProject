@@ -22,8 +22,18 @@ const APPROVAL_BADGES: Record<
 };
 
 function getErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : "Unable to load manager riders.";
+  return error instanceof Error
+    ? error.message
+    : "Unable to load manager riders.";
 }
+
+const activityDateTimeFormatter = new Intl.DateTimeFormat("en-PH", {
+  month: "short",
+  day: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+  timeZone: "Asia/Manila",
+});
 
 export function RidersPage() {
   const [riders, setRiders] = useState<ManagerRider[]>([]);
@@ -62,11 +72,11 @@ export function RidersPage() {
   ).length;
 
   return (
-    <div>
-      <div className="mb-4 flex items-center justify-between gap-3">
+    <div className="manager-riders">
+      <header className="manager-page-header mb-3 flex items-center justify-between gap-3">
         <div>
           <h1 className="text-base font-bold text-foreground">Riders</h1>
-          <p className="mt-0.5 text-[10px] text-muted-foreground">
+          <p className="mt-0.5 text-xs text-muted-foreground">
             Read-only rider approvals, availability, and completed deliveries
           </p>
         </div>
@@ -78,9 +88,9 @@ export function RidersPage() {
         >
           <RefreshCw className="h-3 w-3" /> Refresh
         </Button>
-      </div>
+      </header>
 
-      <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div className="manager-rider-metrics mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
         <StatCard
           label="Total Riders"
           value={String(riders.length)}
@@ -113,20 +123,16 @@ export function RidersPage() {
       <Table
         headers={[
           "Rider",
-          "Contact",
-          "Vehicle",
-          "License",
-          "Approval",
-          "Availability",
-          "Today",
-          "Total",
+          "Current Status",
+          "Delivery Activity",
+          "Vehicle & Credentials",
         ]}
       >
         {loading ? (
           <tr>
             <td
-              colSpan={8}
-              className="px-4 py-10 text-center text-xs text-muted-foreground"
+              colSpan={4}
+              className="px-4 py-8 text-center text-xs text-muted-foreground"
             >
               Loading riders…
             </td>
@@ -134,8 +140,8 @@ export function RidersPage() {
         ) : riders.length === 0 ? (
           <tr>
             <td
-              colSpan={8}
-              className="px-4 py-10 text-center text-xs text-muted-foreground"
+              colSpan={4}
+              className="px-4 py-8 text-center text-xs text-muted-foreground"
             >
               No rider profiles were returned by PostgreSQL.
             </td>
@@ -146,6 +152,9 @@ export function RidersPage() {
             const motor = [rider.motorBrand, rider.motorModel]
               .filter(Boolean)
               .join(" ");
+            const hasVehicleDetails = Boolean(
+              rider.plateNumber || motor || rider.driverLicenseNumber,
+            );
 
             return (
               <tr key={rider.id} className="hover:bg-muted/30">
@@ -158,37 +167,74 @@ export function RidersPage() {
                     </div>
                     <div>
                       <p className="text-xs font-semibold">{rider.name}</p>
+                      <p className="mt-0.5 font-mono text-[10px] text-muted-foreground">
+                        {rider.contactNumber ?? "Contact not recorded"}
+                      </p>
                       {!rider.isActive ? (
-                        <p className="text-[9px] font-bold uppercase text-red-600">
+                        <p className="mt-0.5 text-[9px] font-bold uppercase text-red-600">
                           Inactive account
                         </p>
                       ) : null}
                     </div>
                   </div>
                 </Td>
-                <Td className="font-mono text-[10px]">
-                  {rider.contactNumber ?? "—"}
+                <Td>
+                  <div className="flex flex-col items-start gap-1.5">
+                    <StatusBadge status={rider.availabilityStatus} />
+                    <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground">
+                      <span>Approval</span>
+                      <Badge variant={approvalBadge.variant}>
+                        {approvalBadge.label}
+                      </Badge>
+                    </div>
+                  </div>
+                </Td>
+                <Td>
+                  <div className="flex items-baseline gap-4">
+                    <div>
+                      <p className="text-sm font-bold text-foreground">
+                        {rider.deliveriesToday.toLocaleString("en-PH")}
+                      </p>
+                      <p className="text-[9px] text-muted-foreground">Today</p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-foreground">
+                        {rider.totalDeliveries.toLocaleString("en-PH")}
+                      </p>
+                      <p className="text-[9px] text-muted-foreground">Total</p>
+                    </div>
+                  </div>
+                  <p className="mt-1.5 text-[9px] text-muted-foreground">
+                    {rider.lastAssignedAt
+                      ? `Last assigned ${activityDateTimeFormatter.format(
+                          new Date(rider.lastAssignedAt),
+                        )}`
+                      : "No assignment recorded"}
+                  </p>
                 </Td>
                 <Td className="text-[10px]">
-                  <p className="font-semibold">{rider.plateNumber ?? "—"}</p>
-                  <p className="text-muted-foreground">{motor || "—"}</p>
-                </Td>
-                <Td className="font-mono text-[10px]">
-                  {rider.driverLicenseNumber ?? "—"}
-                </Td>
-                <Td>
-                  <Badge variant={approvalBadge.variant}>
-                    {approvalBadge.label}
-                  </Badge>
-                </Td>
-                <Td>
-                  <StatusBadge status={rider.availabilityStatus} />
-                </Td>
-                <Td className="text-xs font-bold">
-                  {rider.deliveriesToday.toLocaleString("en-PH")}
-                </Td>
-                <Td className="text-xs font-bold">
-                  {rider.totalDeliveries.toLocaleString("en-PH")}
+                  {hasVehicleDetails ? (
+                    <div className="space-y-0.5 text-muted-foreground">
+                      {rider.plateNumber ? (
+                        <p>
+                          <span className="font-semibold text-foreground">
+                            Plate
+                          </span>{" "}
+                          {rider.plateNumber}
+                        </p>
+                      ) : null}
+                      {motor ? <p>{motor}</p> : null}
+                      {rider.driverLicenseNumber ? (
+                        <p className="font-mono">
+                          License {rider.driverLicenseNumber}
+                        </p>
+                      ) : null}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground/70">
+                      No vehicle or license details recorded
+                    </p>
+                  )}
                 </Td>
               </tr>
             );

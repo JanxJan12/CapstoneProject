@@ -60,11 +60,11 @@ export function CustomersPage() {
   }, [customers, search]);
 
   return (
-    <div>
-      <div className="mb-4 flex items-center justify-between gap-3">
+    <div className="manager-customers">
+      <header className="manager-page-header mb-3 flex items-center justify-between gap-3">
         <div>
           <h1 className="text-base font-bold text-foreground">Customers</h1>
-          <p className="mt-0.5 text-[10px] text-muted-foreground">
+          <p className="mt-0.5 text-xs text-muted-foreground">
             Read-only registered customer accounts and linked order totals
           </p>
         </div>
@@ -76,16 +76,19 @@ export function CustomersPage() {
         >
           <RefreshCw className="h-3 w-3" /> Refresh
         </Button>
-      </div>
+      </header>
 
-      <div className="relative mb-4 max-w-xs">
-        <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-        <input
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          placeholder="Search name or contact…"
-          className="w-full rounded-lg border border-border bg-input-background py-2 pl-8 pr-3 text-xs focus:outline-none"
-        />
+      <div className="manager-customer-toolbar mb-4 rounded-xl border border-border bg-card p-2.5">
+        <div className="relative max-w-sm">
+          <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+          <input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search name or contact…"
+            aria-label="Search customers by name or contact"
+            className="min-h-10 w-full rounded-lg border border-border bg-input-background pl-9 pr-3 text-xs focus:border-primary/50 focus:outline-none"
+          />
+        </div>
       </div>
 
       {error ? (
@@ -95,20 +98,13 @@ export function CustomersPage() {
       ) : null}
 
       <Table
-        headers={[
-          "Customer",
-          "Contact",
-          "Orders",
-          "Last Order",
-          "Account",
-          "Registered",
-        ]}
+        headers={["Customer", "Account", "Orders", "Last Order", "Registered"]}
       >
         {loading ? (
           <tr>
             <td
-              colSpan={6}
-              className="px-4 py-10 text-center text-xs text-muted-foreground"
+              colSpan={5}
+              className="px-4 py-8 text-center text-xs text-muted-foreground"
             >
               Loading registered customers…
             </td>
@@ -116,8 +112,8 @@ export function CustomersPage() {
         ) : filteredCustomers.length === 0 ? (
           <tr>
             <td
-              colSpan={6}
-              className="px-4 py-10 text-center text-xs text-muted-foreground"
+              colSpan={5}
+              className="px-4 py-8 text-center text-xs text-muted-foreground"
             >
               {customers.length === 0
                 ? "No registered customer accounts were returned by PostgreSQL."
@@ -134,24 +130,26 @@ export function CustomersPage() {
                       {customer.name.charAt(0).toUpperCase()}
                     </span>
                   </div>
-                  <span className="text-xs font-semibold">{customer.name}</span>
+                  <div>
+                    <p className="text-xs font-semibold">{customer.name}</p>
+                    <p className="mt-0.5 font-mono text-[10px] text-muted-foreground">
+                      {customer.contactNumber ?? "Contact not recorded"}
+                    </p>
+                  </div>
                 </div>
-              </Td>
-              <Td className="font-mono text-[10px]">
-                {customer.contactNumber ?? "—"}
-              </Td>
-              <Td className="text-xs font-bold">
-                {customer.orderCount.toLocaleString("en-PH")}
-              </Td>
-              <Td className="text-[10px] text-muted-foreground">
-                {customer.lastOrderAt
-                  ? dateTimeFormatter.format(new Date(customer.lastOrderAt))
-                  : "No linked orders"}
               </Td>
               <Td>
                 <Badge variant={customer.isActive ? "success" : "neutral"}>
                   {customer.isActive ? "Active" : "Inactive"}
                 </Badge>
+              </Td>
+              <Td className="text-xs font-bold">
+                {customer.orderCount.toLocaleString("en-PH")}
+              </Td>
+              <Td className="text-xs text-foreground">
+                {customer.lastOrderAt
+                  ? dateTimeFormatter.format(new Date(customer.lastOrderAt))
+                  : "No linked orders"}
               </Td>
               <Td className="text-[10px] text-muted-foreground">
                 {dateTimeFormatter.format(new Date(customer.createdAt))}

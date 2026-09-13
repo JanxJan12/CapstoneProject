@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import {
+  CalendarRange,
   DollarSign,
   RefreshCw,
   ShoppingCart,
@@ -86,41 +87,59 @@ export function ReportsPage() {
   }, [loadReport]);
 
   return (
-    <div>
-      <div className="mb-4">
+    <div className="manager-reports">
+      <header className="manager-page-header mb-3">
         <h1 className="text-base font-bold text-foreground">Reports</h1>
-        <p className="mt-0.5 text-[10px] text-muted-foreground">
+        <p className="mt-0.5 text-xs text-muted-foreground">
           Verified-payment revenue and order activity
         </p>
-      </div>
+      </header>
 
-      <div className="mb-4 flex flex-wrap items-end gap-3 rounded-xl border border-border bg-card p-3">
-        <label className="flex flex-col gap-1 text-[10px] font-semibold text-muted-foreground">
-          Start date
-          <input
-            type="date"
-            value={startDate}
-            onChange={(event) => setStartDate(event.target.value)}
-            className="rounded-lg border border-border bg-input-background px-3 py-2 text-xs font-normal text-foreground focus:outline-none"
-          />
-        </label>
-        <label className="flex flex-col gap-1 text-[10px] font-semibold text-muted-foreground">
-          End date
-          <input
-            type="date"
-            value={endDate}
-            onChange={(event) => setEndDate(event.target.value)}
-            className="rounded-lg border border-border bg-input-background px-3 py-2 text-xs font-normal text-foreground focus:outline-none"
-          />
-        </label>
-        <Button
-          variant="primary"
-          size="sm"
-          loading={loading}
-          onClick={() => void loadReport(startDate, endDate)}
-        >
-          Apply
-        </Button>
+      <div className="manager-report-toolbar mb-4 flex flex-wrap items-end gap-2.5 rounded-xl border border-border bg-card p-2.5">
+        <div className="mr-1 flex min-h-10 items-center gap-2 border-border pr-2 sm:border-r">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <CalendarRange className="h-4 w-4" />
+          </div>
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+              Report period
+            </p>
+            <p className="text-xs font-semibold text-foreground">
+              Select dates, then apply
+            </p>
+          </div>
+        </div>
+        <div className="flex min-w-0 flex-1 flex-wrap items-end gap-2.5">
+          <label className="flex min-w-[145px] flex-1 flex-col gap-1 text-[10px] font-semibold text-muted-foreground sm:max-w-[175px]">
+            Start date
+            <input
+              type="date"
+              value={startDate}
+              onChange={(event) => setStartDate(event.target.value)}
+              className="min-h-10 rounded-lg border border-border bg-input-background px-3 text-xs font-normal text-foreground focus:border-primary/50 focus:outline-none"
+            />
+          </label>
+          <span className="hidden pb-3 text-xs text-muted-foreground sm:block">
+            →
+          </span>
+          <label className="flex min-w-[145px] flex-1 flex-col gap-1 text-[10px] font-semibold text-muted-foreground sm:max-w-[175px]">
+            End date
+            <input
+              type="date"
+              value={endDate}
+              onChange={(event) => setEndDate(event.target.value)}
+              className="min-h-10 rounded-lg border border-border bg-input-background px-3 text-xs font-normal text-foreground focus:border-primary/50 focus:outline-none"
+            />
+          </label>
+          <Button
+            variant="primary"
+            size="sm"
+            loading={loading}
+            onClick={() => void loadReport(startDate, endDate)}
+          >
+            Apply
+          </Button>
+        </div>
       </div>
 
       {loading && !report ? (
@@ -156,7 +175,7 @@ export function ReportsPage() {
             </div>
           )}
 
-          <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="manager-report-metrics mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
             <StatCard
               label="Total Revenue"
               value={formatCurrency(report.totalRevenue)}
@@ -187,32 +206,32 @@ export function ReportsPage() {
             />
           </div>
 
-          <div className="rounded-xl border border-border bg-card p-4">
+          <div className="rounded-2xl border border-border bg-card p-3.5 shadow-[0_8px_22px_rgba(67,42,23,0.035)]">
             <p className="text-xs font-bold">Daily Sales Performance</p>
-            <p className="mb-3 mt-0.5 text-[10px] text-muted-foreground">
-              Every calendar day in the selected range, including zero-sales
-              days
+            <p className="mb-2.5 mt-0.5 text-[10px] text-muted-foreground">
+              Every date stays on the timeline; zero-sales days remain at the
+              baseline
             </p>
             {report.dailySales.length === 0 ? (
-              <div className="flex h-40 items-center justify-center text-xs text-muted-foreground">
+              <div className="flex h-24 items-center justify-center rounded-xl border border-dashed border-border text-xs text-muted-foreground">
                 No daily sales data is available.
               </div>
             ) : (
-              <ResponsiveContainer width="100%" height={200}>
+              <ResponsiveContainer width="100%" height={176}>
                 <BarChart
                   data={report.dailySales}
                   margin={{ top: 2, right: 2, left: -8, bottom: 0 }}
                   id="daily-sales-chart"
                 >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f2" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#eadfd4" />
                   <XAxis
                     dataKey="day"
-                    tick={{ fontSize: 9, fill: "#9ca3af" }}
+                    tick={{ fontSize: 10, fill: "#68574a" }}
                     axisLine={false}
                     tickLine={false}
                   />
                   <YAxis
-                    tick={{ fontSize: 9, fill: "#9ca3af" }}
+                    tick={{ fontSize: 10, fill: "#68574a" }}
                     axisLine={false}
                     tickLine={false}
                     tickFormatter={(value: number) =>
@@ -235,7 +254,12 @@ export function ReportsPage() {
                       border: "1px solid #e5e7eb",
                     }}
                   />
-                  <Bar dataKey="sales" fill="#b45309" radius={[4, 4, 0, 0]} />
+                  <Bar
+                    dataKey="sales"
+                    fill="#b45309"
+                    maxBarSize={34}
+                    radius={[4, 4, 0, 0]}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             )}

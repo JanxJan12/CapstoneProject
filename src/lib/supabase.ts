@@ -19,4 +19,4 @@ if (!supabasePublishableKey) {
 export const supabase = createClient(
   supabaseUrl,
   supabasePublishableKey,
-);  
+);

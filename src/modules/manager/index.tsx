@@ -29,6 +29,7 @@ import { ReportsPage } from "./reports/ReportsPage";
 import { SettingsPage } from "./settings/SettingsPage";
 import { StockReceivingPage } from "./inventory/StockReceivingPage";
 import { AdjustmentPage } from "./inventory/AdjustmentPage";
+import type { InventoryWorkspacePage } from "./inventory/InventoryWorkspaceNav";
 
 type ManagerPage =
   | "dashboard"
@@ -56,15 +57,19 @@ const NAV_GROUPS: NavGroup<ManagerPage>[] = [
   {
     label: "Menu & Inventory",
     items: [
-      { id: "menu", label: "Menu Management", icon: BookOpen },
+      { id: "menu", label: "Menu", icon: BookOpen },
       { id: "inventory", label: "Inventory", icon: Package },
-      { id: "inv-transactions", label: "Inv. Transactions", icon: RefreshCw },
       {
         id: "stock-receiving",
         label: "Stock Receiving",
         icon: ArrowDownToLine,
       },
       { id: "adjustment", label: "Adjustment", icon: Sliders },
+      {
+        id: "inv-transactions",
+        label: "Inventory Transactions",
+        icon: RefreshCw,
+      },
     ],
   },
   {
@@ -75,7 +80,7 @@ const NAV_GROUPS: NavGroup<ManagerPage>[] = [
     ],
   },
   {
-    label: "Reports & System",
+    label: "Business",
     items: [
       { id: "reports", label: "Reports", icon: BarChart2 },
       { id: "settings", label: "Settings", icon: Settings },
@@ -89,14 +94,18 @@ export function ManagerApp() {
   const [page, setPage] = useState<ManagerPage>("dashboard");
 
   const handleLogout = async () => {
-  await logout();
+    await logout();
 
-  navigate("/auth?portal=staff", {
-    replace: true,
-  });
-};
+    navigate("/auth?portal=staff", {
+      replace: true,
+    });
+  };
 
   const renderPage = () => {
+    const navigateInventoryWorkspace = (target: InventoryWorkspacePage) => {
+      setPage(target);
+    };
+
     switch (page) {
       case "dashboard":
         return <ManagerDashboard />;
@@ -107,13 +116,13 @@ export function ManagerApp() {
       case "menu":
         return <MenuManagementPage />;
       case "inventory":
-        return <InventoryPage />;
+        return <InventoryPage onNavigate={navigateInventoryWorkspace} />;
       case "inv-transactions":
-        return <InvTransactionsPage />;
+        return <InvTransactionsPage onNavigate={navigateInventoryWorkspace} />;
       case "stock-receiving":
-        return <StockReceivingPage />;
+        return <StockReceivingPage onNavigate={navigateInventoryWorkspace} />;
       case "adjustment":
-        return <AdjustmentPage />;
+        return <AdjustmentPage onNavigate={navigateInventoryWorkspace} />;
       case "riders":
         return <RidersPage />;
       case "customers":
@@ -128,19 +137,18 @@ export function ManagerApp() {
   };
 
   return (
-  <AppShell
-    groups={NAV_GROUPS}
-    active={page}
-    onSelect={setPage}
-    user={
-      {
-  name: session?.name ?? "Manager",
-  role: "Manager", }
-}
-    onLogout={() => {
-      void handleLogout();
-    }}
-  >
+    <AppShell
+      groups={NAV_GROUPS}
+      active={page}
+      onSelect={setPage}
+      user={{
+        name: session?.name ?? "Manager",
+        role: "Manager",
+      }}
+      onLogout={() => {
+        void handleLogout();
+      }}
+    >
       {renderPage()}
     </AppShell>
   );

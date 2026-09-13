@@ -7,6 +7,10 @@ import {
   type InventoryStockChangeResult,
   type ManagerInventoryItem,
 } from "./inventoryApi";
+import {
+  InventoryWorkspaceNav,
+  type InventoryWorkspacePage,
+} from "./InventoryWorkspaceNav";
 
 const quantityFormatter = new Intl.NumberFormat("en-PH", {
   maximumFractionDigits: 3,
@@ -16,7 +20,11 @@ function getErrorMessage(caught: unknown, fallback: string): string {
   return caught instanceof Error ? caught.message : fallback;
 }
 
-export function StockReceivingPage() {
+export function StockReceivingPage({
+  onNavigate,
+}: {
+  onNavigate: (page: InventoryWorkspacePage) => void;
+}) {
   const [items, setItems] = useState<ManagerInventoryItem[]>([]);
   const [selectedItemId, setSelectedItemId] = useState("");
   const [quantity, setQuantity] = useState("");
@@ -108,8 +116,8 @@ export function StockReceivingPage() {
   };
 
   return (
-    <div className="max-w-2xl">
-      <div className="mb-6 flex items-center gap-3">
+    <div className="inventory-workspace-page max-w-4xl">
+      <header className="manager-page-header mb-3 flex items-center gap-3">
         <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-green-200 bg-green-50">
           <ArrowDownToLine className="h-4 w-4 text-green-600" />
         </div>
@@ -121,10 +129,12 @@ export function StockReceivingPage() {
             Record incoming inventory stock
           </p>
         </div>
-      </div>
+      </header>
+
+      <InventoryWorkspaceNav active="stock-receiving" onNavigate={onNavigate} />
 
       {result ? (
-        <div className="mb-5 rounded-xl border border-green-200 bg-green-50 px-4 py-4 text-green-800">
+        <div className="mb-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-green-800">
           <div className="flex items-center gap-2 text-sm font-semibold">
             <CheckCircle className="h-4 w-4 flex-shrink-0" />
             Stock received and confirmed by PostgreSQL.
@@ -132,7 +142,7 @@ export function StockReceivingPage() {
           <p className="mt-1 text-xs">
             {result.itemName} · Transaction {result.transactionId}
           </p>
-          <div className="mt-3 grid grid-cols-3 gap-3 text-xs">
+          <div className="mt-2.5 grid grid-cols-3 gap-3 text-xs">
             <div>
               <p className="text-[9px] font-bold uppercase tracking-wide text-green-700">
                 Before
@@ -188,9 +198,9 @@ export function StockReceivingPage() {
         </div>
       ) : null}
 
-      <div className="rounded-xl border border-border bg-card p-6">
-        <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="col-span-2 flex flex-col gap-1.5">
+      <div className="inventory-action-form rounded-2xl border border-border bg-card p-4 shadow-[0_8px_22px_rgba(67,42,23,0.035)]">
+        <div className="mb-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="flex flex-col gap-1.5 sm:col-span-2">
             <label
               htmlFor="receiving-inventory-item"
               className="text-xs font-semibold text-foreground"
@@ -221,7 +231,7 @@ export function StockReceivingPage() {
           </div>
 
           {selectedItem ? (
-            <div className="col-span-2 rounded-lg border border-border bg-muted/50 px-4 py-3 text-xs">
+            <div className="rounded-lg border border-border bg-muted/50 px-3.5 py-2.5 text-xs sm:col-span-2">
               <div className="flex flex-wrap gap-x-6 gap-y-2">
                 <div>
                   <span className="text-muted-foreground">Current Stock:</span>{" "}
@@ -277,7 +287,7 @@ export function StockReceivingPage() {
             </div>
           </div>
 
-          <div className="col-span-2 flex flex-col gap-1.5">
+          <div className="flex flex-col gap-1.5 sm:col-span-2">
             <label
               htmlFor="receiving-reason"
               className="text-xs font-semibold text-foreground"
@@ -286,7 +296,7 @@ export function StockReceivingPage() {
             </label>
             <textarea
               id="receiving-reason"
-              rows={3}
+              rows={2}
               maxLength={300}
               placeholder="Remarks about the received stock…"
               value={reason}
@@ -298,16 +308,16 @@ export function StockReceivingPage() {
               }}
               className="resize-none rounded-lg border border-border bg-input-background px-3 py-2.5 text-sm focus:border-primary/50 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
             />
-            <p className="text-right text-[9px] text-muted-foreground">
+            <p className="text-right text-[10px] text-muted-foreground">
               {reason.trim().length}/300
             </p>
           </div>
         </div>
 
-        <div className="mt-2 flex justify-end gap-2 border-t border-border pt-4">
+        <div className="flex justify-end gap-2 border-t border-border pt-3">
           <Button
             variant="secondary"
-            size="md"
+            size="sm"
             disabled={isSaving}
             onClick={resetForm}
           >
@@ -315,7 +325,7 @@ export function StockReceivingPage() {
           </Button>
           <Button
             variant="primary"
-            size="md"
+            size="sm"
             loading={isSaving}
             disabled={!canSubmit}
             onClick={() => void handleSave()}

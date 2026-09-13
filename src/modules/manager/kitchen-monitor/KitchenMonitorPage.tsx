@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Clock, Database, RefreshCw } from "lucide-react";
+import { Clock, Database, Eye, RefreshCw } from "lucide-react";
 
 import { StatusBadge } from "../../../components/common/Badge";
 import { Button } from "../../../components/common/Button";
@@ -126,17 +126,20 @@ export function KitchenMonitorPage() {
   );
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="mb-3 flex flex-shrink-0 items-center justify-between gap-3">
+    <div className="manager-kitchen-monitor">
+      <header className="manager-page-header mb-3 flex items-center justify-between gap-3">
         <div>
           <h1 className="text-base font-bold text-foreground">
             Kitchen Monitor
           </h1>
-          <p className="mt-0.5 text-[10px] text-muted-foreground">
-            Read-only PostgreSQL queue; kitchen actions remain in the secured KDS
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Manager status overview; kitchen actions remain in the secured KDS
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <span className="hidden items-center gap-1.5 rounded-full border border-border bg-muted/60 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wide text-muted-foreground sm:inline-flex">
+            <Eye className="h-3 w-3" /> Read only
+          </span>
           <span className="hidden items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-[9px] font-bold text-muted-foreground sm:inline-flex">
             <Database className="h-3 w-3" /> {orders.length} active
           </span>
@@ -149,7 +152,7 @@ export function KitchenMonitorPage() {
             <RefreshCw className="h-3 w-3" /> Refresh
           </Button>
         </div>
-      </div>
+      </header>
 
       {error ? (
         <div className="mb-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-700">
@@ -157,7 +160,7 @@ export function KitchenMonitorPage() {
         </div>
       ) : null}
 
-      <div className="flex min-h-0 flex-1 gap-3 overflow-x-auto overflow-y-hidden pb-2">
+      <div className="manager-kitchen-board flex items-start gap-3 overflow-x-auto pb-2">
         {COLUMNS.map((column) => {
           const columnOrders = sortedOrders.filter(
             (order) => order.currentStatus === column.status,
@@ -166,7 +169,7 @@ export function KitchenMonitorPage() {
           return (
             <section
               key={column.status}
-              className="flex w-[240px] flex-shrink-0 flex-col gap-2 overflow-hidden sm:w-auto sm:flex-1"
+              className="flex w-[240px] flex-shrink-0 flex-col gap-2 sm:w-auto sm:min-w-[220px] sm:flex-1"
             >
               <div
                 className={`flex flex-shrink-0 items-center justify-between rounded-lg border px-3 py-1.5 ${column.headerClassName}`}
@@ -177,7 +180,7 @@ export function KitchenMonitorPage() {
                 </span>
               </div>
 
-              <div className="flex flex-1 flex-col gap-2 overflow-y-auto">
+              <div className="flex flex-col gap-2">
                 {columnOrders.map((order) => (
                   <article
                     key={order.id}
@@ -239,7 +242,7 @@ export function KitchenMonitorPage() {
                 ))}
 
                 {columnOrders.length === 0 ? (
-                  <div className="flex h-20 items-center justify-center rounded-xl border border-dashed border-border text-[11px] text-muted-foreground">
+                  <div className="flex h-14 items-center justify-center rounded-xl border border-dashed border-border bg-card/50 text-[11px] text-muted-foreground">
                     {loading ? "Loading orders…" : "No orders"}
                   </div>
                 ) : null}
