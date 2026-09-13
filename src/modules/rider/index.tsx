@@ -40,22 +40,16 @@ type RiderScreen =
 
 type BottomTab = "home" | "deliveries" | "history" | "profile";
     
-// ── Android phone shell ───────────────────────────────────────────
-// On mobile (< md): full-screen, no chrome
-// On desktop (>= md): phone frame centered on dark bg
+// ── Responsive Rider workspace ────────────────────────────────────
 function PhoneShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="rider-app flex h-full w-full items-center justify-center bg-background md:overflow-auto md:py-6">
+    <div className="rider-app flex h-full min-h-0 w-full justify-center">
       <div
-        className="rider-phone flex h-full w-full flex-col overflow-hidden md:h-[720px] md:w-[360px] md:flex-shrink-0 md:rounded-[2.7rem] md:border-[7px] md:border-[#17110e] md:shadow-[0_42px_90px_-32px_rgba(18,10,5,0.8)]"
+        className="rider-workspace flex h-full min-h-0 w-full max-w-3xl flex-col overflow-hidden"
       >
         {/* Screen content */}
-        <div className="rider-screen flex flex-1 flex-col overflow-hidden bg-background">
+        <div className="rider-screen flex min-h-0 flex-1 flex-col overflow-hidden bg-background">
           {children}
-        </div>
-        {/* Home indicator — desktop only */}
-        <div className="hidden md:flex bg-background items-center justify-center py-2 flex-shrink-0">
-          <div className="w-24 h-1 bg-zinc-300 rounded-full" />
         </div>
       </div>
     </div>
@@ -71,21 +65,22 @@ function BottomNav({ active, onSelect }: { active: BottomTab; onSelect: (t: Bott
     { id: "profile",    label: "Profile",    icon: User },
   ];
   return (
-    <div className="rider-bottom-nav flex flex-shrink-0 border-t border-border bg-white/95 backdrop-blur-xl">
+    <nav aria-label="Rider navigation" className="rider-bottom-nav flex flex-shrink-0 border-t border-border bg-white">
       {tabs.map((t) => {
         const Icon = t.icon;
         return (
           <button
             key={t.id}
+            aria-current={active === t.id ? "page" : undefined}
             onClick={() => onSelect(t.id)}
-            className={`flex-1 flex flex-col items-center gap-0.5 py-2.5 transition-colors ${active === t.id ? "text-primary" : "text-muted-foreground"}`}
+            className={`min-w-0 flex-1 flex flex-col items-center justify-center gap-1 px-1 py-3 transition-colors ${active === t.id ? "text-primary bg-orange-50" : "text-muted-foreground"}`}
           >
             <Icon className="w-5 h-5" strokeWidth={active === t.id ? 2.5 : 1.8} />
-            <span className="text-[9px] font-semibold">{t.label}</span>
+            <span className="text-sm font-semibold">{t.label}</span>
           </button>
         );
       })}
-    </div>
+    </nav>
   );
 }
 
@@ -94,7 +89,7 @@ function RiderRetryButton({ onRetry }: { onRetry: () => void }) {
     <button
       type="button"
       onClick={onRetry}
-      className="mt-3 min-h-9 rounded-lg border border-red-300 bg-white px-3 text-[10px] font-bold text-red-700 hover:bg-red-100"
+      className="mt-3 min-h-11 rounded-xl border border-red-300 bg-white px-4 text-sm font-bold text-red-700 hover:bg-red-100"
     >
       Try Again
     </button>
@@ -295,34 +290,34 @@ function HomeTab({ onNav }: { onNav: (s: RiderScreen) => void }) {
   return (
 
 
-    <div className="flex-1 flex flex-col overflow-hidden">
-      <div className="bg-primary px-4 pt-4 pb-8 flex-shrink-0">
+    <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+      <div className="rider-header bg-primary px-4 py-4 flex-shrink-0">
       <div className="flex items-center justify-between mb-4">
-        <div>
-          <p className="text-white/60 text-[8px] font-semibold uppercase tracking-wide">
+        <div className="min-w-0">
+          <p className="text-white/80 text-xs font-semibold uppercase tracking-wide">
             {greeting},
           </p>
 
-          <p className="text-white font-bold text-sm">
+          <p className="text-white font-bold text-xl">
             {riderName}
           </p>
         </div>
 
-        <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
+        <div className="w-11 h-11 shrink-0 rounded-xl bg-white/20 flex items-center justify-center" aria-label="Rider">
           <span className="text-white font-bold text-sm">
             {riderInitial}
           </span>
         </div>
       </div>
 
-      <div className="flex items-center justify-between bg-white/15 rounded-xl px-4 py-3">
-        <div>
-          <p className="text-white text-xs font-bold">
-            Availability
+      <div className="flex items-center justify-between gap-3 bg-white/10 border border-white/20 rounded-xl px-4 py-3">
+        <div className="min-w-0">
+          <p className="text-white/80 text-xs font-semibold uppercase tracking-wide">
+            Your availability
           </p>
 
-          <p className="text-white/60 text-[9px]">
-            {availabilityLabel}
+          <p className="text-white text-base font-bold mt-1" role="status">
+            {riderProfile ? availabilityLabel : activeDeliveryLoading ? "Loading availability…" : "Availability unavailable"}
           </p>
         </div>
 
@@ -339,59 +334,56 @@ function HomeTab({ onNav }: { onNav: (s: RiderScreen) => void }) {
             void handleToggleAvailability();
           }}
           aria-label="Toggle rider availability"
-          className={`w-12 h-6 rounded-full relative transition-colors disabled:opacity-60 ${
+          aria-pressed={isAvailable}
+          className={`rider-availability-toggle w-16 h-11 shrink-0 rounded-full relative border border-white/30 transition-colors disabled:opacity-60 ${
             isAvailable
-              ? "bg-green-400"
+              ? "bg-emerald-600"
               : "bg-white/30"
           }`}
         >
           <div
-            className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${
+            className={`absolute top-1.5 w-7 h-7 bg-white rounded-full transition-all ${
               isAvailable
-                ? "left-6"
-                : "left-0.5"
+                ? "left-8"
+                : "left-1"
             }`}
           />
         </button>
       </div>
       </div>
-      <div className="-mt-4 rounded-t-2xl bg-background flex-1 overflow-y-auto px-4 pt-4">
-      <div className="grid grid-cols-2 gap-2 mb-4">
-        <div className="bg-card rounded-xl border border-border p-3">
-          <p className="text-[9px] text-muted-foreground mb-0.5">
-            Deliveries Today
-          </p>
+      <div className="rider-content bg-background flex-1 overflow-y-auto px-4 pt-4">
+        {isAvailable && offerCount > 0 && (
+          <div className="rider-offer-alert bg-amber-50 border border-amber-300 rounded-xl p-4 mb-4">
+            <p className="text-sm font-bold text-amber-800 mb-1">
+              {offerCount} new{" "}
+              {offerCount === 1
+                ? "delivery request"
+                : "delivery requests"}
+            </p>
 
-          <p className="text-xl font-bold text-primary">
-            {dashboardStats?.deliveriesToday ?? "—"}
-          </p>
-        </div>
-
-        <div className="bg-card rounded-xl border border-border p-3">
-          <p className="text-[9px] text-muted-foreground mb-0.5">
-            Completed
-          </p>
-
-          <p className="text-xl font-bold text-green-600">
-            {dashboardStats?.completedToday ?? "—"}
-          </p>
-        </div>
-      </div>
-      <p className="text-xs font-bold text-foreground mb-2">
+            <button
+              onClick={() => onNav("requests")}
+              className="mt-2 min-h-11 w-full rounded-xl bg-primary px-4 py-2 text-base font-bold text-white"
+            >
+              Review Delivery Offer
+            </button>
+          </div>
+        )}
+      <p className="text-base font-bold text-foreground mb-2">
         Active Delivery
       </p>
 
       {activeDeliveryLoading && (
         <div className="w-full bg-card rounded-xl border border-border p-4 mb-4 text-center">
-          <p className="text-[10px] text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Loading active delivery…
           </p>
         </div>
       )}
 
       {!activeDeliveryLoading && activeDeliveryError && (
-        <div className="w-full rounded-xl border border-red-200 bg-red-50 p-3 mb-4">
-          <p className="text-[10px] font-semibold text-red-700">
+        <div role="alert" className="w-full rounded-xl border border-red-200 bg-red-50 p-3 mb-4">
+          <p className="text-sm font-semibold text-red-700">
             {activeDeliveryError}
           </p>
           <RiderRetryButton
@@ -406,11 +398,11 @@ function HomeTab({ onNav }: { onNav: (s: RiderScreen) => void }) {
           <div className="w-full bg-card rounded-xl border border-border p-4 mb-4 text-center">
             <Bike className="w-6 h-6 mx-auto text-muted-foreground/50 mb-1" />
 
-            <p className="text-[10px] font-semibold">
+            <p className="text-sm font-semibold">
               No active delivery
             </p>
 
-            <p className="text-[9px] text-muted-foreground mt-1">
+            <p className="text-sm text-muted-foreground mt-1">
               Accepted deliveries will appear here.
             </p>
           </div>
@@ -421,14 +413,14 @@ function HomeTab({ onNav }: { onNav: (s: RiderScreen) => void }) {
         activeDelivery && (
           <button
             onClick={() => onNav("delivery-detail")}
-            className="w-full bg-card rounded-xl border border-border p-3 text-left mb-4 hover:border-primary/40 transition-colors"
+            className="rider-active-card w-full bg-card rounded-xl border border-blue-200 p-4 text-left mb-4 hover:border-blue-400 transition-colors"
           >
-            <div className="flex justify-between mb-1.5">
-              <span className="font-mono text-[9px] font-bold text-primary">
+            <div className="rider-order-heading flex flex-wrap items-start justify-between gap-2 mb-3">
+              <span className="rider-order-number font-mono text-lg font-bold text-foreground">
                 {activeDelivery.orderNumber}
               </span>
 
-              <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-blue-100 text-blue-700">
+              <span className="px-2 py-0.5 rounded-full text-sm font-bold bg-blue-100 text-blue-700">
                 {activeDelivery.assignmentStatus === "accepted"
                   ? "Rider Accepted"
                   : activeDelivery.assignmentStatus === "picked_up"
@@ -437,11 +429,11 @@ function HomeTab({ onNav }: { onNav: (s: RiderScreen) => void }) {
               </span>
             </div>
 
-            <p className="text-xs font-semibold mb-1">
+            <p className="text-base font-semibold mb-1">
               {activeDelivery.customerName}
             </p>
 
-            <div className="flex items-start gap-1 text-[9px] text-muted-foreground mb-2">
+            <div className="flex items-start gap-1 text-sm text-muted-foreground mb-2">
               <MapPin className="w-3 h-3 mt-0.5 text-primary flex-shrink-0" />
 
               <span>
@@ -449,28 +441,32 @@ function HomeTab({ onNav }: { onNav: (s: RiderScreen) => void }) {
               </span>
             </div>
 
-            <div className="w-full py-1.5 rounded-lg bg-primary text-white text-[10px] font-bold text-center">
-              View Delivery
+            <div className="mt-3 w-full min-h-11 py-3 rounded-xl bg-primary text-white text-base font-bold text-center">
+              View Delivery & Next Step
             </div>
           </button>
         )}
-        {isAvailable && offerCount > 0 && (
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
-            <p className="text-[10px] font-bold text-amber-800 mb-1">
-              {offerCount} new{" "}
-              {offerCount === 1
-                ? "delivery request"
-                : "delivery requests"}
-            </p>
+      <div className="rider-daily-summary grid grid-cols-2 gap-3 mt-5 mb-1">
+        <div className="bg-card rounded-xl border border-border p-3">
+          <p className="text-sm text-muted-foreground mb-0.5">
+            Deliveries Today
+          </p>
 
-            <button
-              onClick={() => onNav("requests")}
-              className="text-[10px] font-semibold text-primary"
-            >
-              View Request →
-            </button>
-          </div>
-        )}
+          <p className="text-xl font-bold text-foreground">
+            {dashboardStats?.deliveriesToday ?? "—"}
+          </p>
+        </div>
+
+        <div className="bg-card rounded-xl border border-border p-3">
+          <p className="text-sm text-muted-foreground mb-0.5">
+            Completed Today
+          </p>
+
+          <p className="text-xl font-bold text-foreground">
+            {dashboardStats?.completedToday ?? "—"}
+          </p>
+        </div>
+      </div>
       </div>
     </div>
   );
@@ -638,29 +634,29 @@ function DeliveryRequestsTab() {
   };
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
-      <div className="bg-primary px-4 py-4 flex-shrink-0">
+    <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+      <div className="rider-header bg-primary px-4 py-4 flex-shrink-0">
         <p className="text-white font-bold">
-          Delivery Requests
+          Delivery Offers
         </p>
 
-        <p className="text-white/60 text-[9px]">
-          Orders currently offered to you
+        <p className="text-white/80 text-sm">
+          Review the destination, then accept or reject.
         </p>
       </div>
 
-      <div className="-mt-3 rounded-t-2xl bg-background flex-1 px-4 pt-4 overflow-y-auto">
+      <div className="rider-content bg-background flex-1 px-4 pt-4 overflow-y-auto">
         {loading && (
           <div className="bg-card rounded-xl border border-border p-4 text-center">
-            <p className="text-[10px] text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Loading delivery requests…
             </p>
           </div>
         )}
 
         {!loading && error && (
-          <div className="rounded-xl border border-red-200 bg-red-50 p-3">
-            <p className="text-[10px] font-semibold text-red-700">
+          <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3">
+            <p className="text-sm font-semibold text-red-700">
               {error}
             </p>
             <RiderRetryButton
@@ -675,13 +671,12 @@ function DeliveryRequestsTab() {
             <div className="bg-card rounded-xl border border-border p-5 text-center">
               <Bike className="mx-auto h-7 w-7 text-muted-foreground/50" />
 
-              <p className="mt-2 text-xs font-bold">
-                No delivery requests
+              <p className="mt-2 text-base font-bold">
+                No delivery offers
               </p>
 
-              <p className="mt-1 text-[9px] text-muted-foreground">
-                New assigned deliveries will appear
-                here.
+              <p className="mt-1 text-sm text-muted-foreground">
+                Offers will appear here. After accepting, open Home to view your active delivery.
               </p>
             </div>
           )}
@@ -691,25 +686,25 @@ function DeliveryRequestsTab() {
           offers.map((offer) => (
             <div
               key={offer.assignmentId}
-              className="bg-card rounded-xl border border-border p-3 mb-3"
+              className="rider-offer-card bg-card rounded-xl border border-amber-300 p-4 mb-4"
             >
-              <div className="flex justify-between mb-2">
-                <span className="font-mono text-[9px] font-bold text-primary">
+              <div className="rider-order-heading flex flex-wrap items-start justify-between gap-2 mb-3">
+                <span className="rider-order-number font-mono text-lg font-bold text-foreground">
                   {offer.orderNumber}
                 </span>
 
-                <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-100 text-amber-700">
-                  Offered
+                <span className="px-3 py-1 rounded-full text-sm font-bold bg-amber-100 text-amber-800">
+                  Delivery offer
                 </span>
               </div>
 
-              <p className="text-xs font-bold mb-2">
-                {offer.customerName} ·{" "}
-                {offer.contactNumber}
-              </p>
+              <div className="mb-3">
+                <p className="text-base font-bold">{offer.customerName}</p>
+                <p className="text-sm text-muted-foreground mt-1">{offer.contactNumber}</p>
+              </div>
 
               <div className="flex flex-col gap-1.5 mb-2.5">
-                <div className="flex items-start gap-1.5 text-[9px] text-muted-foreground">
+                <div className="flex items-start gap-2 text-base text-foreground">
                   <MapPin className="w-3 h-3 mt-0.5 text-primary flex-shrink-0" />
 
                   <span>
@@ -721,7 +716,7 @@ function DeliveryRequestsTab() {
                 </div>
 
                 {offer.landmark && (
-                  <div className="flex items-start gap-1.5 text-[9px] text-muted-foreground">
+                  <div className="flex items-start gap-1.5 text-sm text-muted-foreground">
                     <Navigation className="w-3 h-3 mt-0.5 flex-shrink-0" />
 
                     <span>
@@ -731,21 +726,8 @@ function DeliveryRequestsTab() {
                 )}
               </div>
 
-              <div className="bg-muted/60 rounded-lg p-2 mb-3">
-                <p className="text-[8px] font-bold text-muted-foreground mb-1">
-                  ORDER ITEMS
-                </p>
-
-                {offer.items.map((item) => (
-                  <p
-                    key={item.id}
-                    className="text-[9px]"
-                  >
-                    {item.quantity} × {item.name}
-                  </p>
-                ))}
-
-                <div className="mt-2 border-t border-border pt-2 flex justify-between text-[9px]">
+              <div className="rounded-xl border border-border p-3 mb-3">
+                <div className="flex justify-between gap-3 text-sm">
                   <span className="text-muted-foreground">
                     Delivery fee
                   </span>
@@ -758,8 +740,8 @@ function DeliveryRequestsTab() {
                   </span>
                 </div>
 
-                <div className="mt-1 flex justify-between text-[10px] font-bold">
-                  <span>Total</span>
+                <div className="mt-1 flex justify-between gap-3 text-base font-bold">
+                  <span>Order total</span>
 
                   <span className="text-primary">
                     ₱
@@ -770,7 +752,7 @@ function DeliveryRequestsTab() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-3 mb-4">
                 <button
                   type="button"
                   disabled={
@@ -782,7 +764,7 @@ function DeliveryRequestsTab() {
                       offer.assignmentId,
                     );
                   }}
-                  className="py-2.5 rounded-xl bg-primary text-white text-[10px] font-bold flex items-center justify-center gap-1 disabled:opacity-60"
+                  className="py-3 rounded-xl bg-primary text-white text-base font-bold flex items-center justify-center gap-1 disabled:opacity-60"
                 >
                   <Check className="w-3 h-3" />
 
@@ -803,7 +785,7 @@ function DeliveryRequestsTab() {
                       offer.assignmentId,
                     );
                   }}
-                  className="py-2.5 rounded-xl border border-border bg-white text-[10px] font-bold text-muted-foreground flex items-center justify-center gap-1 disabled:opacity-60"
+                  className="py-3 rounded-xl border border-red-200 bg-white text-base font-bold text-red-700 flex items-center justify-center gap-2 disabled:opacity-60"
                 >
                   <X className="w-3 h-3" />
 
@@ -813,6 +795,22 @@ function DeliveryRequestsTab() {
                     : "Reject"}
                 </button>
               </div>
+              <div className="bg-muted/60 rounded-xl p-3">
+                <p className="text-xs font-bold text-muted-foreground mb-1">
+                  ORDER ITEMS
+                </p>
+
+                {offer.items.map((item) => (
+                  <p
+                    key={item.id}
+                    className="text-sm"
+                  >
+                    {item.quantity} × {item.name}
+                  </p>
+                ))}
+
+              </div>
+
             </div>
           ))}
       </div>
@@ -920,32 +918,33 @@ function DeliveryDetailScreen({
           : "";
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
-      <div className="bg-primary px-4 py-4 flex items-center gap-3 flex-shrink-0">
+    <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+      <div className="rider-header bg-primary px-4 py-4 flex items-center gap-3 flex-shrink-0">
         <button
           onClick={() => onNav("home")}
-          className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center"
+          aria-label="Back"
+          className="w-11 h-11 shrink-0 rounded-xl bg-white/20 flex items-center justify-center"
         >
           <ArrowLeft className="w-4 h-4 text-white" />
         </button>
 
         <p className="text-white font-bold text-sm">
-          Delivery Detail
+          Active Delivery
         </p>
       </div>
 
-      <div className="flex-1 bg-background overflow-y-auto px-4 py-3">
+      <div className="rider-content flex-1 bg-background overflow-y-auto px-4 py-3">
         {loading && (
           <div className="bg-card rounded-xl border border-border p-4 text-center">
-            <p className="text-[10px] text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Loading delivery details…
             </p>
           </div>
         )}
 
         {!loading && error && (
-          <div className="rounded-xl border border-red-200 bg-red-50 p-3">
-            <p className="text-[10px] font-semibold text-red-700">
+          <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3">
+            <p className="text-sm font-semibold text-red-700">
               {error}
             </p>
             <RiderRetryButton
@@ -960,7 +959,7 @@ function DeliveryDetailScreen({
             <div className="bg-card rounded-xl border border-border p-5 text-center">
               <Bike className="w-7 h-7 mx-auto text-muted-foreground/50" />
 
-              <p className="mt-2 text-xs font-bold">
+              <p className="mt-2 text-base font-bold">
                 No active delivery
               </p>
             </div>
@@ -970,26 +969,26 @@ function DeliveryDetailScreen({
           !error &&
           delivery && (
             <>
-              <div className="flex items-center justify-between gap-2 mb-3">
-                <span className="font-mono text-[9px] font-bold text-primary">
+              <div className="rider-order-heading flex flex-wrap items-start justify-between gap-2 mb-4">
+                <span className="rider-order-number font-mono text-xl font-bold text-foreground">
                   {delivery.orderNumber}
                 </span>
 
-                <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-blue-100 text-blue-700">
+                <span className="px-2 py-0.5 rounded-full text-sm font-bold bg-blue-100 text-blue-700">
                   {statusLabel}
                 </span>
               </div>
 
               <div className="bg-card rounded-xl border border-border p-3 mb-2">
-                <p className="text-[8px] font-bold text-muted-foreground uppercase mb-1">
+                <p className="text-xs font-bold text-muted-foreground uppercase mb-1">
                   Customer
                 </p>
 
-                <p className="text-xs font-bold">
+                <p className="text-base font-bold">
                   {delivery.customerName}
                 </p>
 
-                <div className="flex items-center gap-1 text-[9px] text-muted-foreground mt-0.5">
+                <div className="flex items-center gap-1 text-sm text-muted-foreground mt-0.5">
                   <Phone className="w-3 h-3" />
 
                   <span>
@@ -999,20 +998,20 @@ function DeliveryDetailScreen({
               </div>
 
               <div className="bg-card rounded-xl border border-border p-3 mb-2">
-                <p className="text-[8px] font-bold text-muted-foreground uppercase mb-1">
+                <p className="text-xs font-bold text-muted-foreground uppercase mb-1">
                   Delivery Address
                 </p>
 
-                <div className="flex items-start gap-1.5 text-[9px]">
+                <div className="flex items-start gap-1.5 text-sm">
                   <MapPin className="w-3 h-3 mt-0.5 text-primary flex-shrink-0" />
 
-                  <p className="font-semibold">
+                  <p className="font-semibold text-base">
                     {delivery.deliveryAddress}
                   </p>
                 </div>
 
                 {delivery.landmark && (
-                  <p className="text-[9px] text-muted-foreground mt-1 ml-4">
+                  <p className="text-sm text-muted-foreground mt-1 ml-4">
                     Landmark: {delivery.landmark}
                   </p>
                 )}
@@ -1021,72 +1020,22 @@ function DeliveryDetailScreen({
                   onClick={() =>
                     onNav("nav-assist")
                   }
-                  className="mt-2 w-full h-14 bg-blue-50 rounded-lg border border-blue-200 flex items-center justify-center gap-2 text-[10px] text-blue-600 font-semibold"
+                  className="mt-2 w-full h-14 bg-blue-50 rounded-lg border border-blue-200 flex items-center justify-center gap-2 text-sm text-blue-600 font-semibold"
                 >
                   <Navigation className="w-4 h-4" />
-                  Open Navigation Assistance
+                  Navigation Assistance
                 </button>
               </div>
 
-              <div className="bg-card rounded-xl border border-border p-3 mb-3">
-                <p className="text-[8px] font-bold text-muted-foreground uppercase mb-2">
-                  Items
+              <section aria-label="Next delivery action" className="rider-next-action rounded-xl border border-border bg-card p-4 mb-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">Next step</p>
+                <p className="text-base font-semibold mb-3">
+                  {delivery.assignmentStatus === "accepted"
+                    ? "Collect the order, then mark it as picked up."
+                    : delivery.assignmentStatus === "picked_up"
+                      ? "Ready to leave? Start the delivery."
+                      : "Hand over the order, then upload proof to complete delivery."}
                 </p>
-
-                {delivery.items.map(
-                  (item) => (
-                    <div
-                      key={item.id}
-                      className="flex justify-between text-[9px] mb-1"
-                    >
-                      <span>
-                        {item.name}
-                      </span>
-
-                      <span className="font-bold">
-                        ×{item.quantity}
-                      </span>
-                    </div>
-                  ),
-                )}
-
-                <div className="flex justify-between text-[9px] border-t border-border pt-2 mt-2">
-                  <span className="text-muted-foreground">
-                    Delivery Fee
-                  </span>
-
-                  <span>
-                    ₱
-                    {delivery.deliveryFee.toFixed(
-                      2,
-                    )}
-                  </span>
-                </div>
-
-                <div className="flex justify-between font-bold text-xs mt-1">
-                  <span>Total</span>
-
-                  <span className="text-primary">
-                    ₱
-                    {delivery.total.toFixed(
-                      2,
-                    )}
-                  </span>
-                </div>
-              </div>
-
-              {delivery.notes && (
-                <div className="bg-card rounded-xl border border-border p-3 mb-3">
-                  <p className="text-[8px] font-bold text-muted-foreground uppercase mb-1">
-                    Order Notes
-                  </p>
-
-                  <p className="text-[9px]">
-                    {delivery.notes}
-                  </p>
-                </div>
-              )}
-
               <button
                 type="button"
                 disabled={
@@ -1097,7 +1046,7 @@ function DeliveryDetailScreen({
                 onClick={() => {
                   void handleAdvanceStatus();
                 }}
-                className="w-full py-3 rounded-xl bg-primary text-white font-bold text-[11px] flex items-center justify-center gap-1.5 mb-2 disabled:opacity-60"
+                className="rider-advance-action w-full py-3 rounded-xl bg-primary text-white font-bold text-base flex items-center justify-center gap-2 mb-2 disabled:opacity-60"
               >
                 {updatingStatus
                   ? "Updating…"
@@ -1119,11 +1068,72 @@ function DeliveryDetailScreen({
                 onClick={() => {
                   onNav("upload-proof");
                 }}
-                className="w-full py-2.5 rounded-xl border border-border bg-white text-[10px] font-semibold flex items-center justify-center gap-1.5 disabled:opacity-50"
+                className="rider-proof-action w-full py-3 rounded-xl border border-border bg-white text-base font-bold flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 <Upload className="w-3.5 h-3.5" />
                 Upload Proof of Delivery
               </button>
+              </section>
+
+              <div className="bg-card rounded-xl border border-border p-3 mb-3">
+                <p className="text-xs font-bold text-muted-foreground uppercase mb-2">
+                  Items
+                </p>
+
+                {delivery.items.map(
+                  (item) => (
+                    <div
+                      key={item.id}
+                      className="flex justify-between text-sm mb-1"
+                    >
+                      <span>
+                        {item.name}
+                      </span>
+
+                      <span className="font-bold">
+                        ×{item.quantity}
+                      </span>
+                    </div>
+                  ),
+                )}
+
+                <div className="flex justify-between text-sm border-t border-border pt-2 mt-2">
+                  <span className="text-muted-foreground">
+                    Delivery Fee
+                  </span>
+
+                  <span>
+                    ₱
+                    {delivery.deliveryFee.toFixed(
+                      2,
+                    )}
+                  </span>
+                </div>
+
+                <div className="flex justify-between font-bold text-base mt-1">
+                  <span>Total</span>
+
+                  <span className="text-primary">
+                    ₱
+                    {delivery.total.toFixed(
+                      2,
+                    )}
+                  </span>
+                </div>
+              </div>
+
+              {delivery.notes && (
+                <div className="bg-card rounded-xl border border-border p-3 mb-3">
+                  <p className="text-xs font-bold text-muted-foreground uppercase mb-1">
+                    Order Notes
+                  </p>
+
+                  <p className="text-sm">
+                    {delivery.notes}
+                  </p>
+                </div>
+              )}
+
             </>
           )}
       </div>
@@ -1209,14 +1219,15 @@ function NavAssistScreen({
   };
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
-      <div className="bg-primary px-4 py-4 flex items-center gap-3 flex-shrink-0">
+    <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+      <div className="rider-header bg-primary px-4 py-4 flex items-center gap-3 flex-shrink-0">
         <button
           type="button"
           onClick={() =>
             onNav("delivery-detail")
           }
-          className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center"
+          aria-label="Back"
+          className="w-11 h-11 shrink-0 rounded-xl bg-white/20 flex items-center justify-center"
         >
           <ArrowLeft className="w-4 h-4 text-white" />
         </button>
@@ -1226,24 +1237,24 @@ function NavAssistScreen({
             Navigation
           </p>
 
-          <p className="text-white/60 text-[9px]">
+          <p className="text-white/80 text-sm">
             Delivery destination
           </p>
         </div>
       </div>
 
-      <div className="flex-1 bg-background overflow-y-auto px-4 py-4">
+      <div className="rider-content flex-1 bg-background overflow-y-auto px-4 py-4">
         {loading && (
           <div className="py-6 text-center">
-            <p className="text-[10px] text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Loading delivery destination…
             </p>
           </div>
         )}
 
         {!loading && error && (
-          <div className="rounded-xl border border-red-200 bg-red-50 p-3">
-            <p className="text-[10px] font-semibold text-red-700">
+          <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3">
+            <p className="text-sm font-semibold text-red-700">
               {error}
             </p>
             <RiderRetryButton
@@ -1258,11 +1269,11 @@ function NavAssistScreen({
             <div className="bg-card rounded-xl border border-border p-5 text-center">
               <Navigation className="w-7 h-7 mx-auto text-muted-foreground/50" />
 
-              <p className="mt-2 text-xs font-bold">
+              <p className="mt-2 text-base font-bold">
                 No active delivery
               </p>
 
-              <p className="mt-1 text-[9px] text-muted-foreground">
+              <p className="mt-1 text-sm text-muted-foreground">
                 Navigation becomes available after
                 accepting a delivery.
               </p>
@@ -1274,7 +1285,7 @@ function NavAssistScreen({
           delivery && (
             <>
               <div className="bg-card rounded-xl border border-border p-4 mb-3">
-                <p className="text-[8px] font-bold text-muted-foreground uppercase mb-2">
+                <p className="text-xs font-bold text-muted-foreground uppercase mb-2">
                   Deliver To
                 </p>
 
@@ -1284,16 +1295,16 @@ function NavAssistScreen({
                   </div>
 
                   <div className="min-w-0">
-                    <p className="text-xs font-bold">
+                    <p className="text-base font-bold">
                       {delivery.customerName}
                     </p>
 
-                    <p className="text-[10px] mt-1">
+                    <p className="text-sm mt-1">
                       {delivery.deliveryAddress}
                     </p>
 
                     {delivery.landmark && (
-                      <p className="text-[9px] text-muted-foreground mt-1">
+                      <p className="text-sm text-muted-foreground mt-1">
                         Landmark:{" "}
                         {delivery.landmark}
                       </p>
@@ -1305,11 +1316,11 @@ function NavAssistScreen({
               <div className="bg-blue-50 rounded-xl border border-blue-200 p-4 mb-3 text-center">
                 <Navigation className="w-8 h-8 mx-auto text-blue-600 mb-2" />
 
-                <p className="text-xs font-bold text-blue-700">
+                <p className="text-base font-bold text-blue-700">
                   Open turn-by-turn navigation
                 </p>
 
-                <p className="text-[9px] text-blue-600 mt-1">
+                <p className="text-sm text-blue-600 mt-1">
                   Google Maps will use the delivery
                   address as your destination.
                 </p>
@@ -1318,7 +1329,7 @@ function NavAssistScreen({
               <button
                 type="button"
                 onClick={openGoogleMaps}
-                className="w-full py-3 rounded-xl bg-primary text-white text-[11px] font-bold flex items-center justify-center gap-2"
+                className="w-full py-3 rounded-xl bg-primary text-white text-base font-bold flex items-center justify-center gap-2"
               >
                 <Navigation className="w-4 h-4" />
                 Open in Google Maps
@@ -1484,14 +1495,15 @@ function UploadProofScreen({
   };
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
-      <div className="bg-primary px-4 py-4 flex items-center gap-3 flex-shrink-0">
+    <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+      <div className="rider-header bg-primary px-4 py-4 flex items-center gap-3 flex-shrink-0">
         <button
           type="button"
           onClick={() =>
             onNav("delivery-detail")
           }
-          className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center"
+          aria-label="Back"
+          className="w-11 h-11 shrink-0 rounded-xl bg-white/20 flex items-center justify-center"
         >
           <ArrowLeft className="w-4 h-4 text-white" />
         </button>
@@ -1502,25 +1514,25 @@ function UploadProofScreen({
           </p>
 
           {delivery && (
-            <p className="text-white/60 text-[9px]">
+            <p className="text-white/80 text-sm">
               {delivery.orderNumber}
             </p>
           )}
         </div>
       </div>
 
-      <div className="flex-1 bg-background px-4 py-4 overflow-y-auto">
+      <div className="rider-content flex-1 bg-background px-4 py-4 overflow-y-auto">
         {loading && (
           <div className="py-6 text-center">
-            <p className="text-[10px] text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Loading delivery…
             </p>
           </div>
         )}
 
         {!loading && error && (
-          <div className="mb-3 rounded-xl border border-red-200 bg-red-50 p-3">
-            <p className="text-[10px] font-semibold text-red-700">
+          <div role="alert" className="mb-3 rounded-xl border border-red-200 bg-red-50 p-3">
+            <p className="text-sm font-semibold text-red-700">
               {error}
             </p>
             {!delivery ? (
@@ -1533,12 +1545,18 @@ function UploadProofScreen({
 
         {!loading && delivery && (
           <>
-            <p className="text-xs font-bold mb-1">
+            <div className="rounded-xl border border-border bg-card p-4 mb-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Completing this order</p>
+              <p className="rider-order-number mt-1 font-mono text-xl font-bold">{delivery.orderNumber}</p>
+              <p className="mt-2 text-base font-semibold">{delivery.customerName}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{delivery.deliveryAddress}</p>
+            </div>
+            <p className="text-base font-bold mb-1">
               Delivery Photo
             </p>
 
-            <p className="text-[9px] text-muted-foreground mb-4">
-              Upload a clear photo showing that the order was delivered.
+            <p className="text-sm text-muted-foreground mb-4">
+              Add a clear photo of the delivered order. JPEG, PNG or WebP, up to 5 MB.
             </p>
 
             <div className="w-full min-h-36 bg-muted/60 border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center gap-2 p-4 mb-4">
@@ -1546,11 +1564,14 @@ function UploadProofScreen({
                 <>
                   <Check className="w-8 h-8 text-green-500" />
 
-                  <p className="text-[10px] font-bold text-green-700 text-center break-all">
+                  <p className="text-sm font-semibold text-green-800" role="status">
+                    {proofPath ? "Photo uploaded · completion still required" : "Photo selected · ready to submit"}
+                  </p>
+                  <p className="text-sm font-bold text-green-700 text-center break-all">
                     {selectedFile.name}
                   </p>
 
-                  <p className="text-[9px] text-muted-foreground">
+                  <p className="text-sm text-muted-foreground">
                     {(
                       selectedFile.size /
                       1024 /
@@ -1563,7 +1584,7 @@ function UploadProofScreen({
                 <>
                   <Camera className="w-8 h-8 text-muted-foreground/50" />
 
-                  <p className="text-[10px] font-semibold text-muted-foreground">
+                  <p className="text-sm font-semibold text-muted-foreground">
                     No photo selected
                   </p>
                 </>
@@ -1571,7 +1592,7 @@ function UploadProofScreen({
             </div>
 
             <div className="grid grid-cols-2 gap-2 mb-4">
-              <label className="py-2.5 rounded-xl border border-border bg-card text-[10px] font-semibold flex items-center justify-center gap-1.5 cursor-pointer">
+              <label className="py-2.5 rounded-xl border border-border bg-card text-sm font-semibold flex items-center justify-center gap-1.5 cursor-pointer">
                 <Camera className="w-3.5 h-3.5" />
                 Camera
 
@@ -1591,7 +1612,7 @@ function UploadProofScreen({
                 />
               </label>
 
-              <label className="py-2.5 rounded-xl border border-border bg-card text-[10px] font-semibold flex items-center justify-center gap-1.5 cursor-pointer">
+              <label className="py-2.5 rounded-xl border border-border bg-card text-sm font-semibold flex items-center justify-center gap-1.5 cursor-pointer">
                 <ImageIcon className="w-3.5 h-3.5" />
                 Gallery
 
@@ -1611,6 +1632,13 @@ function UploadProofScreen({
               </label>
             </div>
 
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 mb-3">
+              <p className="text-base font-bold text-amber-900">Confirm the order has been delivered</p>
+              <p className="mt-1 text-sm text-amber-900">
+                Submit only after handing over this order. This completes the delivery and returns you to Home. Completed deliveries appear in History.
+              </p>
+            </div>
+
             <button
               type="button"
               disabled={
@@ -1620,7 +1648,7 @@ function UploadProofScreen({
               onClick={() => {
                 void handleSubmit();
               }}
-              className="w-full py-3 rounded-xl bg-primary text-white font-bold text-[11px] flex items-center justify-center gap-1.5 disabled:opacity-50"
+              className="w-full py-3 rounded-xl bg-primary text-white font-bold text-base flex items-center justify-center gap-1.5 disabled:opacity-50"
             >
               <Upload className="w-3.5 h-3.5" />
 
@@ -1699,29 +1727,29 @@ function HistoryTab() {
     ).format(new Date(value));
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
-      <div className="bg-primary px-4 py-4 flex-shrink-0">
+    <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+      <div className="rider-header bg-primary px-4 py-4 flex-shrink-0">
         <p className="text-white font-bold">
           Delivery History
         </p>
 
-        <p className="text-white/60 text-[9px]">
+        <p className="text-white/80 text-sm">
           Your completed deliveries
         </p>
       </div>
 
-      <div className="-mt-3 rounded-t-2xl bg-background flex-1 overflow-y-auto px-4 pt-4">
+      <div className="rider-content bg-background flex-1 overflow-y-auto px-4 pt-4">
         {loading && (
           <div className="py-6 text-center">
-            <p className="text-[10px] text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Loading delivery history…
             </p>
           </div>
         )}
 
         {!loading && error && (
-          <div className="rounded-xl border border-red-200 bg-red-50 p-3">
-            <p className="text-[10px] font-semibold text-red-700">
+          <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3">
+            <p className="text-sm font-semibold text-red-700">
               {error}
             </p>
             <RiderRetryButton
@@ -1736,11 +1764,11 @@ function HistoryTab() {
             <div className="bg-card rounded-xl border border-border p-5 text-center">
               <History className="w-7 h-7 mx-auto text-muted-foreground/50" />
 
-              <p className="mt-2 text-xs font-bold">
+              <p className="mt-2 text-base font-bold">
                 No completed deliveries
               </p>
 
-              <p className="mt-1 text-[9px] text-muted-foreground">
+              <p className="mt-1 text-sm text-muted-foreground">
                 Completed deliveries will appear here.
               </p>
             </div>
@@ -1754,11 +1782,11 @@ function HistoryTab() {
               className="bg-card rounded-xl border border-border p-3 mb-2"
             >
               <div className="flex items-center justify-between gap-2">
-                <span className="font-mono text-[9px] font-bold text-primary">
+                <span className="font-mono text-sm font-bold text-primary">
                   {record.orderNumber}
                 </span>
 
-                <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-green-100 text-green-700">
+                <span className="px-2 py-0.5 rounded-full text-sm font-bold bg-green-100 text-green-700">
                   Delivered
                 </span>
               </div>
@@ -1766,19 +1794,19 @@ function HistoryTab() {
               <div className="flex items-start gap-1.5 mt-2">
                 <MapPin className="w-3 h-3 mt-0.5 text-primary flex-shrink-0" />
 
-                <p className="text-[9px] text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                   {record.deliveryAddress}
                 </p>
               </div>
 
               <div className="flex items-end justify-between gap-3 mt-2 pt-2 border-t border-border">
-                <p className="text-[8px] text-muted-foreground">
+                <p className="text-xs text-muted-foreground">
                   {formatDeliveredAt(
                     record.deliveredAt,
                   )}
                 </p>
 
-                <p className="text-xs font-bold">
+                <p className="text-base font-bold">
                   ₱{record.total.toFixed(2)}
                 </p>
               </div>
@@ -1890,8 +1918,8 @@ function ProfileTab() {
       .join(" ") || "Not provided";
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
-      <div className="bg-primary px-4 py-5 flex flex-col items-center gap-2 flex-shrink-0">
+    <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+      <div className="rider-header bg-primary px-4 py-5 flex flex-col items-center gap-2 flex-shrink-0">
         <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center">
           <span className="text-white font-bold text-xl">
             {riderInitial}
@@ -1903,24 +1931,24 @@ function ProfileTab() {
         </p>
 
         {!loading && profile && (
-          <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-green-400/30 text-green-100">
+          <span className="px-2 py-0.5 rounded-full text-sm font-bold bg-green-400/30 text-green-100">
             {availabilityLabel}
           </span>
         )}
       </div>
 
-      <div className="flex-1 bg-background px-4 py-4 overflow-y-auto">
+      <div className="rider-content flex-1 bg-background px-4 py-4 overflow-y-auto">
         {loading && (
           <div className="py-4 text-center">
-            <p className="text-[10px] text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Loading rider profile…
             </p>
           </div>
         )}
 
         {!loading && error && (
-          <div className="rounded-xl border border-red-200 bg-red-50 p-3 mb-3">
-            <p className="text-[10px] font-semibold text-red-700">
+          <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3 mb-3">
+            <p className="text-sm font-semibold text-red-700">
               {error}
             </p>
             <RiderRetryButton
@@ -1959,7 +1987,7 @@ function ProfileTab() {
               ].map((field) => (
                 <div
                   key={field.l}
-                  className="flex justify-between gap-4 py-2.5 border-b border-border last:border-0 text-[10px]"
+                  className="flex justify-between gap-4 py-2.5 border-b border-border last:border-0 text-sm"
                 >
                   <span className="text-muted-foreground">
                     {field.l}
@@ -1975,7 +2003,7 @@ function ProfileTab() {
 
         <div className="grid grid-cols-2 gap-2 mt-3">
           <div className="bg-card rounded-xl border border-border p-2.5 text-center">
-            <p className="text-[8px] text-muted-foreground mb-0.5">
+            <p className="text-xs text-muted-foreground mb-0.5">
               Total Deliveries
             </p>
 
@@ -1986,7 +2014,7 @@ function ProfileTab() {
           </div>
 
           <div className="bg-card rounded-xl border border-border p-2.5 text-center">
-            <p className="text-[8px] text-muted-foreground mb-0.5">
+            <p className="text-xs text-muted-foreground mb-0.5">
               Today
             </p>
 
@@ -2003,7 +2031,7 @@ function ProfileTab() {
           onClick={() => {
             void handleSignOut();
           }}
-          className="w-full mt-4 py-2.5 rounded-xl border border-border bg-white text-[10px] font-bold text-muted-foreground flex items-center justify-center gap-1.5 disabled:opacity-60"
+          className="w-full mt-4 py-2.5 rounded-xl border border-border bg-white text-sm font-bold text-muted-foreground flex items-center justify-center gap-1.5 disabled:opacity-60"
         >
           <LogOut className="w-3 h-3" />
 
