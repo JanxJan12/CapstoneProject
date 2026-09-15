@@ -2,11 +2,14 @@ import { useCallback, useEffect, useState } from "react";
 import { ArrowDownToLine, CheckCircle } from "lucide-react";
 import { Button } from "../../../components/common/Button";
 import {
+  clearInventoryMutationRequestId,
   getManagerInventory,
+  getOrCreateInventoryMutationRequestId,
   receiveInventoryStock,
   type InventoryStockChangeResult,
   type ManagerInventoryItem,
 } from "./inventoryApi";
+
 import {
   InventoryWorkspaceNav,
   type InventoryWorkspacePage,
@@ -69,51 +72,81 @@ export function StockReceivingPage({
   const canSubmit =
     Boolean(selectedItem?.isActive) && quantityIsValid && !isSaving;
 
-  const resetForm = () => {
-    setSelectedItemId("");
-    setQuantity("");
-    setReason("");
-    setSaveError("");
-    setResult(null);
-  };
+const resetForm = () => {
+  clearInventoryMutationRequestId(
+    "receiving",
+  );
 
-  const handleSave = async () => {
-    if (isSaving) return;
+  setSelectedItemId("");
+  setQuantity("");
+  setReason("");
+  setSaveError("");
+  setResult(null);
+};
 
-    if (!selectedItem?.isActive) {
-      setSaveError("Select an active inventory item.");
-      return;
-    }
+const handleSave = async () => {
+  if (isSaving) return;
 
-    if (!quantityIsValid) {
-      setSaveError("Quantity received must be greater than zero.");
-      return;
-    }
+  if (!selectedItem?.isActive) {
+    setSaveError("Select an active inventory item.");
+    return;
+  }
 
-    setIsSaving(true);
-    setSaveError("");
-    setResult(null);
+  if (!quantityIsValid) {
+    setSaveError(
+      "Quantity received must be greater than zero.",
+    );
+    return;
+  }
 
-    try {
-      const authoritativeResult = await receiveInventoryStock({
+  const requestFingerprint = JSON.stringify({
+    operation: "receiving",
+    inventoryItemId: selectedItem.id,
+    quantity: parsedQuantity,
+    reason: reason.trim(),
+  });
+
+  const requestId =
+    getOrCreateInventoryMutationRequestId(
+      "receiving",
+      requestFingerprint,
+    );
+
+  setIsSaving(true);
+  setSaveError("");
+  setResult(null);
+
+  try {
+    const authoritativeResult =
+      await receiveInventoryStock({
         inventoryItemId: selectedItem.id,
         quantity: parsedQuantity,
         reason,
+        requestId,
       });
 
-      setResult(authoritativeResult);
-      setSelectedItemId("");
-      setQuantity("");
-      setReason("");
-      await loadInventory(false);
-    } catch (caught) {
-      setSaveError(
-        getErrorMessage(caught, "Unable to receive inventory stock."),
-      );
-    } finally {
-      setIsSaving(false);
-    }
-  };
+    clearInventoryMutationRequestId(
+      "receiving",
+      requestId,
+    );
+
+    setResult(authoritativeResult);
+    setSelectedItemId("");
+    setQuantity("");
+    setReason("");
+
+    await loadInventory(false);
+  } catch (caught) {
+    setSaveError(
+      getErrorMessage(
+        caught,
+        "Unable to receive inventory stock.",
+      ),
+    );
+  } finally {
+    setIsSaving(false);
+  }
+};
 
   return (
     <div className="inventory-workspace-page max-w-4xl">

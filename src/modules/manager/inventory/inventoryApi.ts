@@ -53,12 +53,14 @@ export interface ReceiveInventoryStockInput {
   inventoryItemId: string;
   quantity: number;
   reason?: string;
+  requestId: string;
 }
 
 export interface AdjustInventoryStockInput {
   inventoryItemId: string;
   quantityChange: number;
   reason: string;
+  requestId: string;
 }
 
 const UUID_PATTERN =
@@ -71,6 +73,110 @@ const TRANSACTION_TYPES = new Set<InventoryTransactionType>([
   "waste",
   "adjustment",
 ]);
+
+export type InventoryMutationKind =
+  | "receiving"
+  | "adjustment";
+
+interface StoredInventoryMutationRequest {
+  requestId: string;
+  fingerprint: string;
+}
+
+function getInventoryMutationStorageKey(
+  kind: InventoryMutationKind,
+): string {
+  return `rrj_manager_inventory_${kind}_request_v1`;
+}
+
+export function getOrCreateInventoryMutationRequestId(
+  kind: InventoryMutationKind,
+  fingerprint: string,
+): string {
+  const storageKey =
+    getInventoryMutationStorageKey(kind);
+
+  try {
+    const stored =
+      sessionStorage.getItem(storageKey);
+
+    if (stored) {
+      const parsed = JSON.parse(
+        stored,
+      ) as Partial<StoredInventoryMutationRequest>;
+
+      if (
+        typeof parsed.requestId === "string" &&
+        parsed.requestId.length > 0 &&
+        parsed.fingerprint === fingerprint
+      ) {
+        return parsed.requestId;
+      }
+    }
+  } catch {
+    // Create a new request ID below.
+  }
+
+  const requestId =
+    crypto.randomUUID();
+
+  try {
+    sessionStorage.setItem(
+      storageKey,
+      JSON.stringify({
+        requestId,
+        fingerprint,
+      }),
+    );
+  } catch {
+    // Current request can still proceed.
+  }
+
+  return requestId;
+}
+
+export function clearInventoryMutationRequestId(
+  kind: InventoryMutationKind,
+  requestId?: string,
+): void {
+  const storageKey =
+    getInventoryMutationStorageKey(kind);
+
+  if (!requestId) {
+    try {
+      sessionStorage.removeItem(storageKey);
+    } catch {
+      // Ignore browser storage errors.
+    }
+
+    return;
+  }
+
+  try {
+    const stored =
+      sessionStorage.getItem(storageKey);
+
+    if (!stored) {
+      return;
+    }
+
+    const parsed = JSON.parse(
+      stored,
+    ) as Partial<StoredInventoryMutationRequest>;
+
+    if (parsed.requestId === requestId) {
+      sessionStorage.removeItem(
+        storageKey,
+      );
+    }
+  } catch {
+    try {
+      sessionStorage.removeItem(storageKey);
+    } catch {
+      // Ignore browser storage errors.
+    }
+  }
+}
 
 function requireRecord(
   value: unknown,
@@ -281,6 +387,20 @@ function validateInventoryItemId(inventoryItemId: string): string {
   return normalizedId;
 }
 
+function validateInventoryRequestId(
+  requestId: string,
+): string {
+  const normalizedId = requestId.trim();
+
+  if (!UUID_PATTERN.test(normalizedId)) {
+    throw new Error(
+      "A valid inventory request ID is required.",
+    );
+  }
+
+  return normalizedId;
+}
+
 function normalizeReason(
   reason: string | undefined,
   required: boolean,
@@ -342,48 +462,102 @@ export async function receiveInventoryStock({
   inventoryItemId,
   quantity,
   reason,
+  requestId,
 }: ReceiveInventoryStockInput): Promise<InventoryStockChangeResult> {
-  const normalizedId = validateInventoryItemId(inventoryItemId);
+  const normalizedId =
+    validateInventoryItemId(inventoryItemId);
 
-  if (!Number.isFinite(quantity) || quantity <= 0) {
-    throw new Error("Quantity received must be greater than zero.");
+  const normalizedRequestId =
+    validateInventoryRequestId(requestId);
+
+  if (
+    !Number.isFinite(quantity) ||
+    quantity <= 0
+  ) {
+    throw new Error(
+      "Quantity received must be greater than zero.",
+    );
   }
 
-  const normalizedReason = normalizeReason(reason, false);
-  const { data, error } = await supabase.rpc("receive_inventory_stock", {
-    p_inventory_item_id: normalizedId,
-    p_quantity: quantity,
-    p_reason: normalizedReason,
-  });
+  const normalizedReason =
+    normalizeReason(reason, false);
+
+  const { data, error } =
+    await supabase.rpc(
+      "receive_inventory_stock",
+      {
+        p_inventory_item_id:
+          normalizedId,
+        p_quantity: quantity,
+        p_reason: normalizedReason,
+        p_request_id:
+          normalizedRequestId,
+      },
+    );
 
   if (error) {
-    throw new Error(`Unable to receive inventory stock: ${error.message}`);
+    throw new Error(
+      `Unable to receive inventory stock: ${error.message}`,
+    );
   }
 
-  return mapStockChangeResult(data, "receiving");
+  return mapStockChangeResult(
+    data,
+    "receiving",
+  );
 }
 
 export async function adjustInventoryStock({
   inventoryItemId,
   quantityChange,
   reason,
+  requestId,
 }: AdjustInventoryStockInput): Promise<InventoryStockChangeResult> {
-  const normalizedId = validateInventoryItemId(inventoryItemId);
+  const normalizedId =
+    validateInventoryItemId(
+      inventoryItemId,
+    );
 
-  if (!Number.isFinite(quantityChange) || quantityChange === 0) {
-    throw new Error("Adjustment quantity must be greater than zero.");
+  const normalizedRequestId =
+    validateInventoryRequestId(
+      requestId,
+    );
+
+  if (
+    !Number.isFinite(quantityChange) ||
+    quantityChange === 0
+  ) {
+    throw new Error(
+      "Adjustment quantity must not be zero.",
+    );
   }
 
-  const normalizedReason = normalizeReason(reason, true);
-  const { data, error } = await supabase.rpc("adjust_inventory_stock", {
-    p_inventory_item_id: normalizedId,
-    p_quantity_change: quantityChange,
-    p_reason: normalizedReason,
-  });
+  const normalizedReason =
+    normalizeReason(reason, true);
+
+  const { data, error } =
+    await supabase.rpc(
+      "adjust_inventory_stock",
+      {
+        p_inventory_item_id:
+          normalizedId,
+        p_quantity_change:
+          quantityChange,
+        p_reason:
+          normalizedReason,
+        p_request_id:
+          normalizedRequestId,
+      },
+    );
 
   if (error) {
-    throw new Error(`Unable to adjust inventory stock: ${error.message}`);
+    throw new Error(
+      `Unable to adjust inventory stock: ${error.message}`,
+    );
   }
 
-  return mapStockChangeResult(data, "adjustment");
+  return mapStockChangeResult(
+    data,
+    "adjustment",
+  );
 }

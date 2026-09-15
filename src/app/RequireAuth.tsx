@@ -35,13 +35,14 @@ export function RequireAuth({
    */
   if (loading) {
     return (
-      <div className="flex h-full items-center justify-center bg-background p-6">
-        <div className="flex flex-col items-center gap-3 text-center">
+      <div className="auth-status-page flex h-full items-center justify-center bg-background p-4 sm:p-6">
+        <div role="status" className="auth-status-card flex w-full max-w-sm flex-col items-center gap-3 rounded-xl border border-border bg-white p-6 text-center">
           <div className="h-9 w-9 animate-spin rounded-full border-[3px] border-primary/20 border-t-primary" />
 
-          <p className="text-sm font-bold text-foreground">
+          <p className="text-base font-bold text-foreground">
             Checking your account…
           </p>
+          <p className="text-sm text-muted-foreground">Please wait while your session is restored.</p>
         </div>
       </div>
     );

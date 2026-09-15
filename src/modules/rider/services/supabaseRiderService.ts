@@ -365,7 +365,8 @@ export async function acceptRiderOffer(
   const { data, error } = await supabase.rpc(
     "accept_rider_offer",
     {
-      p_assignment_id: normalizedId,
+      p_assignment_id:
+        normalizedId,
     },
   );
 
@@ -641,6 +642,9 @@ export async function fetchRiderProfile():
 
 export async function advanceRiderDelivery(
   assignmentId: string,
+  expectedAssignmentStatus:
+    | "accepted"
+    | "picked_up",
 ): Promise<AdvanceRiderDeliveryResult> {
   const normalizedId =
     assignmentId.trim();
@@ -657,6 +661,8 @@ export async function advanceRiderDelivery(
       {
         p_assignment_id:
           normalizedId,
+        p_expected_assignment_status:
+          expectedAssignmentStatus,
       },
     );
 

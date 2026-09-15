@@ -180,11 +180,21 @@ export async function fetchKdsQueue(
 export async function advanceKdsOrder(
   credential: KdsTerminalCredential,
   databaseOrderId: string,
+  expectedStatus: KdsOrderStatus,
 ): Promise<AdvanceKdsOrderResult> {
   const terminalId = credential.terminalId.trim();
   const terminalSecret =
     credential.terminalSecret.trim();
   const orderId = databaseOrderId.trim();
+
+  if (
+  expectedStatus !== "confirmed" &&
+  expectedStatus !== "preparing"
+) {
+  throw new Error(
+    "Only confirmed or preparing kitchen orders can be advanced.",
+  );
+}
 
   if (!terminalId || !terminalSecret) {
     throw new Error(
@@ -204,6 +214,7 @@ export async function advanceKdsOrder(
       p_terminal_id: terminalId,
       p_terminal_secret: terminalSecret,
       p_order_id: orderId,
+      p_expected_status: expectedStatus,
     },
   );
 

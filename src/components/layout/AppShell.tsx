@@ -393,13 +393,13 @@ export function AppShell<T extends string>({
             </DropdownMenu>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="hidden min-h-11 items-center gap-1.5 rounded-lg px-2 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:flex">
+                <button aria-label={`Account: ${user.name}, ${user.role}`} className="flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-xl px-2 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
                   <div className="w-7 h-7 rounded-full bg-primary/15 flex items-center justify-center flex-shrink-0">
                     <span className="text-[10px] font-bold text-primary">
                       {user.name.charAt(0)}
                     </span>
                   </div>
-                  <span className="text-xs font-semibold text-foreground">
+                  <span className="hidden max-w-36 truncate text-sm font-semibold text-foreground sm:block">
                     {user.name.split(" ")[0]}
                   </span>
                   <ChevronDown className="w-3 h-3 text-muted-foreground" />
@@ -407,18 +407,18 @@ export function AppShell<T extends string>({
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
-                className="w-52 rounded-xl border-border/80 p-2 shadow-xl"
+                className="w-64 max-w-[calc(100vw-2rem)] rounded-xl border-border p-2 shadow-md"
               >
                 <DropdownMenuLabel>
-                  <span className="block text-xs">{user.name}</span>
-                  <span className="text-[10px] font-normal text-muted-foreground">
+                  <span className="block break-words text-sm font-bold">{user.name}</span>
+                  <span className="mt-1 block text-sm font-normal text-muted-foreground">
                     {user.role}
                   </span>
                 </DropdownMenuLabel>
                 {onLogout && (
                   <>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem variant="destructive" onSelect={onLogout}>
+                    <DropdownMenuItem className="min-h-11 rounded-lg px-3 text-sm font-semibold" variant="destructive" onSelect={onLogout}>
                       <LogOut className="h-4 w-4" />
                       Log out
                     </DropdownMenuItem>

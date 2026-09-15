@@ -93,7 +93,7 @@ export function KitchenQueue() {
     setError("");
 
     try {
-      const result = await advanceKdsOrder(credential, ticket.databaseId);
+      const result = await advanceKdsOrder(credential, ticket.databaseId, ticket.status );
 
       const nextStatus =
         result.currentStatus === "preparing" ? "Preparing" : "Ready";

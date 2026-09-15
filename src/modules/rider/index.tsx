@@ -889,8 +889,18 @@ function DeliveryDetailScreen({
   setError("");
 
   try {
+    if (
+      delivery.assignmentStatus !== "accepted" &&
+      delivery.assignmentStatus !== "picked_up"
+    ) {
+      throw new Error(
+        "This delivery cannot be advanced from its current status.",
+      );
+    }
+
     await advanceRiderDelivery(
       delivery.assignmentId,
+      delivery.assignmentStatus,
     );
 
     const nextDelivery =

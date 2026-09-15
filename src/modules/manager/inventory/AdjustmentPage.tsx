@@ -3,7 +3,9 @@ import { CheckCircle, Sliders } from "lucide-react";
 import { Button } from "../../../components/common/Button";
 import {
   adjustInventoryStock,
+  clearInventoryMutationRequestId,
   getManagerInventory,
+  getOrCreateInventoryMutationRequestId,
   type InventoryStockChangeResult,
   type ManagerInventoryItem,
 } from "./inventoryApi";
@@ -95,6 +97,8 @@ export function AdjustmentPage({
     !isSaving;
 
   const resetForm = () => {
+    clearInventoryMutationRequestId("adjustment");
+
     setSelectedItemId("");
     setAdjustmentType("add");
     setQuantity("");
@@ -127,32 +131,56 @@ export function AdjustmentPage({
       return;
     }
 
-    setIsSaving(true);
-    setSaveError("");
-    setResult(null);
+const requestFingerprint = JSON.stringify({
+  operation: "adjustment",
+  inventoryItemId: selectedItem.id,
+  quantityChange: signedQuantityChange,
+  reason: combinedReason,
+});
 
-    try {
-      const authoritativeResult = await adjustInventoryStock({
-        inventoryItemId: selectedItem.id,
-        quantityChange: signedQuantityChange,
-        reason: combinedReason,
-      });
+const requestId =
+  getOrCreateInventoryMutationRequestId(
+    "adjustment",
+    requestFingerprint,
+  );
 
-      setResult(authoritativeResult);
-      setSelectedItemId("");
-      setAdjustmentType("add");
-      setQuantity("");
-      setReason("");
-      setNote("");
-      await loadInventory(false);
-    } catch (caught) {
-      setSaveError(
-        getErrorMessage(caught, "Unable to adjust inventory stock."),
-      );
-    } finally {
-      setIsSaving(false);
-    }
-  };
+setIsSaving(true);
+setSaveError("");
+setResult(null);
+
+try {
+  const authoritativeResult =
+    await adjustInventoryStock({
+      inventoryItemId: selectedItem.id,
+      quantityChange: signedQuantityChange,
+      reason: combinedReason,
+      requestId,
+    });
+
+  clearInventoryMutationRequestId(
+    "adjustment",
+    requestId,
+  );
+
+  setResult(authoritativeResult);
+  setSelectedItemId("");
+  setAdjustmentType("add");
+  setQuantity("");
+  setReason("");
+  setNote("");
+
+  await loadInventory(false);
+} catch (caught) {
+  setSaveError(
+    getErrorMessage(
+      caught,
+      "Unable to adjust inventory stock.",
+    ),
+  );
+} finally {
+  setIsSaving(false);
+}
+};
 
   return (
     <div className="inventory-workspace-page max-w-4xl">

@@ -1,29 +1,12 @@
-import {
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import {
-  useNavigate,
-} from "react-router";
-import type {
-  Session as SupabaseSession,
-} from "@supabase/supabase-js";
-import {
-  AlertCircle,
-  CheckCircle,
-  Loader2,
-  Lock,
-  UtensilsCrossed,
-} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router";
+import type { Session as SupabaseSession } from "@supabase/supabase-js";
+import { AlertCircle, CheckCircle, Loader2 } from "lucide-react";
 
 import { supabase } from "@/lib/supabase";
+import rrjLogo from "@/assets/brand/rrj-logo.jpg";
 
-type AuthenticationStep =
-  | "credentials"
-  | "permissions"
-  | "workspace"
-  | "error";
+type AuthenticationStep = "credentials" | "permissions" | "workspace" | "error";
 
 type StaffRole = "manager" | "cashier";
 
@@ -33,77 +16,47 @@ interface StaffProfile {
   is_active: boolean;
 }
 
-const STAFF_ROLES: StaffRole[] = [
-  "manager",
-  "cashier",
-];
+const STAFF_ROLES: StaffRole[] = ["manager", "cashier"];
 
-function isStaffRole(
-  role: unknown,
-): role is StaffRole {
-  return STAFF_ROLES.includes(
-    role as StaffRole,
-  );
+function isStaffRole(role: unknown): role is StaffRole {
+  return STAFF_ROLES.includes(role as StaffRole);
 }
 
 export function AuthenticatingPage() {
   const navigate = useNavigate();
 
-  const [step, setStep] =
-    useState<AuthenticationStep>(
-      "credentials",
-    );
+  const [step, setStep] = useState<AuthenticationStep>("credentials");
 
-  const [errorMessage, setErrorMessage] =
-    useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   /*
    * Prevent getSession and onAuthStateChange from
    * processing the same login twice.
    */
-  const authenticationHandled =
-    useRef(false);
+  const authenticationHandled = useRef(false);
 
   useEffect(() => {
     let isMounted = true;
 
-    let redirectTimer:
-      | number
-      | undefined;
+    let redirectTimer: number | undefined;
 
-    let sessionTimeout:
-      | number
-      | undefined;
+    let sessionTimeout: number | undefined;
 
-    const returnToStaffPortal = (
-      notice = "unauthorized",
-    ): void => {
-      redirectTimer = window.setTimeout(
-        () => {
-          navigate(
-            `/auth?notice=${notice}`,
-            {
-              replace: true,
-            },
-          );
-        },
-        1500,
-      );
+    const returnToStaffPortal = (notice = "unauthorized"): void => {
+      redirectTimer = window.setTimeout(() => {
+        navigate(`/auth?notice=${notice}`, {
+          replace: true,
+        });
+      }, 1500);
     };
 
-    const denyAccess = async (
-      message: string,
-    ): Promise<void> => {
-      const { error } =
-        await supabase.auth.signOut({
-          scope: "local",
-        });
+    const denyAccess = async (message: string): Promise<void> => {
+      const { error } = await supabase.auth.signOut({
+        scope: "local",
+      });
 
       if (error) {
-        console.error(
-          "Unable to clear unauthorized session:",
-          error.message,
-        );
+        console.error("Unable to clear unauthorized session:", error.message);
       }
 
       if (!isMounted) {
@@ -116,14 +69,9 @@ export function AuthenticatingPage() {
     };
 
     const inspectSession = async (
-      authSession:
-        | SupabaseSession
-        | null,
+      authSession: SupabaseSession | null,
     ): Promise<void> => {
-      if (
-        !isMounted ||
-        authenticationHandled.current
-      ) {
+      if (!isMounted || authenticationHandled.current) {
         return;
       }
 
@@ -136,8 +84,7 @@ export function AuthenticatingPage() {
         return;
       }
 
-      authenticationHandled.current =
-        true;
+      authenticationHandled.current = true;
 
       setStep("permissions");
 
@@ -145,10 +92,7 @@ export function AuthenticatingPage() {
        * Read the role belonging to the exact Google account
        * that Supabase authenticated.
        */
-      const {
-        data,
-        error,
-      } = await supabase
+      const { data, error } = await supabase
         .from("profiles")
         .select(
           `
@@ -157,10 +101,7 @@ export function AuthenticatingPage() {
             is_active
           `,
         )
-        .eq(
-          "id",
-          authSession.user.id,
-        )
+        .eq("id", authSession.user.id)
         .maybeSingle();
 
       if (!isMounted) {
@@ -168,10 +109,7 @@ export function AuthenticatingPage() {
       }
 
       if (error) {
-        console.error(
-          "Unable to read staff profile:",
-          error.message,
-        );
+        console.error("Unable to read staff profile:", error.message);
 
         await denyAccess(
           "Your Google account was verified, but its staff profile could not be loaded.",
@@ -180,8 +118,7 @@ export function AuthenticatingPage() {
         return;
       }
 
-      const profile =
-        data as StaffProfile | null;
+      const profile = data as StaffProfile | null;
 
       if (!profile) {
         await denyAccess(
@@ -212,52 +149,38 @@ export function AuthenticatingPage() {
        */
       setStep("workspace");
 
-      redirectTimer = window.setTimeout(
-        () => {
-          navigate(
-            `/${profile.role}`,
-            {
-              replace: true,
-            },
-          );
-        },
-        650,
-      );
+      redirectTimer = window.setTimeout(() => {
+        navigate(`/${profile.role}`, {
+          replace: true,
+        });
+      }, 650);
     };
 
-    const initializeAuthentication =
-      async (): Promise<void> => {
-        const {
-          data: { session },
-          error,
-        } =
-          await supabase.auth.getSession();
+    const initializeAuthentication = async (): Promise<void> => {
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession();
 
-        if (!isMounted) {
-          return;
-        }
+      if (!isMounted) {
+        return;
+      }
 
-        if (error) {
-          console.error(
-            "Unable to restore OAuth session:",
-            error.message,
-          );
+      if (error) {
+        console.error("Unable to restore OAuth session:", error.message);
 
-          authenticationHandled.current =
-            true;
+        authenticationHandled.current = true;
 
-          setErrorMessage(
-            "The Google login session could not be restored.",
-          );
+        setErrorMessage("The Google login session could not be restored.");
 
-          setStep("error");
-          returnToStaffPortal();
+        setStep("error");
+        returnToStaffPortal();
 
-          return;
-        }
+        return;
+      }
 
-        await inspectSession(session);
-      };
+      await inspectSession(session);
+    };
 
     /*
      * Supabase may finish detecting the OAuth session
@@ -265,16 +188,11 @@ export function AuthenticatingPage() {
      */
     const {
       data: { subscription },
-    } =
-      supabase.auth.onAuthStateChange(
-        (_event, nextSession) => {
-          window.setTimeout(() => {
-            void inspectSession(
-              nextSession,
-            );
-          }, 0);
-        },
-      );
+    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      window.setTimeout(() => {
+        void inspectSession(nextSession);
+      }, 0);
+    });
 
     void initializeAuthentication();
 
@@ -282,25 +200,18 @@ export function AuthenticatingPage() {
      * Avoid leaving the user on an endless loading screen
      * when the OAuth callback contains no valid session.
      */
-    sessionTimeout =
-      window.setTimeout(() => {
-        if (
-          !isMounted ||
-          authenticationHandled.current
-        ) {
-          return;
-        }
+    sessionTimeout = window.setTimeout(() => {
+      if (!isMounted || authenticationHandled.current) {
+        return;
+      }
 
-        authenticationHandled.current =
-          true;
+      authenticationHandled.current = true;
 
-        setErrorMessage(
-          "No valid Google login session was found.",
-        );
+      setErrorMessage("No valid Google login session was found.");
 
-        setStep("error");
-        returnToStaffPortal();
-      }, 8000);
+      setStep("error");
+      returnToStaffPortal();
+    }, 8000);
 
     return () => {
       isMounted = false;
@@ -308,109 +219,90 @@ export function AuthenticatingPage() {
       subscription.unsubscribe();
 
       if (redirectTimer) {
-        window.clearTimeout(
-          redirectTimer,
-        );
+        window.clearTimeout(redirectTimer);
       }
 
       if (sessionTimeout) {
-        window.clearTimeout(
-          sessionTimeout,
-        );
+        window.clearTimeout(sessionTimeout);
       }
     };
   }, [navigate]);
 
-  const verifyingCredentials =
-    step === "credentials";
+  const verifyingCredentials = step === "credentials";
 
-  const credentialsVerified =
-    step === "permissions" ||
-    step === "workspace";
+  const credentialsVerified = step === "permissions" || step === "workspace";
 
-  const checkingPermissions =
-    step === "permissions";
+  const checkingPermissions = step === "permissions";
 
-  const permissionsVerified =
-    step === "workspace";
+  const permissionsVerified = step === "workspace";
 
-  const loadingWorkspace =
-    step === "workspace";
+  const loadingWorkspace = step === "workspace";
 
   return (
-    <div className="flex min-h-full items-center justify-center bg-background p-6">
-      <div className="flex w-full max-w-xs flex-col items-center gap-7 text-center">
+    <div className="auth-status-page flex min-h-full items-center justify-center bg-background p-4 sm:p-6">
+      <div className="auth-status-card flex w-full max-w-md flex-col items-center gap-5 rounded-xl border border-border bg-white p-5 text-center sm:p-6">
         {/* Brand */}
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-sm">
-            <UtensilsCrossed
-              className="h-4 w-4 text-white"
-              strokeWidth={2.5}
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-black">
+            <img
+              src={rrjLogo}
+              alt="RRJ's Food-Haus logo"
+              className="h-full w-full object-contain"
             />
           </div>
 
           <div className="text-left">
             <div className="text-xl font-bold leading-none tracking-tight text-foreground">
-              RRJ Food-House
+              RRJ's Food-Haus
             </div>
 
-            <div className="mt-0.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-              Management System
+            <div className="mt-1 text-sm text-muted-foreground">
+              Cashier & Manager sign-in
             </div>
           </div>
         </div>
 
         {/* Main indicator */}
         {step !== "error" ? (
-          <div className="relative h-16 w-16">
+          <div className="relative h-11 w-11" aria-hidden="true">
             <div className="absolute inset-0 rounded-full border-4 border-muted" />
 
             <div
               className="absolute inset-0 animate-spin rounded-full border-4 border-primary border-t-transparent"
               style={{
-                animationDuration:
-                  "0.9s",
+                animationDuration: "0.9s",
               }}
             />
-
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Lock className="h-5 w-5 text-primary" />
-            </div>
           </div>
         ) : (
-          <div className="flex h-16 w-16 items-center justify-center rounded-full border border-red-200 bg-red-50">
+          <div
+            className="flex h-11 w-11 items-center justify-center rounded-xl border border-red-200 bg-red-50"
+            aria-hidden="true"
+          >
             <AlertCircle className="h-7 w-7 text-red-500" />
           </div>
         )}
 
         {/* Status heading */}
-        <div>
-          <h2 className="text-lg font-bold text-foreground">
-            {step === "credentials" &&
-              "Authenticating..."}
+        <div role="status">
+          <h1 className="text-xl font-bold text-foreground">
+            {step === "credentials" && "Authenticating..."}
 
-            {step === "permissions" &&
-              "Checking account permissions..."}
+            {step === "permissions" && "Checking account permissions..."}
 
-            {step === "workspace" &&
-              "Access granted"}
+            {step === "workspace" && "Access granted"}
 
-            {step === "error" &&
-              "Access denied"}
-          </h2>
+            {step === "error" && "Access denied"}
+          </h1>
 
           <p className="mt-1 text-sm text-muted-foreground">
-            {step === "credentials" &&
-              "Verifying your Google login session."}
+            {step === "credentials" && "Verifying your Google login session."}
 
-            {step === "permissions" &&
-              "Reading your assigned staff role."}
+            {step === "permissions" && "Reading your assigned staff role."}
 
-            {step === "workspace" &&
-              "Preparing your workspace..."}
+            {step === "workspace" && "Preparing your workspace..."}
 
-            {step === "error" &&
-              "Returning to the Staff Portal..."}
+            {step === "error" && "Returning to the Staff Portal..."}
           </p>
         </div>
 
@@ -419,45 +311,37 @@ export function AuthenticatingPage() {
           <div className="flex w-full flex-col gap-2">
             <StatusRow
               label="Verifying credentials"
-              done={
-                credentialsVerified
-              }
-              active={
-                verifyingCredentials
-              }
+              done={credentialsVerified}
+              active={verifyingCredentials}
             />
 
             <StatusRow
               label="Checking permissions"
-              done={
-                permissionsVerified
-              }
-              active={
-                checkingPermissions
-              }
+              done={permissionsVerified}
+              active={checkingPermissions}
             />
 
             <StatusRow
               label="Loading workspace"
               done={false}
-              active={
-                loadingWorkspace
-              }
+              active={loadingWorkspace}
             />
           </div>
         )}
 
         {/* Error message */}
-        {step === "error" &&
-          errorMessage && (
-            <div className="w-full rounded-xl border border-red-200 bg-red-50 p-4 text-left">
-              <p className="text-xs font-semibold leading-relaxed text-red-700">
-                {errorMessage}
-              </p>
-            </div>
-          )}
+        {step === "error" && errorMessage && (
+          <div
+            role="alert"
+            className="w-full rounded-xl border border-red-200 bg-red-50 p-4 text-left"
+          >
+            <p className="text-sm font-semibold leading-relaxed text-red-800">
+              {errorMessage}
+            </p>
+          </div>
+        )}
 
-        <p className="text-[10px] text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           {step === "error"
             ? "Use a Google account assigned to a manager or cashier."
             : "You will be redirected based on your assigned role."}
@@ -495,7 +379,7 @@ function StatusRow({
       )}
 
       <span
-        className={`text-xs font-medium ${
+        className={`text-sm font-medium ${
           done
             ? "text-green-700"
             : active

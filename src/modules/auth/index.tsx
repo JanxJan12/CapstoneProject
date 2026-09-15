@@ -1,17 +1,7 @@
-import {useEffect,useState,} from "react";
-import {
-  useNavigate,
-  useSearchParams,
-} from "react-router";
+import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router";
 import { AnimatePresence, motion } from "motion/react";
-import {
-  Bike,
-  Clock3,
-  ShieldCheck,
-  ShoppingBag,
-  Sparkles,
-  UsersRound,
-} from "lucide-react";
+import { Bike, ShoppingBag, UsersRound } from "lucide-react";
 import { StaffLoginPage } from "./pages/StaffLoginPage";
 import { CustomerLoginPage } from "./pages/CustomerLoginPage";
 import { RiderLoginPage } from "./pages/RiderLoginPage";
@@ -29,46 +19,46 @@ const SCREEN_TABS: {
   shortLabel: string;
   icon: React.ElementType;
 }[] = [
-  { id: "staff", label: "Staff Portal", shortLabel: "Staff", icon: UsersRound },
-  { id: "customer", label: "Order Online", shortLabel: "Order", icon: ShoppingBag },
-  { id: "rider", label: "Rider Access", shortLabel: "Rider", icon: Bike },
+  { id: "staff", label: "Staff", shortLabel: "Staff", icon: UsersRound },
+  {
+    id: "customer",
+    label: "Customer",
+    shortLabel: "Customer",
+    icon: ShoppingBag,
+  },
+  { id: "rider", label: "Rider", shortLabel: "Rider", icon: Bike },
 ];
 
 export function AuthApp() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const {
-    session,
-    loading,
-  } = useAuth();
+  const { session, loading } = useAuth();
   const [screen, setScreen] = useState<AuthScreen>("staff");
 
   useEffect(() => {
-  const portal = searchParams.get("portal");
+    const portal = searchParams.get("portal");
 
-  if (
-    portal === "staff" ||
-    portal === "customer" ||
-    portal === "rider"
-  ) {
-    setScreen(portal);
-  }
-}, [searchParams]);
+    if (portal === "staff" || portal === "customer" || portal === "rider") {
+      setScreen(portal);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
-  if (loading || !session) {
-    return;
-  }
+    if (loading || !session) {
+      return;
+    }
 
-  navigate(`/${session.role}`, {
-    replace: true,
-  });
-}, [loading, navigate, session]);
+    navigate(`/${session.role}`, {
+      replace: true,
+    });
+  }, [loading, navigate, session]);
 
-  const handleLoginSuccess = ( role: AccountRole, ) => { navigate(`/${role}`); };
+  const handleLoginSuccess = (role: AccountRole) => {
+    navigate(`/${role}`);
+  };
 
   return (
-    <main className="auth-experience">
+    <main className="auth-experience" data-portal={screen}>
       <section className="auth-story" aria-label="About RRJ's Food-Haus">
         <ImageWithFallback
           src={rrjPhoto}
@@ -76,11 +66,6 @@ export function AuthApp() {
           className="auth-story-image"
         />
         <div className="auth-story-shade" />
-        <div className="auth-light-string" aria-hidden="true">
-          {Array.from({ length: 9 }).map((_, index) => (
-            <i key={index} style={{ "--bulb-index": index } as React.CSSProperties} />
-          ))}
-        </div>
 
         <div className="auth-story-content">
           <motion.div
@@ -98,7 +83,11 @@ export function AuthApp() {
             </div>
             <div>
               <p className="auth-brand-name">RRJ's Food-Haus</p>
-              <p className="auth-brand-meta">Halal Filipino comfort food</p>
+              <p className="auth-brand-meta">
+                {screen === "customer"
+                  ? "Welcome to the table"
+                  : "Staff & delivery access"}
+              </p>
             </div>
           </motion.div>
 
@@ -108,24 +97,28 @@ export function AuthApp() {
             transition={{ delay: 0.12, duration: 0.65 }}
             className="auth-story-copy"
           >
-            <div className="auth-open-pill">
-              <span className="auth-open-dot" />
-              Halal kitchen · Welcoming guests since 2021
-            </div>
-            <h1>Good food.<br />Better moments.</h1>
+            <h2>
+              {screen === "customer"
+                ? "Your next meal starts here."
+                : screen === "rider"
+                  ? "Rider access"
+                  : "Cashier & Manager access"}
+            </h2>
             <p>
-              From the kitchen to your doorstep, every RRJ experience starts
-              with care and ends around a shared table.
+              {screen === "customer"
+                ? "Explore the menu, choose your meal, and order when you’re ready."
+                : screen === "rider"
+                  ? "Use your approved rider account to open your delivery workspace."
+                  : "Use your assigned staff account to open your workspace."}
             </p>
-            <div className="auth-story-facts">
-              <span><Clock3 /> Freshly prepared</span>
-              <span><Sparkles /> Made with care</span>
-            </div>
           </motion.div>
         </div>
       </section>
 
-      <section className="auth-workspace" aria-label="Sign in to RRJ's Food-Haus">
+      <section
+        className="auth-workspace"
+        aria-label="Sign in to RRJ's Food-Haus"
+      >
         <header className="auth-workspace-header">
           <div className="auth-mobile-brand">
             <div className="auth-mobile-logo">
@@ -137,14 +130,17 @@ export function AuthApp() {
             </div>
             <div>
               <p>RRJ's Food-Haus</p>
-              <span>Est. 2021</span>
+              <span>Choose your sign-in below</span>
             </div>
           </div>
 
-          <div className="auth-secure-label">
-            <ShieldCheck />
-            Secure access
-          </div>
+          <p className="auth-entry-context">
+            {screen === "customer"
+              ? "Order online"
+              : screen === "rider"
+                ? "Rider sign-in"
+                : "Cashier & Manager sign-in"}
+          </p>
         </header>
 
         <nav className="auth-portal-tabs" aria-label="Choose your portal">
@@ -185,21 +181,26 @@ export function AuthApp() {
               className="min-h-full"
             >
               {screen === "staff" && (
-                <StaffLoginPage onLoginSuccess={(role) => handleLoginSuccess(role)} />
+                <StaffLoginPage
+                  onLoginSuccess={(role) => handleLoginSuccess(role)}
+                />
               )}
               {screen === "customer" && (
-                <CustomerLoginPage onLoginSuccess={(role) => handleLoginSuccess(role)} />
+                <CustomerLoginPage
+                  onLoginSuccess={(role) => handleLoginSuccess(role)}
+                />
               )}
               {screen === "rider" && (
-                <RiderLoginPage onLoginSuccess={(role) => handleLoginSuccess(role)} />
+                <RiderLoginPage
+                  onLoginSuccess={(role) => handleLoginSuccess(role)}
+                />
               )}
             </motion.div>
           </AnimatePresence>
         </div>
 
         <footer className="auth-workspace-footer">
-          <span>© 2021–2026 RRJ's Food-Haus</span>
-          <span>Privacy · Help</span>
+          <span>RRJ's Food-Haus</span>
         </footer>
       </section>
     </main>

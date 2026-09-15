@@ -72,6 +72,84 @@ interface CustomerDatabaseMenuItem {
 const CUSTOMER_CART_STORAGE_KEY = "rrj_customer_cart_v2";
 const CUSTOMER_RESUME_PAGE_STORAGE_KEY ="rrj_customer_resume_page_v1";
 
+const CUSTOMER_ORDER_REQUEST_STORAGE_KEY =
+  "rrj_customer_order_request_v1";
+
+interface StoredCustomerOrderRequest {
+  requestId: string;
+  fingerprint: string;
+}
+
+function getOrCreateCustomerOrderRequestId(
+  fingerprint: string,
+): string {
+  try {
+    const stored = sessionStorage.getItem(
+      CUSTOMER_ORDER_REQUEST_STORAGE_KEY,
+    );
+
+    if (stored) {
+      const parsed = JSON.parse(
+        stored,
+      ) as Partial<StoredCustomerOrderRequest>;
+
+      if (
+        typeof parsed.requestId === "string" &&
+        parsed.requestId.length > 0 &&
+        parsed.fingerprint === fingerprint
+      ) {
+        return parsed.requestId;
+      }
+    }
+  } catch {
+    // Fall through and create a new request ID.
+  }
+
+  const requestId = crypto.randomUUID();
+
+  try {
+    sessionStorage.setItem(
+      CUSTOMER_ORDER_REQUEST_STORAGE_KEY,
+      JSON.stringify({
+        requestId,
+        fingerprint,
+      }),
+    );
+  } catch {
+    // The current in-memory request can still proceed.
+  }
+
+  return requestId;
+}
+
+function clearCustomerOrderRequestId(
+  requestId: string,
+): void {
+  try {
+    const stored = sessionStorage.getItem(
+      CUSTOMER_ORDER_REQUEST_STORAGE_KEY,
+    );
+
+    if (!stored) {
+      return;
+    }
+
+    const parsed = JSON.parse(
+      stored,
+    ) as Partial<StoredCustomerOrderRequest>;
+
+    if (parsed.requestId === requestId) {
+      sessionStorage.removeItem(
+        CUSTOMER_ORDER_REQUEST_STORAGE_KEY,
+      );
+    }
+  } catch {
+    sessionStorage.removeItem(
+      CUSTOMER_ORDER_REQUEST_STORAGE_KEY,
+    );
+  }
+}
+
 const ORDER_STEPS = [
   {
     status: "waiting_payment_verification",
@@ -1084,6 +1162,7 @@ interface PlacedCustomerOrder {
 
 interface PendingCustomerPaymentSubmission {
   order: PlacedCustomerOrder;
+  requestId: string;
   proofImagePath?: string;
 }
 
@@ -1455,46 +1534,107 @@ useEffect(() => {
   orderCreationInFlightRef.current = true;
 
   try {
-    const rpcItems = cart.map((item) => ({
-      id: item.id,
-      qty: item.qty,
-    }));
+const rpcItems = cart.map((item) => ({
+  id: item.id,
+  qty: item.qty,
+}));
 
-    const {
-      data: orderData,
-      error: orderError,
-    } = await supabase.rpc(
-      "place_customer_order",
-      {
-        p_customer_name: cleanName,
-        p_contact_number: cleanContact,
-        p_delivery_address: cleanAddress,
-        p_landmark: landmark.trim() || null,
-        p_items: rpcItems,
-      },
+const requestFingerprint = JSON.stringify({
+  customerName: cleanName,
+  contactNumber: cleanContact,
+  deliveryAddress: cleanAddress,
+  landmark: landmark.trim(),
+  items: [...rpcItems].sort((a, b) =>
+    a.id.localeCompare(b.id),
+  ),
+});
+
+const orderRequestId =
+  getOrCreateCustomerOrderRequestId(
+    requestFingerprint,
+  );
+
+const {
+  data: orderData,
+  error: orderError,
+} = await supabase.rpc(
+  "place_customer_order",
+  {
+    p_customer_name: cleanName,
+    p_contact_number: cleanContact,
+    p_delivery_address: cleanAddress,
+    p_landmark:
+      landmark.trim() || null,
+    p_items: rpcItems,
+    p_request_id: orderRequestId,
+  },
+);
+
+if (orderError) {
+  throw new Error(
+    `Unable to place your order: ${orderError.message}`,
+  );
+}
+
+const orderResult =
+  Array.isArray(orderData) &&
+  orderData.length === 1
+    ? orderData[0]
+    : null;
+
+if (!orderResult) {
+  throw new Error(
+    "The order was submitted but no complete order information was returned.",
+  );
+}
+
+const createdOrder =
+  parsePlacedCustomerOrder(
+    orderResult,
+  );
+
+/*
+ * The same idempotency request may be replayed after
+ * the original order has already moved forward.
+ *
+ * Never create another order for that same request.
+ */
+if (
+  createdOrder.current_status !==
+  "waiting_payment_verification"
+) {
+  clearCustomerOrderRequestId(
+    orderRequestId,
+  );
+
+  if (
+    createdOrder.current_status === "cancelled" ||
+    createdOrder.current_status === "rejected"
+  ) {
+    throw new Error(
+      `Order ${createdOrder.order_number} already exists but can no longer continue. You may create a new order.`,
     );
+  }
 
-    if (orderError) {
-      throw new Error(
-        `Unable to place your order: ${orderError.message}`,
-      );
-    }
+  /*
+   * The original order already progressed.
+   * Treat it as the successful order instead of creating
+   * another checkout attempt.
+   */
+  onOrderPlaced(
+    createdOrder.order_id,
+  );
 
-    const orderResult =
-      Array.isArray(orderData) && orderData.length === 1
-        ? orderData[0]
-        : null;
+  return;
+}
 
-    if (!orderResult) {
-      throw new Error(
-        "The order was submitted but no complete order information was returned.",
-      );
-    }
+setPendingPaymentSubmission({
+  order: createdOrder,
+  requestId: orderRequestId,
+});
 
-    const createdOrder = parsePlacedCustomerOrder(orderResult);
+setStep("upload");
 
-    setPendingPaymentSubmission({ order: createdOrder });
-    setStep("upload");
   } catch (error) {
     console.error("Unable to create customer order:", error);
 
@@ -1727,9 +1867,21 @@ const handlePlaceOrder = async () => {
       );
     }
 
-    setPlacedOrder(submission.order);
-    setPendingPaymentSubmission(null);
-    onOrderPlaced(submission.order.order_id);
+  clearCustomerOrderRequestId(
+    submission.requestId,
+  );
+
+  setPlacedOrder(
+    submission.order,
+  );
+
+  setPendingPaymentSubmission(
+    null,
+  );
+
+  onOrderPlaced(
+    submission.order.order_id,
+  );
   } catch (error) {
     console.error(
       "Unable to complete customer payment submission:",

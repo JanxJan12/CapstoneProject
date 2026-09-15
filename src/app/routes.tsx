@@ -53,8 +53,8 @@ const RiderApp = lazy(() =>
 
 function RouteLoader() {
   return (
-    <div className="flex h-full items-center justify-center bg-background p-6">
-      <div className="flex flex-col items-center text-center">
+    <div className="auth-status-page flex h-full items-center justify-center bg-background p-4 sm:p-6">
+      <div role="status" className="auth-status-card flex w-full max-w-sm flex-col items-center rounded-xl border border-border bg-white p-6 text-center">
         <div className="relative mb-5 h-12 w-12">
           <div className="absolute inset-0 rounded-full border-[3px] border-primary/15" />
 
@@ -65,12 +65,12 @@ function RouteLoader() {
           </span>
         </div>
 
-        <p className="text-xs font-extrabold text-foreground">
-          Preparing your RRJ experience
+        <p className="text-base font-bold text-foreground">
+          Loading your page…
         </p>
 
-        <p className="mt-1 text-[10px] text-muted-foreground">
-          Fresh from the halal kitchen…
+        <p className="mt-1 text-sm text-muted-foreground">
+          Please wait while RRJ's Food-Haus opens.
         </p>
       </div>
     </div>

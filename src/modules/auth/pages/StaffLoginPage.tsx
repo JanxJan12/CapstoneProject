@@ -3,7 +3,6 @@ import { useSearchParams } from "react-router";
 import {
   AlertCircle,
   Loader2,
-  ShieldCheck,
   ShieldOff,
   TimerOff,
   Users,
@@ -26,10 +25,7 @@ interface Props {
 }
 
 export type AuthNotice =
-  | "session-expired"
-  | "unauthorized"
-  | "maintenance"
-  | null;
+  "session-expired" | "unauthorized" | "maintenance" | null;
 
 interface NoticeConfig {
   icon: LucideIcon;
@@ -41,10 +37,7 @@ interface NoticeConfig {
   message: string;
 }
 
-const NOTICE_CONFIG: Record<
-  NonNullable<AuthNotice>,
-  NoticeConfig
-> = {
+const NOTICE_CONFIG: Record<NonNullable<AuthNotice>, NoticeConfig> = {
   "session-expired": {
     icon: TimerOff,
     bg: "bg-amber-50",
@@ -52,8 +45,7 @@ const NOTICE_CONFIG: Record<
     titleColor: "text-amber-800",
     messageColor: "text-amber-700",
     title: "Session Expired",
-    message:
-      "Your session has expired. Sign in again to continue.",
+    message: "Your session has expired. Sign in again to continue.",
   },
 
   unauthorized: {
@@ -64,7 +56,7 @@ const NOTICE_CONFIG: Record<
     messageColor: "text-red-700",
     title: "Access Denied",
     message:
-      "This Google account is not authorized to access the Staff Portal.",
+      "This account cannot access the staff workspace. Sign in with a Google account assigned as Cashier or Manager.",
   },
 
   maintenance: {
@@ -81,11 +73,7 @@ const NOTICE_CONFIG: Record<
 
 function GoogleIcon() {
   return (
-    <svg
-      aria-hidden="true"
-      className="h-5 w-5"
-      viewBox="0 0 24 24"
-    >
+    <svg aria-hidden="true" className="h-5 w-5" viewBox="0 0 24 24">
       <path
         fill="#4285F4"
         d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09Z"
@@ -112,14 +100,11 @@ function GoogleIcon() {
 export function StaffLoginPage(_props: Props) {
   const [searchParams] = useSearchParams();
 
-  const [signingIn, setSigningIn] =
-    useState(false);
+  const [signingIn, setSigningIn] = useState(false);
 
-  const [errorMessage, setErrorMessage] =
-    useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const noticeParam =
-    searchParams.get("notice");
+  const noticeParam = searchParams.get("notice");
 
   const notice: AuthNotice =
     noticeParam === "session-expired" ||
@@ -128,69 +113,59 @@ export function StaffLoginPage(_props: Props) {
       ? noticeParam
       : null;
 
-  const handleGoogleSignIn =
-    async (): Promise<void> => {
-      if (signingIn) {
-        return;
-      }
+  const handleGoogleSignIn = async (): Promise<void> => {
+    if (signingIn) {
+      return;
+    }
 
-      setSigningIn(true);
-      setErrorMessage(null);
+    setSigningIn(true);
+    setErrorMessage(null);
 
-      /*
-       * Remember which portal started the OAuth request.
-       * We will use this when enforcing portal-specific access.
-       */
-      window.sessionStorage.setItem(
-        "rrjs_login_portal",
-        "staff",
-      );
+    /*
+     * Remember which portal started the OAuth request.
+     * We will use this when enforcing portal-specific access.
+     */
+    window.sessionStorage.setItem("rrjs_login_portal", "staff");
 
-      const { error } =
-        await supabase.auth.signInWithOAuth({
-          provider: "google",
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
 
-          options: {
-            /*
-             * After Google verifies the account, Supabase
-             * returns the browser to this authentication route.
-             */
-            redirectTo: `${window.location.origin}/authenticating?portal=staff`,
+      options: {
+        /*
+         * After Google verifies the account, Supabase
+         * returns the browser to this authentication route.
+         */
+        redirectTo: `${window.location.origin}/authenticating?portal=staff`,
 
-            /*
-             * Always show Google's account chooser. This is
-             * useful when customer and staff accounts are signed
-             * in on the same computer.
-             */
-            queryParams: {
-              prompt: "select_account",
-            },
-          },
-        });
+        /*
+         * Always show Google's account chooser. This is
+         * useful when customer and staff accounts are signed
+         * in on the same computer.
+         */
+        queryParams: {
+          prompt: "select_account",
+        },
+      },
+    });
 
-      /*
-       * On success the browser leaves this page, so this block
-       * runs only when Supabase cannot start the OAuth flow.
-       */
-      if (error) {
-        console.error(
-          "Staff Google sign-in failed:",
-          error.message,
-        );
+    /*
+     * On success the browser leaves this page, so this block
+     * runs only when Supabase cannot start the OAuth flow.
+     */
+    if (error) {
+      console.error("Staff Google sign-in failed:", error.message);
 
-        window.sessionStorage.removeItem(
-          "rrjs_login_portal",
-        );
+      window.sessionStorage.removeItem("rrjs_login_portal");
 
-        setErrorMessage(error.message);
-        setSigningIn(false);
-      }
-    };
+      setErrorMessage(error.message);
+      setSigningIn(false);
+    }
+  };
 
   return (
     <div className="auth-page-shell">
-      <div className="auth-form-card w-full max-w-[25rem] overflow-hidden rounded-[1.6rem]">
-        <div className="h-1 bg-gradient-to-r from-amber-700 via-orange-500 to-amber-300" />
+      <div className="auth-form-card w-full max-w-[25rem] overflow-hidden rounded-xl">
+        <div className="h-1 bg-slate-700" />
 
         <div className="p-6 sm:p-8">
           {/* Brand */}
@@ -208,8 +183,8 @@ export function StaffLoginPage(_props: Props) {
                 RRJ&apos;s Food-Haus
               </div>
 
-              <div className="mt-0.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                Management System · Est. 2021
+              <div className="mt-0.5 text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+                Cashier & Manager
               </div>
             </div>
           </div>
@@ -217,25 +192,24 @@ export function StaffLoginPage(_props: Props) {
           {/* Heading */}
           <div className="mb-5">
             <h1 className="text-[22px] font-bold tracking-tight text-foreground">
-              Staff Portal
+              Staff sign-in
             </h1>
 
             <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-              Sign in using the Google account assigned
-              to a manager or cashier.
+              Sign in using the Google account assigned to a manager or cashier.
             </p>
           </div>
 
           {/* Notice */}
           {notice &&
             (() => {
-              const config =
-                NOTICE_CONFIG[notice];
+              const config = NOTICE_CONFIG[notice];
 
               const NoticeIcon = config.icon;
 
               return (
                 <div
+                  role="alert"
                   className={`mb-5 flex items-start gap-3 rounded-xl border px-4 py-3.5 ${config.bg} ${config.border}`}
                 >
                   <NoticeIcon
@@ -243,14 +217,12 @@ export function StaffLoginPage(_props: Props) {
                   />
 
                   <div>
-                    <p
-                      className={`text-sm font-semibold ${config.titleColor}`}
-                    >
+                    <p className={`text-sm font-semibold ${config.titleColor}`}>
                       {config.title}
                     </p>
 
                     <p
-                      className={`mt-0.5 text-xs leading-relaxed ${config.messageColor}`}
+                      className={`mt-0.5 text-sm leading-relaxed ${config.messageColor}`}
                     >
                       {config.message}
                     </p>
@@ -261,7 +233,10 @@ export function StaffLoginPage(_props: Props) {
 
           {/* OAuth error */}
           {errorMessage && (
-            <div className="mb-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3.5">
+            <div
+              role="alert"
+              className="mb-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3.5"
+            >
               <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-red-500" />
 
               <div>
@@ -269,51 +244,12 @@ export function StaffLoginPage(_props: Props) {
                   Sign-in failed
                 </p>
 
-                <p className="mt-0.5 text-xs leading-relaxed text-red-700">
+                <p className="mt-0.5 text-sm leading-relaxed text-red-700">
                   {errorMessage}
                 </p>
               </div>
             </div>
           )}
-
-          {/* Security explanation */}
-          <div className="mb-5 rounded-xl border border-border bg-muted/35 p-4">
-            <div className="flex items-start gap-3">
-              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
-                <ShieldCheck className="h-4 w-4" />
-              </div>
-
-              <div>
-                <p className="text-sm font-bold text-foreground">
-                  Role-based access
-                </p>
-
-                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                  The system will check the account&apos;s
-                  assigned role after Google verifies its
-                  identity.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-4 grid grid-cols-2 gap-2">
-              <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5">
-                <Users className="h-4 w-4 text-violet-600" />
-
-                <span className="text-xs font-bold text-foreground">
-                  Manager
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5">
-                <Users className="h-4 w-4 text-blue-600" />
-
-                <span className="text-xs font-bold text-foreground">
-                  Cashier
-                </span>
-              </div>
-            </div>
-          </div>
 
           {/* Google button */}
           <button
@@ -322,7 +258,8 @@ export function StaffLoginPage(_props: Props) {
               void handleGoogleSignIn();
             }}
             disabled={signingIn}
-            className="flex min-h-12 w-full items-center justify-center gap-3 rounded-xl border border-border bg-white px-4 text-sm font-bold text-foreground shadow-sm transition-colors hover:bg-muted/60 disabled:cursor-not-allowed disabled:opacity-70"
+            aria-busy={signingIn}
+            className="auth-google-button mb-5 flex min-h-12 w-full items-center justify-center gap-3 rounded-xl border border-border bg-white px-4 text-sm font-bold text-foreground shadow-sm transition-colors hover:bg-muted/60 disabled:cursor-not-allowed disabled:opacity-70"
           >
             {signingIn ? (
               <>
@@ -337,9 +274,47 @@ export function StaffLoginPage(_props: Props) {
             )}
           </button>
 
-          <p className="mt-5 text-center text-[11px] leading-relaxed text-muted-foreground">
-            Customers and riders cannot access the
-            management system using this portal.
+          {/* Security explanation */}
+          <div className="mb-5 rounded-xl border border-border bg-muted/35 p-4">
+            <div className="flex items-start gap-3">
+              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
+                <Users className="h-4 w-4" aria-hidden="true" />
+              </div>
+
+              <div>
+                <p className="text-sm font-bold text-foreground">
+                  Role-based access
+                </p>
+
+                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                  The system will check the account&apos;s assigned role after
+                  Google verifies its identity.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5">
+                <Users className="h-4 w-4 text-violet-600" />
+
+                <span className="text-sm font-bold text-foreground">
+                  Manager
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5">
+                <Users className="h-4 w-4 text-blue-600" />
+
+                <span className="text-sm font-bold text-foreground">
+                  Cashier
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <p className="mt-5 text-center text-sm leading-relaxed text-muted-foreground">
+            Customers and riders cannot access the management system using this
+            portal.
           </p>
         </div>
       </div>
