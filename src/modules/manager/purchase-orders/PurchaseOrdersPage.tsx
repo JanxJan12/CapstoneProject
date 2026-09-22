@@ -3,19 +3,25 @@ import { Plus, Check, X } from "lucide-react";
 import { Button } from "../../../components/common/Button";
 import { Table, Td } from "../../../components/common/Table";
 import { StatusBadge } from "../../../components/common/Badge";
-import { purchaseOrders } from "../../../data/mockData";
+import { prototypePurchaseOrders } from "../../../data/mockData";
 
-export function PurchaseOrdersPage() {
-  const [sel, setSel] = useState<typeof purchaseOrders[0] | null>(null);
+/** Prototype reference only. This page is not part of operational Manager routing. */
+export function PrototypePurchaseOrdersPage() {
+  const [sel, setSel] = useState<typeof prototypePurchaseOrders[0] | null>(null);
   return (
+    <div>
+      <div role="note" className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900">
+        <p className="font-bold">Prototype only</p>
+        <p className="mt-1">Fixture data for design reference. No authoritative PO, approval, receiving-report, or database-write workflow is connected.</p>
+      </div>
     <div className="flex gap-4">
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-base font-bold text-foreground">Purchase Orders</h1>
-          <Button variant="primary" size="sm"><Plus className="w-3 h-3" />Create PO</Button>
+          <Button variant="primary" size="sm" disabled><Plus className="w-3 h-3" />Create PO</Button>
         </div>
         <Table headers={["PO Number", "Supplier", "Status", "Items", "Total", "Date", ""]}>
-          {purchaseOrders.map((po) => (
+          {prototypePurchaseOrders.map((po) => (
             <tr key={po.id} onClick={() => setSel(po)} className={`hover:bg-muted/30 cursor-pointer ${sel?.id === po.id ? "bg-red-50/40" : ""}`}>
               <Td><span className="font-mono text-[10px] font-bold text-primary">{po.id}</span></Td>
               <Td className="font-semibold text-xs">{po.supplier}</Td>
@@ -43,11 +49,12 @@ export function PurchaseOrdersPage() {
           </div>
           {sel.status === "pending" && (
             <div className="px-4 py-3 border-t border-border">
-              <Button variant="primary" size="sm" className="w-full"><Check className="w-3 h-3" />Receive PO</Button>
+              <Button variant="primary" size="sm" className="w-full" disabled><Check className="w-3 h-3" />Receive PO</Button>
             </div>
           )}
         </div>
       )}
+    </div>
     </div>
   );
 }

@@ -45,8 +45,15 @@ export type PendingPOSAction =
 export function useWalkInPOSController(
   onDirtyChange: (dirty: boolean) => void,
 ) {
-  const { state, activeShift, createWalkInOrder, holdOrder, removeHeldOrder } =
-    useCashierStore();
+  const {
+    state,
+    activeShift,
+    createWalkInOrder,
+    holdOrder,
+    removeHeldOrder,
+    menuAvailabilityRefreshing,
+    refreshMenuAvailability,
+  } = useCashierStore();
   const draft = useMemo(loadPOSDraft, []);
   const [cart, setCart] = useState<POSCartLine[]>(draft.cart);
   const [category, setCategory] = useState("All");
@@ -212,6 +219,47 @@ export function useWalkInPOSController(
   }, [cart.length, orderTypeSelected, receiptOrder]);
 
   useEffect(() => setActiveSearchIndex(-1), [category, search]);
+
+  const refreshCartAvailability = useCallback(async () => {
+    try {
+      const menuItems = await refreshMenuAvailability();
+      const unavailableNames = [
+        ...new Set(
+          cart
+            .filter(
+              (line) =>
+                !menuItems.find((item) => item.id === line.menuItemId)
+                  ?.available,
+            )
+            .map((line) => line.name),
+        ),
+      ];
+
+      if (unavailableNames.length > 0) {
+        const message = `${unavailableNames.join(", ")} ${
+          unavailableNames.length === 1 ? "is" : "are"
+        } no longer available. Remove the affected item${
+          unavailableNames.length === 1 ? "" : "s"
+        } to continue.`;
+
+        setError(message);
+        Toast.warning("Menu availability changed", {
+          description: message,
+        });
+        return false;
+      }
+
+      return true;
+    } catch {
+      const message =
+        "Unable to confirm current menu availability. Check the connection and try again.";
+      setError(message);
+      Toast.error("Availability check failed", {
+        description: message,
+      });
+      return false;
+    }
+  }, [cart, refreshMenuAvailability]);
 
   const addItem = useCallback(
     (
@@ -764,17 +812,20 @@ const clearCartDraft = useCallback(() => {
   const hideSearch = useCallback(() => {
     setSearch("");
   }, []);
-  const openOrderReview = useCallback(() => {
+  const openOrderReview = useCallback(async () => {
     if (!cart.length) {
       Toast.error("Add an item before reviewing the order.");
+      return;
+    }
+    setError("");
+    if (!(await refreshCartAvailability())) {
       return;
     }
     setSelectedItem(undefined);
     setTransactionState((current) =>
       transitionTransactionState(current, "openReview", true),
     );
-    setError("");
-  }, [cart.length]);
+  }, [cart.length, refreshCartAvailability]);
   const backToOrdering = useCallback(() => {
     if (loading) return;
     setTransactionState((current) =>
@@ -782,7 +833,7 @@ const clearCartDraft = useCallback(() => {
     );
     setError("");
   }, [cart.length, loading]);
-  const continueToPayment = useCallback(() => {
+  const continueToPayment = useCallback(async () => {
     if (!summaryAvailability.canContinue) {
       setError(
         summaryAvailability.disabledReason ??
@@ -791,6 +842,9 @@ const clearCartDraft = useCallback(() => {
       if (values.discountType !== "None" && !values.discountReference?.trim()) {
         window.requestAnimationFrame(() => form.setFocus("discountReference"));
       }
+      return;
+    }
+    if (!(await refreshCartAvailability())) {
       return;
     }
     setError("");
@@ -802,7 +856,7 @@ const clearCartDraft = useCallback(() => {
         values.paymentMethod === "GCash" ? "gcashReference" : "amountTendered",
       ),
     );
-  }, [form, summaryAvailability, values]);
+  }, [form, refreshCartAvailability, summaryAvailability, values]);
   const backToReview = useCallback(() => {
     if (loading) return;
     setError("");
@@ -816,14 +870,14 @@ const clearCartDraft = useCallback(() => {
       return;
     }
     if (!summaryAvailability.canContinue) {
-      openOrderReview();
+      void openOrderReview();
       setError(
         summaryAvailability.disabledReason ??
           "Complete the order information before payment.",
       );
       return;
     }
-    continueToPayment();
+    void continueToPayment();
   }, [
     cart.length,
     continueToPayment,
@@ -904,7 +958,7 @@ const clearCartDraft = useCallback(() => {
         if (transactionState === POSTransactionState.PAYMENT) {
           confirmOrderRef.current?.click();
         } else if (transactionState === POSTransactionState.ORDER_REVIEW) {
-          continueToPayment();
+          void continueToPayment();
         } else {
           beginPayment();
         }
@@ -913,7 +967,7 @@ const clearCartDraft = useCallback(() => {
         if (transactionState === POSTransactionState.PAYMENT) {
           confirmOrderRef.current?.click();
         } else if (transactionState === POSTransactionState.ORDER_REVIEW) {
-          continueToPayment();
+          void continueToPayment();
         } else {
           beginPayment();
         }
@@ -990,7 +1044,7 @@ const clearCartDraft = useCallback(() => {
     closeReceipt,
     receiptPrinted,
     printReceipt,
-    loading,
+    loading: loading || menuAvailabilityRefreshing,
     error,
     setError,
     pendingAction,

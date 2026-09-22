@@ -9,7 +9,11 @@ export type PageId =
   | "reports"
   | "states"
   | "components";
-export type ManagerPage =
+/**
+ * Legacy design-system page IDs used only by disconnected blueprint screens.
+ * The operational Manager app owns its route union in modules/manager/index.tsx.
+ */
+export type PrototypeManagerPage =
   | "dashboard"
   | "orders"
   | "payments"
@@ -120,7 +124,8 @@ export interface Rider {
   deliveries: number;
 }
 
-export interface Supplier {
+/** Prototype fixture shape; not the authoritative suppliers table contract. */
+export interface PrototypeSupplier {
   id: number;
   name: string;
   contact: string;
@@ -129,17 +134,19 @@ export interface Supplier {
   pos: number;
 }
 
-export interface PurchaseOrderItem {
+/** Prototype fixture shape; not an authoritative PO line or receipt line. */
+export interface PrototypePurchaseOrderItem {
   name: string;
   qty: number;
   unit: string;
   cost: number;
 }
 
-export interface PurchaseOrder {
+/** Prototype fixture shape; no operational PO/RR workflow consumes it. */
+export interface PrototypePurchaseOrder {
   id: string;
   supplier: string;
-  items: PurchaseOrderItem[];
+  items: PrototypePurchaseOrderItem[];
   total: number;
   status: string;
   date: string;

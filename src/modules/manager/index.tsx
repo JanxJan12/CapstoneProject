@@ -14,6 +14,7 @@ import {
   Settings,
   ArrowDownToLine,
   Sliders,
+  Trash2,
 } from "lucide-react";
 import { AppShell } from "../../components/layout/AppShell";
 import type { NavGroup } from "../../types";
@@ -29,6 +30,7 @@ import { ReportsPage } from "./reports/ReportsPage";
 import { SettingsPage } from "./settings/SettingsPage";
 import { StockReceivingPage } from "./inventory/StockReceivingPage";
 import { AdjustmentPage } from "./inventory/AdjustmentPage";
+import { WasteSpoilagePage } from "./inventory/WasteSpoilagePage";
 import type { InventoryWorkspacePage } from "./inventory/InventoryWorkspaceNav";
 
 type ManagerPage =
@@ -40,6 +42,7 @@ type ManagerPage =
   | "inv-transactions"
   | "stock-receiving"
   | "adjustment"
+  | "waste-spoilage"
   | "riders"
   | "customers"
   | "reports"
@@ -65,6 +68,11 @@ const NAV_GROUPS: NavGroup<ManagerPage>[] = [
         icon: ArrowDownToLine,
       },
       { id: "adjustment", label: "Adjustment", icon: Sliders },
+      {
+        id: "waste-spoilage",
+        label: "Waste / Spoilage",
+        icon: Trash2,
+      },
       {
         id: "inv-transactions",
         label: "Inventory Transactions",
@@ -123,6 +131,8 @@ export function ManagerApp() {
         return <StockReceivingPage onNavigate={navigateInventoryWorkspace} />;
       case "adjustment":
         return <AdjustmentPage onNavigate={navigateInventoryWorkspace} />;
+      case "waste-spoilage":
+        return <WasteSpoilagePage onNavigate={navigateInventoryWorkspace} />;
       case "riders":
         return <RidersPage />;
       case "customers":

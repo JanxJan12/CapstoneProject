@@ -91,7 +91,7 @@ export function ReportsPage() {
       <header className="manager-page-header mb-3">
         <h1 className="text-base font-bold text-foreground">Reports</h1>
         <p className="mt-0.5 text-xs text-muted-foreground">
-          Verified-payment revenue and order activity
+          Verified-payment revenue from successfully fulfilled orders
         </p>
       </header>
 
@@ -184,7 +184,7 @@ export function ReportsPage() {
               iconColor="text-green-600"
             />
             <StatCard
-              label="Total Orders"
+              label="Fulfilled Orders"
               value={report.totalOrders.toLocaleString("en-PH")}
               icon={ShoppingCart}
               iconBg="bg-blue-50"
@@ -209,7 +209,7 @@ export function ReportsPage() {
           <div className="rounded-2xl border border-border bg-card p-3.5 shadow-[0_8px_22px_rgba(67,42,23,0.035)]">
             <p className="text-xs font-bold">Daily Sales Performance</p>
             <p className="mb-2.5 mt-0.5 text-[10px] text-muted-foreground">
-              Every date stays on the timeline; zero-sales days remain at the
+              Grouped by fulfillment date; zero-sales days remain at the
               baseline
             </p>
             {report.dailySales.length === 0 ? (

@@ -12,9 +12,16 @@ import { Button } from "@/components/common/Button";
 import { Table, Td } from "@/components/common/Table";
 import {
   getManagerInventory,
+  getManagerInventoryTransactions,
   type InventoryStockStatus,
   type ManagerInventoryItem,
 } from "./inventoryApi";
+import { InventoryReconciliationPanel } from "./InventoryReconciliationPanel";
+import {
+  INVENTORY_RECONCILIATION_TRANSACTION_LIMIT,
+  reconcileInventoryBalances,
+  type InventoryReconciliationReport,
+} from "./inventoryReconciliation";
 import {
   InventoryWorkspaceNav,
   type InventoryWorkspacePage,
@@ -110,21 +117,49 @@ export function InventoryPage({
   onNavigate: (page: InventoryWorkspacePage) => void;
 }) {
   const [items, setItems] = useState<ManagerInventoryItem[]>([]);
+  const [reconciliation, setReconciliation] =
+    useState<InventoryReconciliationReport | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [reconciliationError, setReconciliationError] = useState("");
 
   const loadInventory = useCallback(async () => {
     setIsLoading(true);
     setError("");
+    setReconciliationError("");
 
-    try {
-      setItems(await getManagerInventory());
-    } catch (caught) {
+    const [inventoryResult, transactionsResult] = await Promise.allSettled([
+      getManagerInventory(),
+      getManagerInventoryTransactions(
+        INVENTORY_RECONCILIATION_TRANSACTION_LIMIT,
+      ),
+    ]);
+
+    if (inventoryResult.status === "rejected") {
       setItems([]);
-      setError(getErrorMessage(caught));
-    } finally {
-      setIsLoading(false);
+      setReconciliation(null);
+      setError(getErrorMessage(inventoryResult.reason));
+    } else {
+      setItems(inventoryResult.value);
+
+      if (transactionsResult.status === "rejected") {
+        setReconciliation(null);
+        setReconciliationError(
+          transactionsResult.reason instanceof Error
+            ? transactionsResult.reason.message
+            : "Unable to load inventory transactions for reconciliation.",
+        );
+      } else {
+        setReconciliation(
+          reconcileInventoryBalances(
+            inventoryResult.value,
+            transactionsResult.value,
+          ),
+        );
+      }
     }
+
+    setIsLoading(false);
   }, []);
 
   useEffect(() => {
@@ -381,6 +416,14 @@ export function InventoryPage({
           ))}
         </Table>
       )}
+
+      {!error ? (
+        <InventoryReconciliationPanel
+          report={reconciliation}
+          isLoading={isLoading}
+          error={reconciliationError}
+        />
+      ) : null}
     </div>
   );
 }

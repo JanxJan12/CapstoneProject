@@ -1,3 +1,5 @@
+> **Historical prototype brief:** This document is a design reference, not a description of the current operational system. Supplier, Purchase Order, formal Receiving Report, PO receipt, batch/lot, and FIFO workflows are not implemented. Current receiving records aggregate inventory stock directly.
+
 Transform the current RRJ Food-House Management System prototype into a fully connected, production-quality application prototype. Do not redesign the existing visual identity—the current red, white, and black branding, typography, spacing, cards, and overall design language should remain consistent. Instead, improve the functionality, realism, and connectivity of every module.
 
 The goal is to make this prototype feel like a complete restaurant management system that could realistically be deployed, where every screen is part of the same application and every action affects the rest of the system.

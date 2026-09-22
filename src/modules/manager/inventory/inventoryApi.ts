@@ -40,7 +40,7 @@ export interface InventoryStockChangeResult {
   inventoryItemId: string;
   itemName: string;
   unit: string;
-  transactionType: "receiving" | "adjustment";
+  transactionType: "receiving" | "adjustment" | "waste";
   quantityChange: number;
   quantityBefore: number;
   quantityAfter: number;
@@ -63,6 +63,13 @@ export interface AdjustInventoryStockInput {
   requestId: string;
 }
 
+export interface RecordInventoryWasteInput {
+  inventoryItemId: string;
+  quantity: number;
+  reason: string;
+  requestId: string;
+}
+
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -76,7 +83,8 @@ const TRANSACTION_TYPES = new Set<InventoryTransactionType>([
 
 export type InventoryMutationKind =
   | "receiving"
-  | "adjustment";
+  | "adjustment"
+  | "waste";
 
 interface StoredInventoryMutationRequest {
   requestId: string;
@@ -345,7 +353,7 @@ function mapInventoryTransaction(value: unknown): ManagerInventoryTransaction {
 
 function mapStockChangeResult(
   value: unknown,
-  expectedType: "receiving" | "adjustment",
+  expectedType: "receiving" | "adjustment" | "waste",
 ): InventoryStockChangeResult {
   const row = requireRecord(value, "inventory stock change result");
   const transactionType = requireTransactionType(row.transaction_type);
@@ -560,4 +568,84 @@ export async function adjustInventoryStock({
     data,
     "adjustment",
   );
+}
+
+function getWasteMutationError(message: string): string {
+  const normalizedMessage = message.toLowerCase();
+
+  if (
+    normalizedMessage.includes("authentication required") ||
+    normalizedMessage.includes("active manager access required")
+  ) {
+    return "Active Manager access is required to record waste/spoilage.";
+  }
+
+  if (
+    normalizedMessage.includes("already used for a different stock mutation")
+  ) {
+    return "This request was already used for another stock change. Reset the form and try again.";
+  }
+
+  if (normalizedMessage.includes("inventory item not found")) {
+    return "The selected inventory item no longer exists. Refresh inventory and try again.";
+  }
+
+  if (normalizedMessage.includes("inactive inventory items")) {
+    return "Waste/spoilage cannot be recorded for an inactive inventory item.";
+  }
+
+  if (normalizedMessage.includes("exceeds available stock")) {
+    return "Waste quantity exceeds the currently available stock. Refresh inventory and try again.";
+  }
+
+  if (normalizedMessage.includes("finite number greater than zero")) {
+    return "Waste quantity must be a valid number greater than zero.";
+  }
+
+  if (normalizedMessage.includes("three decimal places")) {
+    return "Waste quantity must not use more than three decimal places.";
+  }
+
+  if (normalizedMessage.includes("reason is required")) {
+    return "A waste/spoilage reason is required.";
+  }
+
+  if (normalizedMessage.includes("must not exceed 300 characters")) {
+    return "Waste/spoilage reason must not exceed 300 characters.";
+  }
+
+  return "Unable to record waste/spoilage. Check your connection and try again.";
+}
+
+export async function recordInventoryWaste({
+  inventoryItemId,
+  quantity,
+  reason,
+  requestId,
+}: RecordInventoryWasteInput): Promise<InventoryStockChangeResult> {
+  const normalizedId = validateInventoryItemId(inventoryItemId);
+  const normalizedRequestId = validateInventoryRequestId(requestId);
+
+  if (!Number.isFinite(quantity) || quantity <= 0) {
+    throw new Error("Waste quantity must be greater than zero.");
+  }
+
+  const normalizedReason = normalizeReason(reason, false);
+
+  if (!normalizedReason) {
+    throw new Error("A waste/spoilage reason is required.");
+  }
+
+  const { data, error } = await supabase.rpc("record_inventory_waste", {
+    p_inventory_item_id: normalizedId,
+    p_quantity: quantity,
+    p_reason: normalizedReason,
+    p_request_id: normalizedRequestId,
+  });
+
+  if (error) {
+    throw new Error(getWasteMutationError(error.message));
+  }
+
+  return mapStockChangeResult(data, "waste");
 }

@@ -1,3 +1,5 @@
+> **Historical design blueprint:** This document records proposed screens, not current operational capability. Supplier, Purchase Order, formal Receiving Report, PO receipt, batch/lot, and FIFO workflows are not implemented. Current receiving records aggregate inventory stock directly.
+
 Create a complete UI/UX blueprint for the RRJ Food-House Management System based on the approved capstone manuscript.
 
 Project Title:

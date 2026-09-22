@@ -107,7 +107,7 @@ function SparkAreaChart({ data }: { data: ManagerDailySale[] }) {
       width="100%"
       height={height}
       role="img"
-      aria-label="Verified revenue for the last seven calendar days"
+      aria-label="Verified fulfilled revenue for the last seven calendar days"
     >
       {[0, 0.5, 1].map((tick, index) => {
         const y = paddingTop + innerHeight - tick * innerHeight;
@@ -499,7 +499,7 @@ export function ManagerDashboard() {
                 Business snapshot
               </h2>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                Secondary performance view from verified payments
+                Verified payments on successfully fulfilled orders
               </p>
             </div>
             <div className="grid gap-4 p-4 lg:grid-cols-[240px_minmax(0,1fr)] lg:items-center">
@@ -507,7 +507,7 @@ export function ManagerDashboard() {
                 <div className="rounded-xl border border-border/80 bg-muted/25 p-3">
                   <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground">
                     <DollarSign className="h-4 w-4 text-emerald-700" />
-                    Verified sales today
+                    Verified fulfilled sales today
                   </div>
                   <p className="mt-2 font-['Fraunces'] text-xl font-bold tabular-nums text-foreground">
                     {formatCurrency(dashboard.salesToday)}
@@ -525,7 +525,7 @@ export function ManagerDashboard() {
               </div>
               <div className="min-w-0">
                 <p className="mb-1 text-xs font-bold text-muted-foreground">
-                  Verified revenue · Last 7 calendar days
+                  Verified fulfilled revenue · Last 7 fulfillment dates
                 </p>
                 <SparkAreaChart data={dashboard.dailySales} />
               </div>

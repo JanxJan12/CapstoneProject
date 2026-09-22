@@ -50,6 +50,47 @@ export interface ManagerRider {
   lastAssignedAt: string | null;
 }
 
+export interface ManagerRiderApplication {
+  id: string;
+  name: string;
+  contactNumber: string | null;
+
+  validIdPath: string | null;
+  validIdUrl: string | null;
+
+  orCrDocumentPath: string | null;
+  orCrDocumentUrl: string | null;
+
+  riderPhotoPath: string | null;
+  riderPhotoUrl: string | null;
+
+  driverLicenseNumber: string | null;
+  plateNumber: string | null;
+  motorBrand: string | null;
+  motorModel: string | null;
+
+  approvalStatus: ManagerRiderApprovalStatus;
+  availabilityStatus: ManagerRiderAvailabilityStatus;
+
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ManagerRiderApprovalResult {
+  riderId: string;
+  approvalStatus: ManagerRiderApprovalStatus;
+  availabilityStatus: ManagerRiderAvailabilityStatus;
+  profileRole:
+    | "customer"
+    | "cashier"
+    | "manager"
+    | "rider";
+  updatedAt: string;
+}
+
+const RIDER_DOCUMENT_SIGNED_URL_EXPIRY_SECONDS = 300;
+
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -268,6 +309,124 @@ function mapRider(value: unknown): ManagerRider {
   };
 }
 
+function mapRiderApplication(
+  value: unknown,
+): Omit<
+  ManagerRiderApplication,
+  | "validIdUrl"
+  | "orCrDocumentUrl"
+  | "riderPhotoUrl"
+> {
+  const row = requireRecord(
+    value,
+    "manager rider application",
+  );
+
+  return {
+    id: requireUuid(
+      row.id,
+      "rider application ID",
+    ),
+
+    name: requireString(
+      row.rider_name,
+      "rider name",
+    ),
+
+    contactNumber: optionalString(
+      row.contact_number,
+      "rider contact number",
+    ),
+
+    validIdPath: optionalString(
+      row.valid_id_path,
+      "valid ID path",
+    ),
+
+    orCrDocumentPath: optionalString(
+      row.or_cr_document_path,
+      "OR/CR document path",
+    ),
+
+    riderPhotoPath: optionalString(
+      row.rider_photo_path,
+      "rider photo path",
+    ),
+
+    driverLicenseNumber: optionalString(
+      row.driver_license_number,
+      "driver license number",
+    ),
+
+    plateNumber: optionalString(
+      row.plate_number,
+      "plate number",
+    ),
+
+    motorBrand: optionalString(
+      row.motor_brand,
+      "motor brand",
+    ),
+
+    motorModel: optionalString(
+      row.motor_model,
+      "motor model",
+    ),
+
+    approvalStatus: requireEnum(
+      row.approval_status,
+      RIDER_APPROVAL_STATUSES,
+      "rider approval status",
+    ),
+
+    availabilityStatus: requireEnum(
+      row.availability_status,
+      RIDER_AVAILABILITY_STATUSES,
+      "rider availability status",
+    ),
+
+    isActive: requireBoolean(
+      row.is_active,
+      "rider active state",
+    ),
+
+    createdAt: requireTimestamp(
+      row.created_at,
+      "rider application creation date",
+    ),
+
+    updatedAt: requireTimestamp(
+      row.updated_at,
+      "rider application update date",
+    ),
+  };
+}
+
+async function createRiderDocumentSignedUrl(
+  path: string | null,
+): Promise<string | null> {
+  if (!path) {
+    return null;
+  }
+
+  const { data, error } = await supabase.storage
+    .from("rider-documents")
+    .createSignedUrl(
+      path,
+      RIDER_DOCUMENT_SIGNED_URL_EXPIRY_SECONDS,
+    );
+
+  if (error || !data?.signedUrl) {
+    throw new Error(
+      `Unable to open rider document: ${
+        error?.message ?? "No signed URL was returned."
+      }`,
+    );
+  }
+
+  return data.signedUrl;
+}
+
 export async function getManagerMenuItems(): Promise<ManagerMenuItem[]> {
   const { data, error } = await supabase.rpc("get_manager_menu_items");
 
@@ -330,4 +489,155 @@ export async function getManagerRiders(): Promise<ManagerRider[]> {
   }
 
   return requireList(data, "manager rider list").map(mapRider);
+}
+
+
+export async function getManagerRiderApplication(
+  riderId: string,
+): Promise<ManagerRiderApplication> {
+  const normalizedId = requireUuid(
+    riderId,
+    "rider ID",
+  );
+
+  const { data, error } = await supabase.rpc(
+    "get_manager_rider_application",
+    {
+      p_rider_id: normalizedId,
+    },
+  );
+
+  if (error) {
+    throw new Error(
+      `Unable to load rider application: ${error.message}`,
+    );
+  }
+
+  const row = requireList(
+    data,
+    "manager rider application result",
+  )[0];
+
+  if (!row) {
+    throw new Error(
+      "The rider application was not found.",
+    );
+  }
+
+  const application =
+    mapRiderApplication(row);
+
+  const [
+    validIdUrl,
+    orCrDocumentUrl,
+    riderPhotoUrl,
+  ] = await Promise.all([
+    createRiderDocumentSignedUrl(
+      application.validIdPath,
+    ),
+    createRiderDocumentSignedUrl(
+      application.orCrDocumentPath,
+    ),
+    createRiderDocumentSignedUrl(
+      application.riderPhotoPath,
+    ),
+  ]);
+
+  return {
+    ...application,
+    validIdUrl,
+    orCrDocumentUrl,
+    riderPhotoUrl,
+  };
+}
+
+export async function setManagerRiderApprovalStatus(
+  riderId: string,
+  status: "approved" | "suspended",
+): Promise<ManagerRiderApprovalResult> {
+  const normalizedId = requireUuid(
+    riderId,
+    "rider ID",
+  );
+
+  const { data, error } = await supabase.rpc(
+    "set_manager_rider_approval_status",
+    {
+      p_rider_id: normalizedId,
+      p_status: status,
+    },
+  );
+
+  if (error) {
+    throw new Error(
+      `Unable to update rider approval: ${error.message}`,
+    );
+  }
+
+  const row = requireList(
+    data,
+    "rider approval result",
+  )[0];
+
+  if (!row) {
+    throw new Error(
+      "The rider approval was updated, but the server returned no result.",
+    );
+  }
+
+  const result = requireRecord(
+    row,
+    "rider approval result",
+  );
+
+  const approvalStatus = requireEnum(
+    result.approval_status,
+    RIDER_APPROVAL_STATUSES,
+    "rider approval status",
+  );
+
+  const availabilityStatus = requireEnum(
+    result.availability_status,
+    RIDER_AVAILABILITY_STATUSES,
+    "rider availability status",
+  );
+
+  const profileRole = requireString(
+    result.profile_role,
+    "profile role",
+  );
+
+  if (
+    profileRole !== "customer" &&
+    profileRole !== "cashier" &&
+    profileRole !== "manager" &&
+    profileRole !== "rider"
+  ) {
+    throw new Error(
+      "The server returned an unsupported profile role.",
+    );
+  }
+
+  if (approvalStatus !== status) {
+    throw new Error(
+      "The server returned an unexpected rider approval status.",
+    );
+  }
+
+  return {
+    riderId: requireUuid(
+      result.rider_id,
+      "rider ID",
+    ),
+
+    approvalStatus,
+    availabilityStatus,
+
+    profileRole,
+
+    updatedAt: requireTimestamp(
+      result.updated_at,
+      "rider approval update date",
+    ),
+  };
 }

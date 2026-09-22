@@ -41,6 +41,11 @@ export interface CashierStoreValue extends CashierActions {
   databaseLoading: boolean;
   databaseError: string;
   refreshDatabaseState: () => void;
+  menuAvailabilityRefreshing: boolean;
+  menuAvailabilityError: string;
+  refreshMenuAvailability: (
+    force?: boolean,
+  ) => Promise<CashierState["menuItems"]>;
   activeShift: CashierState["shifts"][number] | undefined;
   shiftTotals: ShiftTotals;
 }

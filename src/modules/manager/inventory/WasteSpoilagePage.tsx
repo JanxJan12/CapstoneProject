@@ -1,179 +1,584 @@
-import { useState } from "react";
-import { CheckCircle, Trash2 } from "lucide-react";
-import { Button }          from "../../../components/common/Button";
-import { StatusBadge }     from "../../../components/common/Badge";
-import { inventoryItems }  from "../../../data/mockData";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { CheckCircle, Loader2, RefreshCw, Trash2 } from "lucide-react";
 
-type RecordType = "waste" | "spoilage";
+import { Button } from "@/components/common/Button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  clearInventoryMutationRequestId,
+  getManagerInventory,
+  getManagerInventoryTransactions,
+  getOrCreateInventoryMutationRequestId,
+  recordInventoryWaste,
+  type InventoryStockChangeResult,
+  type ManagerInventoryItem,
+} from "./inventoryApi";
+import { InventoryReconciliationPanel } from "./InventoryReconciliationPanel";
+import {
+  INVENTORY_RECONCILIATION_TRANSACTION_LIMIT,
+  reconcileInventoryBalances,
+  type InventoryReconciliationReport,
+} from "./inventoryReconciliation";
+import {
+  InventoryWorkspaceNav,
+  type InventoryWorkspacePage,
+} from "./InventoryWorkspaceNav";
 
-const WASTE_REASONS   = ["Cooking error", "Spillage", "Over-preparation", "Expired", "Other"];
-const SPOILAGE_REASONS = ["Improper storage", "Power outage", "Past shelf life", "Contamination", "Other"];
+const WASTE_REASONS = [
+  "Spoiled",
+  "Expired",
+  "Damaged",
+  "Preparation waste",
+  "Contaminated",
+  "Other",
+] as const;
 
-export function WasteSpoilagePage() {
-  const [type, setType]           = useState<RecordType>("waste");
-  const [selectedItem, setSelectedItem] = useState("");
-  const [qty, setQty]             = useState("");
-  const [reason, setReason]       = useState("");
-  const [note, setNote]           = useState("");
-  const [saved, setSaved]         = useState(false);
+const quantityFormatter = new Intl.NumberFormat("en-PH", {
+  maximumFractionDigits: 3,
+});
 
-  const selectedInv = inventoryItems.find((i) => i.name === selectedItem);
+function getErrorMessage(caught: unknown, fallback: string): string {
+  return caught instanceof Error ? caught.message : fallback;
+}
 
-  const handleSave = () => {
-    if (!selectedItem || !qty || !reason) return;
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
-    setSelectedItem(""); setQty(""); setReason(""); setNote("");
+export function WasteSpoilagePage({
+  onNavigate,
+}: {
+  onNavigate: (page: InventoryWorkspacePage) => void;
+}) {
+  const [items, setItems] = useState<ManagerInventoryItem[]>([]);
+  const [reconciliation, setReconciliation] =
+    useState<InventoryReconciliationReport | null>(null);
+  const [selectedItemId, setSelectedItemId] = useState("");
+  const [quantity, setQuantity] = useState("");
+  const [reason, setReason] = useState("");
+  const [details, setDetails] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
+  const [loadError, setLoadError] = useState("");
+  const [reconciliationError, setReconciliationError] = useState("");
+  const [saveError, setSaveError] = useState("");
+  const [result, setResult] = useState<InventoryStockChangeResult | null>(null);
+
+  const loadInventoryData = useCallback(async (showLoading = true) => {
+    if (showLoading) {
+      setIsLoading(true);
+    }
+
+    setLoadError("");
+    setReconciliationError("");
+
+    const [inventoryResult, transactionsResult] = await Promise.allSettled([
+      getManagerInventory(),
+      getManagerInventoryTransactions(
+        INVENTORY_RECONCILIATION_TRANSACTION_LIMIT,
+      ),
+    ]);
+
+    if (inventoryResult.status === "rejected") {
+      setItems([]);
+      setReconciliation(null);
+      setLoadError(
+        getErrorMessage(
+          inventoryResult.reason,
+          "Unable to load manager inventory.",
+        ),
+      );
+    } else {
+      setItems(inventoryResult.value);
+
+      if (transactionsResult.status === "rejected") {
+        setReconciliation(null);
+        setReconciliationError(
+          getErrorMessage(
+            transactionsResult.reason,
+            "Unable to load inventory transactions for reconciliation.",
+          ),
+        );
+      } else {
+        setReconciliation(
+          reconcileInventoryBalances(
+            inventoryResult.value,
+            transactionsResult.value,
+          ),
+        );
+      }
+    }
+
+    if (showLoading) {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadInventoryData();
+  }, [loadInventoryData]);
+
+  const selectedItem = items.find((item) => item.id === selectedItemId);
+  const parsedQuantity = Number(quantity);
+  const quantityIsValid =
+    quantity.trim() !== "" &&
+    Number.isFinite(parsedQuantity) &&
+    parsedQuantity > 0;
+  const quantityFitsAvailableStock =
+    Boolean(selectedItem) &&
+    quantityIsValid &&
+    parsedQuantity <= (selectedItem?.quantityOnHand ?? 0);
+  const normalizedReason = reason.trim();
+  const normalizedDetails = details.trim();
+  const combinedReason = useMemo(() => {
+    if (!normalizedReason) {
+      return "";
+    }
+
+    if (normalizedReason === "Other") {
+      return normalizedDetails ? `Other: ${normalizedDetails}` : "";
+    }
+
+    return normalizedDetails
+      ? `${normalizedReason}: ${normalizedDetails}`
+      : normalizedReason;
+  }, [normalizedDetails, normalizedReason]);
+  const reasonIsValid =
+    combinedReason.length > 0 && combinedReason.length <= 300;
+  const canSubmit =
+    Boolean(selectedItem?.isActive) &&
+    quantityIsValid &&
+    quantityFitsAvailableStock &&
+    reasonIsValid &&
+    !isSaving;
+
+  const clearForm = () => {
+    clearInventoryMutationRequestId("waste");
+    setSelectedItemId("");
+    setQuantity("");
+    setReason("");
+    setDetails("");
+    setSaveError("");
   };
 
-  const reasons = type === "waste" ? WASTE_REASONS : SPOILAGE_REASONS;
+  const resetForm = () => {
+    clearForm();
+    setResult(null);
+  };
+
+  const openConfirmation = () => {
+    if (!selectedItem?.isActive) {
+      setSaveError("Select an active inventory item.");
+      return;
+    }
+
+    if (!quantityIsValid) {
+      setSaveError("Waste quantity must be greater than zero.");
+      return;
+    }
+
+    if (!quantityFitsAvailableStock) {
+      setSaveError(
+        "Waste quantity cannot exceed the currently displayed stock.",
+      );
+      return;
+    }
+
+    if (!normalizedReason) {
+      setSaveError("Select a waste/spoilage reason.");
+      return;
+    }
+
+    if (normalizedReason === "Other" && !normalizedDetails) {
+      setSaveError("Enter a reason when Other is selected.");
+      return;
+    }
+
+    if (combinedReason.length > 300) {
+      setSaveError("Reason and details must not exceed 300 characters total.");
+      return;
+    }
+
+    setSaveError("");
+    setIsConfirmationOpen(true);
+  };
+
+  const handleConfirm = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+
+    if (!selectedItem?.isActive || !canSubmit) {
+      return;
+    }
+
+    const requestFingerprint = JSON.stringify({
+      operation: "waste",
+      inventoryItemId: selectedItem.id,
+      quantity: parsedQuantity,
+      reason: combinedReason,
+    });
+    const requestId = getOrCreateInventoryMutationRequestId(
+      "waste",
+      requestFingerprint,
+    );
+
+    setIsSaving(true);
+    setSaveError("");
+    setResult(null);
+
+    try {
+      const authoritativeResult = await recordInventoryWaste({
+        inventoryItemId: selectedItem.id,
+        quantity: parsedQuantity,
+        reason: combinedReason,
+        requestId,
+      });
+
+      clearInventoryMutationRequestId("waste", requestId);
+      setResult(authoritativeResult);
+      setSelectedItemId("");
+      setQuantity("");
+      setReason("");
+      setDetails("");
+      setIsConfirmationOpen(false);
+
+      await loadInventoryData(false);
+    } catch (caught) {
+      setSaveError(getErrorMessage(caught, "Unable to record waste/spoilage."));
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
-    <div className="max-w-2xl">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-9 h-9 rounded-xl bg-red-50 border border-red-200 flex items-center justify-center">
-          <Trash2 className="w-4 h-4 text-red-600" />
+    <div className="inventory-workspace-page max-w-4xl">
+      <header className="manager-page-header mb-3 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-red-200 bg-red-50">
+            <Trash2 className="h-4 w-4 text-red-600" />
+          </div>
+          <div>
+            <h1 className="text-base font-bold text-foreground">
+              Waste / Spoilage
+            </h1>
+            <p className="text-xs text-muted-foreground">
+              Record unusable stock against aggregate inventory
+            </p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-base font-bold text-foreground">Waste & Spoilage Recording</h1>
-          <p className="text-xs text-muted-foreground">Log inventory losses due to waste or spoilage</p>
-        </div>
-      </div>
+        <Button
+          variant="secondary"
+          size="sm"
+          disabled={isSaving}
+          loading={isLoading}
+          onClick={() => void loadInventoryData()}
+        >
+          <RefreshCw className="h-3.5 w-3.5" />
+          Refresh
+        </Button>
+      </header>
 
-      {saved && (
-        <div className="flex items-center gap-3 px-4 py-3 mb-5 bg-green-50 border border-green-200 rounded-xl text-sm text-green-700 font-medium">
-          <CheckCircle className="w-4 h-4 flex-shrink-0" />
-          {type === "waste" ? "Waste" : "Spoilage"} record saved. Inventory updated.
-        </div>
-      )}
+      <InventoryWorkspaceNav active="waste-spoilage" onNavigate={onNavigate} />
 
-      <div className="bg-card rounded-xl border border-border p-6">
-        {/* Type toggle */}
-        <div className="flex gap-2 mb-5 p-1 bg-muted/60 rounded-xl w-fit">
-          {(["waste", "spoilage"] as RecordType[]).map((t) => (
-            <button
-              key={t}
-              onClick={() => { setType(t); setReason(""); }}
-              className={[
-                "px-5 py-2 rounded-lg text-sm font-semibold capitalize transition-all",
-                type === t ? "bg-white shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground",
-              ].join(" ")}
+      {result ? (
+        <div className="mb-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-green-800">
+          <div className="flex items-center gap-2 text-sm font-semibold">
+            <CheckCircle className="h-4 w-4 flex-shrink-0" />
+            Waste/spoilage recorded and confirmed by PostgreSQL.
+          </div>
+          <p className="mt-1 text-xs">
+            {result.itemName} · Transaction {result.transactionId}
+          </p>
+          <div className="mt-2.5 grid grid-cols-3 gap-3 text-xs">
+            <div>
+              <p className="text-[9px] font-bold uppercase tracking-wide text-green-700">
+                Before
+              </p>
+              <p className="mt-1 font-bold">
+                {quantityFormatter.format(result.quantityBefore)} {result.unit}
+              </p>
+            </div>
+            <div>
+              <p className="text-[9px] font-bold uppercase tracking-wide text-green-700">
+                Waste
+              </p>
+              <p className="mt-1 font-bold text-red-700">
+                {quantityFormatter.format(result.quantityChange)} {result.unit}
+              </p>
+            </div>
+            <div>
+              <p className="text-[9px] font-bold uppercase tracking-wide text-green-700">
+                After
+              </p>
+              <p className="mt-1 font-bold">
+                {quantityFormatter.format(result.quantityAfter)} {result.unit}
+              </p>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {loadError ? (
+        <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-700">
+          <p>{loadError}</p>
+          <div className="mt-2">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => void loadInventoryData()}
             >
-              {t}
-            </button>
-          ))}
+              Try Again
+            </Button>
+          </div>
         </div>
+      ) : null}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-          <div className="col-span-2 flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-foreground">Inventory Item</label>
+      {!isLoading && !loadError && items.length === 0 ? (
+        <div className="mb-4 rounded-xl border border-border bg-card px-4 py-4 text-xs text-muted-foreground">
+          No inventory items were returned by PostgreSQL.
+        </div>
+      ) : null}
+
+      {saveError ? (
+        <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-700">
+          {saveError}
+        </div>
+      ) : null}
+
+      <div className="inventory-action-form rounded-2xl border border-border bg-card p-4 shadow-[0_8px_22px_rgba(67,42,23,0.035)]">
+        <div className="mb-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="flex flex-col gap-1.5 sm:col-span-2">
+            <label
+              htmlFor="waste-inventory-item"
+              className="text-xs font-semibold text-foreground"
+            >
+              Inventory Item
+            </label>
             <select
-              value={selectedItem}
-              onChange={(e) => setSelectedItem(e.target.value)}
-              className="px-3 py-2.5 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:border-primary/50 text-foreground"
+              id="waste-inventory-item"
+              value={selectedItemId}
+              disabled={isLoading || isSaving || Boolean(loadError)}
+              onChange={(event) => {
+                setSelectedItemId(event.target.value);
+                setSaveError("");
+                setResult(null);
+              }}
+              className="rounded-lg border border-border bg-input-background px-3 py-2.5 text-sm text-foreground focus:border-primary/50 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <option value="">Select inventory item…</option>
-              {inventoryItems.map((i) => (
-                <option key={i.id} value={i.name}>{i.name} — {i.qty} {i.unit}</option>
+              <option value="">
+                {isLoading ? "Loading inventory…" : "Select inventory item…"}
+              </option>
+              {items.map((item) => (
+                <option key={item.id} value={item.id} disabled={!item.isActive}>
+                  {item.itemName} —{" "}
+                  {quantityFormatter.format(item.quantityOnHand)} {item.unit}
+                  {!item.isActive ? " (Inactive)" : ""}
+                </option>
               ))}
             </select>
           </div>
 
+          {selectedItem ? (
+            <div className="rounded-lg border border-border bg-muted/50 px-3.5 py-2.5 text-xs sm:col-span-2">
+              <span className="text-muted-foreground">Current Stock:</span>{" "}
+              <span className="font-bold">
+                {quantityFormatter.format(selectedItem.quantityOnHand)}{" "}
+                {selectedItem.unit}
+              </span>
+            </div>
+          ) : null}
+
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-foreground">
-              Quantity Lost ({selectedInv?.unit || "units"})
+            <label
+              htmlFor="waste-quantity"
+              className="text-xs font-semibold text-foreground"
+            >
+              Waste Quantity
             </label>
             <input
+              id="waste-quantity"
               type="number"
-              min="0"
+              min="0.001"
+              step="0.001"
               placeholder="0"
-              value={qty}
-              onChange={(e) => setQty(e.target.value)}
-              className="px-3 py-2.5 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:border-primary/50"
+              value={quantity}
+              disabled={isSaving}
+              onChange={(event) => {
+                setQuantity(event.target.value);
+                setSaveError("");
+                setResult(null);
+              }}
+              className="rounded-lg border border-border bg-input-background px-3 py-2.5 text-sm focus:border-primary/50 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
             />
+            {quantity && !quantityIsValid ? (
+              <p className="text-[10px] text-red-600">
+                Enter a quantity greater than zero.
+              </p>
+            ) : quantityIsValid && !quantityFitsAvailableStock ? (
+              <p className="text-[10px] text-red-600">
+                Quantity cannot exceed the displayed stock.
+              </p>
+            ) : null}
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-foreground">Date & Time</label>
-            <input
-              type="datetime-local"
-              defaultValue={new Date().toISOString().slice(0, 16)}
-              className="px-3 py-2.5 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:border-primary/50 text-foreground"
-            />
+            <span className="text-xs font-semibold text-foreground">Unit</span>
+            <div className="rounded-lg border border-border bg-muted px-3 py-2.5 text-sm text-muted-foreground">
+              {selectedItem?.unit ?? "Select an item"}
+            </div>
           </div>
 
-          {selectedInv && qty && (
-            <div className="col-span-2 flex items-center gap-6 px-4 py-3 bg-red-50/60 rounded-lg border border-red-200 text-xs">
-              <div><span className="text-muted-foreground">Current:</span> <span className="font-bold">{selectedInv.qty} {selectedInv.unit}</span></div>
-              <div><span className="text-muted-foreground">Loss:</span> <span className="font-bold text-red-600">−{qty} {selectedInv.unit}</span></div>
-              <div><span className="text-muted-foreground">Remaining:</span> <span className={`font-bold ${selectedInv.qty - Number(qty) < selectedInv.reorder ? "text-red-600" : "text-foreground"}`}>{selectedInv.qty - Number(qty)} {selectedInv.unit}</span></div>
-            </div>
-          )}
-
-          <div className="col-span-2 flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-foreground">Reason <span className="text-red-500">*</span></label>
+          <div className="flex flex-col gap-1.5 sm:col-span-2">
+            <label
+              htmlFor="waste-reason"
+              className="text-xs font-semibold text-foreground"
+            >
+              Reason <span className="text-red-500">*</span>
+            </label>
             <select
+              id="waste-reason"
               value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              className="px-3 py-2.5 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:border-primary/50 text-foreground"
+              disabled={isSaving}
+              onChange={(event) => {
+                setReason(event.target.value);
+                setSaveError("");
+                setResult(null);
+              }}
+              className="rounded-lg border border-border bg-input-background px-3 py-2.5 text-sm text-foreground focus:border-primary/50 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
             >
               <option value="">Select reason…</option>
-              {reasons.map((r) => <option key={r} value={r}>{r}</option>)}
+              {WASTE_REASONS.map((wasteReason) => (
+                <option key={wasteReason} value={wasteReason}>
+                  {wasteReason}
+                </option>
+              ))}
             </select>
           </div>
 
-          <div className="col-span-2 flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-foreground">Notes (optional)</label>
+          <div className="flex flex-col gap-1.5 sm:col-span-2">
+            <label
+              htmlFor="waste-details"
+              className="text-xs font-semibold text-foreground"
+            >
+              {reason === "Other" ? "Reason details *" : "Details (optional)"}
+            </label>
             <textarea
+              id="waste-details"
               rows={2}
-              placeholder="Describe the circumstances…"
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              className="px-3 py-2.5 text-sm bg-input-background border border-border rounded-lg focus:outline-none focus:border-primary/50 resize-none"
+              maxLength={300}
+              placeholder={
+                reason === "Other"
+                  ? "Enter the waste/spoilage reason…"
+                  : "Add relevant details about the inventory loss…"
+              }
+              value={details}
+              disabled={isSaving}
+              onChange={(event) => {
+                setDetails(event.target.value);
+                setSaveError("");
+                setResult(null);
+              }}
+              className="resize-none rounded-lg border border-border bg-input-background px-3 py-2.5 text-sm focus:border-primary/50 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
             />
+            <p
+              className={`text-right text-[10px] ${
+                combinedReason.length > 300
+                  ? "font-semibold text-red-600"
+                  : "text-muted-foreground"
+              }`}
+            >
+              {combinedReason.length}/300 characters sent to PostgreSQL
+            </p>
           </div>
         </div>
 
-        <div className="flex gap-2 pt-2 border-t border-border mt-2 justify-end">
-          <Button variant="secondary" size="md" onClick={() => { setSelectedItem(""); setQty(""); setReason(""); }}>Reset</Button>
-          <Button variant="danger" size="md" disabled={!selectedItem || !qty || !reason} onClick={handleSave}>
-            <Trash2 className="w-4 h-4" /> Record {type === "waste" ? "Waste" : "Spoilage"}
+        <div className="flex justify-end gap-2 border-t border-border pt-3">
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={isSaving}
+            onClick={resetForm}
+          >
+            Reset
+          </Button>
+          <Button
+            variant="danger"
+            size="sm"
+            disabled={!canSubmit}
+            onClick={openConfirmation}
+          >
+            <Trash2 className="h-4 w-4" />
+            Record Waste / Spoilage
           </Button>
         </div>
       </div>
 
-      {/* Recent records */}
-      <div className="mt-6">
-        <p className="text-sm font-bold text-foreground mb-3">Recent Waste & Spoilage Records</p>
-        <div className="bg-card rounded-xl border border-border overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-muted/60 border-b border-border">
-                {["Item", "Type", "Qty Lost", "Reason", "Date", "Recorded By"].map((h) => (
-                  <th key={h} className="px-4 py-2.5 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wide">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {[
-                { item: "Cooking Oil", type: "waste",    qty: "-1.5 liters", reason: "Spillage",           date: "Jul 3, 6:00 PM",  by: "Kitchen Staff" },
-                { item: "Vegetables",  type: "spoilage", qty: "-3 kg",       reason: "Past shelf life",    date: "Jul 3, 5:30 PM",  by: "Kitchen Staff" },
-                { item: "Garlic",      type: "spoilage", qty: "-1 kg",       reason: "Improper storage",   date: "Jul 2, 2:00 PM",  by: "Manager" },
-                { item: "Flour",       type: "waste",    qty: "-0.5 kg",     reason: "Over-preparation",   date: "Jul 1, 11:00 AM", by: "Kitchen Staff" },
-              ].map((r, i) => (
-                <tr key={i} className="hover:bg-muted/30">
-                  <td className="px-4 py-2.5 text-sm font-semibold">{r.item}</td>
-                  <td className="px-4 py-2.5"><StatusBadge status={r.type} /></td>
-                  <td className="px-4 py-2.5 text-sm font-bold text-red-600 font-mono">{r.qty}</td>
-                  <td className="px-4 py-2.5 text-sm text-muted-foreground">{r.reason}</td>
-                  <td className="px-4 py-2.5 text-xs text-muted-foreground">{r.date}</td>
-                  <td className="px-4 py-2.5 text-sm text-muted-foreground">{r.by}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      <div className="mt-4">
+        <InventoryReconciliationPanel
+          report={reconciliation}
+          isLoading={isLoading}
+          error={reconciliationError}
+        />
       </div>
+
+      <AlertDialog
+        open={isConfirmationOpen}
+        onOpenChange={(open) => {
+          if (!isSaving) {
+            setIsConfirmationOpen(open);
+          }
+        }}
+      >
+        <AlertDialogContent className="sm:max-w-md">
+          <AlertDialogHeader>
+            <div className="mb-1 flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-red-600">
+              <Trash2 className="h-5 w-5" aria-hidden="true" />
+            </div>
+            <AlertDialogTitle>Record this inventory loss?</AlertDialogTitle>
+            <AlertDialogDescription className="leading-5">
+              Record {quantityFormatter.format(parsedQuantity)}{" "}
+              {selectedItem?.unit} of {selectedItem?.itemName} as
+              waste/spoilage? This permanently decreases aggregate stock.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-900">
+            <p>
+              <span className="font-semibold">Reason:</span> {combinedReason}
+            </p>
+            <p className="mt-1">
+              PostgreSQL will lock the current balance and reject the request if
+              the available stock has changed.
+            </p>
+          </div>
+
+          {saveError ? (
+            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs font-semibold text-red-800">
+              {saveError}
+            </div>
+          ) : null}
+
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isSaving}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isSaving}
+              onClick={(event) => void handleConfirm(event)}
+              className="bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-600"
+            >
+              {isSaving ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4" />
+              )}
+              {isSaving ? "Recording…" : "Confirm Waste / Spoilage"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

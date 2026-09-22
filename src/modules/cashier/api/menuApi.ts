@@ -117,3 +117,40 @@ export async function fetchCashierMenuItems(): Promise<MenuItem[]> {
     };
   });
 }
+
+export async function refreshCashierMenuAvailability(
+  currentItems: MenuItem[],
+): Promise<MenuItem[]> {
+  if (currentItems.length === 0) {
+    return fetchCashierMenuItems();
+  }
+
+  const { data, error } = await supabase.rpc(
+    "get_menu_effective_availability",
+  );
+
+  if (error) {
+    throw new Error(
+      `Unable to refresh effective cashier menu availability: ${error.message}`,
+    );
+  }
+
+  const rows = (data ?? []) as DatabaseMenuEffectiveAvailabilityRow[];
+  const availabilityByItemId = new Map(
+    rows.map((entry) => [entry.menu_item_id, entry.effective_available]),
+  );
+  const missingItem = currentItems.find(
+    (item) => !availabilityByItemId.has(item.id),
+  );
+
+  if (missingItem) {
+    throw new Error(
+      `Cashier menu item ${missingItem.id} has no effective availability result.`,
+    );
+  }
+
+  return currentItems.map((item) => ({
+    ...item,
+    available: availabilityByItemId.get(item.id) ?? false,
+  }));
+}

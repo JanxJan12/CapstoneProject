@@ -1,3 +1,5 @@
+> **Historical design blueprint:** This document records proposed screens, not current operational capability. Supplier, Purchase Order, formal Receiving Report, PO receipt, batch/lot, and FIFO workflows are not implemented. Current receiving records aggregate inventory stock directly.
+
 Improve the existing RRJ Food-House UI/UX blueprint. Do not redesign from scratch. Keep the same branding, red primary color, Inter font, rounded cards, white surfaces, and enterprise SaaS style.
 
 Goal:

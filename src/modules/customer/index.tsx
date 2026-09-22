@@ -1,6 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import { gcashMerchantConfig } from "@/config/paymentConfig";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useNavigate } from "react-router";
 import { useAuth } from "@/app/providers/AuthProvider";
@@ -69,8 +69,57 @@ interface CustomerDatabaseMenuItem {
   imagePath: string | null;
 }
 
+async function fetchCustomerEffectiveAvailability(): Promise<
+  Map<string, boolean>
+> {
+  const { data, error } = await supabase.rpc(
+    "get_menu_effective_availability",
+  );
+
+  if (error) {
+    throw new Error(
+      `Unable to refresh menu availability: ${error.message}`,
+    );
+  }
+
+  if (!Array.isArray(data)) {
+    throw new Error(
+      "The server returned an invalid menu availability result.",
+    );
+  }
+
+  const availabilityByItemId = new Map<string, boolean>();
+
+  for (const value of data as unknown[]) {
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+      throw new Error(
+        "The server returned an invalid menu availability entry.",
+      );
+    }
+
+    const row = value as Record<string, unknown>;
+
+    if (
+      typeof row.menu_item_id !== "string" ||
+      typeof row.effective_available !== "boolean"
+    ) {
+      throw new Error(
+        "The server returned an incomplete menu availability entry.",
+      );
+    }
+
+    availabilityByItemId.set(
+      row.menu_item_id,
+      row.effective_available,
+    );
+  }
+
+  return availabilityByItemId;
+}
+
 const CUSTOMER_CART_STORAGE_KEY = "rrj_customer_cart_v2";
 const CUSTOMER_RESUME_PAGE_STORAGE_KEY ="rrj_customer_resume_page_v1";
+const CUSTOMER_MENU_AVAILABILITY_FRESHNESS_MS = 5_000;
 
 const CUSTOMER_ORDER_REQUEST_STORAGE_KEY =
   "rrj_customer_order_request_v1";
@@ -1060,8 +1109,26 @@ function MenuDetailPage({
 }
 
 // ── Cart ─────────────────────────────────────────────────────────
-function CartPage({ cart, onNav, onQtyChange, onRemove }: { cart: CartItem[]; onNav: (p: CustomerPage) => void; onQtyChange: (id: string,qty: number,) => void; onRemove: (id: string) => void; }) {
+function CartPage({
+  cart,
+  availabilityRefreshing,
+  availabilityError,
+  onNav,
+  onQtyChange,
+  onRemove,
+}: {
+  cart: CartItem[];
+  availabilityRefreshing: boolean;
+  availabilityError: string | null;
+  onNav: (p: CustomerPage) => void;
+  onQtyChange: (id: string,qty: number,) => void;
+  onRemove: (id: string) => void;
+}) {
   const subtotal = cart.reduce((s, c) => s + c.price * c.qty, 0);
+  const unavailableItems = cart.filter((item) => !item.available);
+  const unavailableItemNames = unavailableItems
+    .map((item) => item.name)
+    .join(", ");
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <CustNav cart={cart} onNav={onNav} currentPage="cart" />
@@ -1078,6 +1145,16 @@ function CartPage({ cart, onNav, onQtyChange, onRemove }: { cart: CartItem[]; on
               </span>
             ) : null}
           </div>
+          {availabilityError ? (
+            <div role="alert" className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium leading-5 text-red-800">
+              {availabilityError} Try checkout again when the connection is available.
+            </div>
+          ) : null}
+          {unavailableItems.length > 0 ? (
+            <div role="alert" className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium leading-5 text-amber-900">
+              Availability changed for {unavailableItemNames}. Your cart was kept; remove the unavailable {unavailableItems.length === 1 ? "item" : "items"} before checkout.
+            </div>
+          ) : null}
           {cart.length === 0 ? (
             <div className="flex min-h-52 flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card/75 px-6 py-10 text-center">
               <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-primary">
@@ -1104,6 +1181,9 @@ function CartPage({ cart, onNav, onQtyChange, onRemove }: { cart: CartItem[]; on
                     <div className="min-w-0">
                       <p className="text-base font-extrabold leading-5 text-foreground">{item.name}</p>
                       <p className="mt-1 text-sm text-muted-foreground">₱{item.price} each</p>
+                      {!item.available ? (
+                        <p className="mt-1 text-sm font-bold text-amber-800">Unavailable after the latest stock check</p>
+                      ) : null}
                       <div className="mt-3 flex flex-wrap items-center gap-3 sm:mt-2">
                         <div className="flex items-center rounded-xl border border-border bg-background p-1" aria-label={`Quantity for ${item.name}`}>
                           <button onClick={() => onQtyChange(item.id, item.qty - 1)} aria-label={`Decrease ${item.name} quantity`} className="flex h-9 w-9 items-center justify-center rounded-lg text-foreground hover:bg-muted"><Minus className="h-3.5 w-3.5" /></button>
@@ -1134,7 +1214,23 @@ function CartPage({ cart, onNav, onQtyChange, onRemove }: { cart: CartItem[]; on
                     <div className="flex items-end justify-between gap-3 border-t border-border pt-4"><span className="font-extrabold text-foreground">Estimated total</span><span className="text-2xl font-black tracking-tight text-primary">₱{subtotal + 50}</span></div>
                   </div>
                   <p className="mt-4 rounded-xl bg-muted/70 px-3 py-2.5 text-sm leading-5 text-muted-foreground">The server will confirm the delivery fee and final amount when your order is created.</p>
-                  <button onClick={() => onNav("checkout")} className="mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-extrabold text-primary-foreground shadow-sm hover:bg-amber-800">Continue to checkout <ChevronRight className="h-4 w-4" /></button>
+                  <button
+                    onClick={() => onNav("checkout")}
+                    disabled={availabilityRefreshing}
+                    className="mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-extrabold text-primary-foreground shadow-sm hover:bg-amber-800 disabled:cursor-not-allowed disabled:bg-stone-200 disabled:text-stone-500 disabled:shadow-none"
+                  >
+                    {availabilityRefreshing ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" /> Checking availability…
+                      </>
+                    ) : unavailableItems.length > 0 ? (
+                      "Check availability again"
+                    ) : availabilityError ? (
+                      "Retry availability"
+                    ) : (
+                      <>Continue to checkout <ChevronRight className="h-4 w-4" /></>
+                    )}
+                  </button>
                 </div>
               </aside>
             </div>
@@ -4461,6 +4557,15 @@ export function CustomerApp() {
 
   const [databaseMenuError, setDatabaseMenuError] =
   useState<string | null>(null);
+  const [availabilityRefreshing, setAvailabilityRefreshing] =
+  useState(false);
+  const [availabilityRefreshError, setAvailabilityRefreshError] =
+  useState<string | null>(null);
+  const databaseMenuItemsRef =
+  useRef<CustomerDatabaseMenuItem[]>([]);
+  const availabilityRefreshInFlightRef =
+  useRef<Promise<CustomerDatabaseMenuItem[]> | null>(null);
+  const lastAvailabilityRefreshAtRef = useRef(0);
   const [databaseMenuLoadAttempt, setDatabaseMenuLoadAttempt] =
   useState(0);
   const [selectedMenuCategory, setSelectedMenuCategory] =
@@ -4522,12 +4627,122 @@ export function CustomerApp() {
       clearTimeout(toastTimer.current);
     }
   }, []);
+
+  const refreshCustomerMenuAvailability = useCallback(
+    (force = false): Promise<CustomerDatabaseMenuItem[]> => {
+      const currentItems = databaseMenuItemsRef.current;
+
+      if (currentItems.length === 0) {
+        const loadingError = new Error(
+          "Menu availability is still loading. Please try again.",
+        );
+
+        setAvailabilityRefreshError(loadingError.message);
+        return Promise.reject(loadingError);
+      }
+
+      if (
+        !force &&
+        Date.now() - lastAvailabilityRefreshAtRef.current <
+          CUSTOMER_MENU_AVAILABILITY_FRESHNESS_MS
+      ) {
+        return Promise.resolve(currentItems);
+      }
+
+      if (availabilityRefreshInFlightRef.current) {
+        return availabilityRefreshInFlightRef.current;
+      }
+
+      const refreshRequest = (async () => {
+        setAvailabilityRefreshing(true);
+        setAvailabilityRefreshError(null);
+
+        try {
+          const availabilityByItemId =
+            await fetchCustomerEffectiveAvailability();
+          const itemWithoutAvailability = currentItems.find(
+            (item) => !availabilityByItemId.has(item.id),
+          );
+
+          if (itemWithoutAvailability) {
+            throw new Error(
+              `Menu item ${itemWithoutAvailability.id} has no effective availability result.`,
+            );
+          }
+
+          const refreshedItems = currentItems.map((item) => ({
+            ...item,
+            available:
+              availabilityByItemId.get(item.id) ?? false,
+          }));
+
+          databaseMenuItemsRef.current = refreshedItems;
+          lastAvailabilityRefreshAtRef.current = Date.now();
+          setDatabaseMenuItems(refreshedItems);
+
+          return refreshedItems;
+        } catch (caughtError) {
+          const refreshError =
+            caughtError instanceof Error
+              ? caughtError
+              : new Error(
+                  "Unable to refresh menu availability. Please try again.",
+                );
+
+          lastAvailabilityRefreshAtRef.current = 0;
+          setAvailabilityRefreshError(refreshError.message);
+          throw refreshError;
+        } finally {
+          availabilityRefreshInFlightRef.current = null;
+          setAvailabilityRefreshing(false);
+        }
+      })();
+
+      availabilityRefreshInFlightRef.current = refreshRequest;
+      return refreshRequest;
+    },
+    [],
+  );
+
+  useEffect(() => {
+    let lastFocusRefreshAt = 0;
+
+    const refreshOnFocus = () => {
+      if (
+        document.visibilityState !== "visible" ||
+        databaseMenuItemsRef.current.length === 0
+      ) {
+        return;
+      }
+
+      const now = Date.now();
+
+      if (now - lastFocusRefreshAt < 1_000) {
+        return;
+      }
+
+      lastFocusRefreshAt = now;
+      void refreshCustomerMenuAvailability(true).catch(() => {
+        // The existing menu cache stays intact; the UI exposes the refresh error.
+      });
+    };
+
+    window.addEventListener("focus", refreshOnFocus);
+    document.addEventListener("visibilitychange", refreshOnFocus);
+
+    return () => {
+      window.removeEventListener("focus", refreshOnFocus);
+      document.removeEventListener("visibilitychange", refreshOnFocus);
+    };
+  }, [refreshCustomerMenuAvailability]);
+
   useEffect(() => {
   let isMounted = true;
 
   async function loadDatabaseMenu() {
     setDatabaseMenuLoading(true);
     setDatabaseMenuError(null);
+    setAvailabilityRefreshError(null);
 
     const [
       { data: categories, error: categoriesError },
@@ -4537,6 +4752,7 @@ export function CustomerApp() {
       supabase
         .from("menu_categories")
         .select("id, name")
+        .eq("is_active", true)
         .order("name"),
 
       supabase
@@ -4553,6 +4769,7 @@ export function CustomerApp() {
             is_active
           `,
         )
+        .eq("is_active", true)
         .order("name"),
 
       supabase.rpc("get_menu_effective_availability"),
@@ -4661,6 +4878,9 @@ export function CustomerApp() {
         imagePath: item.image_path,
       }));
 
+    databaseMenuItemsRef.current = mappedItems;
+    lastAvailabilityRefreshAtRef.current = Date.now();
+    setAvailabilityRefreshError(null);
     setDatabaseMenuItems(mappedItems);
     setDatabaseMenuLoading(false);
 
@@ -4676,6 +4896,46 @@ export function CustomerApp() {
     isMounted = false;
   };
 }, [databaseMenuLoadAttempt]);
+
+  useEffect(() => {
+    if (databaseMenuLoading) {
+      return;
+    }
+
+    const menuItemsById = new Map(
+      databaseMenuItems.map((item) => [item.id, item]),
+    );
+
+    setCart((currentCart) => {
+      let changed = false;
+      const refreshedCart = currentCart.map((cartItem) => {
+        const refreshedItem = menuItemsById.get(cartItem.id);
+        const available = refreshedItem?.available ?? false;
+
+        if (cartItem.available === available) {
+          return cartItem;
+        }
+
+        changed = true;
+        return { ...cartItem, available };
+      });
+
+      return changed ? refreshedCart : currentCart;
+    });
+
+    setDetailItem((currentItem) => {
+      if (!currentItem) {
+        return currentItem;
+      }
+
+      const refreshedItem = menuItemsById.get(currentItem.id);
+      const available = refreshedItem?.available ?? false;
+
+      return currentItem.available === available
+        ? currentItem
+        : { ...currentItem, available };
+    });
+  }, [databaseMenuItems, databaseMenuLoading]);
 
   useEffect(() => {
     try {
@@ -4702,7 +4962,7 @@ export function CustomerApp() {
   setPage("tracking");
 };
 
-  const handleNavigation = (
+  const handleNavigation = async (
   nextPage: CustomerPage,
   ) => {
     const protectedPages: CustomerPage[] = [
@@ -4718,6 +4978,30 @@ export function CustomerApp() {
       navigate("/auth?portal=customer");
       return;
     }
+
+    if (nextPage === "checkout") {
+      try {
+        const refreshedMenuItems =
+          await refreshCustomerMenuAvailability();
+        const refreshedAvailabilityByItemId = new Map(
+          refreshedMenuItems.map((item) => [
+            item.id,
+            item.available,
+          ]),
+        );
+        const hasUnavailableCartItem = cart.some(
+          (item) =>
+            refreshedAvailabilityByItemId.get(item.id) !== true,
+        );
+
+        if (hasUnavailableCartItem) {
+          return;
+        }
+      } catch {
+        return;
+      }
+    }
+
     if (nextPage === "tracking") {
   setTrackingOrderId(null);
   }
@@ -4778,7 +5062,7 @@ if (page === "home") {
     menuItems={databaseMenuItems}
     categories={databaseMenuCategories}
     menuLoading={databaseMenuLoading}
-    menuError={databaseMenuError}
+    menuError={databaseMenuError ?? availabilityRefreshError}
     onNav={handleNavigation}
     onBrowseCategory={handleBrowseCategory}
     onRetryMenu={retryDatabaseMenu}
@@ -4792,7 +5076,7 @@ if (page === "home") {
     menuItems={databaseMenuItems}
     categories={databaseMenuCategories}
     menuLoading={databaseMenuLoading}
-    menuError={databaseMenuError}
+    menuError={databaseMenuError ?? availabilityRefreshError}
     selectedCategory={selectedMenuCategory}
     onNav={handleNavigation}
     onCategoryChange={setSelectedMenuCategory}
@@ -4817,6 +5101,8 @@ if (page === "home") {
   pageContent = (
     <CartPage
       cart={cart}
+      availabilityRefreshing={availabilityRefreshing}
+      availabilityError={availabilityRefreshError}
       onNav={handleNavigation}
       onQtyChange={setQty}
       onRemove={(id) =>
@@ -4866,7 +5152,7 @@ if (page === "home") {
       menuItems={databaseMenuItems}
       categories={databaseMenuCategories}
       menuLoading={databaseMenuLoading}
-      menuError={databaseMenuError}
+      menuError={databaseMenuError ?? availabilityRefreshError}
       onNav={handleNavigation}
       onBrowseCategory={handleBrowseCategory}
       onRetryMenu={retryDatabaseMenu}

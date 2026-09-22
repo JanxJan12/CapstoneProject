@@ -10,7 +10,10 @@ import {
 } from "react";
 import { useAuth } from "@/app/providers/AuthProvider";
 import { supabase } from "@/lib/supabase";
-import { fetchCashierMenuItems } from "../api/menuApi";
+import {
+  fetchCashierMenuItems,
+  refreshCashierMenuAvailability,
+} from "../api/menuApi";
 import {
   fetchCashierOnlinePayments,
   type HydratedOnlinePayment,
@@ -49,6 +52,7 @@ const EMPTY_SHIFT_TOTALS: ShiftTotals = {
 };
 
 const CashierStore = createContext<CashierStoreValue | null>(null);
+const MENU_AVAILABILITY_FRESHNESS_MS = 5_000;
 
 function mergePaymentMetadata(
   existing: Payment,
@@ -309,8 +313,15 @@ export function CashierProvider({ children }: { children: ReactNode }) {
   const [databaseLoading, setDatabaseLoading] = useState(true);
   const [databaseError, setDatabaseError] = useState("");
   const [databaseRefreshRequest, setDatabaseRefreshRequest] = useState(0);
+  const [menuAvailabilityRefreshing, setMenuAvailabilityRefreshing] =
+    useState(false);
+  const [menuAvailabilityError, setMenuAvailabilityError] = useState("");
   const hydratedCashierIdRef = useRef<string | undefined>(undefined);
   const stateRef = useRef(state);
+  const menuAvailabilityRefreshRef = useRef<
+    Promise<CashierState["menuItems"]> | undefined
+  >(undefined);
+  const lastMenuAvailabilityRefreshAtRef = useRef(0);
 
   const commit = useCallback<CashierCommit>((next) => {
     stateRef.current = next;
@@ -372,6 +383,58 @@ export function CashierProvider({ children }: { children: ReactNode }) {
   const refreshDatabaseState = useCallback(() => {
     setDatabaseRefreshRequest((current) => current + 1);
   }, []);
+
+  const refreshMenuAvailability = useCallback(
+    (force = false): Promise<CashierState["menuItems"]> => {
+      const currentItems = stateRef.current.menuItems;
+
+      if (
+        !force &&
+        currentItems.length > 0 &&
+        Date.now() - lastMenuAvailabilityRefreshAtRef.current <
+          MENU_AVAILABILITY_FRESHNESS_MS
+      ) {
+        return Promise.resolve(currentItems);
+      }
+
+      if (menuAvailabilityRefreshRef.current) {
+        return menuAvailabilityRefreshRef.current;
+      }
+
+      const request = (async () => {
+        setMenuAvailabilityRefreshing(true);
+        setMenuAvailabilityError("");
+
+        try {
+          const menuItems = await refreshCashierMenuAvailability(
+            stateRef.current.menuItems,
+          );
+
+          commit({
+            ...stateRef.current,
+            menuItems,
+          });
+          lastMenuAvailabilityRefreshAtRef.current = Date.now();
+
+          return menuItems;
+        } catch (error) {
+          console.error("Unable to refresh cashier menu availability:", error);
+          lastMenuAvailabilityRefreshAtRef.current = 0;
+          setMenuAvailabilityError(
+            "Unable to refresh menu availability. Check the connection and try again.",
+          );
+          throw error;
+        } finally {
+          menuAvailabilityRefreshRef.current = undefined;
+          setMenuAvailabilityRefreshing(false);
+        }
+      })();
+
+      menuAvailabilityRefreshRef.current = request;
+      return request;
+    },
+    [commit],
+  );
 
   useEffect(() => {
     stateRef.current = state;
@@ -439,6 +502,8 @@ export function CashierProvider({ children }: { children: ReactNode }) {
           ),
           menuItems,
         });
+        lastMenuAvailabilityRefreshAtRef.current = Date.now();
+        setMenuAvailabilityError("");
         setDatabaseError("");
       } catch (error) {
         if (cancelled || refreshId !== latestRefreshId) return;
@@ -522,6 +587,51 @@ export function CashierProvider({ children }: { children: ReactNode }) {
     };
   }, [authLoading, commit, databaseRefreshRequest, session]);
 
+  useEffect(() => {
+    if (!session || session.role !== "cashier") {
+      return;
+    }
+
+    let lastFocusRefreshRequestAt = 0;
+
+    const refreshAfterFocus = () => {
+      if (document.visibilityState !== "visible") {
+        return;
+      }
+
+      const now = Date.now();
+
+      if (now - lastFocusRefreshRequestAt < 1_000) {
+        return;
+      }
+
+      lastFocusRefreshRequestAt = now;
+      void refreshMenuAvailability(true).catch(() => {
+        // The store exposes the refresh error without replacing cached data.
+      });
+    };
+
+    const refreshAfterVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        refreshAfterFocus();
+      }
+    };
+
+    window.addEventListener("focus", refreshAfterFocus);
+    document.addEventListener(
+      "visibilitychange",
+      refreshAfterVisibilityChange,
+    );
+
+    return () => {
+      window.removeEventListener("focus", refreshAfterFocus);
+      document.removeEventListener(
+        "visibilitychange",
+        refreshAfterVisibilityChange,
+      );
+    };
+  }, [refreshMenuAvailability, session]);
+
   const activeShift = useMemo(
     () => state.shifts.find((entry) => entry.status === "Open"),
     [state.shifts],
@@ -541,6 +651,9 @@ export function CashierProvider({ children }: { children: ReactNode }) {
       databaseLoading,
       databaseError,
       refreshDatabaseState,
+      menuAvailabilityRefreshing,
+      menuAvailabilityError,
+      refreshMenuAvailability,
       activeShift,
       shiftTotals,
       ...actions,
@@ -551,6 +664,9 @@ export function CashierProvider({ children }: { children: ReactNode }) {
       databaseError,
       databaseLoading,
       isHydrating,
+      menuAvailabilityError,
+      menuAvailabilityRefreshing,
+      refreshMenuAvailability,
       refreshDatabaseState,
       shiftTotals,
       state,

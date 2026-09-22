@@ -3,10 +3,15 @@ import {
   ClipboardList,
   LayoutGrid,
   SlidersHorizontal,
+  Trash2,
 } from "lucide-react";
 
 export type InventoryWorkspacePage =
-  "inventory" | "stock-receiving" | "adjustment" | "inv-transactions";
+  | "inventory"
+  | "stock-receiving"
+  | "adjustment"
+  | "waste-spoilage"
+  | "inv-transactions";
 
 const INVENTORY_WORKSPACE_ITEMS: Array<{
   id: InventoryWorkspacePage;
@@ -14,8 +19,9 @@ const INVENTORY_WORKSPACE_ITEMS: Array<{
   icon: typeof LayoutGrid;
 }> = [
   { id: "inventory", label: "Overview", icon: LayoutGrid },
-  { id: "stock-receiving", label: "Receiving", icon: ArrowDownToLine },
+  { id: "stock-receiving", label: "Stock Receiving", icon: ArrowDownToLine },
   { id: "adjustment", label: "Adjustments", icon: SlidersHorizontal },
+  { id: "waste-spoilage", label: "Waste / Spoilage", icon: Trash2 },
   { id: "inv-transactions", label: "Transactions", icon: ClipboardList },
 ];
 

@@ -38,6 +38,8 @@ function CashierModule() {
     isHydrating,
     databaseError,
     refreshDatabaseState,
+    menuAvailabilityError,
+    refreshMenuAvailability,
     markNotificationRead,
     markNotificationsRead,
   } = useCashierStore();
@@ -326,11 +328,19 @@ function CashierModule() {
         onLogout={logout}
       >
         <div className="flex h-full min-h-0 flex-col">
-          {databaseError ? (
+          {databaseError || menuAvailabilityError ? (
             <div className={page === "walkin-pos" ? "p-4 pb-0" : "mb-4"}>
               <ErrorBanner
-                message={databaseError}
-                onRetry={refreshDatabaseState}
+                message={databaseError || menuAvailabilityError}
+                onRetry={
+                  databaseError
+                    ? refreshDatabaseState
+                    : () => {
+                        void refreshMenuAvailability(true).catch(() => {
+                          // The store keeps the retry error visible.
+                        });
+                      }
+                }
               />
             </div>
           ) : null}

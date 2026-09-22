@@ -1,4 +1,8 @@
-import type { MenuItem, InventoryItem, InvTransaction, Order, PendingPayment, KitchenOrder, Rider, Supplier, PurchaseOrder, Customer, Transaction } from "../types";
+/**
+ * Prototype and design-system fixtures only.
+ * Operational application routes must use PostgreSQL-backed services instead.
+ */
+import type { MenuItem, InventoryItem, InvTransaction, Order, PendingPayment, KitchenOrder, Rider, PrototypeSupplier, PrototypePurchaseOrder, Customer, Transaction } from "../types";
 
 export const salesData = [
   { day: "Mon", sales: 8200 }, { day: "Tue", sales: 9500 }, { day: "Wed", sales: 7800 },
@@ -78,13 +82,14 @@ export const riders: Rider[] = [
   { id: 3, name: "Joey Reyes", phone: "09394567890", plate: "CDE-3456", motor: "Honda Wave 125", status: "offline", license: "LIC-2022-009012", deliveries: 0 },
 ];
 
-export const suppliers: Supplier[] = [
+// Procurement prototypes only. These records do not represent database truth.
+export const prototypeSuppliers: PrototypeSupplier[] = [
   { id: 1, name: "Metro Market Supplier", contact: "09171234567", address: "123 Divisoria St., Manila", items: 12, pos: 5 },
   { id: 2, name: "Fresh Farm Distributors", contact: "09281234567", address: "456 Market Ave., Pasig", items: 8, pos: 3 },
   { id: 3, name: "Pantranco Goods Supply", contact: "09391234567", address: "789 Commercial Rd., QC", items: 15, pos: 7 },
 ];
 
-export const purchaseOrders: PurchaseOrder[] = [
+export const prototypePurchaseOrders: PrototypePurchaseOrder[] = [
   { id: "PO-2024-031", supplier: "Metro Market Supplier", items: [{ name: "Rice", qty: 20, unit: "kg", cost: 1100 }, { name: "Cooking Oil", qty: 10, unit: "liters", cost: 1500 }], total: 3200, status: "received", date: "Jul 1, 2024", by: "Manager" },
   { id: "PO-2024-030", supplier: "Fresh Farm Distributors", items: [{ name: "Vegetables", qty: 10, unit: "kg", cost: 800 }, { name: "Shrimp", qty: 5, unit: "kg", cost: 1050 }], total: 1850, status: "pending", date: "Jul 2, 2024", by: "Manager" },
   { id: "PO-2024-029", supplier: "Pantranco Goods Supply", items: [{ name: "Marinated Chicken Pecho", qty: 15, unit: "kg", cost: 2700 }], total: 4700, status: "received", date: "Jun 28, 2024", by: "Manager" },

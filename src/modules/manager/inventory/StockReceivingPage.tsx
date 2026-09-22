@@ -23,6 +23,10 @@ function getErrorMessage(caught: unknown, fallback: string): string {
   return caught instanceof Error ? caught.message : fallback;
 }
 
+/**
+ * Authoritative aggregate inventory receipt.
+ * This is not supplier-, PO-, receiving-report-, or batch-linked receiving.
+ */
 export function StockReceivingPage({
   onNavigate,
 }: {
@@ -159,7 +163,7 @@ const handleSave = async () => {
             Stock Receiving
           </h1>
           <p className="text-xs text-muted-foreground">
-            Record incoming inventory stock
+            Add received quantity directly to aggregate inventory
           </p>
         </div>
       </header>
@@ -170,7 +174,7 @@ const handleSave = async () => {
         <div className="mb-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-green-800">
           <div className="flex items-center gap-2 text-sm font-semibold">
             <CheckCircle className="h-4 w-4 flex-shrink-0" />
-            Stock received and confirmed by PostgreSQL.
+            Aggregate inventory receipt confirmed by PostgreSQL.
           </div>
           <p className="mt-1 text-xs">
             {result.itemName} · Transaction {result.transactionId}
@@ -331,7 +335,7 @@ const handleSave = async () => {
               id="receiving-reason"
               rows={2}
               maxLength={300}
-              placeholder="Remarks about the received stock…"
+              placeholder="Notes about this aggregate stock receipt…"
               value={reason}
               disabled={isSaving}
               onChange={(event) => {
@@ -364,7 +368,7 @@ const handleSave = async () => {
             onClick={() => void handleSave()}
           >
             <ArrowDownToLine className="h-4 w-4" />
-            {isSaving ? "Recording…" : "Record Stock Received"}
+            {isSaving ? "Recording…" : "Record Inventory Receipt"}
           </Button>
         </div>
       </div>

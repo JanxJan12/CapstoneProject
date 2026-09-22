@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import type {
   BadgeVariant,
-  ManagerPage,
+  PrototypeManagerPage,
   CashierPage,
   NavGroup,
   PageEntry,
@@ -68,7 +68,11 @@ export const PAGE_LIST: PageEntry[] = [
   { id: "components", num: "09", label: "Components", sub: "Design library" },
 ];
 
-export const MANAGER_GROUPS: NavGroup<ManagerPage>[] = [
+/**
+ * Navigation used only by disconnected design-system blueprints.
+ * The operational Manager navigation is defined in modules/manager/index.tsx.
+ */
+export const PROTOTYPE_MANAGER_GROUPS: NavGroup<PrototypeManagerPage>[] = [
   {
     label: "Operations",
     items: [
@@ -84,8 +88,12 @@ export const MANAGER_GROUPS: NavGroup<ManagerPage>[] = [
       { id: "menu", label: "Menu Management", icon: BookOpen },
       { id: "inventory", label: "Inventory", icon: Package, badge: 3 },
       { id: "inv-transactions", label: "Inv. Transactions", icon: RefreshCw },
-      { id: "suppliers", label: "Suppliers", icon: Truck },
-      { id: "purchase-orders", label: "Purchase Orders", icon: ShoppingBag },
+      { id: "suppliers", label: "Suppliers (Prototype)", icon: Truck },
+      {
+        id: "purchase-orders",
+        label: "Purchase Orders (Prototype)",
+        icon: ShoppingBag,
+      },
     ],
   },
   {
