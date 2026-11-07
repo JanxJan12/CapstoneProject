@@ -1,146 +1,43 @@
-import {
-  CASHIER_STATE_VERSION,
-  CASHIER_STORAGE_KEY,
-} from "../constants";
-
+import { CASHIER_STORAGE_KEY } from "../constants";
 import { createInitialCashierState } from "../services/seed";
-
 import type { CashierState } from "../types";
 
-/*
- * An open cashier shift should never realistically remain active
- * for multiple days.
- *
- * If an old prototype shift is still stored in localStorage,
- * regenerate the demo state so timestamps become relative to now.
- */
-const MAX_OPEN_SHIFT_HOURS = 16;
-
-function hasStaleOpenShift(state: CashierState): boolean {
-  const openShift = state.shifts.find(
-    (shift) => shift.status === "Open",
-  );
-
-  if (!openShift?.startedAt) {
-    return false;
-  }
-
-  const startedAt = new Date(openShift.startedAt).getTime();
-
-  if (Number.isNaN(startedAt)) {
-    return true;
-  }
-
-  const ageInHours =
-    (Date.now() - startedAt) / (1000 * 60 * 60);
-
-  return ageInHours > MAX_OPEN_SHIFT_HOURS;
-}
+// The old key contained customer, payment, and shift records. Never restore it.
+const PREFERENCES_KEY = `${CASHIER_STORAGE_KEY}_preferences`;
 
 export function loadCashierState(): CashierState {
+  const initial = createInitialCashierState();
   try {
-    const raw = localStorage.getItem(
-      CASHIER_STORAGE_KEY,
-    );
-
-    if (!raw) {
-      return createInitialCashierState();
-    }
-
-    const parsed = JSON.parse(raw) as CashierState;
-
-    /*
-     * Reset obsolete prototype data.
-     *
-     * This fixes cases where a seeded "active shift" from days
-     * or weeks ago is still being restored from localStorage.
-     */
-    if (hasStaleOpenShift(parsed)) {
-      const freshState =
-        createInitialCashierState();
-
-      localStorage.setItem(
-        CASHIER_STORAGE_KEY,
-        JSON.stringify(freshState),
-      );
-
-      return freshState;
-    }
-
-    /*
-     * Current stored format can be restored normally.
-     */
-    if (
-      parsed.version === CASHIER_STATE_VERSION
-    ) {
-      return {
-        ...parsed,
-        menuItems: [],
-      };
-    }
-
-    /*
-     * Migrate older prototype states while keeping cashier
-     * operations already performed in the browser.
-     */
-    if (
-      parsed.version >= 4 &&
-      parsed.version < CASHIER_STATE_VERSION
-    ) {
-      const migratedState: CashierState = {
-        ...parsed,
-        version: CASHIER_STATE_VERSION,
-        menuItems: [],
-      };
-
-      localStorage.setItem(
-        CASHIER_STORAGE_KEY,
-        JSON.stringify(migratedState),
-      );
-
-      return migratedState;
-    }
-  } catch (error) {
-    console.error(
-      "Unable to restore cashier state:",
-      error,
-    );
-  }
-
-  /*
-   * Unknown or damaged state gets replaced by a known-good
-   * prototype state.
-   */
-  const freshState =
-    createInitialCashierState();
-
-  try {
-    localStorage.setItem(
-      CASHIER_STORAGE_KEY,
-      JSON.stringify(freshState),
-    );
+    localStorage.removeItem(CASHIER_STORAGE_KEY);
+    localStorage.removeItem(PREFERENCES_KEY);
   } catch {
-    // Browser storage may be unavailable.
+    // Storage may be disabled; server-owned data always starts empty.
   }
-
-  return freshState;
+  return initial;
 }
 
-export function saveCashierState(
-  state: CashierState,
-): void {
+export function loadCashierPreferences(cashierId: string): Pick<CashierState, "delayedThresholdMinutes"> {
+  const fallback = createInitialCashierState().delayedThresholdMinutes;
   try {
-    localStorage.setItem(
-      CASHIER_STORAGE_KEY,
-      JSON.stringify({
-        ...state,
-        menuItems: [],
-      }),
-    );
-  } catch (error) {
-    console.error(
-      "Unable to save cashier state:",
-      error,
-    );
+    const saved = JSON.parse(localStorage.getItem(`${PREFERENCES_KEY}_${cashierId}`) ?? "null") as
+      | { delayedThresholdMinutes?: number } | null;
+    if (saved && Number.isFinite(saved.delayedThresholdMinutes)) {
+      return { delayedThresholdMinutes: Math.max(1, saved.delayedThresholdMinutes!) };
+    }
+  } catch {
+    // Use the default preference.
+  }
+  return { delayedThresholdMinutes: fallback };
+}
+
+export function saveCashierState(state: CashierState): void {
+  try {
+    localStorage.removeItem(CASHIER_STORAGE_KEY);
+    if (!state.cashier.id) return;
+    localStorage.setItem(`${PREFERENCES_KEY}_${state.cashier.id}`, JSON.stringify({
+      delayedThresholdMinutes: state.delayedThresholdMinutes,
+    }));
+  } catch {
+    // Preferences are optional.
   }
 }

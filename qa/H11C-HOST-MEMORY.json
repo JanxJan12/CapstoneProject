@@ -1,0 +1,13 @@
+{
+  "capturedAt": "2026-10-16T01:29:56.7265018+08:00",
+  "hostPhysicalMiB": 16106.8,
+  "hostFreePhysicalMiB": 2526.8,
+  "ramModulesMiB": [
+    8192.0,
+    8192.0
+  ],
+  "logicalProcessors": 12,
+  "wslConfigPresent": false,
+  "wslFree": "total        used        free      shared  buff/cache   available\r\nMem:           7803        6732         126         672         945         206\r\nSwap:          2048        2048           0",
+  "dockerInfo": "12 8182239232 29.8.2"
+}

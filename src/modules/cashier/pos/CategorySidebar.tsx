@@ -3,7 +3,6 @@ import {
   Beef,
   CakeSlice,
   CupSoda,
-  Flame,
   Grid2X2,
   Package,
   PlusCircle,
@@ -27,70 +26,50 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
   "Add-ons": PlusCircle,
 };
 
-const QUICK_VIEWS = [
-  { id: "Best sellers", label: "Best sellers", icon: Flame },
-] as const;
-
 export interface CategorySidebarProps {
   menuItems: MenuItem[];
   value: string;
-  bestSellerCount: number;
+  showUnavailable: boolean;
   onChange: (category: string) => void;
 }
 
 export const CategorySidebar = memo(function CategorySidebar({
   menuItems,
   value,
-  bestSellerCount,
+  showUnavailable,
   onChange,
 }: CategorySidebarProps) {
   const counts = useMemo(() => {
-    const result = new Map<string, number>([["All", menuItems.length]]);
+    const result = new Map<string, number>([["All", 0]]);
     for (const item of menuItems) {
+      if (!showUnavailable && !item.available) continue;
+      result.set("All", (result.get("All") ?? 0) + 1);
       result.set(item.category, (result.get(item.category) ?? 0) + 1);
     }
     return result;
-  }, [menuItems]);
-  const quickCounts: Record<(typeof QUICK_VIEWS)[number]["id"], number> = {
-    "Best sellers": bestSellerCount,
-  };
+  }, [menuItems, showUnavailable]);
   const categories = useMemo(() => {
     const configured = MENU_CATEGORIES.filter(
       (category) => category === "All" || (counts.get(category) ?? 0) > 0,
     );
-    const discovered = [...counts.keys()].filter(
+    const discovered = [...new Set(menuItems.map((item) => item.category))].filter(
       (category) => !configured.includes(category),
     );
     return [...configured, ...discovered];
-  }, [counts]);
+  }, [counts, menuItems]);
 
   return (
     <nav
       className="pos-category-rail shrink-0 overflow-auto border-r p-2"
-      aria-label="Menu categories and quick views"
+      aria-label="Menu categories"
     >
-      <p className="pos-category-label px-2 pb-1 pt-1 text-[8px] font-black uppercase tracking-[0.18em]">
-        Quick views
-      </p>
-      {QUICK_VIEWS.map(({ id, label, icon }) => (
-        <CategoryButton
-          key={id}
-          label={label}
-          icon={icon}
-          count={quickCounts[id]}
-          active={value === id}
-          onClick={() => onChange(id)}
-        />
-      ))}
-      <p className="pos-category-label px-2 pb-1 pt-3 text-[8px] font-black uppercase tracking-[0.18em]">
-        Categories
-      </p>
       {categories.map((category) => (
         <CategoryButton
           key={category}
           label={category}
           icon={CATEGORY_ICONS[category] ?? Grid2X2}
           count={counts.get(category) ?? 0}
+          countLabel={showUnavailable ? "menu items" : "available items"}
           active={value === category}
           onClick={() => onChange(category)}
         />
@@ -103,12 +82,14 @@ function CategoryButton({
   label,
   icon: Icon,
   count,
+  countLabel = "items",
   active,
   onClick,
 }: {
   label: string;
   icon: LucideIcon;
   count: number;
+  countLabel?: string;
   active: boolean;
   onClick: () => void;
 }) {
@@ -116,6 +97,7 @@ function CategoryButton({
     <button
       type="button"
       aria-pressed={active}
+      aria-label={`${label}, ${count} ${countLabel}`}
       onClick={onClick}
       className={`pos-category-button ${active ? "is-active" : ""}`}
     >

@@ -1,0 +1,124 @@
+%% RRJ'S FOOD-HOUSE - Orders and cashier
+%% Source: hosted PostgreSQL pg_catalog, captured 2026-10-26T20:58:45.038881+00:00
+%% Field types are Mermaid-safe tokens. Exact PostgreSQL types, nullability and defaults are in hosted-public-catalog.json and column-dictionary.html.
+erDiagram
+  orders {
+    uuid id PK
+    character_varying_50 order_number UK
+    uuid customer_id FK
+    uuid processed_by FK
+    order_channel order_channel
+    fulfillment_type fulfillment_type
+    character_varying_150 customer_name
+    character_varying_20 customer_contact_number
+    text delivery_address
+    text landmark
+    text geolocation
+    order_status current_status
+    numeric_10_2 subtotal
+    numeric_10_2 delivery_fee
+    numeric_10_2 grand_total
+    text notes
+    timestamp_with_time_zone confirmed_at
+    timestamp_with_time_zone created_at
+    timestamp_with_time_zone completed_at
+    timestamp_with_time_zone cancelled_at
+    character_varying_20 table_number
+    character_varying_40 discount_type
+    character_varying_100 discount_reference
+    numeric_12_2 discount_amount
+    numeric_12_2 tax_amount
+    uuid customer_request_id
+  }
+  order_items {
+    uuid id PK
+    uuid order_id FK
+    uuid menu_item_id FK
+    integer quantity
+    numeric_10_2 unit_price
+    numeric_10_2 line_total
+    text special_instructions
+    timestamp_with_time_zone created_at
+    character_varying item_name
+    jsonb modifiers
+  }
+  order_status_history {
+    uuid id PK
+    uuid order_id FK
+    order_status status
+    uuid changed_by FK
+    text notes
+    timestamp_with_time_zone created_at
+  }
+  payments {
+    uuid id PK
+    uuid order_id FK,UK
+    payment_method payment_method
+    numeric_10_2 amount
+    character_varying_100 gcash_reference_number
+    text proof_image_path
+    payment_status status
+    uuid verified_by FK
+    timestamp_with_time_zone verified_at
+    text rejection_reason
+    timestamp_with_time_zone created_at
+    timestamp_with_time_zone updated_at
+    numeric_12_2 cash_received
+    text rejection_notes
+    uuid rejected_by FK
+    timestamp_with_time_zone rejected_at
+  }
+  paid_order_cancellations {
+    uuid id PK
+    uuid order_id FK,UK
+    uuid payment_id FK,UK
+    uuid cashier_transaction_id FK,UK
+    order_status previous_status
+    text inventory_disposition
+    numeric_10_2 refund_amount
+    payment_method refund_method
+    text refund_reference
+    text reason
+    uuid processed_by FK
+    timestamp_with_time_zone processed_at
+  }
+  cashier_shifts {
+    uuid id PK
+    uuid cashier_id FK
+    character_varying_50 terminal
+    numeric_12_2 opening_cash
+    cashier_shift_status status
+    timestamp_with_time_zone started_at
+    timestamp_with_time_zone ended_at
+    numeric_12_2 actual_cash
+    numeric_12_2 expected_cash
+    numeric_12_2 variance
+    text variance_reason
+    text notes
+    uuid closed_by FK
+    uuid manager_approved_by FK
+    timestamp_with_time_zone manager_approved_at
+  }
+  cashier_transactions {
+    uuid id PK
+    character_varying_20 transaction_number UK
+    character_varying_20 receipt_number UK
+    uuid order_id FK,UK
+    uuid payment_id FK,UK
+    uuid shift_id FK
+    uuid cashier_id FK
+    cashier_transaction_status status
+    text void_reason
+    timestamp_with_time_zone voided_at
+    timestamp_with_time_zone created_at
+    uuid request_id UK
+  }
+  orders ||--o| cashier_transactions : "R005 cashier_transactions_order_id_fkey"
+  payments ||--o| cashier_transactions : "R006 cashier_transactions_payment_id_fkey"
+  cashier_shifts ||--o{ cashier_transactions : "R007 cashier_transactions_shift_id_fkey"
+  orders ||--o{ order_items : "R043 order_items_order_id_fkey"
+  orders ||--o{ order_status_history : "R045 order_status_history_order_id_fkey"
+  cashier_transactions ||--o| paid_order_cancellations : "R048 paid_order_cancellations_cashier_transaction_id_fkey"
+  orders ||--o| paid_order_cancellations : "R049 paid_order_cancellations_order_id_fkey"
+  payments ||--o| paid_order_cancellations : "R050 paid_order_cancellations_payment_id_fkey"
+  orders ||--o| payments : "R052 payments_order_id_fkey"

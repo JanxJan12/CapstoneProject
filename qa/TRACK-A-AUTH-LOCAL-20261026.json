@@ -1,0 +1,133 @@
+{
+  "boundary": "http://127.0.0.1:64521",
+  "fixtureMigrationCount": 54,
+  "itemId": "f96befab-bdc1-49c4-99d8-c55b4ead4d8e",
+  "requestId": "237fbc20-8a13-43c2-8cbc-d90fd5e75730",
+  "reportId": "ee1c9ec4-6089-4638-8e3f-6270945b8690",
+  "lineId": "06475925-1d52-487b-a8f0-a04562d316c0",
+  "stages": {
+    "before": {
+      "aggregate": 0,
+      "requestDocuments": 0,
+      "requestLines": 0,
+      "receivingReports": 0,
+      "receivingLines": 0,
+      "batchRows": 0,
+      "batchQuantity": 0,
+      "ledgerRows": 0,
+      "ledgerQuantity": 0,
+      "reportStatus": null,
+      "requestStatus": null
+    },
+    "issued": {
+      "aggregate": 0,
+      "requestDocuments": 1,
+      "requestLines": 1,
+      "receivingReports": 0,
+      "receivingLines": 0,
+      "batchRows": 0,
+      "batchQuantity": 0,
+      "ledgerRows": 0,
+      "ledgerQuantity": 0,
+      "reportStatus": null,
+      "requestStatus": "issued"
+    },
+    "draftOpened": {
+      "aggregate": 0,
+      "requestDocuments": 1,
+      "requestLines": 1,
+      "receivingReports": 1,
+      "receivingLines": 0,
+      "batchRows": 0,
+      "batchQuantity": 0,
+      "ledgerRows": 0,
+      "ledgerQuantity": 0,
+      "reportStatus": "draft",
+      "requestStatus": "issued"
+    },
+    "deliverySaved": {
+      "aggregate": 0,
+      "requestDocuments": 1,
+      "requestLines": 1,
+      "receivingReports": 1,
+      "receivingLines": 1,
+      "batchRows": 0,
+      "batchQuantity": 0,
+      "ledgerRows": 0,
+      "ledgerQuantity": 0,
+      "reportStatus": "draft",
+      "requestStatus": "issued"
+    },
+    "posted": {
+      "aggregate": 2,
+      "requestDocuments": 1,
+      "requestLines": 1,
+      "receivingReports": 1,
+      "receivingLines": 1,
+      "batchRows": 1,
+      "batchQuantity": 2,
+      "ledgerRows": 1,
+      "ledgerQuantity": 2,
+      "reportStatus": "posted",
+      "requestStatus": "partially_received"
+    },
+    "duplicateRejected": {
+      "aggregate": 2,
+      "requestDocuments": 1,
+      "requestLines": 1,
+      "receivingReports": 1,
+      "receivingLines": 1,
+      "batchRows": 1,
+      "batchQuantity": 2,
+      "ledgerRows": 1,
+      "ledgerQuantity": 2,
+      "reportStatus": "posted",
+      "requestStatus": "partially_received"
+    }
+  },
+  "auth": {
+    "method": "GoTrue password",
+    "profileRole": "manager",
+    "profileId": "03193cf8-e425-4033-995f-63200f9ac4b4"
+  },
+  "proposal": {
+    "id": "f96befab-bdc1-49c4-99d8-c55b4ead4d8e",
+    "name": "__TRACK_A_QA_f96befab",
+    "unit": "pcs",
+    "usable_now": 0,
+    "outstanding": 0,
+    "reorder_level": 4,
+    "valid_at_need": 0,
+    "quantity_scale": 0,
+    "expiry_verified": false
+  },
+  "requestNumber": "PR-20261026-000001",
+  "receivingNumber": "RR-20261026-EE1C9EC4",
+  "postResult": {
+    "status": "posted",
+    "posted_at": "2026-10-26T12:17:19.532651+00:00",
+    "posted_by": "03193cf8-e425-4033-995f-63200f9ac4b4",
+    "rr_number": "RR-20261026-EE1C9EC4",
+    "line_count": 1,
+    "batch_count": 1,
+    "source_type": "production_team",
+    "total_accepted": 2,
+    "transaction_count": 1,
+    "receiving_report_id": "ee1c9ec4-6089-4638-8e3f-6270945b8690"
+  },
+  "result": "PASS",
+  "ledger": {
+    "transaction_type": "receiving",
+    "quantity_change": 2,
+    "inventory_batch_id": "f9c7ed9d-ec5c-4af4-827b-4236828c0301",
+    "inventory_item_id": "f96befab-bdc1-49c4-99d8-c55b4ead4d8e",
+    "reason": "Formal request receiving report RR-20261026-EE1C9EC4"
+  },
+  "duplicatePost": {
+    "rejected": true,
+    "httpStatus": 400,
+    "code": "22023",
+    "message": "Receiving report is already posted.",
+    "managerRole": "manager"
+  }
+}

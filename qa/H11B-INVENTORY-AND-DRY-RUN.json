@@ -1,0 +1,1815 @@
+{
+  "profile": "h09-qa",
+  "retained": {
+    "project": "rrj_h09_order_flow_20261015",
+    "port": "48321"
+  },
+  "dryRun": true,
+  "resources": {
+    "totalMiB": 7803.19140625,
+    "availableMiB": 398.4296875,
+    "swapUsedMiB": 2048,
+    "swapTotalMiB": 2048,
+    "load1": 0.56,
+    "pressure10": 0.02
+  },
+  "warnings": [
+    "Low WSL available RAM: 398 MiB",
+    "WSL swap over 90% used: 2048/2048 MiB"
+  ],
+  "inventory": [
+    {
+      "project": "<unlabeled>",
+      "running": 0,
+      "total": 1,
+      "services": [
+        {
+          "name": "rrj_recovery_rehearsal_20261013",
+          "id": "2bede0448e29",
+          "project": null,
+          "composeService": null,
+          "supabaseProject": null,
+          "running": false,
+          "health": "unhealthy",
+          "ports": [],
+          "networks": [
+            "none"
+          ],
+          "mounts": []
+        }
+      ]
+    },
+    {
+      "project": "isolated-stack",
+      "running": 5,
+      "total": 6,
+      "services": [
+        {
+          "name": "supabase_pg_meta_isolated-stack",
+          "id": "fa026b6aa72f",
+          "project": "isolated-stack",
+          "composeService": null,
+          "supabaseProject": "isolated-stack",
+          "running": false,
+          "health": "unhealthy",
+          "ports": [],
+          "networks": [
+            "supabase_network_isolated-stack"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_storage_isolated-stack",
+          "id": "40c80e51042f",
+          "project": "isolated-stack",
+          "composeService": null,
+          "supabaseProject": "isolated-stack",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "supabase_network_isolated-stack"
+          ],
+          "mounts": [
+            {
+              "type": "volume",
+              "destination": "/mnt"
+            }
+          ]
+        },
+        {
+          "name": "supabase_rest_isolated-stack",
+          "id": "7ede4d92799f",
+          "project": "isolated-stack",
+          "composeService": null,
+          "supabaseProject": "isolated-stack",
+          "running": true,
+          "health": null,
+          "ports": [],
+          "networks": [
+            "supabase_network_isolated-stack"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_auth_isolated-stack",
+          "id": "3ceb1b48a1c2",
+          "project": "isolated-stack",
+          "composeService": null,
+          "supabaseProject": "isolated-stack",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "supabase_network_isolated-stack"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_kong_isolated-stack",
+          "id": "b56f15a408f8",
+          "project": "isolated-stack",
+          "composeService": null,
+          "supabaseProject": "isolated-stack",
+          "running": true,
+          "health": "healthy",
+          "ports": [
+            "::1:56321",
+            "127.0.0.1:56321"
+          ],
+          "networks": [
+            "supabase_network_isolated-stack"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_db_isolated-stack",
+          "id": "677b9f1c451b",
+          "project": "isolated-stack",
+          "composeService": null,
+          "supabaseProject": "isolated-stack",
+          "running": true,
+          "health": "healthy",
+          "ports": [
+            "127.0.0.1:56322",
+            "::1:56322"
+          ],
+          "networks": [
+            "supabase_network_isolated-stack"
+          ],
+          "mounts": [
+            {
+              "type": "volume",
+              "destination": "/var/lib/postgresql/data"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "project": "my-local-todo-app",
+      "running": 11,
+      "total": 12,
+      "services": [
+        {
+          "name": "supabase_studio_my-local-todo-app",
+          "id": "9b9a34b6a507",
+          "project": "my-local-todo-app",
+          "composeService": null,
+          "supabaseProject": "my-local-todo-app",
+          "running": true,
+          "health": "healthy",
+          "ports": [
+            "127.0.0.1:54323",
+            "::1:54323"
+          ],
+          "networks": [
+            "supabase_network_my-local-todo-app"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_pg_meta_my-local-todo-app",
+          "id": "2a751d274ef0",
+          "project": "my-local-todo-app",
+          "composeService": null,
+          "supabaseProject": "my-local-todo-app",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "supabase_network_my-local-todo-app"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_edge_runtime_my-local-todo-app",
+          "id": "79eb80b0ca74",
+          "project": "my-local-todo-app",
+          "composeService": null,
+          "supabaseProject": "my-local-todo-app",
+          "running": false,
+          "health": null,
+          "ports": [],
+          "networks": [
+            "supabase_network_my-local-todo-app"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_storage_my-local-todo-app",
+          "id": "5e7897f1092e",
+          "project": "my-local-todo-app",
+          "composeService": null,
+          "supabaseProject": "my-local-todo-app",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "supabase_network_my-local-todo-app"
+          ],
+          "mounts": [
+            {
+              "type": "volume",
+              "destination": "/mnt"
+            }
+          ]
+        },
+        {
+          "name": "supabase_rest_my-local-todo-app",
+          "id": "c236ff779778",
+          "project": "my-local-todo-app",
+          "composeService": null,
+          "supabaseProject": "my-local-todo-app",
+          "running": true,
+          "health": null,
+          "ports": [],
+          "networks": [
+            "supabase_network_my-local-todo-app"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_realtime_my-local-todo-app",
+          "id": "0919896beee1",
+          "project": "my-local-todo-app",
+          "composeService": null,
+          "supabaseProject": "my-local-todo-app",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "supabase_network_my-local-todo-app"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_inbucket_my-local-todo-app",
+          "id": "18aa01159581",
+          "project": "my-local-todo-app",
+          "composeService": null,
+          "supabaseProject": "my-local-todo-app",
+          "running": true,
+          "health": "healthy",
+          "ports": [
+            "::1:54324",
+            "127.0.0.1:54324"
+          ],
+          "networks": [
+            "supabase_network_my-local-todo-app"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_auth_my-local-todo-app",
+          "id": "7bb568ae0766",
+          "project": "my-local-todo-app",
+          "composeService": null,
+          "supabaseProject": "my-local-todo-app",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "supabase_network_my-local-todo-app"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_kong_my-local-todo-app",
+          "id": "350c49e29d51",
+          "project": "my-local-todo-app",
+          "composeService": null,
+          "supabaseProject": "my-local-todo-app",
+          "running": true,
+          "health": "healthy",
+          "ports": [
+            "::1:54321",
+            "127.0.0.1:54321"
+          ],
+          "networks": [
+            "supabase_network_my-local-todo-app"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_vector_my-local-todo-app",
+          "id": "bcf16098d843",
+          "project": "my-local-todo-app",
+          "composeService": null,
+          "supabaseProject": "my-local-todo-app",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "supabase_network_my-local-todo-app"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_analytics_my-local-todo-app",
+          "id": "908d74874442",
+          "project": "my-local-todo-app",
+          "composeService": null,
+          "supabaseProject": "my-local-todo-app",
+          "running": true,
+          "health": "healthy",
+          "ports": [
+            "::1:54327",
+            "127.0.0.1:54327"
+          ],
+          "networks": [
+            "supabase_network_my-local-todo-app"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_db_my-local-todo-app",
+          "id": "3feef4aaa270",
+          "project": "my-local-todo-app",
+          "composeService": null,
+          "supabaseProject": "my-local-todo-app",
+          "running": true,
+          "health": "healthy",
+          "ports": [
+            "::1:54322",
+            "127.0.0.1:54322"
+          ],
+          "networks": [
+            "supabase_network_my-local-todo-app"
+          ],
+          "mounts": [
+            {
+              "type": "volume",
+              "destination": "/etc/postgresql-custom"
+            },
+            {
+              "type": "volume",
+              "destination": "/var/lib/postgresql/data"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "project": "rrj_defense_demo_20261014",
+      "running": 5,
+      "total": 5,
+      "services": [
+        {
+          "name": "supabase_storage_rrj_defense_demo_20261014",
+          "id": "90c84db09a56",
+          "project": "rrj_defense_demo_20261014",
+          "composeService": null,
+          "supabaseProject": "rrj_defense_demo_20261014",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_defense_demo_20261014"
+          ],
+          "mounts": [
+            {
+              "type": "volume",
+              "destination": "/mnt"
+            }
+          ]
+        },
+        {
+          "name": "supabase_rest_rrj_defense_demo_20261014",
+          "id": "55938b9df480",
+          "project": "rrj_defense_demo_20261014",
+          "composeService": null,
+          "supabaseProject": "rrj_defense_demo_20261014",
+          "running": true,
+          "health": null,
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_defense_demo_20261014"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_auth_rrj_defense_demo_20261014",
+          "id": "9b7c1cecb09c",
+          "project": "rrj_defense_demo_20261014",
+          "composeService": null,
+          "supabaseProject": "rrj_defense_demo_20261014",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_defense_demo_20261014"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_kong_rrj_defense_demo_20261014",
+          "id": "3c44fae58d38",
+          "project": "rrj_defense_demo_20261014",
+          "composeService": null,
+          "supabaseProject": "rrj_defense_demo_20261014",
+          "running": true,
+          "health": "healthy",
+          "ports": [
+            "::1:61321",
+            "127.0.0.1:61321"
+          ],
+          "networks": [
+            "supabase_network_rrj_defense_demo_20261014"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_db_rrj_defense_demo_20261014",
+          "id": "d1d080ef20d7",
+          "project": "rrj_defense_demo_20261014",
+          "composeService": null,
+          "supabaseProject": "rrj_defense_demo_20261014",
+          "running": true,
+          "health": "healthy",
+          "ports": [
+            "::1:61322",
+            "127.0.0.1:61322"
+          ],
+          "networks": [
+            "supabase_network_rrj_defense_demo_20261014"
+          ],
+          "mounts": [
+            {
+              "type": "volume",
+              "destination": "/var/lib/postgresql/data"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "project": "rrj_defense_demo_20261014_r2",
+      "running": 5,
+      "total": 5,
+      "services": [
+        {
+          "name": "supabase_storage_rrj_defense_demo_20261014_r2",
+          "id": "fadb21325353",
+          "project": "rrj_defense_demo_20261014_r2",
+          "composeService": null,
+          "supabaseProject": "rrj_defense_demo_20261014_r2",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_defense_demo_20261014_r2"
+          ],
+          "mounts": [
+            {
+              "type": "volume",
+              "destination": "/mnt"
+            }
+          ]
+        },
+        {
+          "name": "supabase_rest_rrj_defense_demo_20261014_r2",
+          "id": "30d5bf2f23a1",
+          "project": "rrj_defense_demo_20261014_r2",
+          "composeService": null,
+          "supabaseProject": "rrj_defense_demo_20261014_r2",
+          "running": true,
+          "health": null,
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_defense_demo_20261014_r2"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_auth_rrj_defense_demo_20261014_r2",
+          "id": "e133aed5720f",
+          "project": "rrj_defense_demo_20261014_r2",
+          "composeService": null,
+          "supabaseProject": "rrj_defense_demo_20261014_r2",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_defense_demo_20261014_r2"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_kong_rrj_defense_demo_20261014_r2",
+          "id": "56c80a5f8803",
+          "project": "rrj_defense_demo_20261014_r2",
+          "composeService": null,
+          "supabaseProject": "rrj_defense_demo_20261014_r2",
+          "running": true,
+          "health": "healthy",
+          "ports": [
+            "127.0.0.1:62321",
+            "::1:62321"
+          ],
+          "networks": [
+            "supabase_network_rrj_defense_demo_20261014_r2"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_db_rrj_defense_demo_20261014_r2",
+          "id": "beec6b1192ca",
+          "project": "rrj_defense_demo_20261014_r2",
+          "composeService": null,
+          "supabaseProject": "rrj_defense_demo_20261014_r2",
+          "running": true,
+          "health": "healthy",
+          "ports": [
+            "127.0.0.1:62322",
+            "::1:62322"
+          ],
+          "networks": [
+            "supabase_network_rrj_defense_demo_20261014_r2"
+          ],
+          "mounts": [
+            {
+              "type": "volume",
+              "destination": "/var/lib/postgresql/data"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "project": "rrj_defense_demo_20261014_r3",
+      "running": 5,
+      "total": 5,
+      "services": [
+        {
+          "name": "supabase_storage_rrj_defense_demo_20261014_r3",
+          "id": "bdd4c001c232",
+          "project": "rrj_defense_demo_20261014_r3",
+          "composeService": null,
+          "supabaseProject": "rrj_defense_demo_20261014_r3",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_defense_demo_20261014_r3"
+          ],
+          "mounts": [
+            {
+              "type": "volume",
+              "destination": "/mnt"
+            }
+          ]
+        },
+        {
+          "name": "supabase_rest_rrj_defense_demo_20261014_r3",
+          "id": "a47c5ff84b74",
+          "project": "rrj_defense_demo_20261014_r3",
+          "composeService": null,
+          "supabaseProject": "rrj_defense_demo_20261014_r3",
+          "running": true,
+          "health": null,
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_defense_demo_20261014_r3"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_auth_rrj_defense_demo_20261014_r3",
+          "id": "92bb64389b29",
+          "project": "rrj_defense_demo_20261014_r3",
+          "composeService": null,
+          "supabaseProject": "rrj_defense_demo_20261014_r3",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_defense_demo_20261014_r3"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_kong_rrj_defense_demo_20261014_r3",
+          "id": "08696de9d4e4",
+          "project": "rrj_defense_demo_20261014_r3",
+          "composeService": null,
+          "supabaseProject": "rrj_defense_demo_20261014_r3",
+          "running": true,
+          "health": "healthy",
+          "ports": [
+            "::1:63321",
+            "127.0.0.1:63321"
+          ],
+          "networks": [
+            "supabase_network_rrj_defense_demo_20261014_r3"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_db_rrj_defense_demo_20261014_r3",
+          "id": "85e0d9d47432",
+          "project": "rrj_defense_demo_20261014_r3",
+          "composeService": null,
+          "supabaseProject": "rrj_defense_demo_20261014_r3",
+          "running": true,
+          "health": "healthy",
+          "ports": [
+            "::1:63322",
+            "127.0.0.1:63322"
+          ],
+          "networks": [
+            "supabase_network_rrj_defense_demo_20261014_r3"
+          ],
+          "mounts": [
+            {
+              "type": "volume",
+              "destination": "/var/lib/postgresql/data"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "project": "rrj_h07_financial_20261014",
+      "running": 5,
+      "total": 5,
+      "services": [
+        {
+          "name": "supabase_storage_rrj_h07_financial_20261014",
+          "id": "74b5ba6d38ca",
+          "project": "rrj_h07_financial_20261014",
+          "composeService": null,
+          "supabaseProject": "rrj_h07_financial_20261014",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_h07_financial_20261014"
+          ],
+          "mounts": [
+            {
+              "type": "volume",
+              "destination": "/mnt"
+            }
+          ]
+        },
+        {
+          "name": "supabase_rest_rrj_h07_financial_20261014",
+          "id": "f8c4f6885aa9",
+          "project": "rrj_h07_financial_20261014",
+          "composeService": null,
+          "supabaseProject": "rrj_h07_financial_20261014",
+          "running": true,
+          "health": null,
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_h07_financial_20261014"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_auth_rrj_h07_financial_20261014",
+          "id": "d8b130694c1d",
+          "project": "rrj_h07_financial_20261014",
+          "composeService": null,
+          "supabaseProject": "rrj_h07_financial_20261014",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_h07_financial_20261014"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_kong_rrj_h07_financial_20261014",
+          "id": "e8f7b6161dd3",
+          "project": "rrj_h07_financial_20261014",
+          "composeService": null,
+          "supabaseProject": "rrj_h07_financial_20261014",
+          "running": true,
+          "health": "healthy",
+          "ports": [
+            "127.0.0.1:57321",
+            "::1:57321"
+          ],
+          "networks": [
+            "supabase_network_rrj_h07_financial_20261014"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_db_rrj_h07_financial_20261014",
+          "id": "db4249c0ec4c",
+          "project": "rrj_h07_financial_20261014",
+          "composeService": null,
+          "supabaseProject": "rrj_h07_financial_20261014",
+          "running": true,
+          "health": "healthy",
+          "ports": [
+            "127.0.0.1:57322",
+            "::1:57322"
+          ],
+          "networks": [
+            "supabase_network_rrj_h07_financial_20261014"
+          ],
+          "mounts": [
+            {
+              "type": "volume",
+              "destination": "/var/lib/postgresql/data"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "project": "rrj_h08b_history_20261015",
+      "running": 5,
+      "total": 5,
+      "services": [
+        {
+          "name": "supabase_storage_rrj_h08b_history_20261015",
+          "id": "1cc9c7088cba",
+          "project": "rrj_h08b_history_20261015",
+          "composeService": null,
+          "supabaseProject": "rrj_h08b_history_20261015",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_h08b_history_20261015"
+          ],
+          "mounts": [
+            {
+              "type": "volume",
+              "destination": "/mnt"
+            }
+          ]
+        },
+        {
+          "name": "supabase_rest_rrj_h08b_history_20261015",
+          "id": "4f23e160669b",
+          "project": "rrj_h08b_history_20261015",
+          "composeService": null,
+          "supabaseProject": "rrj_h08b_history_20261015",
+          "running": true,
+          "health": null,
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_h08b_history_20261015"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_auth_rrj_h08b_history_20261015",
+          "id": "e3685155639e",
+          "project": "rrj_h08b_history_20261015",
+          "composeService": null,
+          "supabaseProject": "rrj_h08b_history_20261015",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_h08b_history_20261015"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_kong_rrj_h08b_history_20261015",
+          "id": "4e7af74404e1",
+          "project": "rrj_h08b_history_20261015",
+          "composeService": null,
+          "supabaseProject": "rrj_h08b_history_20261015",
+          "running": true,
+          "health": "healthy",
+          "ports": [
+            "::1:58321",
+            "127.0.0.1:58321"
+          ],
+          "networks": [
+            "supabase_network_rrj_h08b_history_20261015"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_db_rrj_h08b_history_20261015",
+          "id": "c7716c7d279e",
+          "project": "rrj_h08b_history_20261015",
+          "composeService": null,
+          "supabaseProject": "rrj_h08b_history_20261015",
+          "running": true,
+          "health": "healthy",
+          "ports": [
+            "::1:58322",
+            "127.0.0.1:58322"
+          ],
+          "networks": [
+            "supabase_network_rrj_h08b_history_20261015"
+          ],
+          "mounts": [
+            {
+              "type": "volume",
+              "destination": "/etc/postgresql-custom"
+            },
+            {
+              "type": "volume",
+              "destination": "/var/lib/postgresql/data"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "project": "rrj_h08c_history_20261015",
+      "running": 11,
+      "total": 12,
+      "services": [
+        {
+          "name": "supabase_studio_rrj_h08c_history_20261015",
+          "id": "d99279ea81a3",
+          "project": "rrj_h08c_history_20261015",
+          "composeService": null,
+          "supabaseProject": "rrj_h08c_history_20261015",
+          "running": true,
+          "health": "healthy",
+          "ports": [
+            "127.0.0.1:59323",
+            "::1:59323"
+          ],
+          "networks": [
+            "supabase_network_rrj_h08c_history_20261015"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_pg_meta_rrj_h08c_history_20261015",
+          "id": "36204297b02b",
+          "project": "rrj_h08c_history_20261015",
+          "composeService": null,
+          "supabaseProject": "rrj_h08c_history_20261015",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_h08c_history_20261015"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_edge_runtime_rrj_h08c_history_20261015",
+          "id": "bb74cd675941",
+          "project": "rrj_h08c_history_20261015",
+          "composeService": null,
+          "supabaseProject": "rrj_h08c_history_20261015",
+          "running": false,
+          "health": null,
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_h08c_history_20261015"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_storage_rrj_h08c_history_20261015",
+          "id": "3cde5a00ddf7",
+          "project": "rrj_h08c_history_20261015",
+          "composeService": null,
+          "supabaseProject": "rrj_h08c_history_20261015",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_h08c_history_20261015"
+          ],
+          "mounts": [
+            {
+              "type": "volume",
+              "destination": "/mnt"
+            }
+          ]
+        },
+        {
+          "name": "supabase_rest_rrj_h08c_history_20261015",
+          "id": "feebac47f5fa",
+          "project": "rrj_h08c_history_20261015",
+          "composeService": null,
+          "supabaseProject": "rrj_h08c_history_20261015",
+          "running": true,
+          "health": null,
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_h08c_history_20261015"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_realtime_rrj_h08c_history_20261015",
+          "id": "ff427135d2df",
+          "project": "rrj_h08c_history_20261015",
+          "composeService": null,
+          "supabaseProject": "rrj_h08c_history_20261015",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_h08c_history_20261015"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_inbucket_rrj_h08c_history_20261015",
+          "id": "0ad2bab7e2eb",
+          "project": "rrj_h08c_history_20261015",
+          "composeService": null,
+          "supabaseProject": "rrj_h08c_history_20261015",
+          "running": true,
+          "health": "healthy",
+          "ports": [
+            "127.0.0.1:59324",
+            "::1:59324"
+          ],
+          "networks": [
+            "supabase_network_rrj_h08c_history_20261015"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_auth_rrj_h08c_history_20261015",
+          "id": "862664844b42",
+          "project": "rrj_h08c_history_20261015",
+          "composeService": null,
+          "supabaseProject": "rrj_h08c_history_20261015",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_h08c_history_20261015"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_kong_rrj_h08c_history_20261015",
+          "id": "d3bd5187fb2a",
+          "project": "rrj_h08c_history_20261015",
+          "composeService": null,
+          "supabaseProject": "rrj_h08c_history_20261015",
+          "running": true,
+          "health": "healthy",
+          "ports": [
+            "::1:59321",
+            "127.0.0.1:59321"
+          ],
+          "networks": [
+            "supabase_network_rrj_h08c_history_20261015"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_vector_rrj_h08c_history_20261015",
+          "id": "ab7d705432f5",
+          "project": "rrj_h08c_history_20261015",
+          "composeService": null,
+          "supabaseProject": "rrj_h08c_history_20261015",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_h08c_history_20261015"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_analytics_rrj_h08c_history_20261015",
+          "id": "2d9de3b44279",
+          "project": "rrj_h08c_history_20261015",
+          "composeService": null,
+          "supabaseProject": "rrj_h08c_history_20261015",
+          "running": true,
+          "health": "healthy",
+          "ports": [
+            "127.0.0.1:59327",
+            "::1:59327"
+          ],
+          "networks": [
+            "supabase_network_rrj_h08c_history_20261015"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_db_rrj_h08c_history_20261015",
+          "id": "774017228b5e",
+          "project": "rrj_h08c_history_20261015",
+          "composeService": null,
+          "supabaseProject": "rrj_h08c_history_20261015",
+          "running": true,
+          "health": "healthy",
+          "ports": [
+            "::1:59322",
+            "127.0.0.1:59322"
+          ],
+          "networks": [
+            "supabase_network_rrj_h08c_history_20261015"
+          ],
+          "mounts": [
+            {
+              "type": "volume",
+              "destination": "/etc/postgresql-custom"
+            },
+            {
+              "type": "volume",
+              "destination": "/var/lib/postgresql/data"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "project": "rrj_h09_order_flow_20261015",
+      "running": 6,
+      "total": 6,
+      "services": [
+        {
+          "name": "supabase_storage_rrj_h09_order_flow_20261015",
+          "id": "4319d2dc6862",
+          "project": "rrj_h09_order_flow_20261015",
+          "composeService": null,
+          "supabaseProject": "rrj_h09_order_flow_20261015",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_h09_order_flow_20261015"
+          ],
+          "mounts": [
+            {
+              "type": "volume",
+              "destination": "/mnt"
+            }
+          ]
+        },
+        {
+          "name": "supabase_rest_rrj_h09_order_flow_20261015",
+          "id": "93d1d9e5a74d",
+          "project": "rrj_h09_order_flow_20261015",
+          "composeService": null,
+          "supabaseProject": "rrj_h09_order_flow_20261015",
+          "running": true,
+          "health": null,
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_h09_order_flow_20261015"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_inbucket_rrj_h09_order_flow_20261015",
+          "id": "c2b5180e936b",
+          "project": "rrj_h09_order_flow_20261015",
+          "composeService": null,
+          "supabaseProject": "rrj_h09_order_flow_20261015",
+          "running": true,
+          "health": "healthy",
+          "ports": [
+            "::1:48324",
+            "127.0.0.1:48324"
+          ],
+          "networks": [
+            "supabase_network_rrj_h09_order_flow_20261015"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_auth_rrj_h09_order_flow_20261015",
+          "id": "fc196286ff91",
+          "project": "rrj_h09_order_flow_20261015",
+          "composeService": null,
+          "supabaseProject": "rrj_h09_order_flow_20261015",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_h09_order_flow_20261015"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_kong_rrj_h09_order_flow_20261015",
+          "id": "39d166c2f6ce",
+          "project": "rrj_h09_order_flow_20261015",
+          "composeService": null,
+          "supabaseProject": "rrj_h09_order_flow_20261015",
+          "running": true,
+          "health": "healthy",
+          "ports": [
+            "127.0.0.1:48321",
+            "::1:48321"
+          ],
+          "networks": [
+            "supabase_network_rrj_h09_order_flow_20261015"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_db_rrj_h09_order_flow_20261015",
+          "id": "cac20bb296b3",
+          "project": "rrj_h09_order_flow_20261015",
+          "composeService": null,
+          "supabaseProject": "rrj_h09_order_flow_20261015",
+          "running": true,
+          "health": "healthy",
+          "ports": [
+            "::1:48322",
+            "127.0.0.1:48322"
+          ],
+          "networks": [
+            "supabase_network_rrj_h09_order_flow_20261015"
+          ],
+          "mounts": [
+            {
+              "type": "volume",
+              "destination": "/var/lib/postgresql/data"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "project": "rrj_manager_lifecycle_20261014",
+      "running": 5,
+      "total": 5,
+      "services": [
+        {
+          "name": "supabase_storage_rrj_manager_lifecycle_20261014",
+          "id": "b7f9e3a021fe",
+          "project": "rrj_manager_lifecycle_20261014",
+          "composeService": null,
+          "supabaseProject": "rrj_manager_lifecycle_20261014",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_manager_lifecycle_20261014"
+          ],
+          "mounts": [
+            {
+              "type": "volume",
+              "destination": "/mnt"
+            }
+          ]
+        },
+        {
+          "name": "supabase_rest_rrj_manager_lifecycle_20261014",
+          "id": "dcdd656c805d",
+          "project": "rrj_manager_lifecycle_20261014",
+          "composeService": null,
+          "supabaseProject": "rrj_manager_lifecycle_20261014",
+          "running": true,
+          "health": null,
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_manager_lifecycle_20261014"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_auth_rrj_manager_lifecycle_20261014",
+          "id": "caca8252418a",
+          "project": "rrj_manager_lifecycle_20261014",
+          "composeService": null,
+          "supabaseProject": "rrj_manager_lifecycle_20261014",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_manager_lifecycle_20261014"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_kong_rrj_manager_lifecycle_20261014",
+          "id": "7088583f5d03",
+          "project": "rrj_manager_lifecycle_20261014",
+          "composeService": null,
+          "supabaseProject": "rrj_manager_lifecycle_20261014",
+          "running": true,
+          "health": "healthy",
+          "ports": [
+            "127.0.0.1:52321",
+            "::1:52321"
+          ],
+          "networks": [
+            "supabase_network_rrj_manager_lifecycle_20261014"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_db_rrj_manager_lifecycle_20261014",
+          "id": "8d75e1ef2533",
+          "project": "rrj_manager_lifecycle_20261014",
+          "composeService": null,
+          "supabaseProject": "rrj_manager_lifecycle_20261014",
+          "running": true,
+          "health": "healthy",
+          "ports": [
+            "127.0.0.1:52322",
+            "::1:52322"
+          ],
+          "networks": [
+            "supabase_network_rrj_manager_lifecycle_20261014"
+          ],
+          "mounts": [
+            {
+              "type": "volume",
+              "destination": "/var/lib/postgresql/data"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "project": "rrj_phase3_prefix_20261014_a1",
+      "running": 5,
+      "total": 5,
+      "services": [
+        {
+          "name": "supabase_storage_rrj_phase3_prefix_20261014_a1",
+          "id": "ae137e6fa583",
+          "project": "rrj_phase3_prefix_20261014_a1",
+          "composeService": null,
+          "supabaseProject": "rrj_phase3_prefix_20261014_a1",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_phase3_prefix_20261014_a1"
+          ],
+          "mounts": [
+            {
+              "type": "volume",
+              "destination": "/mnt"
+            }
+          ]
+        },
+        {
+          "name": "supabase_rest_rrj_phase3_prefix_20261014_a1",
+          "id": "04cf7973e393",
+          "project": "rrj_phase3_prefix_20261014_a1",
+          "composeService": null,
+          "supabaseProject": "rrj_phase3_prefix_20261014_a1",
+          "running": true,
+          "health": null,
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_phase3_prefix_20261014_a1"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_auth_rrj_phase3_prefix_20261014_a1",
+          "id": "de14fe3d9d51",
+          "project": "rrj_phase3_prefix_20261014_a1",
+          "composeService": null,
+          "supabaseProject": "rrj_phase3_prefix_20261014_a1",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_phase3_prefix_20261014_a1"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_kong_rrj_phase3_prefix_20261014_a1",
+          "id": "0129b244cbaa",
+          "project": "rrj_phase3_prefix_20261014_a1",
+          "composeService": null,
+          "supabaseProject": "rrj_phase3_prefix_20261014_a1",
+          "running": true,
+          "health": "healthy",
+          "ports": [
+            "127.0.0.1:63221",
+            "::1:63221"
+          ],
+          "networks": [
+            "supabase_network_rrj_phase3_prefix_20261014_a1"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_db_rrj_phase3_prefix_20261014_a1",
+          "id": "8d9ccc55fd6b",
+          "project": "rrj_phase3_prefix_20261014_a1",
+          "composeService": null,
+          "supabaseProject": "rrj_phase3_prefix_20261014_a1",
+          "running": true,
+          "health": "healthy",
+          "ports": [
+            "::1:63222",
+            "127.0.0.1:63222"
+          ],
+          "networks": [
+            "supabase_network_rrj_phase3_prefix_20261014_a1"
+          ],
+          "mounts": [
+            {
+              "type": "volume",
+              "destination": "/var/lib/postgresql/data"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "project": "rrj_phase8_sim",
+      "running": 11,
+      "total": 12,
+      "services": [
+        {
+          "name": "supabase_studio_rrj_phase8_sim",
+          "id": "7b74a27c4f03",
+          "project": "rrj_phase8_sim",
+          "composeService": null,
+          "supabaseProject": "rrj_phase8_sim",
+          "running": true,
+          "health": "healthy",
+          "ports": [
+            "127.0.0.1:55323",
+            "::1:55323"
+          ],
+          "networks": [
+            "rrj_phase8_loopback"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_pg_meta_rrj_phase8_sim",
+          "id": "e8027b107be7",
+          "project": "rrj_phase8_sim",
+          "composeService": null,
+          "supabaseProject": "rrj_phase8_sim",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "rrj_phase8_loopback"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_edge_runtime_rrj_phase8_sim",
+          "id": "21337dc139d7",
+          "project": "rrj_phase8_sim",
+          "composeService": null,
+          "supabaseProject": "rrj_phase8_sim",
+          "running": false,
+          "health": null,
+          "ports": [],
+          "networks": [
+            "rrj_phase8_loopback"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_storage_rrj_phase8_sim",
+          "id": "ba0909dcc96a",
+          "project": "rrj_phase8_sim",
+          "composeService": null,
+          "supabaseProject": "rrj_phase8_sim",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "rrj_phase8_loopback"
+          ],
+          "mounts": [
+            {
+              "type": "volume",
+              "destination": "/mnt"
+            }
+          ]
+        },
+        {
+          "name": "supabase_rest_rrj_phase8_sim",
+          "id": "33b54d736e83",
+          "project": "rrj_phase8_sim",
+          "composeService": null,
+          "supabaseProject": "rrj_phase8_sim",
+          "running": true,
+          "health": null,
+          "ports": [],
+          "networks": [
+            "rrj_phase8_loopback"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_realtime_rrj_phase8_sim",
+          "id": "240232e06d4b",
+          "project": "rrj_phase8_sim",
+          "composeService": null,
+          "supabaseProject": "rrj_phase8_sim",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "rrj_phase8_loopback"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_inbucket_rrj_phase8_sim",
+          "id": "69e08c98aa8e",
+          "project": "rrj_phase8_sim",
+          "composeService": null,
+          "supabaseProject": "rrj_phase8_sim",
+          "running": true,
+          "health": "healthy",
+          "ports": [
+            "::1:55324",
+            "127.0.0.1:55324"
+          ],
+          "networks": [
+            "rrj_phase8_loopback"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_auth_rrj_phase8_sim",
+          "id": "05248ee14735",
+          "project": "rrj_phase8_sim",
+          "composeService": null,
+          "supabaseProject": "rrj_phase8_sim",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "rrj_phase8_loopback"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_kong_rrj_phase8_sim",
+          "id": "fd2fcefdfbc8",
+          "project": "rrj_phase8_sim",
+          "composeService": null,
+          "supabaseProject": "rrj_phase8_sim",
+          "running": true,
+          "health": "healthy",
+          "ports": [
+            "127.0.0.1:55321",
+            "::1:55321"
+          ],
+          "networks": [
+            "rrj_phase8_loopback"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_vector_rrj_phase8_sim",
+          "id": "2877b8ab0d4d",
+          "project": "rrj_phase8_sim",
+          "composeService": null,
+          "supabaseProject": "rrj_phase8_sim",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "rrj_phase8_loopback"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_analytics_rrj_phase8_sim",
+          "id": "bf3087423191",
+          "project": "rrj_phase8_sim",
+          "composeService": null,
+          "supabaseProject": "rrj_phase8_sim",
+          "running": true,
+          "health": "healthy",
+          "ports": [
+            "127.0.0.1:55327",
+            "::1:55327"
+          ],
+          "networks": [
+            "rrj_phase8_loopback"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_db_rrj_phase8_sim",
+          "id": "f4dc2b611561",
+          "project": "rrj_phase8_sim",
+          "composeService": null,
+          "supabaseProject": "rrj_phase8_sim",
+          "running": true,
+          "health": "healthy",
+          "ports": [
+            "127.0.0.1:55322",
+            "::1:55322"
+          ],
+          "networks": [
+            "rrj_phase8_loopback"
+          ],
+          "mounts": [
+            {
+              "type": "volume",
+              "destination": "/etc/postgresql-custom"
+            },
+            {
+              "type": "volume",
+              "destination": "/var/lib/postgresql/data"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "project": "rrj_rc_synthetic_replay_20261013",
+      "running": 5,
+      "total": 5,
+      "services": [
+        {
+          "name": "supabase_storage_rrj_rc_synthetic_replay_20261013",
+          "id": "5a15b115b197",
+          "project": "rrj_rc_synthetic_replay_20261013",
+          "composeService": null,
+          "supabaseProject": "rrj_rc_synthetic_replay_20261013",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_rc_synthetic_replay_20261013"
+          ],
+          "mounts": [
+            {
+              "type": "volume",
+              "destination": "/mnt"
+            }
+          ]
+        },
+        {
+          "name": "supabase_rest_rrj_rc_synthetic_replay_20261013",
+          "id": "aee7e2307389",
+          "project": "rrj_rc_synthetic_replay_20261013",
+          "composeService": null,
+          "supabaseProject": "rrj_rc_synthetic_replay_20261013",
+          "running": true,
+          "health": null,
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_rc_synthetic_replay_20261013"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_auth_rrj_rc_synthetic_replay_20261013",
+          "id": "85c59c5ec0b5",
+          "project": "rrj_rc_synthetic_replay_20261013",
+          "composeService": null,
+          "supabaseProject": "rrj_rc_synthetic_replay_20261013",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_rc_synthetic_replay_20261013"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_kong_rrj_rc_synthetic_replay_20261013",
+          "id": "e77021711b8d",
+          "project": "rrj_rc_synthetic_replay_20261013",
+          "composeService": null,
+          "supabaseProject": "rrj_rc_synthetic_replay_20261013",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_rc_synthetic_replay_20261013"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_db_rrj_rc_synthetic_replay_20261013",
+          "id": "9410f82c405e",
+          "project": "rrj_rc_synthetic_replay_20261013",
+          "composeService": null,
+          "supabaseProject": "rrj_rc_synthetic_replay_20261013",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_rc_synthetic_replay_20261013"
+          ],
+          "mounts": [
+            {
+              "type": "volume",
+              "destination": "/etc/postgresql-custom"
+            },
+            {
+              "type": "volume",
+              "destination": "/var/lib/postgresql/data"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "project": "rrj_recovery_20261014_source",
+      "running": 5,
+      "total": 5,
+      "services": [
+        {
+          "name": "supabase_storage_rrj_recovery_20261014_source",
+          "id": "014c63910b88",
+          "project": "rrj_recovery_20261014_source",
+          "composeService": null,
+          "supabaseProject": "rrj_recovery_20261014_source",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_recovery_20261014_source"
+          ],
+          "mounts": [
+            {
+              "type": "volume",
+              "destination": "/mnt"
+            }
+          ]
+        },
+        {
+          "name": "supabase_rest_rrj_recovery_20261014_source",
+          "id": "431599f0a124",
+          "project": "rrj_recovery_20261014_source",
+          "composeService": null,
+          "supabaseProject": "rrj_recovery_20261014_source",
+          "running": true,
+          "health": null,
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_recovery_20261014_source"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_auth_rrj_recovery_20261014_source",
+          "id": "d6f577841ff1",
+          "project": "rrj_recovery_20261014_source",
+          "composeService": null,
+          "supabaseProject": "rrj_recovery_20261014_source",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_recovery_20261014_source"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_kong_rrj_recovery_20261014_source",
+          "id": "f20027554943",
+          "project": "rrj_recovery_20261014_source",
+          "composeService": null,
+          "supabaseProject": "rrj_recovery_20261014_source",
+          "running": true,
+          "health": "healthy",
+          "ports": [
+            "127.0.0.1:65321",
+            "::1:65321"
+          ],
+          "networks": [
+            "supabase_network_rrj_recovery_20261014_source"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_db_rrj_recovery_20261014_source",
+          "id": "a14b2a34891f",
+          "project": "rrj_recovery_20261014_source",
+          "composeService": null,
+          "supabaseProject": "rrj_recovery_20261014_source",
+          "running": true,
+          "health": "healthy",
+          "ports": [
+            "::1:65322",
+            "127.0.0.1:65322"
+          ],
+          "networks": [
+            "supabase_network_rrj_recovery_20261014_source"
+          ],
+          "mounts": [
+            {
+              "type": "volume",
+              "destination": "/var/lib/postgresql/data"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "project": "rrj_recovery_20261014_target",
+      "running": 5,
+      "total": 5,
+      "services": [
+        {
+          "name": "supabase_storage_rrj_recovery_20261014_target",
+          "id": "7d7cc4e2e298",
+          "project": "rrj_recovery_20261014_target",
+          "composeService": null,
+          "supabaseProject": "rrj_recovery_20261014_target",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_recovery_20261014_target"
+          ],
+          "mounts": [
+            {
+              "type": "volume",
+              "destination": "/mnt"
+            }
+          ]
+        },
+        {
+          "name": "supabase_rest_rrj_recovery_20261014_target",
+          "id": "43ff56c70e58",
+          "project": "rrj_recovery_20261014_target",
+          "composeService": null,
+          "supabaseProject": "rrj_recovery_20261014_target",
+          "running": true,
+          "health": null,
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_recovery_20261014_target"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_auth_rrj_recovery_20261014_target",
+          "id": "e36a0276a003",
+          "project": "rrj_recovery_20261014_target",
+          "composeService": null,
+          "supabaseProject": "rrj_recovery_20261014_target",
+          "running": true,
+          "health": "healthy",
+          "ports": [],
+          "networks": [
+            "supabase_network_rrj_recovery_20261014_target"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_kong_rrj_recovery_20261014_target",
+          "id": "35ebaaa1137c",
+          "project": "rrj_recovery_20261014_target",
+          "composeService": null,
+          "supabaseProject": "rrj_recovery_20261014_target",
+          "running": true,
+          "health": "healthy",
+          "ports": [
+            "::1:64321",
+            "127.0.0.1:64321"
+          ],
+          "networks": [
+            "supabase_network_rrj_recovery_20261014_target"
+          ],
+          "mounts": []
+        },
+        {
+          "name": "supabase_db_rrj_recovery_20261014_target",
+          "id": "0fc45950b40b",
+          "project": "rrj_recovery_20261014_target",
+          "composeService": null,
+          "supabaseProject": "rrj_recovery_20261014_target",
+          "running": true,
+          "health": "healthy",
+          "ports": [
+            "::1:64322",
+            "127.0.0.1:64322"
+          ],
+          "networks": [
+            "supabase_network_rrj_recovery_20261014_target"
+          ],
+          "mounts": [
+            {
+              "type": "volume",
+              "destination": "/var/lib/postgresql/data"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "proposedStop": [
+    "supabase_analytics_rrj_h08c_history_20261015"
+  ],
+  "impacts": [
+    "H-08C analytics endpoint 127.0.0.1:59327 unavailable",
+    "H-08C Studio and log/vector workflows may degrade"
+  ],
+  "blocked": [
+    "Idle status requires live verification; plan never authorizes a stop",
+    "Target started within 30 minutes"
+  ]
+}

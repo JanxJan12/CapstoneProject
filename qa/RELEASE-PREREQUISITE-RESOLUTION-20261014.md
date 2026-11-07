@@ -1,0 +1,19 @@
+# Release prerequisite resolution — 2026-10-14
+
+**Decision: NO-GO.** This continuation added review and validation artifacts only. Hosted `zhzluhqvysvsadwuugpa` remained read only; no private export, Storage download, migration, or business-data insertion occurred. The candidate `RRJ-Release-Prerequisites-20261014.zip` was unavailable at `/mnt/data`, the local project mirror, and checked Downloads locations, so no unreviewed candidate content was merged.
+
+## Accountable historical data approval
+
+The data owner must prepare a private manifest **outside this repository and its synced mirror** for `node scripts/recovery/validate-provenance.mjs <manifest.json>`. The exact contract is `schemaVersion: 1`, `environment: "historical-bootstrap"`, `phase2aSha256`, and two SHA-256-pinned relative JSON files, `kind: "menu"` and `kind: "inventory"`. `approval` must contain `approved: true`, accountable `owner`, `approvedAt`, `sourceDescription`, `recipeTuplesSha256`, `openingStockDecision` (`approved-zero` or `approved-physical-record`), and `openingStockEvidenceId`. Keep the evidence itself private. The owner should sign the manifest SHA-256 and record source capture date, item identities/units, recipe mapping provenance, opening quantity and batch/expiry treatment, and any accepted drift. Engineering must independently review the exact file hashes and insertion plan. Do not infer Chicken conversion, menu rows, stock, or recipes from synthetic fixtures.
+
+The validator checks 51 migration files, the Phase 2A digest, 18 recipe tuples, 10 menu and 12 inventory UUIDs, unique IDs, one Chicken/kg inventory identity, the owner fields, file confinement, and baseline hashes. `REVIEW_REQUIRED` means format and hashes matched; it is **not** authority to insert data. At this checkpoint the manifest is absent and the gate remains **BLOCKED**. The pre-Phase-2A bootstrap must be a newly reviewed, deterministic artifact used only in a new unlinked environment; no historical migration body is changed. The later two unqualified `cashier_shift_status` fields need a separately reviewed compatibility treatment before a full replay can pass.
+
+## Read-only release preflight
+
+`node scripts/recovery/check-release-preflight.mjs <private-provenance.json> <private-recovery-authorization.json>` pins the order and SHA-256 of the five October 13 local-only migrations, invokes the provenance gate, and checks recovery authorization completeness. It returns `REVIEW_REQUIRED` only when these source and approval checks pass; actual encrypted backup, restore, clean replay, and acceptance remain separate gates. `node scripts/recovery/preflight-self-test.mjs` exercises absent and malformed approvals. Neither script connects to Supabase or deploys.
+
+Existing `scripts/check-clean-migration-prerequisites.mjs` and `scripts/recovery/validate-provenance.mjs` still fail closed. The earlier clean 51-file replay failed at Phase 2A with SQLSTATE `23503`; ordinary seed execution occurs too late. Existing two-stack local synthetic PostgreSQL/Auth/private Storage byte tests passed in their narrow scope. No real historical baseline, approved bootstrap, full pristine replay, complete hosted backup, or independent off-device restore exists.
+
+## Verification in this continuation
+
+**PASS:** `node scripts/recovery/preflight-self-test.mjs` rejected absent and malformed approvals while confirming all five pinned migration hashes; `node scripts/recovery/self-test.mjs` accepted a synthetic recovery bundle and rejected corruption and path traversal; `npm.cmd run typecheck`, `npm.cmd run build`, and `npm.cmd run verify:quality` (11 checks). JavaScript syntax checks passed. **BLOCKED as intended:** the preflight, provenance validator, and clean-migration prerequisite checker all exited 1 without private approvals or authoritative historical data. No database, hosted workflow, or actual off-device restore was run in this continuation.

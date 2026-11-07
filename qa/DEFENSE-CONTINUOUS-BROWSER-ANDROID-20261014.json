@@ -1,0 +1,35 @@
+{
+  "status": "PASS",
+  "orderNumber": "ORD-000017",
+  "environment": "isolated local rrj_defense_demo_20261014 at 127.0.0.1:61321; Android emulator used 10.0.2.2:61321",
+  "surfaces": ["authenticated Chrome Customer", "authenticated Chrome Cashier", "Chrome KDS terminal", "Android emulator Rider APK", "authenticated Chrome Customer tracking", "local PostgreSQL and private Storage verification"],
+  "checks": [
+    "Customer chose sample Fried Chicken Regular with Extra rice and server-stored modifier snapshot",
+    "Customer saw NO REAL ACCOUNT and submitted fictional GCash reference and synthetic image",
+    "Cashier verified the pending internal payment claim",
+    "KDS displayed Online and Extra rice, then advanced Confirmed to Preparing to Ready",
+    "Cashier released the order and it appeared as an offer for the approved Rider",
+    "Rider emulator accepted the offer, marked pickup, started delivery and selected a synthetic gallery image",
+    "Rider emulator submitted proof and displayed ORD-000017 in delivered History",
+    "Customer Chrome Orders and Track Order displayed Delivered",
+    "Database reconciled delivered order, verified internal payment, delivered assignment, one private proof object, one cashier transaction, one Extra rice order line, and zero negative batch quantities"
+  ],
+  "databaseTuple": {
+    "orderStatus": "delivered",
+    "paymentStatus": "verified",
+    "assignmentStatus": "delivered",
+    "assignmentHasProofPath": true,
+    "matchingPrivateProofObjects": 1,
+    "cashierTransactions": 1,
+    "deliveryProofBucketPublic": false,
+    "negativeInventoryBatches": 0
+  },
+  "evidence": [
+    "qa/defense-customer-browser-20261014/result.json",
+    "qa/defense-browser-handoff-20261014/result.json",
+    "qa/defense-customer-browser-20261014/browser-order-delivered-result.json",
+    "qa/defense-customer-browser-20261014/browser-order-delivered-tracking.png",
+    "RRJ-Food-House-Rider/qa/rider-defense-20261014/browser-order-delivered-history.png"
+  ],
+  "boundary": "Synthetic demo proof only. No external GCash settlement, real food movement, physical camera or physical handset; the Customer/Cashier/KDS/Rider/Customer software sequence used the same local order."
+}

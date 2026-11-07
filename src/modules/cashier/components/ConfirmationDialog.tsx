@@ -19,6 +19,8 @@ export interface ConfirmationDialogProps {
   cancelLabel?: string;
   danger?: boolean;
   onConfirm: () => void;
+  keepOpenOnConfirm?: boolean;
+  confirmDisabled?: boolean;
 }
 
 export function ConfirmationDialog({
@@ -30,6 +32,8 @@ export function ConfirmationDialog({
   cancelLabel = "Go back",
   danger = false,
   onConfirm,
+  keepOpenOnConfirm = false,
+  confirmDisabled = false,
 }: ConfirmationDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -53,7 +57,11 @@ export function ConfirmationDialog({
                 ? "bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600"
                 : "bg-gradient-to-r from-primary to-orange-600 hover:shadow-md",
             )}
-            onClick={onConfirm}
+            disabled={confirmDisabled}
+            onClick={(event) => {
+              if (keepOpenOnConfirm) event.preventDefault();
+              onConfirm();
+            }}
           >
             {confirmLabel}
           </AlertDialogAction>

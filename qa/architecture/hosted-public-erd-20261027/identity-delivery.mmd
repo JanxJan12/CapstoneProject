@@ -1,0 +1,85 @@
+%% RRJ'S FOOD-HOUSE - Identity and delivery
+%% Source: hosted PostgreSQL pg_catalog, captured 2026-10-26T20:58:45.038881+00:00
+%% Field types are Mermaid-safe tokens. Exact PostgreSQL types, nullability and defaults are in hosted-public-catalog.json and column-dictionary.html.
+erDiagram
+  profiles {
+    uuid id PK,FK
+    character_varying_100 first_name
+    character_varying_100 last_name
+    character_varying_20 contact_number
+    user_role role
+    boolean is_active
+    timestamp_with_time_zone created_at
+    timestamp_with_time_zone updated_at
+    text avatar_url
+  }
+  riders {
+    uuid id PK,FK
+    text valid_id_path
+    text or_cr_document_path
+    character_varying_100 driver_license_number
+    character_varying_100 plate_number
+    character_varying_100 motor_brand
+    character_varying_100 motor_model
+    text rider_photo_path
+    rider_approval_status approval_status
+    rider_availability_status availability_status
+    timestamp_with_time_zone last_assigned_at
+    timestamp_with_time_zone created_at
+    timestamp_with_time_zone updated_at
+  }
+  rider_push_devices {
+    uuid id PK
+    uuid rider_id FK
+    text expo_push_token
+    boolean enabled
+    timestamp_with_time_zone created_at
+    timestamp_with_time_zone updated_at
+  }
+  rider_offer_push_outbox {
+    bigint id PK
+    uuid assignment_id FK,UK
+    uuid device_id FK,UK
+    text status
+    integer attempts
+    timestamp_with_time_zone next_attempt_at
+    timestamp_with_time_zone expires_at
+    timestamp_with_time_zone lease_until
+    text ticket_id
+    text sent_expo_push_token
+    timestamp_with_time_zone receipt_due_at
+    text last_error_code
+    timestamp_with_time_zone created_at
+    timestamp_with_time_zone updated_at
+  }
+  delivery_assignments {
+    uuid id PK
+    uuid order_id FK
+    uuid rider_id FK
+    assignment_method assignment_method
+    delivery_assignment_status status
+    timestamp_with_time_zone assigned_at
+    timestamp_with_time_zone responded_at
+    timestamp_with_time_zone accepted_at
+    timestamp_with_time_zone rejected_at
+    timestamp_with_time_zone picked_up_at
+    timestamp_with_time_zone out_for_delivery_at
+    timestamp_with_time_zone delivered_at
+    text rejection_reason
+    text proof_of_delivery_path
+    timestamp_with_time_zone created_at
+    timestamp_with_time_zone updated_at
+  }
+  kds_terminals {
+    uuid id PK
+    text terminal_name
+    text secret_hash UK
+    boolean is_active
+    timestamp_with_time_zone created_at
+    timestamp_with_time_zone last_used_at
+  }
+  riders ||--o{ delivery_assignments : "R009 delivery_assignments_rider_id_fkey"
+  delivery_assignments ||--o{ rider_offer_push_outbox : "R075 rider_offer_push_outbox_assignment_id_fkey"
+  rider_push_devices ||--o{ rider_offer_push_outbox : "R076 rider_offer_push_outbox_device_id_fkey"
+  riders ||--o{ rider_push_devices : "R077 rider_push_devices_rider_id_fkey"
+  profiles ||--o| riders : "R078 riders_id_fkey"

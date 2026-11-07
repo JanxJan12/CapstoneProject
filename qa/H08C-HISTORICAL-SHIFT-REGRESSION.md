@@ -1,0 +1,26 @@
+# H-08C historical shift regression
+
+**Run:** 2026-10-15 Manila. **Boundary:** isolated local development only. No hosted calls or deployment. Existing H-07/H-08B/demo containers, volumes, backups, original 51 migrations, and Rider app were not modified.
+
+## Verification ledger
+
+| Check | Status and evidence |
+| --- | --- |
+| Source trace and permission design | **PASS source review:** current shift RPCs remain the start/close/open authority; new read RPC uses current `profiles.is_active` and role, while direct table RLS receives the same active-profile condition. Function EXECUTE and table SELECT grants were both reviewed. See [implementation](H08C-HISTORICAL-SHIFT-IMPLEMENTATION.md). |
+| Original migration preservation | **PASS source:** a new versioned migration was added after the original 51; none of the original files was edited or reordered by H-08C. The copied disposable diagnostic chain has 53 files: prior 52, including its synthetic prerequisite, plus H-08C. This is **not** pristine replay proof. |
+| Fresh diagnostic stack migration | **PASS local diagnostic chain:** local `rrj_h08c_history_20261015` at loopback API `127.0.0.1:59321` / DB `127.0.0.1:59322` applied through `20261014191853_h08c_historical_shift_access.sql`. Docker's normal restart restored service availability without deleting volumes. API returned HTTP 200 before the final probe. This still does not prove pristine original-51 replay. |
+| Typecheck and build | **PASS:** `npm.cmd run typecheck` and a full `npm.cmd run build` after the final date-filter correction. |
+| Prepared local probe syntax | **PASS:** `node --check .tmp/h08c-history-20261015/probe.mjs`. Syntax success is not execution of its assertions. |
+| Focused authenticated API and direct table | **PASS local JWT/PostgREST:** two fresh synthetic Cashiers each saw their own shift, Cashier cross-owner filter was denied, active Manager saw both, anonymous and unrelated Production staff were denied. After deactivation, each Cashier/Manager token that had been valid was denied by RPC and direct-table REST. Catalog checks confirmed the intended grants/RLS/EXECUTE state; see [implementation](H08C-HISTORICAL-SHIFT-IMPLEMENTATION.md). |
+| Closure, cancellation, and mutation | **PASS local authenticated RPC/SQL:** shift A saved opening ₱20, expected ₱30, actual ₱29, variance −₱1 with reason/notes; B saved ₱7/₱7/₱7/₱0. Manager's later paid GCash cancellation reduced the current completed-receipt count 2→1 while the full saved shift row hash stayed unchanged. Attempted change of closed expected cash and attempted closed-row deletion were both rejected by the new trigger. Separate authenticated `start_cashier_shift` → `get_open_cashier_shift` → `close_cashier_shift` passed for Cashier C. No refund-period or net-sales interpretation was inferred. |
+| Pagination and UTC boundaries | **PASS local JWT/PostgREST:** 27 owned rows returned as 25 then 2 in deterministic keyset pages. A date interval included 26 synthetic rows at/after its start and before its end; `p_limit=51` was denied. The browser's Manila date filter also produced an empty future period and recovered after clearing it. |
+| Fresh Cashier browser and reload | **PASS local headless Chrome:** a new profile signed in through local Auth, loaded Cashier Shift Settlement, and rendered its persisted owned closed shift with ₱29 actual cash. Reload still rendered the row, without a local closed-shift cache. A Cashier navigating to `/manager` was denied. No screenshot is claimed. |
+| Cashier browser states | **PASS local headless Chrome:** next/previous history pages, blocked-RPC error and Retry recovery, future-date empty state and date reset all rendered through the mounted screen. The cached prototype/local shift list was not presented as persisted history. |
+| Manager browser and routes | **PASS local headless Chrome:** active Manager opened mounted Shift Audit, saw both Cashiers' saved rows, filtered by Cashier A ID to remove B, and was denied the Cashier route. Successful observed response origins were loopback only. |
+| Hosted access, external GCash, refund recognition, net sales, post-close adjustments, off-device recovery and pristine replay | **NOT TESTED / BLOCKED by separate authorization and release gates.** |
+
+The stack's first startup encountered Docker service-inspection HTTP 500. A retry applied migrations but the API initially timed out. With owner authorization, Docker Desktop was restarted normally; it recovered without a forced stop or volume deletion. The scoped stop attempt before that restart had failed. The H-08C stack was retained with synthetic rows for review, including partial fixture rows from probe repairs. No existing H-07/H-08B/demo stack was reset or replaced. Earlier probe attempts failed on a 25-row default limit assertion and uniqueness/length rules in **test fixture identifiers**; the corrected probe completed with exit code 0. Those attempts are not product-code PASS evidence.
+
+## Remaining limits
+
+The final probe completed the listed local API and browser cases. A separate clean original-51 replay remains blocked by historical provenance and is not implied by this run. A physical second-device session, hosted deployment, off-device recovery, refund/net-sales policy, and all unrelated app flows remain **NOT TESTED**.

@@ -1,6 +1,5 @@
 import {
   CASH_TENDER_ROUNDING_STEPS,
-  DISCOUNT_RATE,
   MAX_POS_ITEM_QUANTITY,
   POS_BEST_SELLER_LIMIT,
   POS_TAX_ENABLED,
@@ -57,7 +56,7 @@ export function transitionTransactionState(
 
 export function getOrderSummaryAvailability(
   cart: POSCartLine[],
-  form: POSForm,
+  _form: POSForm,
   menuItems: MenuItem[],
 ) {
   const unavailableItem = cart.find(
@@ -65,17 +64,13 @@ export function getOrderSummaryAvailability(
       !menuItems.find((menuItem) => menuItem.id === entry.menuItemId)
         ?.available,
   );
-  const missingDiscountReference =
-    form.discountType !== "None" && !form.discountReference?.trim();
   const canContinue =
-    cart.length > 0 && !unavailableItem && !missingDiscountReference;
+    cart.length > 0 && !unavailableItem;
   const disabledReason = !cart.length
     ? "Add at least one menu item to continue."
     : unavailableItem
       ? `${unavailableItem.name} is no longer available. Remove it to continue.`
-      : missingDiscountReference
-        ? "Enter the Senior/PWD ID or reference."
-        : undefined;
+      : undefined;
 
   return { canContinue, disabledReason };
 }
@@ -225,18 +220,13 @@ export function calculatePOSTotals(cart: POSCartLine[], form: POSForm) {
     (sum, item) => sum + item.unitPrice * item.quantity,
     0,
   );
-  const discountAmount =
-    form.discountType === "None"
-      ? 0
-      : Math.round(subtotal * DISCOUNT_RATE * 100) / 100;
   const taxAmount = POS_TAX_ENABLED
-    ? Math.round((subtotal - discountAmount) * POS_TAX_RATE * 100) / 100
+    ? Math.round(subtotal * POS_TAX_RATE * 100) / 100
     : 0;
   return {
     subtotal,
-    discountAmount,
     taxAmount,
-    total: subtotal - discountAmount + taxAmount,
+    total: subtotal + taxAmount,
     tendered: Number(form.amountTendered ?? 0),
   };
 }
@@ -262,10 +252,8 @@ export function getPlaceOrderAvailability(
         form.deliveryAddress?.trim(),
       )) &&
     !unavailableItem &&
-    (form.discountType === "None" || Boolean(form.discountReference?.trim())) &&
-    (form.paymentMethod === "Cash"
-      ? tendered >= total
-      : Boolean(form.gcashReference?.trim() && form.gcashConfirmed));
+    form.paymentMethod === "Cash" &&
+    tendered >= total;
   const disabledReason = !cart.length
     ? "Add at least one menu item to continue."
     : unavailableItem
@@ -276,16 +264,11 @@ export function getPlaceOrderAvailability(
           ? "Enter the delivery contact number."
           : form.orderType === "Delivery" && !form.deliveryAddress?.trim()
             ? "Enter the delivery address."
-            : form.discountType !== "None" && !form.discountReference?.trim()
-              ? "Enter the Senior/PWD ID or reference."
-              : form.paymentMethod === "Cash" && tendered < total
+            : form.paymentMethod !== "Cash"
+              ? "Only cash is available for new walk-in sales."
+              : tendered < total
                 ? "Enter enough cash tendered to cover the total."
-                : form.paymentMethod === "GCash" &&
-                    !form.gcashReference?.trim()
-                  ? "Enter the customer's GCash reference number."
-                  : form.paymentMethod === "GCash" && !form.gcashConfirmed
-                    ? "Confirm the GCash payment before placing the order."
-                    : undefined;
+                : undefined;
   return { unavailableItem, canPlace, disabledReason };
 }
 
@@ -295,6 +278,7 @@ export function addCartItem(
   quantity = 1,
   itemNote = "",
   modifiers: OrderItemModifier[] = [],
+  mealOption?: "with_rice" | "without_rice",
 ): CartUpdateResult {
   const currentQuantity = current
     .filter((entry) => entry.menuItemId === menuItem.id)
@@ -316,6 +300,7 @@ export function addCartItem(
   const existing = current.find(
     (entry) =>
       entry.menuItemId === menuItem.id &&
+      entry.mealOption === mealOption &&
       (entry.note?.trim() ?? "") === normalizedNote &&
       (entry.modifiers ?? [])
         .map((modifier) => modifier.id)
@@ -335,13 +320,14 @@ export function addCartItem(
           menuItemId: menuItem.id,
           name: menuItem.name,
           unitPrice:
-            menuItem.price +
+            (mealOption === "without_rice" ? menuItem.withoutRicePrice ?? menuItem.price : menuItem.price) +
             modifiers.reduce((sum, modifier) => sum + modifier.price, 0),
           quantity: amountToAdd,
           note: normalizedNote || undefined,
           modifiers: modifiers.length
             ? modifiers.map((modifier) => ({ ...modifier }))
             : undefined,
+          mealOption,
         },
       ];
   return {

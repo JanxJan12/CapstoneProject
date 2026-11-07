@@ -1,4 +1,4 @@
-import { UtensilsCrossed } from "lucide-react";
+ import { UtensilsCrossed } from "lucide-react";
 import { PAGE_LIST } from "../../constants";
 
 export function CoverPage() {

@@ -1,0 +1,13 @@
+[
+ {
+  "mode": "redesign",
+  "prompt": "Redesign the active RRJ customer ordering app",
+  "depth": "full",
+  "scope": "app",
+  "theme": "brand",
+  "genre": "modern-minimal",
+  "target": "src/modules/customer",
+  "signature": "menu list and persisted order status",
+  "date": "2026-11-04"
+ }
+]

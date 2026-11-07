@@ -1,0 +1,1914 @@
+[
+  {
+    "name": "supabase_storage_rrj_h09_order_flow_20261015",
+    "project": "rrj_h09_order_flow_20261015",
+    "service": null,
+    "supabaseProject": "rrj_h09_order_flow_20261015",
+    "image": "public.ecr.aws/supabase/storage-api:v1.79.36",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:47.495792991Z",
+    "finishedAt": "2026-10-15T16:39:45.903070031Z",
+    "restartCount": 1,
+    "health": "healthy",
+    "aliases": [
+      "storage"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_rest_rrj_h09_order_flow_20261015",
+    "project": "rrj_h09_order_flow_20261015",
+    "service": null,
+    "supabaseProject": "rrj_h09_order_flow_20261015",
+    "image": "public.ecr.aws/supabase/postgrest:v16.4",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.638247629Z",
+    "finishedAt": "2026-10-15T16:39:24.431158754Z",
+    "restartCount": 0,
+    "health": null,
+    "aliases": [
+      "rest"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_inbucket_rrj_h09_order_flow_20261015",
+    "project": "rrj_h09_order_flow_20261015",
+    "service": null,
+    "supabaseProject": "rrj_h09_order_flow_20261015",
+    "image": "public.ecr.aws/supabase/mailpit:v1.31.3",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.852721313Z",
+    "finishedAt": "2026-10-15T16:39:24.42636207Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "inbucket"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_auth_rrj_h09_order_flow_20261015",
+    "project": "rrj_h09_order_flow_20261015",
+    "service": null,
+    "supabaseProject": "rrj_h09_order_flow_20261015",
+    "image": "public.ecr.aws/supabase/gotrue:v2.197.0",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:54.608786575Z",
+    "finishedAt": "2026-10-15T16:39:52.969766031Z",
+    "restartCount": 4,
+    "health": "healthy",
+    "aliases": [
+      "auth"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_kong_rrj_h09_order_flow_20261015",
+    "project": "rrj_h09_order_flow_20261015",
+    "service": null,
+    "supabaseProject": "rrj_h09_order_flow_20261015",
+    "image": "public.ecr.aws/supabase/kong:2.8.1",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.383761142Z",
+    "finishedAt": "2026-10-15T16:39:24.431244284Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "kong",
+      "api.supabase.internal"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_db_rrj_h09_order_flow_20261015",
+    "project": "rrj_h09_order_flow_20261015",
+    "service": null,
+    "supabaseProject": "rrj_h09_order_flow_20261015",
+    "image": "public.ecr.aws/supabase/postgres:17.11.0.004",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.875323227Z",
+    "finishedAt": "2026-10-15T16:39:24.435259362Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "db",
+      "db.supabase.internal"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_studio_rrj_h08c_history_20261015",
+    "project": "rrj_h08c_history_20261015",
+    "service": null,
+    "supabaseProject": "rrj_h08c_history_20261015",
+    "image": "public.ecr.aws/supabase/studio:2025.07.28-sha-578b707",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.93898284Z",
+    "finishedAt": "2026-10-15T16:39:24.440059468Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "studio"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_pg_meta_rrj_h08c_history_20261015",
+    "project": "rrj_h08c_history_20261015",
+    "service": null,
+    "supabaseProject": "rrj_h08c_history_20261015",
+    "image": "public.ecr.aws/supabase/postgres-meta:v0.91.4",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.643203244Z",
+    "finishedAt": "2026-10-15T16:39:24.42304207Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "pg_meta"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_edge_runtime_rrj_h08c_history_20261015",
+    "project": "rrj_h08c_history_20261015",
+    "service": null,
+    "supabaseProject": "rrj_h08c_history_20261015",
+    "image": "public.ecr.aws/supabase/edge-runtime:v1.68.3",
+    "running": false,
+    "startedAt": "2026-10-14T19:22:25.217801834Z",
+    "finishedAt": "2026-10-14T19:43:51.365283644Z",
+    "restartCount": 0,
+    "health": null,
+    "aliases": [
+      "edge_runtime"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_storage_rrj_h08c_history_20261015",
+    "project": "rrj_h08c_history_20261015",
+    "service": null,
+    "supabaseProject": "rrj_h08c_history_20261015",
+    "image": "public.ecr.aws/supabase/storage-api:v1.26.0",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.599450545Z",
+    "finishedAt": "2026-10-15T16:39:24.42738775Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "storage"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_rest_rrj_h08c_history_20261015",
+    "project": "rrj_h08c_history_20261015",
+    "service": null,
+    "supabaseProject": "rrj_h08c_history_20261015",
+    "image": "public.ecr.aws/supabase/postgrest:v12.2.12",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.738344267Z",
+    "finishedAt": "2026-10-15T16:39:24.426114652Z",
+    "restartCount": 0,
+    "health": null,
+    "aliases": [
+      "rest"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_realtime_rrj_h08c_history_20261015",
+    "project": "rrj_h08c_history_20261015",
+    "service": null,
+    "supabaseProject": "rrj_h08c_history_20261015",
+    "image": "public.ecr.aws/supabase/realtime:v2.41.11",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.217103913Z",
+    "finishedAt": "2026-10-15T16:39:24.406292269Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "realtime",
+      "realtime-dev"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_inbucket_rrj_h08c_history_20261015",
+    "project": "rrj_h08c_history_20261015",
+    "service": null,
+    "supabaseProject": "rrj_h08c_history_20261015",
+    "image": "public.ecr.aws/supabase/mailpit:v1.22.3",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.859331581Z",
+    "finishedAt": "2026-10-15T16:39:24.406299625Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "inbucket"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_auth_rrj_h08c_history_20261015",
+    "project": "rrj_h08c_history_20261015",
+    "service": null,
+    "supabaseProject": "rrj_h08c_history_20261015",
+    "image": "public.ecr.aws/supabase/gotrue:v2.177.0",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:43.852130258Z",
+    "finishedAt": "2026-10-15T16:39:42.779554282Z",
+    "restartCount": 2,
+    "health": "healthy",
+    "aliases": [
+      "auth"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_kong_rrj_h08c_history_20261015",
+    "project": "rrj_h08c_history_20261015",
+    "service": null,
+    "supabaseProject": "rrj_h08c_history_20261015",
+    "image": "public.ecr.aws/supabase/kong:2.8.1",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.501449763Z",
+    "finishedAt": "2026-10-15T16:39:24.423076955Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "kong",
+      "api.supabase.internal"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_vector_rrj_h08c_history_20261015",
+    "project": "rrj_h08c_history_20261015",
+    "service": null,
+    "supabaseProject": "rrj_h08c_history_20261015",
+    "image": "public.ecr.aws/supabase/vector:0.28.1-alpine",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.868170902Z",
+    "finishedAt": "2026-10-15T16:39:24.406419907Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "vector"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_analytics_rrj_h08c_history_20261015",
+    "project": "rrj_h08c_history_20261015",
+    "service": null,
+    "supabaseProject": "rrj_h08c_history_20261015",
+    "image": "public.ecr.aws/supabase/logflare:1.14.2",
+    "running": true,
+    "startedAt": "2026-10-15T17:16:18.042844494Z",
+    "finishedAt": "2026-10-15T17:15:31.113874046Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "analytics"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_db_rrj_h08c_history_20261015",
+    "project": "rrj_h08c_history_20261015",
+    "service": null,
+    "supabaseProject": "rrj_h08c_history_20261015",
+    "image": "public.ecr.aws/supabase/postgres:17.4.1.068",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.297417846Z",
+    "finishedAt": "2026-10-15T16:39:24.431156185Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "db",
+      "db.supabase.internal"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_storage_rrj_h08b_history_20261015",
+    "project": "rrj_h08b_history_20261015",
+    "service": null,
+    "supabaseProject": "rrj_h08b_history_20261015",
+    "image": "public.ecr.aws/supabase/storage-api:v1.26.0",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:33.007598434Z",
+    "finishedAt": "2026-10-15T16:39:24.423880596Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "storage"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_rest_rrj_h08b_history_20261015",
+    "project": "rrj_h08b_history_20261015",
+    "service": null,
+    "supabaseProject": "rrj_h08b_history_20261015",
+    "image": "public.ecr.aws/supabase/postgrest:v12.2.12",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:33.049848513Z",
+    "finishedAt": "2026-10-15T16:39:24.423153482Z",
+    "restartCount": 0,
+    "health": null,
+    "aliases": [
+      "rest"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_auth_rrj_h08b_history_20261015",
+    "project": "rrj_h08b_history_20261015",
+    "service": null,
+    "supabaseProject": "rrj_h08b_history_20261015",
+    "image": "public.ecr.aws/supabase/gotrue:v2.177.0",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:49.895694303Z",
+    "finishedAt": "2026-10-15T16:39:48.433913062Z",
+    "restartCount": 3,
+    "health": "healthy",
+    "aliases": [
+      "auth"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_kong_rrj_h08b_history_20261015",
+    "project": "rrj_h08b_history_20261015",
+    "service": null,
+    "supabaseProject": "rrj_h08b_history_20261015",
+    "image": "public.ecr.aws/supabase/kong:2.8.1",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.406216065Z",
+    "finishedAt": "2026-10-15T16:39:24.403648687Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "kong",
+      "api.supabase.internal"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_db_rrj_h08b_history_20261015",
+    "project": "rrj_h08b_history_20261015",
+    "service": null,
+    "supabaseProject": "rrj_h08b_history_20261015",
+    "image": "public.ecr.aws/supabase/postgres:17.4.1.068",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:33.054234708Z",
+    "finishedAt": "2026-10-15T16:39:24.406401026Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "db",
+      "db.supabase.internal"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_storage_rrj_h07_financial_20261014",
+    "project": "rrj_h07_financial_20261014",
+    "service": null,
+    "supabaseProject": "rrj_h07_financial_20261014",
+    "image": "public.ecr.aws/supabase/storage-api:v1.79.36",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:46.469650489Z",
+    "finishedAt": "2026-10-15T16:39:44.668967718Z",
+    "restartCount": 1,
+    "health": "healthy",
+    "aliases": [
+      "storage"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_rest_rrj_h07_financial_20261014",
+    "project": "rrj_h07_financial_20261014",
+    "service": null,
+    "supabaseProject": "rrj_h07_financial_20261014",
+    "image": "public.ecr.aws/supabase/postgrest:v16.4",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.730995813Z",
+    "finishedAt": "2026-10-15T16:39:24.435258747Z",
+    "restartCount": 0,
+    "health": null,
+    "aliases": [
+      "rest"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_auth_rrj_h07_financial_20261014",
+    "project": "rrj_h07_financial_20261014",
+    "service": null,
+    "supabaseProject": "rrj_h07_financial_20261014",
+    "image": "public.ecr.aws/supabase/gotrue:v2.197.0",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:51.044857433Z",
+    "finishedAt": "2026-10-15T16:39:49.454347489Z",
+    "restartCount": 3,
+    "health": "healthy",
+    "aliases": [
+      "auth"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_kong_rrj_h07_financial_20261014",
+    "project": "rrj_h07_financial_20261014",
+    "service": null,
+    "supabaseProject": "rrj_h07_financial_20261014",
+    "image": "public.ecr.aws/supabase/kong:2.8.1",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.62424963Z",
+    "finishedAt": "2026-10-15T16:39:24.43117512Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "kong",
+      "api.supabase.internal"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_db_rrj_h07_financial_20261014",
+    "project": "rrj_h07_financial_20261014",
+    "service": null,
+    "supabaseProject": "rrj_h07_financial_20261014",
+    "image": "public.ecr.aws/supabase/postgres:17.11.0.004",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.761064903Z",
+    "finishedAt": "2026-10-15T16:39:24.439973128Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "db",
+      "db.supabase.internal"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_storage_rrj_manager_lifecycle_20261014",
+    "project": "rrj_manager_lifecycle_20261014",
+    "service": null,
+    "supabaseProject": "rrj_manager_lifecycle_20261014",
+    "image": "public.ecr.aws/supabase/storage-api:v1.79.36",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:48.598625457Z",
+    "finishedAt": "2026-10-15T16:39:47.46845643Z",
+    "restartCount": 1,
+    "health": "healthy",
+    "aliases": [
+      "storage"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_rest_rrj_manager_lifecycle_20261014",
+    "project": "rrj_manager_lifecycle_20261014",
+    "service": null,
+    "supabaseProject": "rrj_manager_lifecycle_20261014",
+    "image": "public.ecr.aws/supabase/postgrest:v16.4",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:33.063186074Z",
+    "finishedAt": "2026-10-15T16:39:24.435255324Z",
+    "restartCount": 0,
+    "health": null,
+    "aliases": [
+      "rest"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_auth_rrj_manager_lifecycle_20261014",
+    "project": "rrj_manager_lifecycle_20261014",
+    "service": null,
+    "supabaseProject": "rrj_manager_lifecycle_20261014",
+    "image": "public.ecr.aws/supabase/gotrue:v2.197.0",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:49.775751666Z",
+    "finishedAt": "2026-10-15T16:39:48.297081634Z",
+    "restartCount": 3,
+    "health": "healthy",
+    "aliases": [
+      "auth"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_kong_rrj_manager_lifecycle_20261014",
+    "project": "rrj_manager_lifecycle_20261014",
+    "service": null,
+    "supabaseProject": "rrj_manager_lifecycle_20261014",
+    "image": "public.ecr.aws/supabase/kong:2.8.1",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.655643414Z",
+    "finishedAt": "2026-10-15T16:39:24.433716401Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "kong",
+      "api.supabase.internal"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_db_rrj_manager_lifecycle_20261014",
+    "project": "rrj_manager_lifecycle_20261014",
+    "service": null,
+    "supabaseProject": "rrj_manager_lifecycle_20261014",
+    "image": "public.ecr.aws/supabase/postgres:17.11.0.004",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.829658678Z",
+    "finishedAt": "2026-10-15T16:39:24.441323614Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "db",
+      "db.supabase.internal"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_storage_rrj_defense_demo_20261014_r3",
+    "project": "rrj_defense_demo_20261014_r3",
+    "service": null,
+    "supabaseProject": "rrj_defense_demo_20261014_r3",
+    "image": "public.ecr.aws/supabase/storage-api:v1.79.36",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:46.560250559Z",
+    "finishedAt": "2026-10-15T16:39:45.134375113Z",
+    "restartCount": 1,
+    "health": "healthy",
+    "aliases": [
+      "storage"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_rest_rrj_defense_demo_20261014_r3",
+    "project": "rrj_defense_demo_20261014_r3",
+    "service": null,
+    "supabaseProject": "rrj_defense_demo_20261014_r3",
+    "image": "public.ecr.aws/supabase/postgrest:v16.4",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.341417511Z",
+    "finishedAt": "2026-10-15T16:39:24.423030501Z",
+    "restartCount": 0,
+    "health": null,
+    "aliases": [
+      "rest"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_auth_rrj_defense_demo_20261014_r3",
+    "project": "rrj_defense_demo_20261014_r3",
+    "service": null,
+    "supabaseProject": "rrj_defense_demo_20261014_r3",
+    "image": "public.ecr.aws/supabase/gotrue:v2.197.0",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:49.625408199Z",
+    "finishedAt": "2026-10-15T16:39:48.159159935Z",
+    "restartCount": 3,
+    "health": "healthy",
+    "aliases": [
+      "auth"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_kong_rrj_defense_demo_20261014_r3",
+    "project": "rrj_defense_demo_20261014_r3",
+    "service": null,
+    "supabaseProject": "rrj_defense_demo_20261014_r3",
+    "image": "public.ecr.aws/supabase/kong:2.8.1",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.549415234Z",
+    "finishedAt": "2026-10-15T16:39:24.428907626Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "kong",
+      "api.supabase.internal"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_db_rrj_defense_demo_20261014_r3",
+    "project": "rrj_defense_demo_20261014_r3",
+    "service": null,
+    "supabaseProject": "rrj_defense_demo_20261014_r3",
+    "image": "public.ecr.aws/supabase/postgres:17.11.0.004",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:33.091677262Z",
+    "finishedAt": "2026-10-15T16:39:24.435996055Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "db",
+      "db.supabase.internal"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_storage_rrj_phase3_prefix_20261014_a1",
+    "project": "rrj_phase3_prefix_20261014_a1",
+    "service": null,
+    "supabaseProject": "rrj_phase3_prefix_20261014_a1",
+    "image": "public.ecr.aws/supabase/storage-api:v1.79.36",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:49.213734255Z",
+    "finishedAt": "2026-10-15T16:39:47.994518443Z",
+    "restartCount": 1,
+    "health": "healthy",
+    "aliases": [
+      "storage"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_rest_rrj_phase3_prefix_20261014_a1",
+    "project": "rrj_phase3_prefix_20261014_a1",
+    "service": null,
+    "supabaseProject": "rrj_phase3_prefix_20261014_a1",
+    "image": "public.ecr.aws/supabase/postgrest:v16.4",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.0430493Z",
+    "finishedAt": "2026-10-15T16:39:24.440310855Z",
+    "restartCount": 0,
+    "health": null,
+    "aliases": [
+      "rest"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_auth_rrj_phase3_prefix_20261014_a1",
+    "project": "rrj_phase3_prefix_20261014_a1",
+    "service": null,
+    "supabaseProject": "rrj_phase3_prefix_20261014_a1",
+    "image": "public.ecr.aws/supabase/gotrue:v2.197.0",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:45.48379666Z",
+    "finishedAt": "2026-10-15T16:39:43.306078412Z",
+    "restartCount": 2,
+    "health": "healthy",
+    "aliases": [
+      "auth"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_kong_rrj_phase3_prefix_20261014_a1",
+    "project": "rrj_phase3_prefix_20261014_a1",
+    "service": null,
+    "supabaseProject": "rrj_phase3_prefix_20261014_a1",
+    "image": "public.ecr.aws/supabase/kong:2.8.1",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.711122933Z",
+    "finishedAt": "2026-10-15T16:39:24.428204126Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "kong",
+      "api.supabase.internal"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_db_rrj_phase3_prefix_20261014_a1",
+    "project": "rrj_phase3_prefix_20261014_a1",
+    "service": null,
+    "supabaseProject": "rrj_phase3_prefix_20261014_a1",
+    "image": "public.ecr.aws/supabase/postgres:17.11.0.004",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:33.100072667Z",
+    "finishedAt": "2026-10-15T16:39:24.428359545Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "db",
+      "db.supabase.internal"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_storage_rrj_defense_demo_20261014_r2",
+    "project": "rrj_defense_demo_20261014_r2",
+    "service": null,
+    "supabaseProject": "rrj_defense_demo_20261014_r2",
+    "image": "public.ecr.aws/supabase/storage-api:v1.79.36",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:46.518360853Z",
+    "finishedAt": "2026-10-15T16:39:44.767159555Z",
+    "restartCount": 1,
+    "health": "healthy",
+    "aliases": [
+      "storage"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_rest_rrj_defense_demo_20261014_r2",
+    "project": "rrj_defense_demo_20261014_r2",
+    "service": null,
+    "supabaseProject": "rrj_defense_demo_20261014_r2",
+    "image": "public.ecr.aws/supabase/postgrest:v16.4",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.584260734Z",
+    "finishedAt": "2026-10-15T16:39:24.426249822Z",
+    "restartCount": 0,
+    "health": null,
+    "aliases": [
+      "rest"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_auth_rrj_defense_demo_20261014_r2",
+    "project": "rrj_defense_demo_20261014_r2",
+    "service": null,
+    "supabaseProject": "rrj_defense_demo_20261014_r2",
+    "image": "public.ecr.aws/supabase/gotrue:v2.197.0",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:50.0331778Z",
+    "finishedAt": "2026-10-15T16:39:48.452827441Z",
+    "restartCount": 3,
+    "health": "healthy",
+    "aliases": [
+      "auth"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_kong_rrj_defense_demo_20261014_r2",
+    "project": "rrj_defense_demo_20261014_r2",
+    "service": null,
+    "supabaseProject": "rrj_defense_demo_20261014_r2",
+    "image": "public.ecr.aws/supabase/kong:2.8.1",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:33.082313078Z",
+    "finishedAt": "2026-10-15T16:39:24.428844572Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "kong",
+      "api.supabase.internal"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_db_rrj_defense_demo_20261014_r2",
+    "project": "rrj_defense_demo_20261014_r2",
+    "service": null,
+    "supabaseProject": "rrj_defense_demo_20261014_r2",
+    "image": "public.ecr.aws/supabase/postgres:17.11.0.004",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.783404208Z",
+    "finishedAt": "2026-10-15T16:39:24.443304531Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "db",
+      "db.supabase.internal"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_storage_rrj_defense_demo_20261014",
+    "project": "rrj_defense_demo_20261014",
+    "service": null,
+    "supabaseProject": "rrj_defense_demo_20261014",
+    "image": "public.ecr.aws/supabase/storage-api:v1.79.36",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:45.960812466Z",
+    "finishedAt": "2026-10-15T16:39:44.641941236Z",
+    "restartCount": 1,
+    "health": "healthy",
+    "aliases": [
+      "storage"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_rest_rrj_defense_demo_20261014",
+    "project": "rrj_defense_demo_20261014",
+    "service": null,
+    "supabaseProject": "rrj_defense_demo_20261014",
+    "image": "public.ecr.aws/supabase/postgrest:v16.4",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.933776725Z",
+    "finishedAt": "2026-10-15T16:39:24.406436083Z",
+    "restartCount": 0,
+    "health": null,
+    "aliases": [
+      "rest"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_auth_rrj_defense_demo_20261014",
+    "project": "rrj_defense_demo_20261014",
+    "service": null,
+    "supabaseProject": "rrj_defense_demo_20261014",
+    "image": "public.ecr.aws/supabase/gotrue:v2.197.0",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:49.475617921Z",
+    "finishedAt": "2026-10-15T16:39:48.171893975Z",
+    "restartCount": 3,
+    "health": "healthy",
+    "aliases": [
+      "auth"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_kong_rrj_defense_demo_20261014",
+    "project": "rrj_defense_demo_20261014",
+    "service": null,
+    "supabaseProject": "rrj_defense_demo_20261014",
+    "image": "public.ecr.aws/supabase/kong:2.8.1",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.839474939Z",
+    "finishedAt": "2026-10-15T16:39:24.423980479Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "kong",
+      "api.supabase.internal"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_db_rrj_defense_demo_20261014",
+    "project": "rrj_defense_demo_20261014",
+    "service": null,
+    "supabaseProject": "rrj_defense_demo_20261014",
+    "image": "public.ecr.aws/supabase/postgres:17.11.0.004",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:33.137045194Z",
+    "finishedAt": "2026-10-15T16:39:24.426140094Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "db",
+      "db.supabase.internal"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_storage_rrj_recovery_20261014_target",
+    "project": "rrj_recovery_20261014_target",
+    "service": null,
+    "supabaseProject": "rrj_recovery_20261014_target",
+    "image": "public.ecr.aws/supabase/storage-api:v1.79.36",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:46.771152007Z",
+    "finishedAt": "2026-10-15T16:39:45.320477258Z",
+    "restartCount": 1,
+    "health": "healthy",
+    "aliases": [
+      "storage"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_rest_rrj_recovery_20261014_target",
+    "project": "rrj_recovery_20261014_target",
+    "service": null,
+    "supabaseProject": "rrj_recovery_20261014_target",
+    "image": "public.ecr.aws/supabase/postgrest:v16.4",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.900227393Z",
+    "finishedAt": "2026-10-15T16:39:24.433792102Z",
+    "restartCount": 0,
+    "health": null,
+    "aliases": [
+      "rest"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_auth_rrj_recovery_20261014_target",
+    "project": "rrj_recovery_20261014_target",
+    "service": null,
+    "supabaseProject": "rrj_recovery_20261014_target",
+    "image": "public.ecr.aws/supabase/gotrue:v2.197.0",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:50.555401756Z",
+    "finishedAt": "2026-10-15T16:39:49.183685022Z",
+    "restartCount": 3,
+    "health": "healthy",
+    "aliases": [
+      "auth"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_kong_rrj_recovery_20261014_target",
+    "project": "rrj_recovery_20261014_target",
+    "service": null,
+    "supabaseProject": "rrj_recovery_20261014_target",
+    "image": "public.ecr.aws/supabase/kong:2.8.1",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:31.912593538Z",
+    "finishedAt": "2026-10-15T16:39:24.418378967Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "kong",
+      "api.supabase.internal"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_db_rrj_recovery_20261014_target",
+    "project": "rrj_recovery_20261014_target",
+    "service": null,
+    "supabaseProject": "rrj_recovery_20261014_target",
+    "image": "public.ecr.aws/supabase/postgres:17.11.0.004",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.957331311Z",
+    "finishedAt": "2026-10-15T16:39:24.403277675Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "db",
+      "db.supabase.internal"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_storage_rrj_recovery_20261014_source",
+    "project": "rrj_recovery_20261014_source",
+    "service": null,
+    "supabaseProject": "rrj_recovery_20261014_source",
+    "image": "public.ecr.aws/supabase/storage-api:v1.79.36",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:46.619073837Z",
+    "finishedAt": "2026-10-15T16:39:44.500513693Z",
+    "restartCount": 1,
+    "health": "healthy",
+    "aliases": [
+      "storage"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_rest_rrj_recovery_20261014_source",
+    "project": "rrj_recovery_20261014_source",
+    "service": null,
+    "supabaseProject": "rrj_recovery_20261014_source",
+    "image": "public.ecr.aws/supabase/postgrest:v16.4",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.224835435Z",
+    "finishedAt": "2026-10-15T16:39:24.40636861Z",
+    "restartCount": 0,
+    "health": null,
+    "aliases": [
+      "rest"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_auth_rrj_recovery_20261014_source",
+    "project": "rrj_recovery_20261014_source",
+    "service": null,
+    "supabaseProject": "rrj_recovery_20261014_source",
+    "image": "public.ecr.aws/supabase/gotrue:v2.197.0",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:50.406272434Z",
+    "finishedAt": "2026-10-15T16:39:48.801871602Z",
+    "restartCount": 3,
+    "health": "healthy",
+    "aliases": [
+      "auth"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_kong_rrj_recovery_20261014_source",
+    "project": "rrj_recovery_20261014_source",
+    "service": null,
+    "supabaseProject": "rrj_recovery_20261014_source",
+    "image": "public.ecr.aws/supabase/kong:2.8.1",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.878230379Z",
+    "finishedAt": "2026-10-15T16:39:24.423031519Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "kong",
+      "api.supabase.internal"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_db_rrj_recovery_20261014_source",
+    "project": "rrj_recovery_20261014_source",
+    "service": null,
+    "supabaseProject": "rrj_recovery_20261014_source",
+    "image": "public.ecr.aws/supabase/postgres:17.11.0.004",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.864277827Z",
+    "finishedAt": "2026-10-15T16:39:24.423032445Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "db",
+      "db.supabase.internal"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_storage_rrj_rc_synthetic_replay_20261013",
+    "project": "rrj_rc_synthetic_replay_20261013",
+    "service": null,
+    "supabaseProject": "rrj_rc_synthetic_replay_20261013",
+    "image": "public.ecr.aws/supabase/storage-api:v1.26.0",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.769338984Z",
+    "finishedAt": "2026-10-15T16:39:24.42765032Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "storage"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_rest_rrj_rc_synthetic_replay_20261013",
+    "project": "rrj_rc_synthetic_replay_20261013",
+    "service": null,
+    "supabaseProject": "rrj_rc_synthetic_replay_20261013",
+    "image": "public.ecr.aws/supabase/postgrest:v12.2.12",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.422583714Z",
+    "finishedAt": "2026-10-15T16:39:24.440251797Z",
+    "restartCount": 0,
+    "health": null,
+    "aliases": [
+      "rest"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_auth_rrj_rc_synthetic_replay_20261013",
+    "project": "rrj_rc_synthetic_replay_20261013",
+    "service": null,
+    "supabaseProject": "rrj_rc_synthetic_replay_20261013",
+    "image": "public.ecr.aws/supabase/gotrue:v2.177.0",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:51.217042781Z",
+    "finishedAt": "2026-10-15T16:39:49.708172954Z",
+    "restartCount": 3,
+    "health": "healthy",
+    "aliases": [
+      "auth"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_kong_rrj_rc_synthetic_replay_20261013",
+    "project": "rrj_rc_synthetic_replay_20261013",
+    "service": null,
+    "supabaseProject": "rrj_rc_synthetic_replay_20261013",
+    "image": "public.ecr.aws/supabase/kong:2.8.1",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:33.073833652Z",
+    "finishedAt": "2026-10-15T16:39:24.435880003Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "kong",
+      "api.supabase.internal"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_db_rrj_rc_synthetic_replay_20261013",
+    "project": "rrj_rc_synthetic_replay_20261013",
+    "service": null,
+    "supabaseProject": "rrj_rc_synthetic_replay_20261013",
+    "image": "public.ecr.aws/supabase/postgres:17.4.1.068",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.843105859Z",
+    "finishedAt": "2026-10-15T16:39:24.440293818Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "db",
+      "db.supabase.internal"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_pg_meta_isolated-stack",
+    "project": "isolated-stack",
+    "service": null,
+    "supabaseProject": "isolated-stack",
+    "image": "public.ecr.aws/supabase/postgres-meta:v0.100.0",
+    "running": false,
+    "startedAt": "2026-10-13T00:12:31.006811341Z",
+    "finishedAt": "2026-10-13T00:16:36.60743837Z",
+    "restartCount": 0,
+    "health": "unhealthy",
+    "aliases": [
+      "pg_meta"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_storage_isolated-stack",
+    "project": "isolated-stack",
+    "service": null,
+    "supabaseProject": "isolated-stack",
+    "image": "public.ecr.aws/supabase/storage-api:v1.79.36",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:50.848205075Z",
+    "finishedAt": "2026-10-15T16:39:49.286842007Z",
+    "restartCount": 1,
+    "health": "healthy",
+    "aliases": [
+      "storage"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_rest_isolated-stack",
+    "project": "isolated-stack",
+    "service": null,
+    "supabaseProject": "isolated-stack",
+    "image": "public.ecr.aws/supabase/postgrest:v16.4",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.666744895Z",
+    "finishedAt": "2026-10-15T16:39:24.433937922Z",
+    "restartCount": 0,
+    "health": null,
+    "aliases": [
+      "rest"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_auth_isolated-stack",
+    "project": "isolated-stack",
+    "service": null,
+    "supabaseProject": "isolated-stack",
+    "image": "public.ecr.aws/supabase/gotrue:v2.197.0",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:54.779662402Z",
+    "finishedAt": "2026-10-15T16:39:53.04027243Z",
+    "restartCount": 4,
+    "health": "healthy",
+    "aliases": [
+      "auth"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_kong_isolated-stack",
+    "project": "isolated-stack",
+    "service": null,
+    "supabaseProject": "isolated-stack",
+    "image": "public.ecr.aws/supabase/kong:2.8.1",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.8091552Z",
+    "finishedAt": "2026-10-15T16:39:24.423969373Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "kong",
+      "api.supabase.internal"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_db_isolated-stack",
+    "project": "isolated-stack",
+    "service": null,
+    "supabaseProject": "isolated-stack",
+    "image": "public.ecr.aws/supabase/postgres:17.11.0.004",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.854265352Z",
+    "finishedAt": "2026-10-15T16:39:24.406379654Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "db",
+      "db.supabase.internal"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "rrj_recovery_rehearsal_20261013",
+    "project": null,
+    "service": null,
+    "supabaseProject": null,
+    "image": "public.ecr.aws/supabase/postgres:17.6.1.147",
+    "running": false,
+    "startedAt": "2026-10-12T23:47:17.505202447Z",
+    "finishedAt": "2026-10-13T00:09:16.307766724Z",
+    "restartCount": 0,
+    "health": "unhealthy",
+    "aliases": [],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_studio_rrj_phase8_sim",
+    "project": "rrj_phase8_sim",
+    "service": null,
+    "supabaseProject": "rrj_phase8_sim",
+    "image": "public.ecr.aws/supabase/studio:2025.07.28-sha-578b707",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.063675453Z",
+    "finishedAt": "2026-10-15T16:39:24.423999137Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "studio"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_pg_meta_rrj_phase8_sim",
+    "project": "rrj_phase8_sim",
+    "service": null,
+    "supabaseProject": "rrj_phase8_sim",
+    "image": "public.ecr.aws/supabase/postgres-meta:v0.91.4",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.650157165Z",
+    "finishedAt": "2026-10-15T16:39:24.434132091Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "pg_meta"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_edge_runtime_rrj_phase8_sim",
+    "project": "rrj_phase8_sim",
+    "service": null,
+    "supabaseProject": "rrj_phase8_sim",
+    "image": "public.ecr.aws/supabase/edge-runtime:v1.68.3",
+    "running": false,
+    "startedAt": "2026-10-10T15:13:59.720351595Z",
+    "finishedAt": "2026-10-10T17:11:16.425686809Z",
+    "restartCount": 0,
+    "health": null,
+    "aliases": [
+      "edge_runtime"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_storage_rrj_phase8_sim",
+    "project": "rrj_phase8_sim",
+    "service": null,
+    "supabaseProject": "rrj_phase8_sim",
+    "image": "public.ecr.aws/supabase/storage-api:v1.26.0",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:53.654771326Z",
+    "finishedAt": "2026-10-15T16:39:52.393977941Z",
+    "restartCount": 1,
+    "health": "healthy",
+    "aliases": [
+      "storage"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_rest_rrj_phase8_sim",
+    "project": "rrj_phase8_sim",
+    "service": null,
+    "supabaseProject": "rrj_phase8_sim",
+    "image": "public.ecr.aws/supabase/postgrest:v12.2.12",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.891354695Z",
+    "finishedAt": "2026-10-15T16:39:24.435294984Z",
+    "restartCount": 0,
+    "health": null,
+    "aliases": [
+      "rest"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_realtime_rrj_phase8_sim",
+    "project": "rrj_phase8_sim",
+    "service": null,
+    "supabaseProject": "rrj_phase8_sim",
+    "image": "public.ecr.aws/supabase/realtime:v2.41.11",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.947037769Z",
+    "finishedAt": "2026-10-15T16:39:24.427129895Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "realtime",
+      "realtime-dev"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_inbucket_rrj_phase8_sim",
+    "project": "rrj_phase8_sim",
+    "service": null,
+    "supabaseProject": "rrj_phase8_sim",
+    "image": "public.ecr.aws/supabase/mailpit:v1.22.3",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:33.041293744Z",
+    "finishedAt": "2026-10-15T16:39:24.44324336Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "inbucket"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_auth_rrj_phase8_sim",
+    "project": "rrj_phase8_sim",
+    "service": null,
+    "supabaseProject": "rrj_phase8_sim",
+    "image": "public.ecr.aws/supabase/gotrue:v2.177.0",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:49.845177375Z",
+    "finishedAt": "2026-10-15T16:39:48.32401359Z",
+    "restartCount": 3,
+    "health": "healthy",
+    "aliases": [
+      "auth"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_kong_rrj_phase8_sim",
+    "project": "rrj_phase8_sim",
+    "service": null,
+    "supabaseProject": "rrj_phase8_sim",
+    "image": "public.ecr.aws/supabase/kong:2.8.1",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.597490917Z",
+    "finishedAt": "2026-10-15T16:39:24.435183979Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "kong",
+      "api.supabase.internal"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_vector_rrj_phase8_sim",
+    "project": "rrj_phase8_sim",
+    "service": null,
+    "supabaseProject": "rrj_phase8_sim",
+    "image": "public.ecr.aws/supabase/vector:0.28.1-alpine",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.83369207Z",
+    "finishedAt": "2026-10-15T16:39:24.443259777Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "vector"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_analytics_rrj_phase8_sim",
+    "project": "rrj_phase8_sim",
+    "service": null,
+    "supabaseProject": "rrj_phase8_sim",
+    "image": "public.ecr.aws/supabase/logflare:1.14.2",
+    "running": true,
+    "startedAt": "2026-10-15T17:07:54.531669531Z",
+    "finishedAt": "2026-10-15T16:57:18.250625743Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "analytics"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_db_rrj_phase8_sim",
+    "project": "rrj_phase8_sim",
+    "service": null,
+    "supabaseProject": "rrj_phase8_sim",
+    "image": "public.ecr.aws/supabase/postgres:17.4.1.068",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.482983685Z",
+    "finishedAt": "2026-10-15T16:39:24.43410391Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "db",
+      "db.supabase.internal"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_studio_my-local-todo-app",
+    "project": "my-local-todo-app",
+    "service": null,
+    "supabaseProject": "my-local-todo-app",
+    "image": "public.ecr.aws/supabase/studio:2025.07.28-sha-578b707",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.102100161Z",
+    "finishedAt": "2026-10-15T16:39:24.430885591Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "studio"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_pg_meta_my-local-todo-app",
+    "project": "my-local-todo-app",
+    "service": null,
+    "supabaseProject": "my-local-todo-app",
+    "image": "public.ecr.aws/supabase/postgres-meta:v0.91.4",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:33.019341022Z",
+    "finishedAt": "2026-10-15T16:39:24.428219309Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "pg_meta"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_edge_runtime_my-local-todo-app",
+    "project": "my-local-todo-app",
+    "service": null,
+    "supabaseProject": "my-local-todo-app",
+    "image": "public.ecr.aws/supabase/edge-runtime:v1.68.3",
+    "running": false,
+    "startedAt": "2025-08-03T15:07:33.938234235Z",
+    "finishedAt": "2025-08-03T15:15:09.502733814Z",
+    "restartCount": 0,
+    "health": null,
+    "aliases": [
+      "edge_runtime"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_storage_my-local-todo-app",
+    "project": "my-local-todo-app",
+    "service": null,
+    "supabaseProject": "my-local-todo-app",
+    "image": "public.ecr.aws/supabase/storage-api:v1.26.0",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.20248466Z",
+    "finishedAt": "2026-10-15T16:39:24.439973041Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "storage"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_rest_my-local-todo-app",
+    "project": "my-local-todo-app",
+    "service": null,
+    "supabaseProject": "my-local-todo-app",
+    "image": "public.ecr.aws/supabase/postgrest:v12.2.12",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:33.034381227Z",
+    "finishedAt": "2026-10-15T16:39:24.440288789Z",
+    "restartCount": 0,
+    "health": null,
+    "aliases": [
+      "rest"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_realtime_my-local-todo-app",
+    "project": "my-local-todo-app",
+    "service": null,
+    "supabaseProject": "my-local-todo-app",
+    "image": "public.ecr.aws/supabase/realtime:v2.41.11",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:55.574821977Z",
+    "finishedAt": "2026-10-15T16:39:54.342691398Z",
+    "restartCount": 1,
+    "health": "healthy",
+    "aliases": [
+      "realtime",
+      "realtime-dev"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_inbucket_my-local-todo-app",
+    "project": "my-local-todo-app",
+    "service": null,
+    "supabaseProject": "my-local-todo-app",
+    "image": "public.ecr.aws/supabase/mailpit:v1.22.3",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.992596646Z",
+    "finishedAt": "2026-10-15T16:39:24.435870164Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "inbucket"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_auth_my-local-todo-app",
+    "project": "my-local-todo-app",
+    "service": null,
+    "supabaseProject": "my-local-todo-app",
+    "image": "public.ecr.aws/supabase/gotrue:v2.177.0",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:44.027152555Z",
+    "finishedAt": "2026-10-15T16:39:42.935201112Z",
+    "restartCount": 2,
+    "health": "healthy",
+    "aliases": [
+      "auth"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_kong_my-local-todo-app",
+    "project": "my-local-todo-app",
+    "service": null,
+    "supabaseProject": "my-local-todo-app",
+    "image": "public.ecr.aws/supabase/kong:2.8.1",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.874272218Z",
+    "finishedAt": "2026-10-15T16:39:24.440215243Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "kong",
+      "api.supabase.internal"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_vector_my-local-todo-app",
+    "project": "my-local-todo-app",
+    "service": null,
+    "supabaseProject": "my-local-todo-app",
+    "image": "public.ecr.aws/supabase/vector:0.28.1-alpine",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.985963039Z",
+    "finishedAt": "2026-10-15T16:39:24.42791327Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "vector"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_analytics_my-local-todo-app",
+    "project": "my-local-todo-app",
+    "service": null,
+    "supabaseProject": "my-local-todo-app",
+    "image": "public.ecr.aws/supabase/logflare:1.14.2",
+    "running": true,
+    "startedAt": "2026-10-15T17:07:53.817651266Z",
+    "finishedAt": "2026-10-15T16:57:18.255366315Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "analytics"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  },
+  {
+    "name": "supabase_db_my-local-todo-app",
+    "project": "my-local-todo-app",
+    "service": null,
+    "supabaseProject": "my-local-todo-app",
+    "image": "public.ecr.aws/supabase/postgres:17.4.1.068",
+    "running": true,
+    "startedAt": "2026-10-15T16:39:32.323431722Z",
+    "finishedAt": "2026-10-15T16:39:24.435150762Z",
+    "restartCount": 0,
+    "health": "healthy",
+    "aliases": [
+      "db",
+      "db.supabase.internal"
+    ],
+    "links": [
+      null
+    ],
+    "dependsOn": null
+  }
+]

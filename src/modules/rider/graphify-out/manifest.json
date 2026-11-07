@@ -1,0 +1,62 @@
+{
+  "index.tsx": {
+    "mtime": 1793475757.876539,
+    "seen": 1793747479.732748,
+    "ast_hash": "3396e2da0ef87565e035646e8ddba51b",
+    "semantic_hash": ""
+  },
+  "screens/DeliveryDetail.tsx": {
+    "mtime": 1784018847.3904543,
+    "seen": 1793747479.732754,
+    "ast_hash": "9b0049901257d794d4139acec2797b2d",
+    "semantic_hash": ""
+  },
+  "screens/DeliveryHistory.tsx": {
+    "mtime": 1783910707.0810266,
+    "seen": 1793747479.732757,
+    "ast_hash": "a5f16eb513905b2be60059b8c2752e43",
+    "semantic_hash": ""
+  },
+  "screens/DeliveryRequests.tsx": {
+    "mtime": 1784018845.8764694,
+    "seen": 1793747479.7327585,
+    "ast_hash": "eeb5781a9aacf95e6acfedab2c90c262",
+    "semantic_hash": ""
+  },
+  "screens/RiderHome.tsx": {
+    "mtime": 1783910707.10302,
+    "seen": 1793747479.73276,
+    "ast_hash": "7114fa71710ae71ad41dce87afa389c0",
+    "semantic_hash": ""
+  },
+  "screens/RiderProfile.tsx": {
+    "mtime": 1783910707.116018,
+    "seen": 1793747479.7327616,
+    "ast_hash": "632ba1b228446016eab589dfd8f17388",
+    "semantic_hash": ""
+  },
+  "screens/SplashScreen.tsx": {
+    "mtime": 1783910707.127097,
+    "seen": 1793747479.7327626,
+    "ast_hash": "730b831b70e7f41f9d2f3b7803cb4e0b",
+    "semantic_hash": ""
+  },
+  "screens/UpdateStatus.tsx": {
+    "mtime": 1783910707.1371002,
+    "seen": 1793747479.732764,
+    "ast_hash": "84f7687f1423924e9e6e6e6340e78d5c",
+    "semantic_hash": ""
+  },
+  "screens/UploadProof.tsx": {
+    "mtime": 1783910707.1480312,
+    "seen": 1793747479.7327652,
+    "ast_hash": "434f315df62e4a0e15591da81744535a",
+    "semantic_hash": ""
+  },
+  "services/supabaseRiderService.ts": {
+    "mtime": 1793475757.874519,
+    "seen": 1793747479.7327662,
+    "ast_hash": "c3649613a9f88cf8165e4380bb566d2a",
+    "semantic_hash": ""
+  }
+}

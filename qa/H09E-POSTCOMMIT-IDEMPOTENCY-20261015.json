@@ -1,0 +1,471 @@
+{
+  "summary": {
+    "dateManila": "2026-10-15",
+    "overall": "PASS isolated browser and SQL",
+    "checks": {
+      "committedOrderResponseLost": "PASS browser + SQL",
+      "sameRequestIdAfterRefresh": "PASS browser",
+      "existingOrderReturned": "PASS browser + SQL",
+      "purchaseSnapshotUnchanged": "PASS SQL",
+      "committedPaymentResponseLostAndRetried": "PASS browser + SQL",
+      "freshCustomerHistoryAndTracking": "PASS browser",
+      "migrationHashes": "PASS",
+      "cashierVerification": "NOT TESTED",
+      "realGCashSettlement": "NOT TESTED",
+      "hostedRelease": "NO-GO",
+      "dockerAuthRootCause": "NOT PROVEN"
+    },
+    "attempts": [
+      {
+        "kind": "preflight harness error",
+        "result": "HARNESS ERROR",
+        "ordersBefore": 26,
+        "ordersAfter": 26
+      },
+      {
+        "kind": "partial committed browser attempt",
+        "result": "PARTIAL HARNESS",
+        "orderNumber": "ORD-000027",
+        "ordersBefore": 26,
+        "ordersAfter": 27
+      },
+      {
+        "kind": "complete committed browser attempt",
+        "result": "PASS",
+        "orderNumber": "ORD-000028",
+        "ordersBefore": 27,
+        "ordersAfter": 28
+      }
+    ],
+    "interception": "CDP Fetch response stage on POST only; 200 response and independent SQL commit confirmation preceded Fetch.failRequest ConnectionClosed",
+    "applicationSourceFilesModified": [],
+    "migrationFilesModified": [],
+    "standaloneRiderFilesModified": [],
+    "hostedOperations": []
+  },
+  "browser": {
+    "status": "PASS",
+    "stack": "rrj_h09_order_flow_20261015",
+    "requestId": "3ac82f72-b98d-425f-b35b-ec951fdff085",
+    "orderId": "35cbe3df-d0f3-4ac7-a7ed-4a7194c7afc7",
+    "orderNumber": "ORD-000028",
+    "beforeOrders": 27,
+    "afterCommittedOrders": 28,
+    "afterRetryOrders": 28,
+    "responseStageHttp": 200,
+    "interception": "Chrome CDP Fetch Response-stage pause, independent SQL commit confirmation, then Fetch.failRequest ConnectionClosed",
+    "visibleError": "Unable to place your order: TypeError: Failed to fetch",
+    "storedRequestIdBeforeRefresh": "3ac82f72-b98d-425f-b35b-ec951fdff085",
+    "storedRequestIdAfterRefresh": "3ac82f72-b98d-425f-b35b-ec951fdff085",
+    "requestIdentityCount": 1,
+    "distinctOrderNumbers": 1,
+    "uniqueIndexPresent": true,
+    "itemSnapshotAtCommit": "1|175.00|175.00|[{\"id\": \"extra-rice\", \"name\": \"Extra rice\", \"price\": 35.00}, {\"id\": \"h09-choice\", \"name\": \"H09 required choice\", \"price\": 10.00}]",
+    "itemSnapshotAfterRetry": "1|175.00|175.00|[{\"id\": \"extra-rice\", \"name\": \"Extra rice\", \"price\": 35.00}, {\"id\": \"h09-choice\", \"name\": \"H09 required choice\", \"price\": 10.00}]",
+    "paymentReceiptStockAssignmentCounts": "0|0|0|0",
+    "browserExistingOrder": "ORD-000028",
+    "payment": {
+      "status": "PASS",
+      "paymentId": "fea7581d-a511-417f-9db5-ce7128e583f7",
+      "firstCommittedState": "fea7581d-a511-417f-9db5-ce7128e583f7|pending",
+      "afterRetryState": "fea7581d-a511-417f-9db5-ce7128e583f7|pending",
+      "paymentCount": 1,
+      "receiptCount": 0,
+      "stockLedgerCount": 0,
+      "responseStageHttp": 200,
+      "visibleError": "Order ORD-000028 and its screenshot were saved, but the payment submission failed: TypeError: Failed to fetch. Retry to continue with the same order."
+    },
+    "network": [
+      {
+        "event": "sent",
+        "rpc": "place_customer_order",
+        "requestId": "21588.77",
+        "status": null
+      },
+      {
+        "event": "sent",
+        "rpc": "place_customer_order",
+        "requestId": "BB8BD8354329A6E0999C9826929A462F",
+        "status": null
+      },
+      {
+        "event": "response",
+        "rpc": "place_customer_order",
+        "requestId": "BB8BD8354329A6E0999C9826929A462F",
+        "status": 200
+      },
+      {
+        "event": "sent",
+        "rpc": "place_customer_order",
+        "requestId": "21588.130",
+        "status": null
+      },
+      {
+        "event": "response",
+        "rpc": "place_customer_order",
+        "requestId": "21588.130",
+        "status": 200
+      },
+      {
+        "event": "sent",
+        "rpc": "submit_customer_payment",
+        "requestId": "21588.133",
+        "status": null
+      },
+      {
+        "event": "sent",
+        "rpc": "submit_customer_payment",
+        "requestId": "FA4FB67BB73BDEFCCBDDFDA86375B945",
+        "status": null
+      },
+      {
+        "event": "response",
+        "rpc": "submit_customer_payment",
+        "requestId": "FA4FB67BB73BDEFCCBDDFDA86375B945",
+        "status": 200
+      },
+      {
+        "event": "sent",
+        "rpc": "submit_customer_payment",
+        "requestId": "21588.135",
+        "status": null
+      },
+      {
+        "event": "response",
+        "rpc": "submit_customer_payment",
+        "requestId": "21588.135",
+        "status": 200
+      }
+    ],
+    "screenshots": [
+      "postcommit-lost-response-error.png",
+      "postcommit-existing-order-payment-step.png",
+      "payment-postcommit-lost-response-error.png",
+      "payment-existing-submission-confirmed.png"
+    ]
+  },
+  "tracking": {
+    "status": "PASS",
+    "orderNumber": "ORD-000028",
+    "historyOrderVisible": true,
+    "trackButtonPresent": true,
+    "trackingOrderVisible": true,
+    "historySummary": "ORD-000028\nWaiting for Payment Verification\n\nOct 15, 2026, 7:55 PM\n\nORDER TOTAL\n\n₱225.00\n\nITEMS\n\n1×H09 Synthetic Order Item\nExtra rice, H09 required choice\n₱175.00\nTrack Order",
+    "boundary": "Fresh authenticated Chrome session on isolated local H09 DB, read-only navigation of existing synthetic order."
+  },
+  "audit": {
+    "dateManila": "2026-10-15",
+    "stack": "rrj_h09_order_flow_20261015",
+    "overall": "PASS",
+    "migrationEntries": 53,
+    "canonicalMigrationHashesMatching": 52,
+    "canonicalMigrationHashCount": 52,
+    "totalOrders": 28,
+    "requestIdentityCount": 1,
+    "uniqueOrderNumbers": 1,
+    "uniqueIndexPresent": true,
+    "orders": [
+      {
+        "order_number": "ORD-000016",
+        "id": "2207bb36-acc5-4cc3-9894-20d9e3457b92",
+        "customer_request_id": "e79ca7b3-048f-4650-8835-4280d5631896",
+        "current_status": "ready",
+        "subtotal": 209,
+        "delivery_fee": 50,
+        "grand_total": 259,
+        "items": [
+          {
+            "id": "54120b78-3253-49a6-a2ad-d81639c299d3",
+            "name": "Chicken Biryani",
+            "quantity": 1,
+            "unitPrice": 209,
+            "lineTotal": 209,
+            "modifiers": []
+          }
+        ],
+        "payments": [
+          {
+            "id": "768ddb23-2954-41b9-b1ee-fc1d7fdfbddb",
+            "status": "verified",
+            "amount": 259,
+            "method": "gcash",
+            "proofMetadataPresent": true,
+            "privateObjectPresent": true
+          }
+        ],
+        "receipts": 1,
+        "inventoryledger": 1,
+        "assignments": 0,
+        "statusevents": 5
+      },
+      {
+        "order_number": "ORD-000023",
+        "id": "d9155f1e-6272-48df-af85-a2ebbc889a6e",
+        "customer_request_id": null,
+        "current_status": "confirmed",
+        "subtotal": 175,
+        "delivery_fee": 0,
+        "grand_total": 175,
+        "items": [
+          {
+            "id": "0f721035-62a8-45ef-91f6-47fcb5607efc",
+            "name": "H09 Synthetic Order Item",
+            "quantity": 1,
+            "unitPrice": 175,
+            "lineTotal": 175,
+            "modifiers": [
+              {
+                "id": "extra-rice",
+                "name": "Extra rice",
+                "price": 35
+              },
+              {
+                "id": "h09-choice",
+                "name": "H09 required choice",
+                "price": 10
+              }
+            ]
+          }
+        ],
+        "payments": [
+          {
+            "id": "7332892f-245d-4134-8b88-913c2c14d769",
+            "status": "verified",
+            "amount": 175,
+            "method": "cash",
+            "proofMetadataPresent": false,
+            "privateObjectPresent": false
+          }
+        ],
+        "receipts": 1,
+        "inventoryledger": 0,
+        "assignments": 0,
+        "statusevents": 1
+      },
+      {
+        "order_number": "ORD-000024",
+        "id": "952b99d6-1f06-49dc-9ed3-4f26e96900d3",
+        "customer_request_id": "6f0f73b5-22d6-446e-85fa-61d7c10076e9",
+        "current_status": "confirmed",
+        "subtotal": 175,
+        "delivery_fee": 50,
+        "grand_total": 225,
+        "items": [
+          {
+            "id": "210b8f7b-19b1-4876-8de3-d7316048eeb5",
+            "name": "H09 Synthetic Order Item",
+            "quantity": 1,
+            "unitPrice": 175,
+            "lineTotal": 175,
+            "modifiers": [
+              {
+                "id": "extra-rice",
+                "name": "Extra rice",
+                "price": 35
+              },
+              {
+                "id": "h09-choice",
+                "name": "H09 required choice",
+                "price": 10
+              }
+            ]
+          }
+        ],
+        "payments": [
+          {
+            "id": "9b51670b-987a-43df-a9d0-20b7c34bd027",
+            "status": "verified",
+            "amount": 225,
+            "method": "gcash",
+            "proofMetadataPresent": true,
+            "privateObjectPresent": true
+          }
+        ],
+        "receipts": 1,
+        "inventoryledger": 0,
+        "assignments": 0,
+        "statusevents": 5
+      },
+      {
+        "order_number": "ORD-000025",
+        "id": "faf474e7-1e6e-41ed-9bd5-0a08cf66a597",
+        "customer_request_id": "37224ac2-c099-4193-80e0-844a0e8cfee9",
+        "current_status": "delivered",
+        "subtotal": 175,
+        "delivery_fee": 50,
+        "grand_total": 225,
+        "items": [
+          {
+            "id": "fef3c065-6d74-4dae-a02d-2dfc21fa56da",
+            "name": "H09 Synthetic Order Item",
+            "quantity": 1,
+            "unitPrice": 175,
+            "lineTotal": 175,
+            "modifiers": [
+              {
+                "id": "extra-rice",
+                "name": "Extra rice",
+                "price": 35
+              },
+              {
+                "id": "h09-choice",
+                "name": "H09 required choice",
+                "price": 10
+              }
+            ]
+          }
+        ],
+        "payments": [
+          {
+            "id": "5f662d91-c364-4fa5-a3bf-bb11a4a6f804",
+            "status": "verified",
+            "amount": 225,
+            "method": "gcash",
+            "proofMetadataPresent": true,
+            "privateObjectPresent": true
+          }
+        ],
+        "receipts": 1,
+        "inventoryledger": 0,
+        "assignments": 1,
+        "statusevents": 10
+      },
+      {
+        "order_number": "ORD-000026",
+        "id": "af878e2e-4644-423a-a563-e9a812a44487",
+        "customer_request_id": "8c840e15-0778-473f-959c-daa13dad7ab3",
+        "current_status": "waiting_payment_verification",
+        "subtotal": 175,
+        "delivery_fee": 50,
+        "grand_total": 225,
+        "items": [
+          {
+            "id": "61148ce9-b940-416a-baec-7bb79ab02404",
+            "name": "H09 Synthetic Order Item",
+            "quantity": 1,
+            "unitPrice": 175,
+            "lineTotal": 175,
+            "modifiers": [
+              {
+                "id": "extra-rice",
+                "name": "Extra rice",
+                "price": 35
+              },
+              {
+                "id": "h09-choice",
+                "name": "H09 required choice",
+                "price": 10
+              }
+            ]
+          }
+        ],
+        "payments": null,
+        "receipts": 0,
+        "inventoryledger": 0,
+        "assignments": 0,
+        "statusevents": 1
+      },
+      {
+        "order_number": "ORD-000027",
+        "id": "15cf0c62-cae7-485f-be0b-c487162e8ad2",
+        "customer_request_id": "9c0abd24-2f28-4222-afa0-841cf0ce38de",
+        "current_status": "waiting_payment_verification",
+        "subtotal": 175,
+        "delivery_fee": 50,
+        "grand_total": 225,
+        "items": [
+          {
+            "id": "54f6f2b5-7d3c-4da0-8bdf-85c524bd9230",
+            "name": "H09 Synthetic Order Item",
+            "quantity": 1,
+            "unitPrice": 175,
+            "lineTotal": 175,
+            "modifiers": [
+              {
+                "id": "extra-rice",
+                "name": "Extra rice",
+                "price": 35
+              },
+              {
+                "id": "h09-choice",
+                "name": "H09 required choice",
+                "price": 10
+              }
+            ]
+          }
+        ],
+        "payments": [
+          {
+            "id": "71a61ea3-b62c-4935-9c58-a83f891fc56e",
+            "status": "pending",
+            "amount": 225,
+            "method": "gcash",
+            "proofMetadataPresent": true,
+            "privateObjectPresent": true
+          }
+        ],
+        "receipts": 0,
+        "inventoryledger": 0,
+        "assignments": 0,
+        "statusevents": 2
+      },
+      {
+        "order_number": "ORD-000028",
+        "id": "35cbe3df-d0f3-4ac7-a7ed-4a7194c7afc7",
+        "customer_request_id": "3ac82f72-b98d-425f-b35b-ec951fdff085",
+        "current_status": "waiting_payment_verification",
+        "subtotal": 175,
+        "delivery_fee": 50,
+        "grand_total": 225,
+        "items": [
+          {
+            "id": "d7b64f16-a1d5-42cc-9bc4-f199f0edac32",
+            "name": "H09 Synthetic Order Item",
+            "quantity": 1,
+            "unitPrice": 175,
+            "lineTotal": 175,
+            "modifiers": [
+              {
+                "id": "extra-rice",
+                "name": "Extra rice",
+                "price": 35
+              },
+              {
+                "id": "h09-choice",
+                "name": "H09 required choice",
+                "price": 10
+              }
+            ]
+          }
+        ],
+        "payments": [
+          {
+            "id": "fea7581d-a511-417f-9db5-ce7128e583f7",
+            "status": "pending",
+            "amount": 225,
+            "method": "gcash",
+            "proofMetadataPresent": true,
+            "privateObjectPresent": true
+          }
+        ],
+        "receipts": 0,
+        "inventoryledger": 0,
+        "assignments": 0,
+        "statusevents": 2
+      }
+    ],
+    "endpoints": [
+      {
+        "path": "auth/v1/health",
+        "status": 200,
+        "milliseconds": 44
+      },
+      {
+        "path": "rest/v1/",
+        "status": 200,
+        "milliseconds": 59
+      }
+    ],
+    "boundary": "Read-only postcheck of original isolated synthetic H09 DB. Proof paths and bytes, account credentials and secrets excluded. ORD-000027 is a preserved harness-interrupted partial payment attempt; ORD-000028 is the complete H09E browser run."
+  }
+}

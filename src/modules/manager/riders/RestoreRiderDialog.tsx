@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Loader2, UserCheck } from "lucide-react";
 
 import {
@@ -20,6 +20,7 @@ interface RestoreRiderDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onRestored: () => void;
+  onOutcomeUnknown: () => void;
 }
 
 export function RestoreRiderDialog({
@@ -28,37 +29,37 @@ export function RestoreRiderDialog({
   open,
   onOpenChange,
   onRestored,
+  onOutcomeUnknown,
 }: RestoreRiderDialogProps) {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const mutationPending = useRef(false);
 
-  const handleRestore = async (
-    event: React.MouseEvent<HTMLButtonElement>,
-  ) => {
+  const handleRestore = async (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
 
-    if (!riderId || loading) {
+    if (!riderId || mutationPending.current) {
       return;
     }
 
+    mutationPending.current = true;
     setLoading(true);
-    setError(null);
 
     try {
-      await setManagerRiderApprovalStatus(
-        riderId,
-        "approved",
-      );
+      const result = await setManagerRiderApprovalStatus(riderId, "approved");
+      if (
+        result.riderId !== riderId ||
+        result.profileRole !== "rider" ||
+        result.availabilityStatus !== "offline"
+      ) {
+        throw new Error("Unexpected restoration result");
+      }
 
       onRestored();
       onOpenChange(false);
-    } catch (restoreError) {
-      setError(
-        restoreError instanceof Error
-          ? restoreError.message
-          : "Unable to restore rider.",
-      );
+    } catch {
+      onOutcomeUnknown();
     } finally {
+      mutationPending.current = false;
       setLoading(false);
     }
   };
@@ -68,51 +69,36 @@ export function RestoreRiderDialog({
       open={open}
       onOpenChange={(nextOpen) => {
         if (!loading) {
-          if (!nextOpen) {
-            setError(null);
-          }
-
           onOpenChange(nextOpen);
         }
       }}
     >
-      <AlertDialogContent className="sm:max-w-md">
+      <AlertDialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-md">
         <AlertDialogHeader>
           <div className="mb-1 flex h-11 w-11 items-center justify-center rounded-xl bg-green-50 text-green-700">
-            <UserCheck
-              className="h-5 w-5"
-              aria-hidden="true"
-            />
+            <UserCheck className="h-5 w-5" aria-hidden="true" />
           </div>
 
-          <AlertDialogTitle>
+          <AlertDialogTitle className="break-words">
             Restore {riderName ?? "this rider"}?
           </AlertDialogTitle>
 
           <AlertDialogDescription className="leading-5">
-            This rider will regain access to the Rider
-            workspace. Their availability will remain Offline
-            until they choose to accept deliveries.
+            This rider will regain access to the Rider workspace. Their
+            availability will remain Offline until they choose to accept
+            deliveries.
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        {error ? (
-          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3">
-            <p className="text-xs font-semibold leading-5 text-red-800">
-              {error}
-            </p>
-          </div>
-        ) : null}
-
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={loading}>
+          <AlertDialogCancel disabled={loading} className="min-h-11">
             Keep suspended
           </AlertDialogCancel>
 
           <AlertDialogAction
             disabled={loading}
             onClick={handleRestore}
-            className="bg-green-600 text-white hover:bg-green-700 focus-visible:ring-green-600"
+            className="min-h-11 bg-green-600 text-white hover:bg-green-700 focus-visible:ring-green-600"
           >
             {loading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -120,9 +106,7 @@ export function RestoreRiderDialog({
               <UserCheck className="h-4 w-4" />
             )}
 
-            {loading
-              ? "Restoring…"
-              : "Restore rider"}
+            {loading ? "Restoring…" : "Restore rider"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -1,0 +1,2839 @@
+{
+  "project": "zhzluhqvysvsadwuugpa",
+  "audit_date": "2026-10-13 Asia/Manila",
+  "scope": "privacy-safe read-only aggregates and catalog; no row payloads",
+  "public_counts": [
+    {
+      "table": "cashier_shifts",
+      "rows": 5
+    },
+    {
+      "table": "cashier_transactions",
+      "rows": 26
+    },
+    {
+      "table": "delivery_assignments",
+      "rows": 14
+    },
+    {
+      "table": "inventory_batches",
+      "rows": 2
+    },
+    {
+      "table": "inventory_items",
+      "rows": 18
+    },
+    {
+      "table": "inventory_opening_balances",
+      "rows": 0
+    },
+    {
+      "table": "inventory_request_documents",
+      "rows": 1
+    },
+    {
+      "table": "inventory_request_events",
+      "rows": 3
+    },
+    {
+      "table": "inventory_request_lines",
+      "rows": 2
+    },
+    {
+      "table": "inventory_request_revisions",
+      "rows": 1
+    },
+    {
+      "table": "inventory_transaction_batch_allocations",
+      "rows": 0
+    },
+    {
+      "table": "inventory_transactions",
+      "rows": 43
+    },
+    {
+      "table": "kds_terminals",
+      "rows": 2
+    },
+    {
+      "table": "menu_categories",
+      "rows": 5
+    },
+    {
+      "table": "menu_ingredients",
+      "rows": 28
+    },
+    {
+      "table": "menu_item_modifier_groups",
+      "rows": 27
+    },
+    {
+      "table": "menu_items",
+      "rows": 20
+    },
+    {
+      "table": "menu_modifier_groups",
+      "rows": 6
+    },
+    {
+      "table": "menu_modifier_options",
+      "rows": 16
+    },
+    {
+      "table": "order_items",
+      "rows": 50
+    },
+    {
+      "table": "order_status_history",
+      "rows": 223
+    },
+    {
+      "table": "orders",
+      "rows": 45
+    },
+    {
+      "table": "paid_order_cancellations",
+      "rows": 0
+    },
+    {
+      "table": "payments",
+      "rows": 27
+    },
+    {
+      "table": "production_replenishment_requests",
+      "rows": 0
+    },
+    {
+      "table": "production_replenishment_status_events",
+      "rows": 0
+    },
+    {
+      "table": "profiles",
+      "rows": 8
+    },
+    {
+      "table": "purchase_order_items",
+      "rows": 0
+    },
+    {
+      "table": "purchase_orders",
+      "rows": 0
+    },
+    {
+      "table": "receiving_report_items",
+      "rows": 2
+    },
+    {
+      "table": "receiving_reports",
+      "rows": 1
+    },
+    {
+      "table": "riders",
+      "rows": 2
+    },
+    {
+      "table": "supplier_items",
+      "rows": 0
+    },
+    {
+      "table": "suppliers",
+      "rows": 0
+    }
+  ],
+  "public_catalog": [
+    {
+      "table_name": "cashier_shifts",
+      "relkind": "r",
+      "estimated_rows": -1,
+      "total_bytes": 65536,
+      "heap_bytes": 8192,
+      "rls": true,
+      "pk": "id",
+      "indexes": 3,
+      "user_triggers": 0,
+      "policies": 1
+    },
+    {
+      "table_name": "cashier_transactions",
+      "relkind": "r",
+      "estimated_rows": -1,
+      "total_bytes": 114688,
+      "heap_bytes": 8192,
+      "rls": true,
+      "pk": "id",
+      "indexes": 6,
+      "user_triggers": 0,
+      "policies": 1
+    },
+    {
+      "table_name": "delivery_assignments",
+      "relkind": "r",
+      "estimated_rows": 12,
+      "total_bytes": 98304,
+      "heap_bytes": 8192,
+      "rls": true,
+      "pk": "id",
+      "indexes": 5,
+      "user_triggers": 1,
+      "policies": 1
+    },
+    {
+      "table_name": "inventory_batches",
+      "relkind": "r",
+      "estimated_rows": 0,
+      "total_bytes": 163840,
+      "heap_bytes": 8192,
+      "rls": true,
+      "pk": "id",
+      "indexes": 8,
+      "user_triggers": 2,
+      "policies": 0
+    },
+    {
+      "table_name": "inventory_items",
+      "relkind": "r",
+      "estimated_rows": 16,
+      "total_bytes": 81920,
+      "heap_bytes": 8192,
+      "rls": true,
+      "pk": "id",
+      "indexes": 2,
+      "user_triggers": 4,
+      "policies": 0
+    },
+    {
+      "table_name": "inventory_opening_balances",
+      "relkind": "r",
+      "estimated_rows": 0,
+      "total_bytes": 98304,
+      "heap_bytes": 16384,
+      "rls": true,
+      "pk": "id",
+      "indexes": 3,
+      "user_triggers": 1,
+      "policies": 0
+    },
+    {
+      "table_name": "inventory_request_documents",
+      "relkind": "r",
+      "estimated_rows": -1,
+      "total_bytes": 49152,
+      "heap_bytes": 8192,
+      "rls": true,
+      "pk": "id",
+      "indexes": 2,
+      "user_triggers": 0,
+      "policies": 0
+    },
+    {
+      "table_name": "inventory_request_events",
+      "relkind": "r",
+      "estimated_rows": -1,
+      "total_bytes": 49152,
+      "heap_bytes": 8192,
+      "rls": true,
+      "pk": "id",
+      "indexes": 2,
+      "user_triggers": 0,
+      "policies": 0
+    },
+    {
+      "table_name": "inventory_request_lines",
+      "relkind": "r",
+      "estimated_rows": -1,
+      "total_bytes": 49152,
+      "heap_bytes": 8192,
+      "rls": true,
+      "pk": "request_id,inventory_item_id",
+      "indexes": 2,
+      "user_triggers": 0,
+      "policies": 0
+    },
+    {
+      "table_name": "inventory_request_revisions",
+      "relkind": "r",
+      "estimated_rows": -1,
+      "total_bytes": 32768,
+      "heap_bytes": 8192,
+      "rls": true,
+      "pk": "request_id,revision",
+      "indexes": 1,
+      "user_triggers": 0,
+      "policies": 0
+    },
+    {
+      "table_name": "inventory_transaction_batch_allocations",
+      "relkind": "r",
+      "estimated_rows": 0,
+      "total_bytes": 73728,
+      "heap_bytes": 8192,
+      "rls": true,
+      "pk": "id",
+      "indexes": 3,
+      "user_triggers": 1,
+      "policies": 0
+    },
+    {
+      "table_name": "inventory_transactions",
+      "relkind": "r",
+      "estimated_rows": 41,
+      "total_bytes": 253952,
+      "heap_bytes": 16384,
+      "rls": true,
+      "pk": "id",
+      "indexes": 13,
+      "user_triggers": 1,
+      "policies": 0
+    },
+    {
+      "table_name": "kds_terminals",
+      "relkind": "r",
+      "estimated_rows": 2,
+      "total_bytes": 49152,
+      "heap_bytes": 8192,
+      "rls": true,
+      "pk": "id",
+      "indexes": 2,
+      "user_triggers": 0,
+      "policies": 0
+    },
+    {
+      "table_name": "menu_categories",
+      "relkind": "r",
+      "estimated_rows": -1,
+      "total_bytes": 49152,
+      "heap_bytes": 8192,
+      "rls": true,
+      "pk": "id",
+      "indexes": 2,
+      "user_triggers": 1,
+      "policies": 1
+    },
+    {
+      "table_name": "menu_ingredients",
+      "relkind": "r",
+      "estimated_rows": 28,
+      "total_bytes": 106496,
+      "heap_bytes": 8192,
+      "rls": true,
+      "pk": "id",
+      "indexes": 4,
+      "user_triggers": 1,
+      "policies": 0
+    },
+    {
+      "table_name": "menu_item_modifier_groups",
+      "relkind": "r",
+      "estimated_rows": -1,
+      "total_bytes": 24576,
+      "heap_bytes": 8192,
+      "rls": true,
+      "pk": "menu_item_id,group_id",
+      "indexes": 1,
+      "user_triggers": 0,
+      "policies": 0
+    },
+    {
+      "table_name": "menu_items",
+      "relkind": "r",
+      "estimated_rows": 20,
+      "total_bytes": 122880,
+      "heap_bytes": 16384,
+      "rls": true,
+      "pk": "id",
+      "indexes": 4,
+      "user_triggers": 1,
+      "policies": 2
+    },
+    {
+      "table_name": "menu_modifier_groups",
+      "relkind": "r",
+      "estimated_rows": -1,
+      "total_bytes": 24576,
+      "heap_bytes": 8192,
+      "rls": true,
+      "pk": "id",
+      "indexes": 1,
+      "user_triggers": 0,
+      "policies": 0
+    },
+    {
+      "table_name": "menu_modifier_options",
+      "relkind": "r",
+      "estimated_rows": -1,
+      "total_bytes": 40960,
+      "heap_bytes": 8192,
+      "rls": true,
+      "pk": "id",
+      "indexes": 2,
+      "user_triggers": 0,
+      "policies": 0
+    },
+    {
+      "table_name": "order_items",
+      "relkind": "r",
+      "estimated_rows": 50,
+      "total_bytes": 90112,
+      "heap_bytes": 16384,
+      "rls": true,
+      "pk": "id",
+      "indexes": 2,
+      "user_triggers": 0,
+      "policies": 3
+    },
+    {
+      "table_name": "order_status_history",
+      "relkind": "r",
+      "estimated_rows": 223,
+      "total_bytes": 114688,
+      "heap_bytes": 40960,
+      "rls": true,
+      "pk": "id",
+      "indexes": 2,
+      "user_triggers": 1,
+      "policies": 2
+    },
+    {
+      "table_name": "orders",
+      "relkind": "r",
+      "estimated_rows": 45,
+      "total_bytes": 172032,
+      "heap_bytes": 16384,
+      "rls": true,
+      "pk": "id",
+      "indexes": 7,
+      "user_triggers": 0,
+      "policies": 3
+    },
+    {
+      "table_name": "paid_order_cancellations",
+      "relkind": "r",
+      "estimated_rows": -1,
+      "total_bytes": 49152,
+      "heap_bytes": 0,
+      "rls": true,
+      "pk": "id",
+      "indexes": 5,
+      "user_triggers": 0,
+      "policies": 0
+    },
+    {
+      "table_name": "payments",
+      "relkind": "r",
+      "estimated_rows": -1,
+      "total_bytes": 81920,
+      "heap_bytes": 8192,
+      "rls": true,
+      "pk": "id",
+      "indexes": 4,
+      "user_triggers": 1,
+      "policies": 0
+    },
+    {
+      "table_name": "production_replenishment_requests",
+      "relkind": "r",
+      "estimated_rows": -1,
+      "total_bytes": 32768,
+      "heap_bytes": 0,
+      "rls": true,
+      "pk": "id",
+      "indexes": 3,
+      "user_triggers": 2,
+      "policies": 0
+    },
+    {
+      "table_name": "production_replenishment_status_events",
+      "relkind": "r",
+      "estimated_rows": -1,
+      "total_bytes": 24576,
+      "heap_bytes": 0,
+      "rls": true,
+      "pk": "id",
+      "indexes": 2,
+      "user_triggers": 0,
+      "policies": 0
+    },
+    {
+      "table_name": "profiles",
+      "relkind": "r",
+      "estimated_rows": 7,
+      "total_bytes": 81920,
+      "heap_bytes": 8192,
+      "rls": true,
+      "pk": "id",
+      "indexes": 2,
+      "user_triggers": 2,
+      "policies": 4
+    },
+    {
+      "table_name": "purchase_order_items",
+      "relkind": "r",
+      "estimated_rows": -1,
+      "total_bytes": 90112,
+      "heap_bytes": 8192,
+      "rls": true,
+      "pk": "id",
+      "indexes": 5,
+      "user_triggers": 2,
+      "policies": 0
+    },
+    {
+      "table_name": "purchase_orders",
+      "relkind": "r",
+      "estimated_rows": -1,
+      "total_bytes": 81920,
+      "heap_bytes": 8192,
+      "rls": true,
+      "pk": "id",
+      "indexes": 4,
+      "user_triggers": 1,
+      "policies": 0
+    },
+    {
+      "table_name": "receiving_report_items",
+      "relkind": "r",
+      "estimated_rows": 0,
+      "total_bytes": 114688,
+      "heap_bytes": 8192,
+      "rls": true,
+      "pk": "id",
+      "indexes": 5,
+      "user_triggers": 5,
+      "policies": 0
+    },
+    {
+      "table_name": "receiving_reports",
+      "relkind": "r",
+      "estimated_rows": 0,
+      "total_bytes": 147456,
+      "heap_bytes": 8192,
+      "rls": true,
+      "pk": "id",
+      "indexes": 7,
+      "user_triggers": 6,
+      "policies": 0
+    },
+    {
+      "table_name": "riders",
+      "relkind": "r",
+      "estimated_rows": 2,
+      "total_bytes": 65536,
+      "heap_bytes": 8192,
+      "rls": true,
+      "pk": "id",
+      "indexes": 3,
+      "user_triggers": 2,
+      "policies": 1
+    },
+    {
+      "table_name": "supplier_items",
+      "relkind": "r",
+      "estimated_rows": -1,
+      "total_bytes": 32768,
+      "heap_bytes": 0,
+      "rls": true,
+      "pk": "id",
+      "indexes": 4,
+      "user_triggers": 1,
+      "policies": 0
+    },
+    {
+      "table_name": "suppliers",
+      "relkind": "r",
+      "estimated_rows": -1,
+      "total_bytes": 32768,
+      "heap_bytes": 8192,
+      "rls": true,
+      "pk": "id",
+      "indexes": 1,
+      "user_triggers": 1,
+      "policies": 0
+    }
+  ],
+  "foreign_keys": [
+    {
+      "child": "cashier_shifts",
+      "conname": "cashier_shifts_cashier_id_fkey",
+      "definition": "FOREIGN KEY (cashier_id) REFERENCES profiles(id)"
+    },
+    {
+      "child": "cashier_shifts",
+      "conname": "cashier_shifts_closed_by_fkey",
+      "definition": "FOREIGN KEY (closed_by) REFERENCES profiles(id)"
+    },
+    {
+      "child": "cashier_shifts",
+      "conname": "cashier_shifts_manager_approved_by_fkey",
+      "definition": "FOREIGN KEY (manager_approved_by) REFERENCES profiles(id)"
+    },
+    {
+      "child": "cashier_transactions",
+      "conname": "cashier_transactions_cashier_id_fkey",
+      "definition": "FOREIGN KEY (cashier_id) REFERENCES profiles(id)"
+    },
+    {
+      "child": "cashier_transactions",
+      "conname": "cashier_transactions_order_id_fkey",
+      "definition": "FOREIGN KEY (order_id) REFERENCES orders(id)"
+    },
+    {
+      "child": "cashier_transactions",
+      "conname": "cashier_transactions_payment_id_fkey",
+      "definition": "FOREIGN KEY (payment_id) REFERENCES payments(id)"
+    },
+    {
+      "child": "cashier_transactions",
+      "conname": "cashier_transactions_shift_id_fkey",
+      "definition": "FOREIGN KEY (shift_id) REFERENCES cashier_shifts(id)"
+    },
+    {
+      "child": "delivery_assignments",
+      "conname": "delivery_assignments_order_id_fkey",
+      "definition": "FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE"
+    },
+    {
+      "child": "delivery_assignments",
+      "conname": "delivery_assignments_rider_id_fkey",
+      "definition": "FOREIGN KEY (rider_id) REFERENCES riders(id) ON DELETE RESTRICT"
+    },
+    {
+      "child": "inventory_batches",
+      "conname": "inventory_batches_inventory_item_id_fkey",
+      "definition": "FOREIGN KEY (inventory_item_id) REFERENCES inventory_items(id)"
+    },
+    {
+      "child": "inventory_batches",
+      "conname": "inventory_batches_opening_balance_id_fkey",
+      "definition": "FOREIGN KEY (opening_balance_id) REFERENCES inventory_opening_balances(id)"
+    },
+    {
+      "child": "inventory_batches",
+      "conname": "inventory_batches_receiving_report_item_id_fkey",
+      "definition": "FOREIGN KEY (receiving_report_item_id) REFERENCES receiving_report_items(id)"
+    },
+    {
+      "child": "inventory_opening_balances",
+      "conname": "inventory_opening_balances_inventory_item_id_fkey",
+      "definition": "FOREIGN KEY (inventory_item_id) REFERENCES inventory_items(id)"
+    },
+    {
+      "child": "inventory_opening_balances",
+      "conname": "inventory_opening_balances_verified_by_fkey",
+      "definition": "FOREIGN KEY (verified_by) REFERENCES profiles(id)"
+    },
+    {
+      "child": "inventory_request_documents",
+      "conname": "inventory_request_documents_closed_by_fkey",
+      "definition": "FOREIGN KEY (closed_by) REFERENCES profiles(id)"
+    },
+    {
+      "child": "inventory_request_documents",
+      "conname": "inventory_request_documents_issued_by_fkey",
+      "definition": "FOREIGN KEY (issued_by) REFERENCES profiles(id)"
+    },
+    {
+      "child": "inventory_request_events",
+      "conname": "inventory_request_events_actor_id_fkey",
+      "definition": "FOREIGN KEY (actor_id) REFERENCES profiles(id)"
+    },
+    {
+      "child": "inventory_request_events",
+      "conname": "inventory_request_events_request_id_fkey",
+      "definition": "FOREIGN KEY (request_id) REFERENCES inventory_request_documents(id)"
+    },
+    {
+      "child": "inventory_request_lines",
+      "conname": "inventory_request_lines_inventory_item_id_fkey",
+      "definition": "FOREIGN KEY (inventory_item_id) REFERENCES inventory_items(id)"
+    },
+    {
+      "child": "inventory_request_lines",
+      "conname": "inventory_request_lines_request_id_fkey",
+      "definition": "FOREIGN KEY (request_id) REFERENCES inventory_request_documents(id)"
+    },
+    {
+      "child": "inventory_request_revisions",
+      "conname": "inventory_request_revisions_issued_by_fkey",
+      "definition": "FOREIGN KEY (issued_by) REFERENCES profiles(id)"
+    },
+    {
+      "child": "inventory_request_revisions",
+      "conname": "inventory_request_revisions_request_id_fkey",
+      "definition": "FOREIGN KEY (request_id) REFERENCES inventory_request_documents(id)"
+    },
+    {
+      "child": "inventory_transaction_batch_allocations",
+      "conname": "inventory_transaction_batch_alloc_inventory_transaction_id_fkey",
+      "definition": "FOREIGN KEY (inventory_transaction_id) REFERENCES inventory_transactions(id) ON DELETE RESTRICT"
+    },
+    {
+      "child": "inventory_transaction_batch_allocations",
+      "conname": "inventory_transaction_batch_allocations_inventory_batch_id_fkey",
+      "definition": "FOREIGN KEY (inventory_batch_id) REFERENCES inventory_batches(id) ON DELETE RESTRICT"
+    },
+    {
+      "child": "inventory_transactions",
+      "conname": "inventory_transactions_inventory_batch_id_fkey",
+      "definition": "FOREIGN KEY (inventory_batch_id) REFERENCES inventory_batches(id)"
+    },
+    {
+      "child": "inventory_transactions",
+      "conname": "inventory_transactions_inventory_item_id_fkey",
+      "definition": "FOREIGN KEY (inventory_item_id) REFERENCES inventory_items(id) ON DELETE RESTRICT"
+    },
+    {
+      "child": "inventory_transactions",
+      "conname": "inventory_transactions_opening_balance_id_fkey",
+      "definition": "FOREIGN KEY (opening_balance_id) REFERENCES inventory_opening_balances(id)"
+    },
+    {
+      "child": "inventory_transactions",
+      "conname": "inventory_transactions_order_id_fkey",
+      "definition": "FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE SET NULL"
+    },
+    {
+      "child": "inventory_transactions",
+      "conname": "inventory_transactions_performed_by_fkey",
+      "definition": "FOREIGN KEY (performed_by) REFERENCES profiles(id) ON DELETE SET NULL"
+    },
+    {
+      "child": "inventory_transactions",
+      "conname": "inventory_transactions_purchase_order_item_id_fkey",
+      "definition": "FOREIGN KEY (purchase_order_item_id) REFERENCES purchase_order_items(id) ON DELETE SET NULL"
+    },
+    {
+      "child": "inventory_transactions",
+      "conname": "inventory_transactions_reverses_allocation_id_fkey",
+      "definition": "FOREIGN KEY (reverses_allocation_id) REFERENCES inventory_transaction_batch_allocations(id) ON DELETE RESTRICT"
+    },
+    {
+      "child": "inventory_transactions",
+      "conname": "inventory_transactions_reverses_issuance_id_fkey",
+      "definition": "FOREIGN KEY (reverses_issuance_id) REFERENCES inventory_transactions(id) ON DELETE RESTRICT"
+    },
+    {
+      "child": "menu_ingredients",
+      "conname": "menu_ingredients_inventory_item_id_fkey",
+      "definition": "FOREIGN KEY (inventory_item_id) REFERENCES inventory_items(id) ON DELETE RESTRICT"
+    },
+    {
+      "child": "menu_ingredients",
+      "conname": "menu_ingredients_menu_item_id_fkey",
+      "definition": "FOREIGN KEY (menu_item_id) REFERENCES menu_items(id) ON DELETE CASCADE"
+    },
+    {
+      "child": "menu_item_modifier_groups",
+      "conname": "menu_item_modifier_groups_group_id_fkey",
+      "definition": "FOREIGN KEY (group_id) REFERENCES menu_modifier_groups(id) ON DELETE CASCADE"
+    },
+    {
+      "child": "menu_item_modifier_groups",
+      "conname": "menu_item_modifier_groups_menu_item_id_fkey",
+      "definition": "FOREIGN KEY (menu_item_id) REFERENCES menu_items(id) ON DELETE CASCADE"
+    },
+    {
+      "child": "menu_items",
+      "conname": "menu_items_category_id_fkey",
+      "definition": "FOREIGN KEY (category_id) REFERENCES menu_categories(id) ON DELETE RESTRICT"
+    },
+    {
+      "child": "menu_modifier_options",
+      "conname": "menu_modifier_options_group_id_fkey",
+      "definition": "FOREIGN KEY (group_id) REFERENCES menu_modifier_groups(id) ON DELETE CASCADE"
+    },
+    {
+      "child": "order_items",
+      "conname": "order_items_menu_item_id_fkey",
+      "definition": "FOREIGN KEY (menu_item_id) REFERENCES menu_items(id) ON DELETE RESTRICT"
+    },
+    {
+      "child": "order_items",
+      "conname": "order_items_order_id_fkey",
+      "definition": "FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE"
+    },
+    {
+      "child": "order_status_history",
+      "conname": "order_status_history_changed_by_fkey",
+      "definition": "FOREIGN KEY (changed_by) REFERENCES profiles(id) ON DELETE SET NULL"
+    },
+    {
+      "child": "order_status_history",
+      "conname": "order_status_history_order_id_fkey",
+      "definition": "FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE"
+    },
+    {
+      "child": "orders",
+      "conname": "orders_customer_id_fkey",
+      "definition": "FOREIGN KEY (customer_id) REFERENCES profiles(id) ON DELETE SET NULL"
+    },
+    {
+      "child": "orders",
+      "conname": "orders_processed_by_fkey",
+      "definition": "FOREIGN KEY (processed_by) REFERENCES profiles(id) ON DELETE SET NULL"
+    },
+    {
+      "child": "paid_order_cancellations",
+      "conname": "paid_order_cancellations_cashier_transaction_id_fkey",
+      "definition": "FOREIGN KEY (cashier_transaction_id) REFERENCES cashier_transactions(id) ON DELETE RESTRICT"
+    },
+    {
+      "child": "paid_order_cancellations",
+      "conname": "paid_order_cancellations_order_id_fkey",
+      "definition": "FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE RESTRICT"
+    },
+    {
+      "child": "paid_order_cancellations",
+      "conname": "paid_order_cancellations_payment_id_fkey",
+      "definition": "FOREIGN KEY (payment_id) REFERENCES payments(id) ON DELETE RESTRICT"
+    },
+    {
+      "child": "paid_order_cancellations",
+      "conname": "paid_order_cancellations_processed_by_fkey",
+      "definition": "FOREIGN KEY (processed_by) REFERENCES profiles(id)"
+    },
+    {
+      "child": "payments",
+      "conname": "payments_order_id_fkey",
+      "definition": "FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE"
+    },
+    {
+      "child": "payments",
+      "conname": "payments_rejected_by_fkey",
+      "definition": "FOREIGN KEY (rejected_by) REFERENCES profiles(id) ON DELETE SET NULL"
+    },
+    {
+      "child": "payments",
+      "conname": "payments_verified_by_fkey",
+      "definition": "FOREIGN KEY (verified_by) REFERENCES profiles(id) ON DELETE SET NULL"
+    },
+    {
+      "child": "production_replenishment_requests",
+      "conname": "production_replenishment_requests_fulfilled_report_id_fkey",
+      "definition": "FOREIGN KEY (fulfilled_report_id) REFERENCES receiving_reports(id)"
+    },
+    {
+      "child": "production_replenishment_requests",
+      "conname": "production_replenishment_requests_inventory_item_id_fkey",
+      "definition": "FOREIGN KEY (inventory_item_id) REFERENCES inventory_items(id)"
+    },
+    {
+      "child": "production_replenishment_requests",
+      "conname": "production_replenishment_requests_requested_by_fkey",
+      "definition": "FOREIGN KEY (requested_by) REFERENCES profiles(id)"
+    },
+    {
+      "child": "production_replenishment_status_events",
+      "conname": "production_replenishment_status_events_changed_by_fkey",
+      "definition": "FOREIGN KEY (changed_by) REFERENCES profiles(id)"
+    },
+    {
+      "child": "production_replenishment_status_events",
+      "conname": "production_replenishment_status_events_receiving_report_id_fkey",
+      "definition": "FOREIGN KEY (receiving_report_id) REFERENCES receiving_reports(id)"
+    },
+    {
+      "child": "production_replenishment_status_events",
+      "conname": "production_replenishment_status_events_request_id_fkey",
+      "definition": "FOREIGN KEY (request_id) REFERENCES production_replenishment_requests(id)"
+    },
+    {
+      "child": "profiles",
+      "conname": "profiles_id_fkey",
+      "definition": "FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE"
+    },
+    {
+      "child": "purchase_order_items",
+      "conname": "purchase_order_items_inventory_item_id_fkey",
+      "definition": "FOREIGN KEY (inventory_item_id) REFERENCES inventory_items(id) ON DELETE RESTRICT"
+    },
+    {
+      "child": "purchase_order_items",
+      "conname": "purchase_order_items_purchase_order_id_fkey",
+      "definition": "FOREIGN KEY (purchase_order_id) REFERENCES purchase_orders(id) ON DELETE CASCADE"
+    },
+    {
+      "child": "purchase_orders",
+      "conname": "purchase_orders_created_by_fkey",
+      "definition": "FOREIGN KEY (created_by) REFERENCES profiles(id) ON DELETE RESTRICT"
+    },
+    {
+      "child": "purchase_orders",
+      "conname": "purchase_orders_supplier_id_fkey",
+      "definition": "FOREIGN KEY (supplier_id) REFERENCES suppliers(id) ON DELETE RESTRICT"
+    },
+    {
+      "child": "receiving_report_items",
+      "conname": "receiving_report_items_inventory_item_id_fkey",
+      "definition": "FOREIGN KEY (inventory_item_id) REFERENCES inventory_items(id)"
+    },
+    {
+      "child": "receiving_report_items",
+      "conname": "receiving_report_items_purchase_order_item_id_fkey",
+      "definition": "FOREIGN KEY (purchase_order_item_id) REFERENCES purchase_order_items(id)"
+    },
+    {
+      "child": "receiving_report_items",
+      "conname": "receiving_report_items_receiving_report_id_fkey",
+      "definition": "FOREIGN KEY (receiving_report_id) REFERENCES receiving_reports(id)"
+    },
+    {
+      "child": "receiving_reports",
+      "conname": "receiving_reports_inventory_request_id_fkey",
+      "definition": "FOREIGN KEY (inventory_request_id) REFERENCES inventory_request_documents(id)"
+    },
+    {
+      "child": "receiving_reports",
+      "conname": "receiving_reports_posted_by_fkey",
+      "definition": "FOREIGN KEY (posted_by) REFERENCES profiles(id)"
+    },
+    {
+      "child": "receiving_reports",
+      "conname": "receiving_reports_purchase_order_id_fkey",
+      "definition": "FOREIGN KEY (purchase_order_id) REFERENCES purchase_orders(id)"
+    },
+    {
+      "child": "receiving_reports",
+      "conname": "receiving_reports_received_by_fkey",
+      "definition": "FOREIGN KEY (received_by) REFERENCES profiles(id)"
+    },
+    {
+      "child": "receiving_reports",
+      "conname": "receiving_reports_replenishment_request_id_fkey",
+      "definition": "FOREIGN KEY (replenishment_request_id) REFERENCES production_replenishment_requests(id)"
+    },
+    {
+      "child": "riders",
+      "conname": "riders_id_fkey",
+      "definition": "FOREIGN KEY (id) REFERENCES profiles(id) ON DELETE CASCADE"
+    },
+    {
+      "child": "supplier_items",
+      "conname": "supplier_items_inventory_item_id_fkey",
+      "definition": "FOREIGN KEY (inventory_item_id) REFERENCES inventory_items(id) ON DELETE CASCADE"
+    },
+    {
+      "child": "supplier_items",
+      "conname": "supplier_items_supplier_id_fkey",
+      "definition": "FOREIGN KEY (supplier_id) REFERENCES suppliers(id) ON DELETE CASCADE"
+    }
+  ],
+  "indexes": [
+    {
+      "table_name": "cashier_shifts",
+      "index_name": "cashier_shifts_one_open_per_cashier_idx",
+      "definition": "CREATE UNIQUE INDEX cashier_shifts_one_open_per_cashier_idx ON public.cashier_shifts USING btree (cashier_id) WHERE (status = 'open'::cashier_shift_status)",
+      "idx_scan": 18,
+      "bytes": 16384
+    },
+    {
+      "table_name": "cashier_shifts",
+      "index_name": "cashier_shifts_one_open_per_terminal_idx",
+      "definition": "CREATE UNIQUE INDEX cashier_shifts_one_open_per_terminal_idx ON public.cashier_shifts USING btree (lower((terminal)::text)) WHERE (status = 'open'::cashier_shift_status)",
+      "idx_scan": 4949,
+      "bytes": 16384
+    },
+    {
+      "table_name": "cashier_shifts",
+      "index_name": "cashier_shifts_pkey",
+      "definition": "CREATE UNIQUE INDEX cashier_shifts_pkey ON public.cashier_shifts USING btree (id)",
+      "idx_scan": 68,
+      "bytes": 16384
+    },
+    {
+      "table_name": "cashier_transactions",
+      "index_name": "cashier_transactions_order_id_key",
+      "definition": "CREATE UNIQUE INDEX cashier_transactions_order_id_key ON public.cashier_transactions USING btree (order_id)",
+      "idx_scan": 6436,
+      "bytes": 16384
+    },
+    {
+      "table_name": "cashier_transactions",
+      "index_name": "cashier_transactions_payment_id_key",
+      "definition": "CREATE UNIQUE INDEX cashier_transactions_payment_id_key ON public.cashier_transactions USING btree (payment_id)",
+      "idx_scan": 80,
+      "bytes": 16384
+    },
+    {
+      "table_name": "cashier_transactions",
+      "index_name": "cashier_transactions_pkey",
+      "definition": "CREATE UNIQUE INDEX cashier_transactions_pkey ON public.cashier_transactions USING btree (id)",
+      "idx_scan": 14,
+      "bytes": 16384
+    },
+    {
+      "table_name": "cashier_transactions",
+      "index_name": "cashier_transactions_receipt_number_key",
+      "definition": "CREATE UNIQUE INDEX cashier_transactions_receipt_number_key ON public.cashier_transactions USING btree (receipt_number)",
+      "idx_scan": 0,
+      "bytes": 16384
+    },
+    {
+      "table_name": "cashier_transactions",
+      "index_name": "cashier_transactions_request_id_key",
+      "definition": "CREATE UNIQUE INDEX cashier_transactions_request_id_key ON public.cashier_transactions USING btree (request_id)",
+      "idx_scan": 71,
+      "bytes": 16384
+    },
+    {
+      "table_name": "cashier_transactions",
+      "index_name": "cashier_transactions_transaction_number_key",
+      "definition": "CREATE UNIQUE INDEX cashier_transactions_transaction_number_key ON public.cashier_transactions USING btree (transaction_number)",
+      "idx_scan": 0,
+      "bytes": 16384
+    },
+    {
+      "table_name": "delivery_assignments",
+      "index_name": "delivery_assignments_one_active_per_order_idx",
+      "definition": "CREATE UNIQUE INDEX delivery_assignments_one_active_per_order_idx ON public.delivery_assignments USING btree (order_id) WHERE (status = ANY (ARRAY['offered'::delivery_assignment_status, 'accepted'::delivery_assignment_status, 'picked_up'::delivery_assignment_status, 'out_for_delivery'::delivery_assignment_status]))",
+      "idx_scan": 42,
+      "bytes": 16384
+    },
+    {
+      "table_name": "delivery_assignments",
+      "index_name": "delivery_assignments_order_id_idx",
+      "definition": "CREATE INDEX delivery_assignments_order_id_idx ON public.delivery_assignments USING btree (order_id)",
+      "idx_scan": 763,
+      "bytes": 16384
+    },
+    {
+      "table_name": "delivery_assignments",
+      "index_name": "delivery_assignments_pkey",
+      "definition": "CREATE UNIQUE INDEX delivery_assignments_pkey ON public.delivery_assignments USING btree (id)",
+      "idx_scan": 115,
+      "bytes": 16384
+    },
+    {
+      "table_name": "delivery_assignments",
+      "index_name": "delivery_assignments_rider_id_idx",
+      "definition": "CREATE INDEX delivery_assignments_rider_id_idx ON public.delivery_assignments USING btree (rider_id)",
+      "idx_scan": 2607,
+      "bytes": 16384
+    },
+    {
+      "table_name": "delivery_assignments",
+      "index_name": "delivery_assignments_status_idx",
+      "definition": "CREATE INDEX delivery_assignments_status_idx ON public.delivery_assignments USING btree (status)",
+      "idx_scan": 13,
+      "bytes": 16384
+    },
+    {
+      "table_name": "inventory_batches",
+      "index_name": "inventory_batches_batch_code_key",
+      "definition": "CREATE UNIQUE INDEX inventory_batches_batch_code_key ON public.inventory_batches USING btree (batch_code)",
+      "idx_scan": 0,
+      "bytes": 16384
+    },
+    {
+      "table_name": "inventory_batches",
+      "index_name": "inventory_batches_inventory_item_fefo_idx",
+      "definition": "CREATE INDEX inventory_batches_inventory_item_fefo_idx ON public.inventory_batches USING btree (inventory_item_id, use_by_date, received_at)",
+      "idx_scan": 43,
+      "bytes": 16384
+    },
+    {
+      "table_name": "inventory_batches",
+      "index_name": "inventory_batches_opening_balance_id_idx",
+      "definition": "CREATE INDEX inventory_batches_opening_balance_id_idx ON public.inventory_batches USING btree (opening_balance_id)",
+      "idx_scan": 9,
+      "bytes": 16384
+    },
+    {
+      "table_name": "inventory_batches",
+      "index_name": "inventory_batches_pkey",
+      "definition": "CREATE UNIQUE INDEX inventory_batches_pkey ON public.inventory_batches USING btree (id)",
+      "idx_scan": 74,
+      "bytes": 16384
+    },
+    {
+      "table_name": "inventory_batches",
+      "index_name": "inventory_batches_positive_fefo_idx",
+      "definition": "CREATE INDEX inventory_batches_positive_fefo_idx ON public.inventory_batches USING btree (inventory_item_id, use_by_date, received_at, id) WHERE (quantity_on_hand > (0)::numeric)",
+      "idx_scan": 0,
+      "bytes": 16384
+    },
+    {
+      "table_name": "inventory_batches",
+      "index_name": "inventory_batches_positive_fifo_idx",
+      "definition": "CREATE INDEX inventory_batches_positive_fifo_idx ON public.inventory_batches USING btree (inventory_item_id, received_at, id) WHERE (quantity_on_hand > (0)::numeric)",
+      "idx_scan": 0,
+      "bytes": 16384
+    },
+    {
+      "table_name": "inventory_batches",
+      "index_name": "inventory_batches_receiving_report_item_id_idx",
+      "definition": "CREATE INDEX inventory_batches_receiving_report_item_id_idx ON public.inventory_batches USING btree (receiving_report_item_id)",
+      "idx_scan": 0,
+      "bytes": 16384
+    },
+    {
+      "table_name": "inventory_batches",
+      "index_name": "inventory_batches_receiving_report_item_uidx",
+      "definition": "CREATE UNIQUE INDEX inventory_batches_receiving_report_item_uidx ON public.inventory_batches USING btree (receiving_report_item_id) WHERE (receiving_report_item_id IS NOT NULL)",
+      "idx_scan": 20,
+      "bytes": 16384
+    },
+    {
+      "table_name": "inventory_items",
+      "index_name": "inventory_items_item_name_key",
+      "definition": "CREATE UNIQUE INDEX inventory_items_item_name_key ON public.inventory_items USING btree (item_name)",
+      "idx_scan": 31,
+      "bytes": 16384
+    },
+    {
+      "table_name": "inventory_items",
+      "index_name": "inventory_items_pkey",
+      "definition": "CREATE UNIQUE INDEX inventory_items_pkey ON public.inventory_items USING btree (id)",
+      "idx_scan": 19897,
+      "bytes": 16384
+    },
+    {
+      "table_name": "inventory_opening_balances",
+      "index_name": "inventory_opening_balances_inventory_item_id_key",
+      "definition": "CREATE UNIQUE INDEX inventory_opening_balances_inventory_item_id_key ON public.inventory_opening_balances USING btree (inventory_item_id)",
+      "idx_scan": 57,
+      "bytes": 16384
+    },
+    {
+      "table_name": "inventory_opening_balances",
+      "index_name": "inventory_opening_balances_pkey",
+      "definition": "CREATE UNIQUE INDEX inventory_opening_balances_pkey ON public.inventory_opening_balances USING btree (id)",
+      "idx_scan": 218,
+      "bytes": 16384
+    },
+    {
+      "table_name": "inventory_opening_balances",
+      "index_name": "inventory_opening_balances_request_id_key",
+      "definition": "CREATE UNIQUE INDEX inventory_opening_balances_request_id_key ON public.inventory_opening_balances USING btree (request_id)",
+      "idx_scan": 29,
+      "bytes": 16384
+    },
+    {
+      "table_name": "inventory_request_documents",
+      "index_name": "inventory_request_documents_pkey",
+      "definition": "CREATE UNIQUE INDEX inventory_request_documents_pkey ON public.inventory_request_documents USING btree (id)",
+      "idx_scan": 45,
+      "bytes": 16384
+    },
+    {
+      "table_name": "inventory_request_documents",
+      "index_name": "inventory_request_documents_request_number_key",
+      "definition": "CREATE UNIQUE INDEX inventory_request_documents_request_number_key ON public.inventory_request_documents USING btree (request_number)",
+      "idx_scan": 7,
+      "bytes": 16384
+    },
+    {
+      "table_name": "inventory_request_events",
+      "index_name": "inventory_request_events_pkey",
+      "definition": "CREATE UNIQUE INDEX inventory_request_events_pkey ON public.inventory_request_events USING btree (id)",
+      "idx_scan": 9,
+      "bytes": 16384
+    },
+    {
+      "table_name": "inventory_request_events",
+      "index_name": "inventory_request_events_request_idx",
+      "definition": "CREATE INDEX inventory_request_events_request_idx ON public.inventory_request_events USING btree (request_id, id)",
+      "idx_scan": 24,
+      "bytes": 16384
+    },
+    {
+      "table_name": "inventory_request_lines",
+      "index_name": "inventory_request_lines_item_idx",
+      "definition": "CREATE INDEX inventory_request_lines_item_idx ON public.inventory_request_lines USING btree (inventory_item_id)",
+      "idx_scan": 702,
+      "bytes": 16384
+    },
+    {
+      "table_name": "inventory_request_lines",
+      "index_name": "inventory_request_lines_pkey",
+      "definition": "CREATE UNIQUE INDEX inventory_request_lines_pkey ON public.inventory_request_lines USING btree (request_id, inventory_item_id)",
+      "idx_scan": 35,
+      "bytes": 16384
+    },
+    {
+      "table_name": "inventory_request_revisions",
+      "index_name": "inventory_request_revisions_pkey",
+      "definition": "CREATE UNIQUE INDEX inventory_request_revisions_pkey ON public.inventory_request_revisions USING btree (request_id, revision)",
+      "idx_scan": 43,
+      "bytes": 16384
+    },
+    {
+      "table_name": "inventory_transaction_batch_allocations",
+      "index_name": "inventory_transaction_batch_allocations_batch_id_idx",
+      "definition": "CREATE INDEX inventory_transaction_batch_allocations_batch_id_idx ON public.inventory_transaction_batch_allocations USING btree (inventory_batch_id)",
+      "idx_scan": 2,
+      "bytes": 16384
+    },
+    {
+      "table_name": "inventory_transaction_batch_allocations",
+      "index_name": "inventory_transaction_batch_allocations_pkey",
+      "definition": "CREATE UNIQUE INDEX inventory_transaction_batch_allocations_pkey ON public.inventory_transaction_batch_allocations USING btree (id)",
+      "idx_scan": 0,
+      "bytes": 16384
+    },
+    {
+      "table_name": "inventory_transaction_batch_allocations",
+      "index_name": "inventory_transaction_batch_allocations_transaction_batch_key",
+      "definition": "CREATE UNIQUE INDEX inventory_transaction_batch_allocations_transaction_batch_key ON public.inventory_transaction_batch_allocations USING btree (inventory_transaction_id, inventory_batch_id)",
+      "idx_scan": 142,
+      "bytes": 16384
+    },
+    {
+      "table_name": "inventory_transactions",
+      "index_name": "inventory_transactions_actor_mutation_request_uidx",
+      "definition": "CREATE UNIQUE INDEX inventory_transactions_actor_mutation_request_uidx ON public.inventory_transactions USING btree (performed_by, mutation_request_id) WHERE (mutation_request_id IS NOT NULL)",
+      "idx_scan": 143,
+      "bytes": 16384
+    },
+    {
+      "table_name": "inventory_transactions",
+      "index_name": "inventory_transactions_inventory_batch_id_idx",
+      "definition": "CREATE INDEX inventory_transactions_inventory_batch_id_idx ON public.inventory_transactions USING btree (inventory_batch_id)",
+      "idx_scan": 17,
+      "bytes": 16384
+    },
+    {
+      "table_name": "inventory_transactions",
+      "index_name": "inventory_transactions_inventory_item_id_idx",
+      "definition": "CREATE INDEX inventory_transactions_inventory_item_id_idx ON public.inventory_transactions USING btree (inventory_item_id)",
+      "idx_scan": 129,
+      "bytes": 16384
+    },
+    {
+      "table_name": "inventory_transactions",
+      "index_name": "inventory_transactions_item_movement_page_idx",
+      "definition": "CREATE INDEX inventory_transactions_item_movement_page_idx ON public.inventory_transactions USING btree (inventory_item_id, created_at DESC, id DESC)",
+      "idx_scan": 31,
+      "bytes": 16384
+    },
+    {
+      "table_name": "inventory_transactions",
+      "index_name": "inventory_transactions_movement_page_idx",
+      "definition": "CREATE INDEX inventory_transactions_movement_page_idx ON public.inventory_transactions USING btree (created_at DESC, id DESC)",
+      "idx_scan": 52,
+      "bytes": 16384
+    },
+    {
+      "table_name": "inventory_transactions",
+      "index_name": "inventory_transactions_opening_balance_id_uidx",
+      "definition": "CREATE UNIQUE INDEX inventory_transactions_opening_balance_id_uidx ON public.inventory_transactions USING btree (opening_balance_id) WHERE (opening_balance_id IS NOT NULL)",
+      "idx_scan": 2,
+      "bytes": 16384
+    },
+    {
+      "table_name": "inventory_transactions",
+      "index_name": "inventory_transactions_order_id_idx",
+      "definition": "CREATE INDEX inventory_transactions_order_id_idx ON public.inventory_transactions USING btree (order_id)",
+      "idx_scan": 60,
+      "bytes": 16384
+    },
+    {
+      "table_name": "inventory_transactions",
+      "index_name": "inventory_transactions_order_item_issuance_uidx",
+      "definition": "CREATE UNIQUE INDEX inventory_transactions_order_item_issuance_uidx ON public.inventory_transactions USING btree (order_id, inventory_item_id) WHERE ((transaction_type = 'issuance'::inventory_transaction_type) AND (order_id IS NOT NULL))",
+      "idx_scan": 161,
+      "bytes": 16384
+    },
+    {
+      "table_name": "inventory_transactions",
+      "index_name": "inventory_transactions_pkey",
+      "definition": "CREATE UNIQUE INDEX inventory_transactions_pkey ON public.inventory_transactions USING btree (id)",
+      "idx_scan": 231,
+      "bytes": 16384
+    },
+    {
+      "table_name": "inventory_transactions",
+      "index_name": "inventory_transactions_purchase_order_item_id_idx",
+      "definition": "CREATE INDEX inventory_transactions_purchase_order_item_id_idx ON public.inventory_transactions USING btree (purchase_order_item_id)",
+      "idx_scan": 4,
+      "bytes": 16384
+    },
+    {
+      "table_name": "inventory_transactions",
+      "index_name": "inventory_transactions_receiving_batch_uidx",
+      "definition": "CREATE UNIQUE INDEX inventory_transactions_receiving_batch_uidx ON public.inventory_transactions USING btree (inventory_batch_id) WHERE ((transaction_type = 'receiving'::inventory_transaction_type) AND (inventory_batch_id IS NOT NULL))",
+      "idx_scan": 8,
+      "bytes": 16384
+    },
+    {
+      "table_name": "inventory_transactions",
+      "index_name": "inventory_transactions_reversed_allocation_uidx",
+      "definition": "CREATE UNIQUE INDEX inventory_transactions_reversed_allocation_uidx ON public.inventory_transactions USING btree (reverses_allocation_id) WHERE (reverses_allocation_id IS NOT NULL)",
+      "idx_scan": 0,
+      "bytes": 8192
+    },
+    {
+      "table_name": "inventory_transactions",
+      "index_name": "inventory_transactions_reversed_legacy_issuance_uidx",
+      "definition": "CREATE UNIQUE INDEX inventory_transactions_reversed_legacy_issuance_uidx ON public.inventory_transactions USING btree (reverses_issuance_id) WHERE ((reverses_issuance_id IS NOT NULL) AND (reverses_allocation_id IS NULL))",
+      "idx_scan": 0,
+      "bytes": 8192
+    },
+    {
+      "table_name": "kds_terminals",
+      "index_name": "kds_terminals_pkey",
+      "definition": "CREATE UNIQUE INDEX kds_terminals_pkey ON public.kds_terminals USING btree (id)",
+      "idx_scan": 41,
+      "bytes": 16384
+    },
+    {
+      "table_name": "kds_terminals",
+      "index_name": "kds_terminals_secret_hash_key",
+      "definition": "CREATE UNIQUE INDEX kds_terminals_secret_hash_key ON public.kds_terminals USING btree (secret_hash)",
+      "idx_scan": 48,
+      "bytes": 16384
+    },
+    {
+      "table_name": "menu_categories",
+      "index_name": "menu_categories_name_key",
+      "definition": "CREATE UNIQUE INDEX menu_categories_name_key ON public.menu_categories USING btree (name)",
+      "idx_scan": 429,
+      "bytes": 16384
+    },
+    {
+      "table_name": "menu_categories",
+      "index_name": "menu_categories_pkey",
+      "definition": "CREATE UNIQUE INDEX menu_categories_pkey ON public.menu_categories USING btree (id)",
+      "idx_scan": 559,
+      "bytes": 16384
+    },
+    {
+      "table_name": "menu_ingredients",
+      "index_name": "menu_ingredients_inventory_item_id_idx",
+      "definition": "CREATE INDEX menu_ingredients_inventory_item_id_idx ON public.menu_ingredients USING btree (inventory_item_id)",
+      "idx_scan": 83,
+      "bytes": 16384
+    },
+    {
+      "table_name": "menu_ingredients",
+      "index_name": "menu_ingredients_menu_item_id_idx",
+      "definition": "CREATE INDEX menu_ingredients_menu_item_id_idx ON public.menu_ingredients USING btree (menu_item_id)",
+      "idx_scan": 350,
+      "bytes": 16384
+    },
+    {
+      "table_name": "menu_ingredients",
+      "index_name": "menu_ingredients_menu_item_inventory_unique",
+      "definition": "CREATE UNIQUE INDEX menu_ingredients_menu_item_inventory_unique ON public.menu_ingredients USING btree (menu_item_id, inventory_item_id)",
+      "idx_scan": 15837,
+      "bytes": 16384
+    },
+    {
+      "table_name": "menu_ingredients",
+      "index_name": "menu_ingredients_pkey",
+      "definition": "CREATE UNIQUE INDEX menu_ingredients_pkey ON public.menu_ingredients USING btree (id)",
+      "idx_scan": 23,
+      "bytes": 16384
+    },
+    {
+      "table_name": "menu_item_modifier_groups",
+      "index_name": "menu_item_modifier_groups_pkey",
+      "definition": "CREATE UNIQUE INDEX menu_item_modifier_groups_pkey ON public.menu_item_modifier_groups USING btree (menu_item_id, group_id)",
+      "idx_scan": 71,
+      "bytes": 16384
+    },
+    {
+      "table_name": "menu_items",
+      "index_name": "menu_items_category_id_idx",
+      "definition": "CREATE INDEX menu_items_category_id_idx ON public.menu_items USING btree (category_id)",
+      "idx_scan": 0,
+      "bytes": 16384
+    },
+    {
+      "table_name": "menu_items",
+      "index_name": "menu_items_code_key",
+      "definition": "CREATE UNIQUE INDEX menu_items_code_key ON public.menu_items USING btree (code)",
+      "idx_scan": 2,
+      "bytes": 16384
+    },
+    {
+      "table_name": "menu_items",
+      "index_name": "menu_items_is_available_idx",
+      "definition": "CREATE INDEX menu_items_is_available_idx ON public.menu_items USING btree (is_available)",
+      "idx_scan": 0,
+      "bytes": 16384
+    },
+    {
+      "table_name": "menu_items",
+      "index_name": "menu_items_pkey",
+      "definition": "CREATE UNIQUE INDEX menu_items_pkey ON public.menu_items USING btree (id)",
+      "idx_scan": 250,
+      "bytes": 16384
+    },
+    {
+      "table_name": "menu_modifier_groups",
+      "index_name": "menu_modifier_groups_pkey",
+      "definition": "CREATE UNIQUE INDEX menu_modifier_groups_pkey ON public.menu_modifier_groups USING btree (id)",
+      "idx_scan": 159,
+      "bytes": 16384
+    },
+    {
+      "table_name": "menu_modifier_options",
+      "index_name": "menu_modifier_options_group_name_key",
+      "definition": "CREATE UNIQUE INDEX menu_modifier_options_group_name_key ON public.menu_modifier_options USING btree (group_id, name)",
+      "idx_scan": 19,
+      "bytes": 16384
+    },
+    {
+      "table_name": "menu_modifier_options",
+      "index_name": "menu_modifier_options_pkey",
+      "definition": "CREATE UNIQUE INDEX menu_modifier_options_pkey ON public.menu_modifier_options USING btree (id)",
+      "idx_scan": 36,
+      "bytes": 16384
+    },
+    {
+      "table_name": "order_items",
+      "index_name": "order_items_order_id_idx",
+      "definition": "CREATE INDEX order_items_order_id_idx ON public.order_items USING btree (order_id)",
+      "idx_scan": 34411,
+      "bytes": 16384
+    },
+    {
+      "table_name": "order_items",
+      "index_name": "order_items_pkey",
+      "definition": "CREATE UNIQUE INDEX order_items_pkey ON public.order_items USING btree (id)",
+      "idx_scan": 12,
+      "bytes": 16384
+    },
+    {
+      "table_name": "order_status_history",
+      "index_name": "order_status_history_order_id_idx",
+      "definition": "CREATE INDEX order_status_history_order_id_idx ON public.order_status_history USING btree (order_id)",
+      "idx_scan": 7803,
+      "bytes": 16384
+    },
+    {
+      "table_name": "order_status_history",
+      "index_name": "order_status_history_pkey",
+      "definition": "CREATE UNIQUE INDEX order_status_history_pkey ON public.order_status_history USING btree (id)",
+      "idx_scan": 302,
+      "bytes": 16384
+    },
+    {
+      "table_name": "orders",
+      "index_name": "orders_created_at_idx",
+      "definition": "CREATE INDEX orders_created_at_idx ON public.orders USING btree (created_at)",
+      "idx_scan": 2279,
+      "bytes": 16384
+    },
+    {
+      "table_name": "orders",
+      "index_name": "orders_current_status_idx",
+      "definition": "CREATE INDEX orders_current_status_idx ON public.orders USING btree (current_status)",
+      "idx_scan": 663,
+      "bytes": 16384
+    },
+    {
+      "table_name": "orders",
+      "index_name": "orders_customer_id_idx",
+      "definition": "CREATE INDEX orders_customer_id_idx ON public.orders USING btree (customer_id)",
+      "idx_scan": 81,
+      "bytes": 16384
+    },
+    {
+      "table_name": "orders",
+      "index_name": "orders_customer_request_id_uidx",
+      "definition": "CREATE UNIQUE INDEX orders_customer_request_id_uidx ON public.orders USING btree (customer_id, customer_request_id) WHERE (customer_request_id IS NOT NULL)",
+      "idx_scan": 0,
+      "bytes": 16384
+    },
+    {
+      "table_name": "orders",
+      "index_name": "orders_order_number_key",
+      "definition": "CREATE UNIQUE INDEX orders_order_number_key ON public.orders USING btree (order_number)",
+      "idx_scan": 52,
+      "bytes": 16384
+    },
+    {
+      "table_name": "orders",
+      "index_name": "orders_pkey",
+      "definition": "CREATE UNIQUE INDEX orders_pkey ON public.orders USING btree (id)",
+      "idx_scan": 4536,
+      "bytes": 16384
+    },
+    {
+      "table_name": "orders",
+      "index_name": "orders_processed_by_idx",
+      "definition": "CREATE INDEX orders_processed_by_idx ON public.orders USING btree (processed_by)",
+      "idx_scan": 1,
+      "bytes": 16384
+    },
+    {
+      "table_name": "paid_order_cancellations",
+      "index_name": "paid_order_cancellations_cashier_transaction_id_key",
+      "definition": "CREATE UNIQUE INDEX paid_order_cancellations_cashier_transaction_id_key ON public.paid_order_cancellations USING btree (cashier_transaction_id)",
+      "idx_scan": 0,
+      "bytes": 8192
+    },
+    {
+      "table_name": "paid_order_cancellations",
+      "index_name": "paid_order_cancellations_order_id_key",
+      "definition": "CREATE UNIQUE INDEX paid_order_cancellations_order_id_key ON public.paid_order_cancellations USING btree (order_id)",
+      "idx_scan": 0,
+      "bytes": 8192
+    },
+    {
+      "table_name": "paid_order_cancellations",
+      "index_name": "paid_order_cancellations_payment_id_key",
+      "definition": "CREATE UNIQUE INDEX paid_order_cancellations_payment_id_key ON public.paid_order_cancellations USING btree (payment_id)",
+      "idx_scan": 0,
+      "bytes": 8192
+    },
+    {
+      "table_name": "paid_order_cancellations",
+      "index_name": "paid_order_cancellations_pkey",
+      "definition": "CREATE UNIQUE INDEX paid_order_cancellations_pkey ON public.paid_order_cancellations USING btree (id)",
+      "idx_scan": 5,
+      "bytes": 8192
+    },
+    {
+      "table_name": "paid_order_cancellations",
+      "index_name": "paid_order_cancellations_refund_reference_uidx",
+      "definition": "CREATE UNIQUE INDEX paid_order_cancellations_refund_reference_uidx ON public.paid_order_cancellations USING btree (refund_method, lower(btrim(refund_reference)))",
+      "idx_scan": 0,
+      "bytes": 8192
+    },
+    {
+      "table_name": "payments",
+      "index_name": "payments_gcash_reference_unique_idx",
+      "definition": "CREATE UNIQUE INDEX payments_gcash_reference_unique_idx ON public.payments USING btree (lower(btrim((gcash_reference_number)::text))) WHERE ((payment_method = 'gcash'::payment_method) AND (gcash_reference_number IS NOT NULL))",
+      "idx_scan": 23,
+      "bytes": 16384
+    },
+    {
+      "table_name": "payments",
+      "index_name": "payments_order_id_key",
+      "definition": "CREATE UNIQUE INDEX payments_order_id_key ON public.payments USING btree (order_id)",
+      "idx_scan": 2020,
+      "bytes": 16384
+    },
+    {
+      "table_name": "payments",
+      "index_name": "payments_pkey",
+      "definition": "CREATE UNIQUE INDEX payments_pkey ON public.payments USING btree (id)",
+      "idx_scan": 15868,
+      "bytes": 16384
+    },
+    {
+      "table_name": "payments",
+      "index_name": "payments_status_idx",
+      "definition": "CREATE INDEX payments_status_idx ON public.payments USING btree (status)",
+      "idx_scan": 2677,
+      "bytes": 16384
+    },
+    {
+      "table_name": "production_replenishment_requests",
+      "index_name": "production_replenishment_requests_fulfilled_report_id_key",
+      "definition": "CREATE UNIQUE INDEX production_replenishment_requests_fulfilled_report_id_key ON public.production_replenishment_requests USING btree (fulfilled_report_id)",
+      "idx_scan": 0,
+      "bytes": 8192
+    },
+    {
+      "table_name": "production_replenishment_requests",
+      "index_name": "production_replenishment_requests_pkey",
+      "definition": "CREATE UNIQUE INDEX production_replenishment_requests_pkey ON public.production_replenishment_requests USING btree (id)",
+      "idx_scan": 6,
+      "bytes": 8192
+    },
+    {
+      "table_name": "production_replenishment_requests",
+      "index_name": "production_requests_queue_idx",
+      "definition": "CREATE INDEX production_requests_queue_idx ON public.production_replenishment_requests USING btree (status, requested_at DESC)",
+      "idx_scan": 0,
+      "bytes": 8192
+    },
+    {
+      "table_name": "production_replenishment_status_events",
+      "index_name": "production_replenishment_status_events_pkey",
+      "definition": "CREATE UNIQUE INDEX production_replenishment_status_events_pkey ON public.production_replenishment_status_events USING btree (id)",
+      "idx_scan": 4,
+      "bytes": 8192
+    },
+    {
+      "table_name": "production_replenishment_status_events",
+      "index_name": "production_request_events_idx",
+      "definition": "CREATE INDEX production_request_events_idx ON public.production_replenishment_status_events USING btree (request_id, id)",
+      "idx_scan": 0,
+      "bytes": 8192
+    },
+    {
+      "table_name": "profiles",
+      "index_name": "profiles_pkey",
+      "definition": "CREATE UNIQUE INDEX profiles_pkey ON public.profiles USING btree (id)",
+      "idx_scan": 40050,
+      "bytes": 16384
+    },
+    {
+      "table_name": "profiles",
+      "index_name": "profiles_role_idx",
+      "definition": "CREATE INDEX profiles_role_idx ON public.profiles USING btree (role)",
+      "idx_scan": 8141,
+      "bytes": 16384
+    },
+    {
+      "table_name": "purchase_order_items",
+      "index_name": "purchase_order_items_inventory_item_id_idx",
+      "definition": "CREATE INDEX purchase_order_items_inventory_item_id_idx ON public.purchase_order_items USING btree (inventory_item_id)",
+      "idx_scan": 0,
+      "bytes": 16384
+    },
+    {
+      "table_name": "purchase_order_items",
+      "index_name": "purchase_order_items_pkey",
+      "definition": "CREATE UNIQUE INDEX purchase_order_items_pkey ON public.purchase_order_items USING btree (id)",
+      "idx_scan": 163,
+      "bytes": 16384
+    },
+    {
+      "table_name": "purchase_order_items",
+      "index_name": "purchase_order_items_quantity_remaining_idx",
+      "definition": "CREATE INDEX purchase_order_items_quantity_remaining_idx ON public.purchase_order_items USING btree (quantity_remaining)",
+      "idx_scan": 0,
+      "bytes": 16384
+    },
+    {
+      "table_name": "purchase_order_items",
+      "index_name": "purchase_order_items_received_at_idx",
+      "definition": "CREATE INDEX purchase_order_items_received_at_idx ON public.purchase_order_items USING btree (received_at)",
+      "idx_scan": 0,
+      "bytes": 16384
+    },
+    {
+      "table_name": "purchase_order_items",
+      "index_name": "purchase_order_items_unique_purchase_order_inventory",
+      "definition": "CREATE UNIQUE INDEX purchase_order_items_unique_purchase_order_inventory ON public.purchase_order_items USING btree (purchase_order_id, inventory_item_id)",
+      "idx_scan": 7,
+      "bytes": 16384
+    },
+    {
+      "table_name": "purchase_orders",
+      "index_name": "purchase_orders_pkey",
+      "definition": "CREATE UNIQUE INDEX purchase_orders_pkey ON public.purchase_orders USING btree (id)",
+      "idx_scan": 112,
+      "bytes": 16384
+    },
+    {
+      "table_name": "purchase_orders",
+      "index_name": "purchase_orders_po_number_key",
+      "definition": "CREATE UNIQUE INDEX purchase_orders_po_number_key ON public.purchase_orders USING btree (po_number)",
+      "idx_scan": 0,
+      "bytes": 16384
+    },
+    {
+      "table_name": "purchase_orders",
+      "index_name": "purchase_orders_status_idx",
+      "definition": "CREATE INDEX purchase_orders_status_idx ON public.purchase_orders USING btree (status)",
+      "idx_scan": 111,
+      "bytes": 16384
+    },
+    {
+      "table_name": "purchase_orders",
+      "index_name": "purchase_orders_supplier_id_idx",
+      "definition": "CREATE INDEX purchase_orders_supplier_id_idx ON public.purchase_orders USING btree (supplier_id)",
+      "idx_scan": 0,
+      "bytes": 16384
+    },
+    {
+      "table_name": "receiving_report_items",
+      "index_name": "receiving_report_items_inventory_item_id_idx",
+      "definition": "CREATE INDEX receiving_report_items_inventory_item_id_idx ON public.receiving_report_items USING btree (inventory_item_id)",
+      "idx_scan": 0,
+      "bytes": 16384
+    },
+    {
+      "table_name": "receiving_report_items",
+      "index_name": "receiving_report_items_pkey",
+      "definition": "CREATE UNIQUE INDEX receiving_report_items_pkey ON public.receiving_report_items USING btree (id)",
+      "idx_scan": 129,
+      "bytes": 16384
+    },
+    {
+      "table_name": "receiving_report_items",
+      "index_name": "receiving_report_items_purchase_order_item_id_idx",
+      "definition": "CREATE INDEX receiving_report_items_purchase_order_item_id_idx ON public.receiving_report_items USING btree (purchase_order_item_id)",
+      "idx_scan": 0,
+      "bytes": 16384
+    },
+    {
+      "table_name": "receiving_report_items",
+      "index_name": "receiving_report_items_report_inventory_item_uidx",
+      "definition": "CREATE UNIQUE INDEX receiving_report_items_report_inventory_item_uidx ON public.receiving_report_items USING btree (receiving_report_id, inventory_item_id) WHERE (inventory_item_id IS NOT NULL)",
+      "idx_scan": 34,
+      "bytes": 16384
+    },
+    {
+      "table_name": "receiving_report_items",
+      "index_name": "receiving_report_items_report_po_item_key",
+      "definition": "CREATE UNIQUE INDEX receiving_report_items_report_po_item_key ON public.receiving_report_items USING btree (receiving_report_id, purchase_order_item_id)",
+      "idx_scan": 133,
+      "bytes": 16384
+    },
+    {
+      "table_name": "receiving_reports",
+      "index_name": "inventory_request_receipts_idx",
+      "definition": "CREATE INDEX inventory_request_receipts_idx ON public.receiving_reports USING btree (inventory_request_id, status)",
+      "idx_scan": 0,
+      "bytes": 16384
+    },
+    {
+      "table_name": "receiving_reports",
+      "index_name": "one_open_inventory_request_receipt",
+      "definition": "CREATE UNIQUE INDEX one_open_inventory_request_receipt ON public.receiving_reports USING btree (inventory_request_id) WHERE ((inventory_request_id IS NOT NULL) AND (status = 'draft'::text))",
+      "idx_scan": 0,
+      "bytes": 16384
+    },
+    {
+      "table_name": "receiving_reports",
+      "index_name": "receiving_reports_pkey",
+      "definition": "CREATE UNIQUE INDEX receiving_reports_pkey ON public.receiving_reports USING btree (id)",
+      "idx_scan": 186,
+      "bytes": 16384
+    },
+    {
+      "table_name": "receiving_reports",
+      "index_name": "receiving_reports_purchase_order_id_idx",
+      "definition": "CREATE INDEX receiving_reports_purchase_order_id_idx ON public.receiving_reports USING btree (purchase_order_id)",
+      "idx_scan": 0,
+      "bytes": 16384
+    },
+    {
+      "table_name": "receiving_reports",
+      "index_name": "receiving_reports_replenishment_request_id_key",
+      "definition": "CREATE UNIQUE INDEX receiving_reports_replenishment_request_id_key ON public.receiving_reports USING btree (replenishment_request_id)",
+      "idx_scan": 0,
+      "bytes": 16384
+    },
+    {
+      "table_name": "receiving_reports",
+      "index_name": "receiving_reports_rr_number_key",
+      "definition": "CREATE UNIQUE INDEX receiving_reports_rr_number_key ON public.receiving_reports USING btree (rr_number)",
+      "idx_scan": 0,
+      "bytes": 16384
+    },
+    {
+      "table_name": "receiving_reports",
+      "index_name": "receiving_reports_status_received_at_idx",
+      "definition": "CREATE INDEX receiving_reports_status_received_at_idx ON public.receiving_reports USING btree (status, received_at DESC)",
+      "idx_scan": 9,
+      "bytes": 16384
+    },
+    {
+      "table_name": "riders",
+      "index_name": "riders_approval_status_idx",
+      "definition": "CREATE INDEX riders_approval_status_idx ON public.riders USING btree (approval_status)",
+      "idx_scan": 60,
+      "bytes": 16384
+    },
+    {
+      "table_name": "riders",
+      "index_name": "riders_availability_status_idx",
+      "definition": "CREATE INDEX riders_availability_status_idx ON public.riders USING btree (availability_status)",
+      "idx_scan": 21,
+      "bytes": 16384
+    },
+    {
+      "table_name": "riders",
+      "index_name": "riders_pkey",
+      "definition": "CREATE UNIQUE INDEX riders_pkey ON public.riders USING btree (id)",
+      "idx_scan": 474,
+      "bytes": 16384
+    },
+    {
+      "table_name": "supplier_items",
+      "index_name": "supplier_items_inventory_item_id_idx",
+      "definition": "CREATE INDEX supplier_items_inventory_item_id_idx ON public.supplier_items USING btree (inventory_item_id)",
+      "idx_scan": 0,
+      "bytes": 8192
+    },
+    {
+      "table_name": "supplier_items",
+      "index_name": "supplier_items_pkey",
+      "definition": "CREATE UNIQUE INDEX supplier_items_pkey ON public.supplier_items USING btree (id)",
+      "idx_scan": 5,
+      "bytes": 8192
+    },
+    {
+      "table_name": "supplier_items",
+      "index_name": "supplier_items_supplier_id_idx",
+      "definition": "CREATE INDEX supplier_items_supplier_id_idx ON public.supplier_items USING btree (supplier_id)",
+      "idx_scan": 0,
+      "bytes": 8192
+    },
+    {
+      "table_name": "supplier_items",
+      "index_name": "supplier_items_supplier_inventory_unique",
+      "definition": "CREATE UNIQUE INDEX supplier_items_supplier_inventory_unique ON public.supplier_items USING btree (supplier_id, inventory_item_id)",
+      "idx_scan": 0,
+      "bytes": 8192
+    },
+    {
+      "table_name": "suppliers",
+      "index_name": "suppliers_pkey",
+      "definition": "CREATE UNIQUE INDEX suppliers_pkey ON public.suppliers USING btree (id)",
+      "idx_scan": 45,
+      "bytes": 16384
+    }
+  ],
+  "security": [
+    {
+      "table_name": "cashier_shifts",
+      "policies": [
+        {
+          "roles": "{16485}",
+          "policy": "cashier_shifts_select_staff",
+          "command": "r"
+        }
+      ],
+      "acl": "{postgres=arwdDxtm/postgres,authenticated=rm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "table_name": "cashier_transactions",
+      "policies": [
+        {
+          "roles": "{16485}",
+          "policy": "cashier_transactions_select_staff",
+          "command": "r"
+        }
+      ],
+      "acl": "{postgres=arwdDxtm/postgres,authenticated=rm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "table_name": "delivery_assignments",
+      "policies": [
+        {
+          "roles": "{16485}",
+          "policy": "rider_select_own_assignments",
+          "command": "r"
+        }
+      ],
+      "acl": "{postgres=arwdDxtm/postgres,anon=r/postgres,authenticated=r/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "table_name": "inventory_batches",
+      "policies": [],
+      "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "table_name": "inventory_items",
+      "policies": [],
+      "acl": "{postgres=arwdDxtm/postgres,anon=r/postgres,authenticated=r/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "table_name": "inventory_opening_balances",
+      "policies": [],
+      "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "table_name": "inventory_request_documents",
+      "policies": [],
+      "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "table_name": "inventory_request_events",
+      "policies": [],
+      "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "table_name": "inventory_request_lines",
+      "policies": [],
+      "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "table_name": "inventory_request_revisions",
+      "policies": [],
+      "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "table_name": "inventory_transaction_batch_allocations",
+      "policies": [],
+      "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "table_name": "inventory_transactions",
+      "policies": [],
+      "acl": "{postgres=arwdDxtm/postgres,anon=r/postgres,authenticated=r/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "table_name": "kds_terminals",
+      "policies": [],
+      "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "table_name": "menu_categories",
+      "policies": [
+        {
+          "roles": "{0}",
+          "policy": "menu_categories_select_active",
+          "command": "r"
+        }
+      ],
+      "acl": "{postgres=arwdDxtm/postgres,anon=r/postgres,authenticated=r/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "table_name": "menu_ingredients",
+      "policies": [],
+      "acl": "{postgres=arwdDxtm/postgres,anon=r/postgres,authenticated=r/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "table_name": "menu_item_modifier_groups",
+      "policies": [],
+      "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "table_name": "menu_items",
+      "policies": [
+        {
+          "roles": "{0}",
+          "policy": "menu_items_select_active",
+          "command": "r"
+        },
+        {
+          "roles": "{16485}",
+          "policy": "menu_items_select_staff",
+          "command": "r"
+        }
+      ],
+      "acl": "{postgres=arwdDxtm/postgres,anon=r/postgres,authenticated=r/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "table_name": "menu_modifier_groups",
+      "policies": [],
+      "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "table_name": "menu_modifier_options",
+      "policies": [],
+      "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "table_name": "order_items",
+      "policies": [
+        {
+          "roles": "{16485}",
+          "policy": "customers_select_own_order_items",
+          "command": "r"
+        },
+        {
+          "roles": "{16485}",
+          "policy": "rider_select_assigned_order_items",
+          "command": "r"
+        },
+        {
+          "roles": "{16485}",
+          "policy": "staff_select_order_items",
+          "command": "r"
+        }
+      ],
+      "acl": "{postgres=arwdDxtm/postgres,anon=r/postgres,authenticated=r/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "table_name": "order_status_history",
+      "policies": [
+        {
+          "roles": "{16485}",
+          "policy": "customers_select_own_order_status_history",
+          "command": "r"
+        },
+        {
+          "roles": "{16485}",
+          "policy": "staff_select_order_status_history",
+          "command": "r"
+        }
+      ],
+      "acl": "{postgres=arwdDxtm/postgres,anon=r/postgres,authenticated=r/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "table_name": "orders",
+      "policies": [
+        {
+          "roles": "{16485}",
+          "policy": "customers_select_own_orders",
+          "command": "r"
+        },
+        {
+          "roles": "{16485}",
+          "policy": "rider_select_assigned_orders",
+          "command": "r"
+        },
+        {
+          "roles": "{16485}",
+          "policy": "staff_select_orders",
+          "command": "r"
+        }
+      ],
+      "acl": "{postgres=arwdDxtm/postgres,anon=r/postgres,authenticated=r/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "table_name": "paid_order_cancellations",
+      "policies": [],
+      "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "table_name": "payments",
+      "policies": [],
+      "acl": "{postgres=arwdDxtm/postgres,anon=r/postgres,authenticated=r/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "table_name": "production_replenishment_requests",
+      "policies": [],
+      "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "table_name": "production_replenishment_status_events",
+      "policies": [],
+      "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "table_name": "profiles",
+      "policies": [
+        {
+          "roles": "{16485}",
+          "policy": "managers_view_profiles",
+          "command": "r"
+        },
+        {
+          "roles": "{16485}",
+          "policy": "profiles_select_own",
+          "command": "r"
+        },
+        {
+          "roles": "{16485}",
+          "policy": "profiles_update_own",
+          "command": "w"
+        },
+        {
+          "roles": "{16485}",
+          "policy": "profiles_view_own",
+          "command": "r"
+        }
+      ],
+      "acl": "{postgres=arwdDxtm/postgres,authenticated=r/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "table_name": "purchase_order_items",
+      "policies": [],
+      "acl": "{postgres=arwdDxtm/postgres,anon=r/postgres,authenticated=r/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "table_name": "purchase_orders",
+      "policies": [],
+      "acl": "{postgres=arwdDxtm/postgres,anon=r/postgres,authenticated=r/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "table_name": "receiving_report_items",
+      "policies": [],
+      "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "table_name": "receiving_reports",
+      "policies": [],
+      "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "table_name": "riders",
+      "policies": [
+        {
+          "roles": "{16485}",
+          "policy": "riders_view_own_application",
+          "command": "r"
+        }
+      ],
+      "acl": "{postgres=arwdDxtm/postgres,authenticated=rm/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "table_name": "supplier_items",
+      "policies": [],
+      "acl": "{postgres=arwdDxtm/postgres,anon=r/postgres,authenticated=r/postgres,service_role=arwdDxtm/postgres}"
+    },
+    {
+      "table_name": "suppliers",
+      "policies": [],
+      "acl": "{postgres=arwdDxtm/postgres,anon=r/postgres,authenticated=r/postgres,service_role=arwdDxtm/postgres}"
+    }
+  ],
+  "triggers": [
+    {
+      "table_name": "delivery_assignments",
+      "tgname": "trg_delivery_assignments_set_updated_at",
+      "definition": "CREATE TRIGGER trg_delivery_assignments_set_updated_at BEFORE UPDATE ON public.delivery_assignments FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
+    },
+    {
+      "table_name": "inventory_batches",
+      "tgname": "inventory_batches_enforce_quantity_scale",
+      "definition": "CREATE TRIGGER inventory_batches_enforce_quantity_scale BEFORE INSERT OR UPDATE OF inventory_item_id, quantity_initial, quantity_on_hand ON public.inventory_batches FOR EACH ROW EXECUTE FUNCTION enforce_inventory_related_quantity_scale()"
+    },
+    {
+      "table_name": "inventory_batches",
+      "tgname": "inventory_batches_enforce_shelf_life",
+      "definition": "CREATE TRIGGER inventory_batches_enforce_shelf_life BEFORE INSERT OR UPDATE OF inventory_item_id, received_at, manufactured_on, use_by_date ON public.inventory_batches FOR EACH ROW EXECUTE FUNCTION enforce_inventory_batch_shelf_life()"
+    },
+    {
+      "table_name": "inventory_items",
+      "tgname": "inventory_items_enforce_quantity_policy",
+      "definition": "CREATE TRIGGER inventory_items_enforce_quantity_policy BEFORE INSERT OR UPDATE OF quantity_on_hand, reorder_level, quantity_scale ON public.inventory_items FOR EACH ROW EXECUTE FUNCTION enforce_inventory_item_quantity_policy()"
+    },
+    {
+      "table_name": "inventory_items",
+      "tgname": "inventory_open_replenishment_unit_guard",
+      "definition": "CREATE TRIGGER inventory_open_replenishment_unit_guard BEFORE UPDATE OF unit ON public.inventory_items FOR EACH ROW EXECUTE FUNCTION guard_open_replenishment_item_unit()"
+    },
+    {
+      "table_name": "inventory_items",
+      "tgname": "inventory_request_master_guard",
+      "definition": "CREATE TRIGGER inventory_request_master_guard BEFORE UPDATE OF unit, quantity_scale ON public.inventory_items FOR EACH ROW EXECUTE FUNCTION guard_open_inventory_request_master()"
+    },
+    {
+      "table_name": "inventory_items",
+      "tgname": "trg_inventory_items_set_updated_at",
+      "definition": "CREATE TRIGGER trg_inventory_items_set_updated_at BEFORE UPDATE ON public.inventory_items FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
+    },
+    {
+      "table_name": "inventory_opening_balances",
+      "tgname": "inventory_opening_balances_enforce_quantity_scale",
+      "definition": "CREATE TRIGGER inventory_opening_balances_enforce_quantity_scale BEFORE INSERT OR UPDATE OF inventory_item_id, quantity_total ON public.inventory_opening_balances FOR EACH ROW EXECUTE FUNCTION enforce_inventory_related_quantity_scale()"
+    },
+    {
+      "table_name": "inventory_transaction_batch_allocations",
+      "tgname": "inventory_transaction_batch_allocations_enforce_integrity",
+      "definition": "CREATE TRIGGER inventory_transaction_batch_allocations_enforce_integrity BEFORE INSERT OR UPDATE OF inventory_transaction_id, inventory_batch_id, quantity ON public.inventory_transaction_batch_allocations FOR EACH ROW EXECUTE FUNCTION enforce_inventory_batch_allocation_integrity()"
+    },
+    {
+      "table_name": "inventory_transactions",
+      "tgname": "inventory_transactions_enforce_quantity_scale",
+      "definition": "CREATE TRIGGER inventory_transactions_enforce_quantity_scale BEFORE INSERT OR UPDATE OF inventory_item_id, quantity_change, quantity_before, quantity_after ON public.inventory_transactions FOR EACH ROW EXECUTE FUNCTION enforce_inventory_related_quantity_scale()"
+    },
+    {
+      "table_name": "menu_categories",
+      "tgname": "trg_menu_categories_set_updated_at",
+      "definition": "CREATE TRIGGER trg_menu_categories_set_updated_at BEFORE UPDATE ON public.menu_categories FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
+    },
+    {
+      "table_name": "menu_ingredients",
+      "tgname": "menu_ingredients_enforce_quantity_scale",
+      "definition": "CREATE TRIGGER menu_ingredients_enforce_quantity_scale BEFORE INSERT OR UPDATE OF inventory_item_id, quantity_required ON public.menu_ingredients FOR EACH ROW EXECUTE FUNCTION enforce_inventory_related_quantity_scale()"
+    },
+    {
+      "table_name": "menu_items",
+      "tgname": "trg_menu_items_set_updated_at",
+      "definition": "CREATE TRIGGER trg_menu_items_set_updated_at BEFORE UPDATE ON public.menu_items FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
+    },
+    {
+      "table_name": "order_status_history",
+      "tgname": "order_status_history_deduct_inventory_on_confirmed_trg",
+      "definition": "CREATE TRIGGER order_status_history_deduct_inventory_on_confirmed_trg AFTER INSERT ON public.order_status_history FOR EACH ROW WHEN ((new.status = 'confirmed'::order_status)) EXECUTE FUNCTION deduct_inventory_on_confirmed_history()"
+    },
+    {
+      "table_name": "payments",
+      "tgname": "trg_payments_set_updated_at",
+      "definition": "CREATE TRIGGER trg_payments_set_updated_at BEFORE UPDATE ON public.payments FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
+    },
+    {
+      "table_name": "production_replenishment_requests",
+      "tgname": "production_request_audit_insert",
+      "definition": "CREATE TRIGGER production_request_audit_insert AFTER INSERT ON public.production_replenishment_requests FOR EACH ROW EXECUTE FUNCTION guard_production_replenishment_request()"
+    },
+    {
+      "table_name": "production_replenishment_requests",
+      "tgname": "production_request_guard_update",
+      "definition": "CREATE TRIGGER production_request_guard_update BEFORE UPDATE ON public.production_replenishment_requests FOR EACH ROW EXECUTE FUNCTION guard_production_replenishment_request()"
+    },
+    {
+      "table_name": "profiles",
+      "tgname": "profiles_set_updated_at",
+      "definition": "CREATE TRIGGER profiles_set_updated_at BEFORE UPDATE ON public.profiles FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
+    },
+    {
+      "table_name": "profiles",
+      "tgname": "trg_profiles_set_updated_at",
+      "definition": "CREATE TRIGGER trg_profiles_set_updated_at BEFORE UPDATE ON public.profiles FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
+    },
+    {
+      "table_name": "purchase_order_items",
+      "tgname": "purchase_order_items_enforce_quantity_scale",
+      "definition": "CREATE TRIGGER purchase_order_items_enforce_quantity_scale BEFORE INSERT OR UPDATE OF inventory_item_id, quantity_ordered, quantity_received, quantity_cancelled ON public.purchase_order_items FOR EACH ROW EXECUTE FUNCTION enforce_inventory_related_quantity_scale()"
+    },
+    {
+      "table_name": "purchase_order_items",
+      "tgname": "trg_purchase_order_items_set_updated_at",
+      "definition": "CREATE TRIGGER trg_purchase_order_items_set_updated_at BEFORE UPDATE ON public.purchase_order_items FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
+    },
+    {
+      "table_name": "purchase_orders",
+      "tgname": "trg_purchase_orders_set_updated_at",
+      "definition": "CREATE TRIGGER trg_purchase_orders_set_updated_at BEFORE UPDATE ON public.purchase_orders FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
+    },
+    {
+      "table_name": "receiving_report_items",
+      "tgname": "receiving_inventory_request_line_guard",
+      "definition": "CREATE TRIGGER receiving_inventory_request_line_guard BEFORE INSERT OR UPDATE ON public.receiving_report_items FOR EACH ROW EXECUTE FUNCTION guard_inventory_request_line()"
+    },
+    {
+      "table_name": "receiving_report_items",
+      "tgname": "receiving_linked_line_guard",
+      "definition": "CREATE TRIGGER receiving_linked_line_guard BEFORE INSERT OR UPDATE ON public.receiving_report_items FOR EACH ROW EXECUTE FUNCTION guard_linked_replenishment_line()"
+    },
+    {
+      "table_name": "receiving_report_items",
+      "tgname": "receiving_report_items_enforce_quantity_scale",
+      "definition": "CREATE TRIGGER receiving_report_items_enforce_quantity_scale BEFORE INSERT OR UPDATE OF inventory_item_id, purchase_order_item_id, quantity_delivered, quantity_accepted ON public.receiving_report_items FOR EACH ROW EXECUTE FUNCTION enforce_inventory_related_quantity_scale()"
+    },
+    {
+      "table_name": "receiving_report_items",
+      "tgname": "receiving_report_items_enforce_shelf_life",
+      "definition": "CREATE TRIGGER receiving_report_items_enforce_shelf_life BEFORE INSERT OR UPDATE OF receiving_report_id, inventory_item_id, purchase_order_item_id, manufactured_on, use_by_date ON public.receiving_report_items FOR EACH ROW EXECUTE FUNCTION enforce_receiving_item_shelf_life()"
+    },
+    {
+      "table_name": "receiving_report_items",
+      "tgname": "receiving_report_items_set_updated_at",
+      "definition": "CREATE TRIGGER receiving_report_items_set_updated_at BEFORE UPDATE ON public.receiving_report_items FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
+    },
+    {
+      "table_name": "receiving_reports",
+      "tgname": "receiving_closes_replenishment",
+      "definition": "CREATE TRIGGER receiving_closes_replenishment AFTER UPDATE OF status ON public.receiving_reports FOR EACH ROW WHEN ((old.status IS DISTINCT FROM new.status)) EXECUTE FUNCTION close_replenishment_from_receiving()"
+    },
+    {
+      "table_name": "receiving_reports",
+      "tgname": "receiving_inventory_request_guard",
+      "definition": "CREATE TRIGGER receiving_inventory_request_guard BEFORE INSERT OR DELETE OR UPDATE ON public.receiving_reports FOR EACH ROW EXECUTE FUNCTION guard_inventory_request_receiving()"
+    },
+    {
+      "table_name": "receiving_reports",
+      "tgname": "receiving_link_guard",
+      "definition": "CREATE TRIGGER receiving_link_guard BEFORE INSERT OR DELETE OR UPDATE ON public.receiving_reports FOR EACH ROW EXECUTE FUNCTION guard_linked_replenishment_report()"
+    },
+    {
+      "table_name": "receiving_reports",
+      "tgname": "receiving_reconciles_inventory_request",
+      "definition": "CREATE TRIGGER receiving_reconciles_inventory_request AFTER UPDATE OF status ON public.receiving_reports FOR EACH ROW WHEN ((old.status IS DISTINCT FROM new.status)) EXECUTE FUNCTION reconcile_inventory_request_receiving()"
+    },
+    {
+      "table_name": "receiving_reports",
+      "tgname": "receiving_reports_refresh_shelf_life",
+      "definition": "CREATE TRIGGER receiving_reports_refresh_shelf_life AFTER UPDATE OF received_at ON public.receiving_reports FOR EACH ROW EXECUTE FUNCTION refresh_receiving_item_shelf_life()"
+    },
+    {
+      "table_name": "receiving_reports",
+      "tgname": "receiving_reports_set_updated_at",
+      "definition": "CREATE TRIGGER receiving_reports_set_updated_at BEFORE UPDATE ON public.receiving_reports FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
+    },
+    {
+      "table_name": "riders",
+      "tgname": "riders_set_updated_at",
+      "definition": "CREATE TRIGGER riders_set_updated_at BEFORE UPDATE ON public.riders FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
+    },
+    {
+      "table_name": "riders",
+      "tgname": "trg_riders_set_updated_at",
+      "definition": "CREATE TRIGGER trg_riders_set_updated_at BEFORE UPDATE ON public.riders FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
+    },
+    {
+      "table_name": "supplier_items",
+      "tgname": "trg_supplier_items_set_updated_at",
+      "definition": "CREATE TRIGGER trg_supplier_items_set_updated_at BEFORE UPDATE ON public.supplier_items FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
+    },
+    {
+      "table_name": "suppliers",
+      "tgname": "trg_suppliers_set_updated_at",
+      "definition": "CREATE TRIGGER trg_suppliers_set_updated_at BEFORE UPDATE ON public.suppliers FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
+    }
+  ],
+  "views": [],
+  "functions_by_table": [
+    {
+      "name": "cashier_shifts",
+      "function_count": 8,
+      "functions": "close_cashier_shift,create_walk_in_sale,get_current_shift_cashier_sales,get_current_shift_walk_in_sales,get_open_cashier_shift,settle_paid_order_cancellation,start_cashier_shift,verify_customer_gcash_payment"
+    },
+    {
+      "name": "cashier_transactions",
+      "function_count": 8,
+      "functions": "cancel_order,close_cashier_shift,create_walk_in_sale,get_cashier_sale,get_current_shift_cashier_sales,get_current_shift_walk_in_sales,settle_paid_order_cancellation,verify_customer_gcash_payment"
+    },
+    {
+      "name": "delivery_assignments",
+      "function_count": 13,
+      "functions": "accept_rider_offer,advance_rider_delivery,cancel_order,complete_rider_delivery,get_manager_dashboard,get_manager_orders,get_manager_riders,get_manager_sales_report,offer_order_to_next_rider,reject_rider_offer,set_manager_rider_approval_status,set_rider_availability,settle_paid_order_cancellation"
+    },
+    {
+      "name": "inventory_batches",
+      "function_count": 16,
+      "functions": "assert_batch_inventory_consistent,deduct_inventory_for_confirmed_order,enforce_inventory_batch_allocation_integrity,enforce_inventory_item_quantity_policy,enforce_inventory_related_quantity_scale,get_inventory_request_proposal,get_manager_inventory_batch_context,get_manager_inventory_item_detail,get_manager_inventory_movements,get_manager_inventory_stock_summary,get_manager_receiving_workspace,initialize_inventory_opening_balance,inventory_usable_quantity,mutate_inventory_batch_quantity,post_receiving_report,settle_paid_order_cancellation"
+    },
+    {
+      "name": "inventory_items",
+      "function_count": 36,
+      "functions": "adjust_inventory_stock,adjust_inventory_stock_legacy_aggregate,assert_batch_inventory_consistent,assert_inventory_available_for_requested_items,create_replenishment_request,deduct_inventory_for_confirmed_order,enforce_inventory_batch_allocation_integrity,enforce_inventory_batch_shelf_life,enforce_inventory_related_quantity_scale,enforce_receiving_item_shelf_life,get_inventory_request_proposal,get_manager_dashboard,get_manager_inventory,get_manager_inventory_batch_context,get_manager_inventory_item_detail,get_manager_inventory_movements,get_manager_inventory_stock_summary,get_manager_inventory_transactions,get_manager_menu_items,get_manager_receiving_workspace,get_menu_effective_availability,get_replenishment_requests,initialize_inventory_opening_balance,inventory_usable_quantity,issue_inventory_request,mutate_inventory_batch_quantity,post_receiving_report,receive_inventory_stock,receive_inventory_stock_legacy_aggregate,record_inventory_waste,record_inventory_waste_legacy_aggregate,refresh_receiving_item_shelf_life,revise_inventory_request,save_receiving_report_item,set_manager_menu_item_availability,settle_paid_order_cancellation"
+    },
+    {
+      "name": "inventory_opening_balances",
+      "function_count": 2,
+      "functions": "enforce_inventory_related_quantity_scale,initialize_inventory_opening_balance"
+    },
+    {
+      "name": "inventory_request_documents",
+      "function_count": 10,
+      "functions": "close_inventory_request_short,get_inventory_request_proposal,get_inventory_request_register,guard_inventory_request_receiving,guard_open_inventory_request_master,issue_inventory_request,reconcile_inventory_request_receiving,record_inventory_request_event,revise_inventory_request,start_inventory_request_receiving"
+    },
+    {
+      "name": "inventory_request_events",
+      "function_count": 8,
+      "functions": "close_inventory_request_short,get_inventory_request_register,guard_inventory_request_receiving,issue_inventory_request,reconcile_inventory_request_receiving,record_inventory_request_event,revise_inventory_request,start_inventory_request_receiving"
+    },
+    {
+      "name": "inventory_request_lines",
+      "function_count": 7,
+      "functions": "get_inventory_request_proposal,get_inventory_request_register,guard_inventory_request_line,guard_open_inventory_request_master,issue_inventory_request,reconcile_inventory_request_receiving,revise_inventory_request"
+    },
+    {
+      "name": "inventory_request_revisions",
+      "function_count": 3,
+      "functions": "get_inventory_request_register,issue_inventory_request,revise_inventory_request"
+    },
+    {
+      "name": "inventory_transaction_batch_allocations",
+      "function_count": 3,
+      "functions": "deduct_inventory_for_confirmed_order,get_manager_inventory_movements,settle_paid_order_cancellation"
+    },
+    {
+      "name": "inventory_transactions",
+      "function_count": 13,
+      "functions": "adjust_inventory_stock_legacy_aggregate,deduct_inventory_for_confirmed_order,enforce_inventory_batch_allocation_integrity,enforce_inventory_item_quantity_policy,enforce_inventory_related_quantity_scale,get_manager_inventory_movements,get_manager_inventory_transactions,initialize_inventory_opening_balance,mutate_inventory_batch_quantity,post_receiving_report,receive_inventory_stock_legacy_aggregate,record_inventory_waste_legacy_aggregate,settle_paid_order_cancellation"
+    },
+    {
+      "name": "kds_terminals",
+      "function_count": 4,
+      "functions": "advance_kds_order,get_kds_queue,provision_kds_terminal,verify_kds_terminal"
+    },
+    {
+      "name": "menu_categories",
+      "function_count": 2,
+      "functions": "get_manager_menu_items,set_manager_menu_item_availability"
+    },
+    {
+      "name": "menu_ingredients",
+      "function_count": 7,
+      "functions": "assert_inventory_available_for_requested_items,deduct_inventory_for_confirmed_order,enforce_inventory_item_quantity_policy,enforce_inventory_related_quantity_scale,get_manager_menu_items,get_menu_effective_availability,set_manager_menu_item_availability"
+    },
+    {
+      "name": "menu_item_modifier_groups",
+      "function_count": 1,
+      "functions": "create_walk_in_sale"
+    },
+    {
+      "name": "menu_items",
+      "function_count": 6,
+      "functions": "create_walk_in_sale,get_manager_menu_items,get_manager_sales_report,get_menu_effective_availability,place_customer_order,set_manager_menu_item_availability"
+    },
+    {
+      "name": "menu_modifier_groups",
+      "function_count": 1,
+      "functions": "create_walk_in_sale"
+    },
+    {
+      "name": "menu_modifier_options",
+      "function_count": 1,
+      "functions": "create_walk_in_sale"
+    },
+    {
+      "name": "order_items",
+      "function_count": 9,
+      "functions": "create_walk_in_sale,deduct_inventory_for_confirmed_order,get_cashier_sale,get_current_shift_cashier_sales,get_current_shift_walk_in_sales,get_kds_queue,get_manager_orders,get_manager_sales_report,place_customer_order"
+    },
+    {
+      "name": "order_status_history",
+      "function_count": 17,
+      "functions": "accept_rider_offer,advance_kds_order,advance_rider_delivery,cancel_order,complete_rider_delivery,create_walk_in_sale,get_cashier_sale,get_current_shift_cashier_sales,get_current_shift_walk_in_sales,place_customer_order,reject_customer_gcash_payment,reject_rider_offer,release_ready_order,settle_paid_order_cancellation,submit_customer_payment,update_cashier_order_operational_details,verify_customer_gcash_payment"
+    },
+    {
+      "name": "orders",
+      "function_count": 28,
+      "functions": "accept_rider_offer,advance_kds_order,advance_rider_delivery,cancel_order,complete_rider_delivery,create_walk_in_sale,deduct_inventory_for_confirmed_order,get_cashier_online_payments,get_cashier_sale,get_current_shift_cashier_sales,get_current_shift_walk_in_sales,get_customer_order_payment,get_kds_queue,get_manager_customers,get_manager_dashboard,get_manager_inventory_movements,get_manager_inventory_transactions,get_manager_orders,get_manager_sales_report,offer_order_to_next_rider,place_customer_order,reject_customer_gcash_payment,reject_rider_offer,release_ready_order,settle_paid_order_cancellation,submit_customer_payment,update_cashier_order_operational_details,verify_customer_gcash_payment"
+    },
+    {
+      "name": "paid_order_cancellations",
+      "function_count": 2,
+      "functions": "get_manager_paid_order_cancellation,settle_paid_order_cancellation"
+    },
+    {
+      "name": "payments",
+      "function_count": 15,
+      "functions": "cancel_order,close_cashier_shift,create_walk_in_sale,get_cashier_online_payments,get_cashier_sale,get_current_shift_cashier_sales,get_current_shift_walk_in_sales,get_customer_order_payment,get_manager_dashboard,get_manager_orders,get_manager_sales_report,reject_customer_gcash_payment,settle_paid_order_cancellation,submit_customer_payment,verify_customer_gcash_payment"
+    },
+    {
+      "name": "production_replenishment_requests",
+      "function_count": 9,
+      "functions": "advance_replenishment_request,close_replenishment_from_receiving,create_replenishment_request,get_inventory_request_proposal,get_replenishment_requests,guard_linked_replenishment_line,guard_linked_replenishment_report,guard_open_replenishment_item_unit,start_replenishment_receiving"
+    },
+    {
+      "name": "production_replenishment_status_events",
+      "function_count": 2,
+      "functions": "get_replenishment_requests,guard_production_replenishment_request"
+    },
+    {
+      "name": "profiles",
+      "function_count": 67,
+      "functions": "accept_rider_offer,adjust_inventory_stock,adjust_inventory_stock_legacy_aggregate,advance_replenishment_request,advance_rider_delivery,cancel_order,close_cashier_shift,complete_rider_delivery,create_receiving_report_draft,create_replenishment_request,create_walk_in_sale,current_user_role,delete_empty_receiving_report_draft,get_cashier_online_payments,get_cashier_sale,get_current_shift_cashier_sales,get_current_shift_walk_in_sales,get_customer_order_payment,get_inventory_request_register,get_manager_customers,get_manager_dashboard,get_manager_inventory,get_manager_inventory_batch_context,get_manager_inventory_item_detail,get_manager_inventory_movements,get_manager_inventory_stock_summary,get_manager_inventory_transactions,get_manager_menu_items,get_manager_orders,get_manager_paid_order_cancellation,get_manager_receiving_documents,get_manager_receiving_workspace,get_manager_rider_application,get_manager_riders,get_manager_sales_report,get_open_cashier_shift,get_replenishment_requests,handle_new_auth_user,initialize_inventory_opening_balance,inventory_request_manager_required,issue_inventory_request,mutate_inventory_batch_quantity,offer_order_to_next_rider,place_customer_order,post_receiving_report,provision_kds_terminal,receive_inventory_stock,receive_inventory_stock_legacy_aggregate,record_inventory_waste,record_inventory_waste_legacy_aggregate,reject_customer_gcash_payment,reject_rider_offer,release_ready_order,remove_receiving_report_item,revise_inventory_request,save_receiving_report_item,set_manager_menu_item_availability,set_manager_rider_approval_status,set_rider_availability,settle_paid_order_cancellation,start_cashier_shift,start_replenishment_receiving,submit_customer_payment,submit_rider_application,update_cashier_order_operational_details,update_receiving_report_draft,verify_customer_gcash_payment"
+    },
+    {
+      "name": "purchase_order_items",
+      "function_count": 8,
+      "functions": "enforce_inventory_item_quantity_policy,enforce_inventory_related_quantity_scale,enforce_receiving_item_shelf_life,get_manager_inventory_movements,get_manager_receiving_workspace,post_receiving_report,refresh_receiving_item_shelf_life,save_receiving_report_item"
+    },
+    {
+      "name": "purchase_orders",
+      "function_count": 6,
+      "functions": "create_receiving_report_draft,get_manager_inventory_movements,get_manager_receiving_documents,get_manager_receiving_workspace,post_receiving_report,update_receiving_report_draft"
+    },
+    {
+      "name": "receiving_report_items",
+      "function_count": 18,
+      "functions": "close_replenishment_from_receiving,delete_empty_receiving_report_draft,enforce_inventory_item_quantity_policy,enforce_inventory_related_quantity_scale,get_inventory_request_proposal,get_inventory_request_register,get_manager_inventory_movements,get_manager_receiving_documents,get_manager_receiving_workspace,get_replenishment_requests,guard_inventory_request_receiving,guard_linked_replenishment_line,post_receiving_report,reconcile_inventory_request_receiving,refresh_receiving_item_shelf_life,remove_receiving_report_item,save_receiving_report_item,update_receiving_report_draft"
+    },
+    {
+      "name": "receiving_reports",
+      "function_count": 20,
+      "functions": "close_inventory_request_short,create_receiving_report_draft,delete_empty_receiving_report_draft,enforce_receiving_item_shelf_life,get_inventory_request_proposal,get_inventory_request_register,get_manager_inventory_movements,get_manager_receiving_documents,get_manager_receiving_workspace,get_replenishment_requests,guard_inventory_request_line,guard_linked_replenishment_line,post_receiving_report,reconcile_inventory_request_receiving,remove_receiving_report_item,revise_inventory_request,save_receiving_report_item,start_inventory_request_receiving,start_replenishment_receiving,update_receiving_report_draft"
+    },
+    {
+      "name": "riders",
+      "function_count": 12,
+      "functions": "accept_rider_offer,advance_rider_delivery,cancel_order,complete_rider_delivery,get_manager_rider_application,get_manager_riders,offer_order_to_next_rider,reject_rider_offer,set_manager_rider_approval_status,set_rider_availability,settle_paid_order_cancellation,submit_rider_application"
+    },
+    {
+      "name": "supplier_items",
+      "function_count": 0,
+      "functions": ""
+    },
+    {
+      "name": "suppliers",
+      "function_count": 4,
+      "functions": "create_receiving_report_draft,get_manager_receiving_documents,get_manager_receiving_workspace,update_receiving_report_draft"
+    }
+  ],
+  "duplicate_checks": [
+    {
+      "key": "cashier_transactions.order_id",
+      "excess": "0",
+      "groups": 0
+    },
+    {
+      "key": "cashier_transactions.payment_id",
+      "excess": "0",
+      "groups": 0
+    },
+    {
+      "key": "delivery_assignments.active_per_order",
+      "excess": "0",
+      "groups": 0
+    },
+    {
+      "key": "delivery_assignments.same_order",
+      "excess": "0",
+      "groups": 0
+    },
+    {
+      "key": "inventory_transactions.mutation_request_id",
+      "excess": "0",
+      "groups": 0
+    },
+    {
+      "key": "menu_ingredients.menu_inventory_pair",
+      "excess": "0",
+      "groups": 0
+    },
+    {
+      "key": "order_status_history.same_order_status",
+      "excess": "21",
+      "groups": 13
+    },
+    {
+      "key": "order_status_history.same_order_status_second",
+      "excess": "0",
+      "groups": 0
+    },
+    {
+      "key": "orders.customer_request_id",
+      "excess": "0",
+      "groups": 0
+    },
+    {
+      "key": "orders.order_number",
+      "excess": "0",
+      "groups": 0
+    },
+    {
+      "key": "payments.order_method_reference",
+      "excess": "0",
+      "groups": 0
+    },
+    {
+      "key": "payments.same_order",
+      "excess": "0",
+      "groups": 0
+    }
+  ],
+  "history_repeated_status": [
+    {
+      "status": "waiting_for_rider",
+      "groups": 2,
+      "excess": "2",
+      "min_span": "01:03:08.228864",
+      "max_span": "1 day 06:07:20.030807",
+      "groups_with_note_variants": 2,
+      "groups_with_actor_variants": 2
+    },
+    {
+      "status": "waiting_payment_verification",
+      "groups": 11,
+      "excess": "19",
+      "min_span": "00:00:01.116837",
+      "max_span": "06:18:21.382907",
+      "groups_with_note_variants": 11,
+      "groups_with_actor_variants": 4
+    }
+  ],
+  "status_counts": [
+    {
+      "entity": "delivery_assignments",
+      "dimension": "delivered",
+      "n": 11
+    },
+    {
+      "entity": "delivery_assignments",
+      "dimension": "offered",
+      "n": 1
+    },
+    {
+      "entity": "delivery_assignments",
+      "dimension": "rejected",
+      "n": 2
+    },
+    {
+      "entity": "inventory_transactions",
+      "dimension": "adjustment",
+      "n": 3
+    },
+    {
+      "entity": "inventory_transactions",
+      "dimension": "issuance",
+      "n": 25
+    },
+    {
+      "entity": "inventory_transactions",
+      "dimension": "receiving",
+      "n": 15
+    },
+    {
+      "entity": "order_status_history",
+      "dimension": "cancelled",
+      "n": 10
+    },
+    {
+      "entity": "order_status_history",
+      "dimension": "completed",
+      "n": 9
+    },
+    {
+      "entity": "order_status_history",
+      "dimension": "confirmed",
+      "n": 34
+    },
+    {
+      "entity": "order_status_history",
+      "dimension": "delivered",
+      "n": 11
+    },
+    {
+      "entity": "order_status_history",
+      "dimension": "out_for_delivery",
+      "n": 11
+    },
+    {
+      "entity": "order_status_history",
+      "dimension": "picked_up",
+      "n": 11
+    },
+    {
+      "entity": "order_status_history",
+      "dimension": "preparing",
+      "n": 31
+    },
+    {
+      "entity": "order_status_history",
+      "dimension": "ready",
+      "n": 30
+    },
+    {
+      "entity": "order_status_history",
+      "dimension": "rider_accepted",
+      "n": 11
+    },
+    {
+      "entity": "order_status_history",
+      "dimension": "waiting_for_rider",
+      "n": 16
+    },
+    {
+      "entity": "order_status_history",
+      "dimension": "waiting_payment_verification",
+      "n": 49
+    },
+    {
+      "entity": "orders",
+      "dimension": "cancelled",
+      "n": 10
+    },
+    {
+      "entity": "orders",
+      "dimension": "completed",
+      "n": 9
+    },
+    {
+      "entity": "orders",
+      "dimension": "confirmed",
+      "n": 1
+    },
+    {
+      "entity": "orders",
+      "dimension": "delivered",
+      "n": 11
+    },
+    {
+      "entity": "orders",
+      "dimension": "ready",
+      "n": 6
+    },
+    {
+      "entity": "orders",
+      "dimension": "waiting_for_rider",
+      "n": 1
+    },
+    {
+      "entity": "orders",
+      "dimension": "waiting_payment_verification",
+      "n": 7
+    },
+    {
+      "entity": "payments",
+      "dimension": "rejected",
+      "n": 1
+    },
+    {
+      "entity": "payments",
+      "dimension": "verified",
+      "n": 26
+    },
+    {
+      "entity": "receiving_reports",
+      "dimension": "posted",
+      "n": 1
+    }
+  ],
+  "data_ages": [
+    {
+      "table_name": "orders",
+      "oldest": "2026-08-16 22:16:46.288542+00",
+      "newest": "2026-09-15 01:35:46.278913+00"
+    },
+    {
+      "table_name": "payments",
+      "oldest": "2026-08-29 14:41:03.80054+00",
+      "newest": "2026-09-15 01:36:30.777654+00"
+    },
+    {
+      "table_name": "inventory_transactions",
+      "oldest": "2026-08-31 15:50:59.883091+00",
+      "newest": "2026-10-12 19:35:29.384422+00"
+    },
+    {
+      "table_name": "order_status_history",
+      "oldest": "2026-08-16 22:16:46.288542+00",
+      "newest": "2026-09-15 01:41:24.360652+00"
+    },
+    {
+      "table_name": "delivery_assignments",
+      "oldest": "2026-08-20 18:47:34.194751+00",
+      "newest": "2026-09-15 01:41:13.279939+00"
+    }
+  ],
+  "storage_bucket_counts": [
+    {
+      "bucket_id": "delivery-proofs",
+      "objects": 11,
+      "oldest": "2026-08-21 14:19:20.389304+00",
+      "newest": "2026-09-14 08:08:55.784252+00"
+    },
+    {
+      "bucket_id": "payment-proofs",
+      "objects": 16,
+      "oldest": "2026-08-30 12:32:03.025646+00",
+      "newest": "2026-09-15 01:36:30.491332+00"
+    },
+    {
+      "bucket_id": "rider-documents",
+      "objects": 3,
+      "oldest": "2026-09-18 06:03:33.213884+00",
+      "newest": "2026-09-18 06:03:33.983113+00"
+    }
+  ],
+  "schema_sizes": [
+    {
+      "schema_name": "auth",
+      "tables": 27,
+      "relation_bytes": "1671168"
+    },
+    {
+      "schema_name": "public",
+      "tables": 34,
+      "relation_bytes": "2760704"
+    },
+    {
+      "schema_name": "realtime",
+      "tables": 10,
+      "relation_bytes": "376832"
+    },
+    {
+      "schema_name": "storage",
+      "tables": 8,
+      "relation_bytes": "425984"
+    },
+    {
+      "schema_name": "supabase_migrations",
+      "tables": 1,
+      "relation_bytes": "319488"
+    }
+  ],
+  "label_screen": [
+    {
+      "field": "orders.customer_name",
+      "hits": 0
+    },
+    {
+      "field": "orders.notes",
+      "hits": 1
+    },
+    {
+      "field": "inventory_transactions.reason",
+      "hits": 2
+    },
+    {
+      "field": "order_status_history.notes",
+      "hits": 13
+    }
+  ],
+  "derived_screen": [
+    {
+      "items_nonzero": 12,
+      "batches_nonzero": 2,
+      "po_remaining_populated": 0,
+      "order_total_formula_mismatch": 0
+    }
+  ],
+  "delete_dependencies": [
+    {
+      "parent": "cashier_shifts",
+      "incoming_fks": 1,
+      "children_delete_codes": "cashier_transactions:cashier_transactions_shift_id_fkey:a"
+    },
+    {
+      "parent": "cashier_transactions",
+      "incoming_fks": 1,
+      "children_delete_codes": "paid_order_cancellations:paid_order_cancellations_cashier_transaction_id_fkey:r"
+    },
+    {
+      "parent": "inventory_batches",
+      "incoming_fks": 2,
+      "children_delete_codes": "inventory_transaction_batch_allocations:inventory_transaction_batch_allocations_inventory_batch_id_fkey:r; inventory_transactions:inventory_transactions_inventory_batch_id_fkey:a"
+    },
+    {
+      "parent": "inventory_items",
+      "incoming_fks": 9,
+      "children_delete_codes": "inventory_batches:inventory_batches_inventory_item_id_fkey:a; inventory_opening_balances:inventory_opening_balances_inventory_item_id_fkey:a; inventory_request_lines:inventory_request_lines_inventory_item_id_fkey:a; inventory_transactions:inventory_transactions_inventory_item_id_fkey:r; menu_ingredients:menu_ingredients_inventory_item_id_fkey:r; production_replenishment_requests:production_replenishment_requests_inventory_item_id_fkey:a; purchase_order_items:purchase_order_items_inventory_item_id_fkey:r; receiving_report_items:receiving_report_items_inventory_item_id_fkey:a; supplier_items:supplier_items_inventory_item_id_fkey:c"
+    },
+    {
+      "parent": "inventory_opening_balances",
+      "incoming_fks": 2,
+      "children_delete_codes": "inventory_batches:inventory_batches_opening_balance_id_fkey:a; inventory_transactions:inventory_transactions_opening_balance_id_fkey:a"
+    },
+    {
+      "parent": "inventory_request_documents",
+      "incoming_fks": 4,
+      "children_delete_codes": "inventory_request_events:inventory_request_events_request_id_fkey:a; inventory_request_lines:inventory_request_lines_request_id_fkey:a; inventory_request_revisions:inventory_request_revisions_request_id_fkey:a; receiving_reports:receiving_reports_inventory_request_id_fkey:a"
+    },
+    {
+      "parent": "inventory_transaction_batch_allocations",
+      "incoming_fks": 1,
+      "children_delete_codes": "inventory_transactions:inventory_transactions_reverses_allocation_id_fkey:r"
+    },
+    {
+      "parent": "inventory_transactions",
+      "incoming_fks": 2,
+      "children_delete_codes": "inventory_transaction_batch_allocations:inventory_transaction_batch_alloc_inventory_transaction_id_fkey:r; inventory_transactions:inventory_transactions_reverses_issuance_id_fkey:r"
+    },
+    {
+      "parent": "menu_categories",
+      "incoming_fks": 1,
+      "children_delete_codes": "menu_items:menu_items_category_id_fkey:r"
+    },
+    {
+      "parent": "menu_items",
+      "incoming_fks": 3,
+      "children_delete_codes": "menu_ingredients:menu_ingredients_menu_item_id_fkey:c; menu_item_modifier_groups:menu_item_modifier_groups_menu_item_id_fkey:c; order_items:order_items_menu_item_id_fkey:r"
+    },
+    {
+      "parent": "menu_modifier_groups",
+      "incoming_fks": 2,
+      "children_delete_codes": "menu_item_modifier_groups:menu_item_modifier_groups_group_id_fkey:c; menu_modifier_options:menu_modifier_options_group_id_fkey:c"
+    },
+    {
+      "parent": "orders",
+      "incoming_fks": 7,
+      "children_delete_codes": "cashier_transactions:cashier_transactions_order_id_fkey:a; delivery_assignments:delivery_assignments_order_id_fkey:c; inventory_transactions:inventory_transactions_order_id_fkey:n; order_items:order_items_order_id_fkey:c; order_status_history:order_status_history_order_id_fkey:c; paid_order_cancellations:paid_order_cancellations_order_id_fkey:r; payments:payments_order_id_fkey:c"
+    },
+    {
+      "parent": "payments",
+      "incoming_fks": 2,
+      "children_delete_codes": "cashier_transactions:cashier_transactions_payment_id_fkey:a; paid_order_cancellations:paid_order_cancellations_payment_id_fkey:r"
+    },
+    {
+      "parent": "production_replenishment_requests",
+      "incoming_fks": 2,
+      "children_delete_codes": "production_replenishment_status_events:production_replenishment_status_events_request_id_fkey:a; receiving_reports:receiving_reports_replenishment_request_id_fkey:a"
+    },
+    {
+      "parent": "profiles",
+      "incoming_fks": 22,
+      "children_delete_codes": "cashier_shifts:cashier_shifts_manager_approved_by_fkey:a; cashier_shifts:cashier_shifts_closed_by_fkey:a; cashier_shifts:cashier_shifts_cashier_id_fkey:a; cashier_transactions:cashier_transactions_cashier_id_fkey:a; inventory_opening_balances:inventory_opening_balances_verified_by_fkey:a; inventory_request_documents:inventory_request_documents_issued_by_fkey:a; inventory_request_documents:inventory_request_documents_closed_by_fkey:a; inventory_request_events:inventory_request_events_actor_id_fkey:a; inventory_request_revisions:inventory_request_revisions_issued_by_fkey:a; inventory_transactions:inventory_transactions_performed_by_fkey:n; order_status_history:order_status_history_changed_by_fkey:n; orders:orders_customer_id_fkey:n; orders:orders_processed_by_fkey:n; paid_order_cancellations:paid_order_cancellations_processed_by_fkey:a; payments:payments_rejected_by_fkey:n; payments:payments_verified_by_fkey:n; production_replenishment_requests:production_replenishment_requests_requested_by_fkey:a; production_replenishment_status_events:production_replenishment_status_events_changed_by_fkey:a; purchase_orders:purchase_orders_created_by_fkey:r; receiving_reports:receiving_reports_posted_by_fkey:a; receiving_reports:receiving_reports_received_by_fkey:a; riders:riders_id_fkey:c"
+    },
+    {
+      "parent": "purchase_order_items",
+      "incoming_fks": 2,
+      "children_delete_codes": "inventory_transactions:inventory_transactions_purchase_order_item_id_fkey:n; receiving_report_items:receiving_report_items_purchase_order_item_id_fkey:a"
+    },
+    {
+      "parent": "purchase_orders",
+      "incoming_fks": 2,
+      "children_delete_codes": "purchase_order_items:purchase_order_items_purchase_order_id_fkey:c; receiving_reports:receiving_reports_purchase_order_id_fkey:a"
+    },
+    {
+      "parent": "receiving_report_items",
+      "incoming_fks": 1,
+      "children_delete_codes": "inventory_batches:inventory_batches_receiving_report_item_id_fkey:a"
+    },
+    {
+      "parent": "receiving_reports",
+      "incoming_fks": 3,
+      "children_delete_codes": "production_replenishment_requests:production_replenishment_requests_fulfilled_report_id_fkey:a; production_replenishment_status_events:production_replenishment_status_events_receiving_report_id_fkey:a; receiving_report_items:receiving_report_items_receiving_report_id_fkey:a"
+    },
+    {
+      "parent": "riders",
+      "incoming_fks": 1,
+      "children_delete_codes": "delivery_assignments:delivery_assignments_rider_id_fkey:r"
+    },
+    {
+      "parent": "suppliers",
+      "incoming_fks": 2,
+      "children_delete_codes": "purchase_orders:purchase_orders_supplier_id_fkey:r; supplier_items:supplier_items_supplier_id_fkey:c"
+    }
+  ]
+}

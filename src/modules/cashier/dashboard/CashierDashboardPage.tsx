@@ -13,7 +13,6 @@ import { useCashierStore } from "../hooks/CashierStore";
 import { useCashierDashboard } from "../hooks/useCashierDashboard";
 import { OrderDetailsDrawer } from "../orders/OrderDetailsDrawer";
 import { EndShiftDialog } from "../shifts/EndShiftDialog";
-import { AttentionSummary } from "./AttentionSummary";
 import { CashierWorkQueue } from "./CashierWorkQueue";
 import { CashierDashboardSkeleton } from "./CashierDashboardSkeleton";
 import { CompactShiftHeader } from "./CompactShiftHeader";
@@ -35,12 +34,11 @@ export function CashierDashboardPage({
     activeShift,
     shiftTotals,
     endShift,
-    releaseReadyOrder,
   } = useCashierStore();
 
   const { session } = useAuth();
 
-  const { actionQueue, shiftSummary, attention } =
+  const { queue, shiftSummary, attention } =
     useCashierDashboard();
   const currentShiftSummary = {
   ...shiftSummary,
@@ -53,10 +51,8 @@ export function CashierDashboardPage({
   const [receiptsOpen, setReceiptsOpen] = useState(false);
   const [settlementOpen, setSettlementOpen] = useState(false);
   const [settling, setSettling] = useState(false);
-  const [loadingOrderId, setLoadingOrderId] = useState<string>();
 
-  const [queueView, setQueueView] =
-    useState<CashierQueueView>("action_required");
+  const [queueView, setQueueView] = useState<CashierQueueView>("action_required");
 
   const [attentionFilter, setAttentionFilter] =
     useState<CashierAttentionFilter>();
@@ -72,10 +68,7 @@ export function CashierDashboardPage({
       await endShift(input);
 
       Toast.success("Shift closed and settlement recorded", {
-        description:
-          input.actualCash === shiftTotals.expectedCash
-            ? "The drawer is balanced."
-            : "The approved variance and reason were recorded.",
+        description: "Review the server's saved expected cash and variance in Shift Settlement.",
       });
 
       setSettlementOpen(false);
@@ -87,6 +80,7 @@ export function CashierDashboardPage({
             ? caught.message
             : "Review the drawer count and try again.",
       });
+      throw caught;
     } finally {
       setSettling(false);
     }
@@ -95,7 +89,7 @@ export function CashierDashboardPage({
   const handleAttentionFilter = (
     filter: CashierAttentionFilter,
   ) => {
-    setQueueView("action_required");
+    setQueueView(filter === "delayed" ? "all_active" : "action_required");
     setAttentionFilter(filter);
   };
 
@@ -103,31 +97,6 @@ export function CashierDashboardPage({
     setQueueView(view);
     setAttentionFilter(undefined);
   };
-
-  const handleReleaseOrder = async (order: Order) => {
-    setLoadingOrderId(order.id);
-
-    try {
-      await releaseReadyOrder(order.id);
-
-      Toast.success(`${order.id} released`, {
-        description:
-          order.type === "Delivery"
-            ? "The order moved to the rider queue."
-            : "The handoff was completed.",
-      });
-    } catch (caught) {
-      Toast.error("Unable to release the order", {
-        description:
-          caught instanceof Error
-            ? caught.message
-            : "Refresh the queue and try again.",
-      });
-    } finally {
-      setLoadingOrderId(undefined);
-    }
-  };
-
 
   return (
     <>
@@ -141,16 +110,14 @@ export function CashierDashboardPage({
       >
       <CompactShiftHeader
         summary={currentShiftSummary}
-        onEndShift={() => setSettlementOpen(true)}
+        onEndShift={() => activeShift ? setSettlementOpen(true) : onNavigate("shift-settlement")}
       />
 
         <PrimaryCashierActions
           attention={attention}
           shiftActive={shiftSummary.isActive}
           onNewOrder={() => onNavigate("walkin-pos")}
-          onVerifyPayments={() =>
-            handleAttentionFilter("payments")
-          }
+          onVerifyPayments={() => onNavigate("pending-payments")}
           onReleaseOrders={() =>
             handleAttentionFilter("ready")
           }
@@ -158,19 +125,12 @@ export function CashierDashboardPage({
           onReprintReceipt={() => setReceiptsOpen(true)}
         />
 
-        <AttentionSummary
-          attention={attention}
-          onFilter={handleAttentionFilter}
-        />
-
         <CashierWorkQueue
-          items={actionQueue}
+          queue={queue}
           attention={attention}
           view={queueView}
           attentionFilter={attentionFilter}
           orders={state.orders}
-          actionsEnabled={shiftSummary.isActive}
-          loadingOrderId={loadingOrderId}
           onViewChange={handleQueueViewChange}
           onClearAttentionFilter={() =>
             setAttentionFilter(undefined)
@@ -181,7 +141,6 @@ export function CashierDashboardPage({
               paymentOrderId: order.id,
             })
 }
-          onRelease={handleReleaseOrder}
         />
       </main>
 
@@ -210,6 +169,8 @@ export function CashierDashboardPage({
         <EndShiftDialog
           open={settlementOpen}
           loading={settling}
+          shiftId={activeShift.id}
+          openingCash={activeShift.openingCash}
           totals={shiftTotals}
           pendingPaymentCount={
             shiftSummary.pendingPaymentCount

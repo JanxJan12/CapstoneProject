@@ -11,8 +11,7 @@ export interface POSCartProps {
   onAdjust: (lineId: string, delta: number) => void;
   onQuantityChange: (lineId: string, quantity: number) => void;
   onRemove: (lineId: string) => void;
-  onDuplicate: (lineId: string) => void;
-  onNoteChange: (lineId: string, note: string) => void;
+  onDuplicate?: (lineId: string) => void;
   onCustomize?: (lineId: string) => void;
   onReorder: (sourceLineId: string, targetLineId: string) => void;
   onClear: () => void;
@@ -27,7 +26,6 @@ export function POSCart({
   onQuantityChange,
   onRemove,
   onDuplicate,
-  onNoteChange,
   onCustomize,
   onReorder,
   onClear,
@@ -90,7 +88,6 @@ export function POSCart({
                 onQuantityChange={onQuantityChange}
                 onRemove={onRemove}
                 onDuplicate={onDuplicate}
-                onNoteChange={onNoteChange}
                 onCustomize={onCustomize}
                 onDragStart={(lineId) => {
                   draggedLine.current = lineId;

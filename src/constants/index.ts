@@ -58,7 +58,7 @@ export const STATUS_MAP: Record<
 export const PAGE_LIST: PageEntry[] = [
   { id: "cover", num: "00", label: "Cover", sub: "Design System" },
   { id: "auth", num: "01", label: "Authentication", sub: "11 screens" },
-  { id: "manager", num: "02", label: "Manager", sub: "13 screens" },
+  { id: "manager", num: "02", label: "Manager", sub: "12 screens" },
   { id: "cashier", num: "03", label: "Cashier", sub: "6 screens" },
   { id: "kitchen", num: "04", label: "Kitchen", sub: "Kanban board" },
   { id: "customer", num: "05", label: "Customer Website", sub: "9 screens" },
@@ -79,7 +79,6 @@ export const PROTOTYPE_MANAGER_GROUPS: NavGroup<PrototypeManagerPage>[] = [
       { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
       { id: "orders", label: "Orders", icon: ShoppingCart, badge: 8 },
       { id: "payments", label: "Payments", icon: CreditCard, badge: 3 },
-      { id: "kitchen-monitor", label: "Kitchen Monitor", icon: ChefHat },
     ],
   },
   {

@@ -1,0 +1,62 @@
+{
+  "checks": [
+    {
+      "width": 1440,
+      "register": true,
+      "explicitStart": true,
+      "inspect": true,
+      "review": true,
+      "posted": true,
+      "noOverflow": true
+    },
+    {
+      "width": 1280,
+      "register": true,
+      "explicitStart": true,
+      "inspect": true,
+      "review": true,
+      "posted": true,
+      "noOverflow": true
+    },
+    {
+      "width": 820,
+      "register": true,
+      "explicitStart": true,
+      "inspect": true,
+      "review": true,
+      "posted": true,
+      "noOverflow": true
+    },
+    {
+      "width": 390,
+      "register": true,
+      "explicitStart": true,
+      "inspect": true,
+      "review": true,
+      "posted": true,
+      "noOverflow": true
+    }
+  ],
+  "panelBoundsVerified": true,
+  "registerStatusSearchSource": true,
+  "registerPagination": true,
+  "requestLoadError": true,
+  "loadingState": true,
+  "draftResumeAndFocus": true,
+  "distinctRequestPriorAcceptedAndOutstanding": true,
+  "syntheticPostCalls": 1,
+  "invalidLineBlocked": true,
+  "localLineSaved": true,
+  "savedLineUpdated": true,
+  "savedLineIdentityPreserved": true,
+  "optionalExpirySavedWithoutUseBy": true,
+  "unsavedNavigationGuard": true,
+  "unsavedRefreshGuard": true,
+  "unsavedPostGuard": true,
+  "unitsPreserved": true,
+  "saveFailurePreservesInputs": true,
+  "postedRouteActions": true,
+  "supplierEmergencyEntry": true,
+  "browserErrors": [],
+  "networkWrites": 0
+}

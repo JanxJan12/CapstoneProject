@@ -1,0 +1,660 @@
+[
+  {
+    "name": "supabase_storage_rrj_h09_order_flow_20261015",
+    "memUsage": "60.88MiB / 7.62GiB",
+    "memPerc": "0.78%",
+    "cpuPerc": "0.00%",
+    "pids": "12"
+  },
+  {
+    "name": "supabase_rest_rrj_h09_order_flow_20261015",
+    "memUsage": "59.76MiB / 7.62GiB",
+    "memPerc": "0.77%",
+    "cpuPerc": "0.01%",
+    "pids": "42"
+  },
+  {
+    "name": "supabase_inbucket_rrj_h09_order_flow_20261015",
+    "memUsage": "7.031MiB / 7.62GiB",
+    "memPerc": "0.09%",
+    "cpuPerc": "0.00%",
+    "pids": "12"
+  },
+  {
+    "name": "supabase_auth_rrj_h09_order_flow_20261015",
+    "memUsage": "10.82MiB / 7.62GiB",
+    "memPerc": "0.14%",
+    "cpuPerc": "0.02%",
+    "pids": "17"
+  },
+  {
+    "name": "supabase_kong_rrj_h09_order_flow_20261015",
+    "memUsage": "45.7MiB / 7.62GiB",
+    "memPerc": "0.59%",
+    "cpuPerc": "0.01%",
+    "pids": "2"
+  },
+  {
+    "name": "supabase_db_rrj_h09_order_flow_20261015",
+    "memUsage": "61.18MiB / 7.62GiB",
+    "memPerc": "0.78%",
+    "cpuPerc": "0.07%",
+    "pids": "14"
+  },
+  {
+    "name": "supabase_studio_rrj_h08c_history_20261015",
+    "memUsage": "118.1MiB / 7.62GiB",
+    "memPerc": "1.51%",
+    "cpuPerc": "0.12%",
+    "pids": "11"
+  },
+  {
+    "name": "supabase_pg_meta_rrj_h08c_history_20261015",
+    "memUsage": "52.96MiB / 7.62GiB",
+    "memPerc": "0.68%",
+    "cpuPerc": "0.44%",
+    "pids": "14"
+  },
+  {
+    "name": "supabase_storage_rrj_h08c_history_20261015",
+    "memUsage": "67.27MiB / 7.62GiB",
+    "memPerc": "0.86%",
+    "cpuPerc": "0.41%",
+    "pids": "12"
+  },
+  {
+    "name": "supabase_rest_rrj_h08c_history_20261015",
+    "memUsage": "15.37MiB / 7.62GiB",
+    "memPerc": "0.20%",
+    "cpuPerc": "0.11%",
+    "pids": "30"
+  },
+  {
+    "name": "supabase_realtime_rrj_h08c_history_20261015",
+    "memUsage": "177.1MiB / 7.62GiB",
+    "memPerc": "2.27%",
+    "cpuPerc": "0.21%",
+    "pids": "48"
+  },
+  {
+    "name": "supabase_inbucket_rrj_h08c_history_20261015",
+    "memUsage": "4.395MiB / 7.62GiB",
+    "memPerc": "0.06%",
+    "cpuPerc": "0.00%",
+    "pids": "9"
+  },
+  {
+    "name": "supabase_auth_rrj_h08c_history_20261015",
+    "memUsage": "7.07MiB / 7.62GiB",
+    "memPerc": "0.09%",
+    "cpuPerc": "0.00%",
+    "pids": "17"
+  },
+  {
+    "name": "supabase_kong_rrj_h08c_history_20261015",
+    "memUsage": "36.91MiB / 7.62GiB",
+    "memPerc": "0.47%",
+    "cpuPerc": "0.01%",
+    "pids": "3"
+  },
+  {
+    "name": "supabase_vector_rrj_h08c_history_20261015",
+    "memUsage": "31.82MiB / 7.62GiB",
+    "memPerc": "0.41%",
+    "cpuPerc": "0.10%",
+    "pids": "14"
+  },
+  {
+    "name": "supabase_analytics_rrj_h08c_history_20261015",
+    "memUsage": "728.7MiB / 7.62GiB",
+    "memPerc": "9.34%",
+    "cpuPerc": "1.82%",
+    "pids": "62"
+  },
+  {
+    "name": "supabase_db_rrj_h08c_history_20261015",
+    "memUsage": "70.91MiB / 7.62GiB",
+    "memPerc": "0.91%",
+    "cpuPerc": "0.09%",
+    "pids": "30"
+  },
+  {
+    "name": "supabase_storage_rrj_h08b_history_20261015",
+    "memUsage": "69.5MiB / 7.62GiB",
+    "memPerc": "0.89%",
+    "cpuPerc": "0.43%",
+    "pids": "12"
+  },
+  {
+    "name": "supabase_rest_rrj_h08b_history_20261015",
+    "memUsage": "17.18MiB / 7.62GiB",
+    "memPerc": "0.22%",
+    "cpuPerc": "0.02%",
+    "pids": "32"
+  },
+  {
+    "name": "supabase_auth_rrj_h08b_history_20261015",
+    "memUsage": "8.758MiB / 7.62GiB",
+    "memPerc": "0.11%",
+    "cpuPerc": "0.00%",
+    "pids": "17"
+  },
+  {
+    "name": "supabase_kong_rrj_h08b_history_20261015",
+    "memUsage": "41.21MiB / 7.62GiB",
+    "memPerc": "0.53%",
+    "cpuPerc": "0.01%",
+    "pids": "3"
+  },
+  {
+    "name": "supabase_db_rrj_h08b_history_20261015",
+    "memUsage": "31.01MiB / 7.62GiB",
+    "memPerc": "0.40%",
+    "cpuPerc": "0.01%",
+    "pids": "11"
+  },
+  {
+    "name": "supabase_storage_rrj_h07_financial_20261014",
+    "memUsage": "58.67MiB / 7.62GiB",
+    "memPerc": "0.75%",
+    "cpuPerc": "0.00%",
+    "pids": "12"
+  },
+  {
+    "name": "supabase_rest_rrj_h07_financial_20261014",
+    "memUsage": "15.51MiB / 7.62GiB",
+    "memPerc": "0.20%",
+    "cpuPerc": "0.01%",
+    "pids": "31"
+  },
+  {
+    "name": "supabase_auth_rrj_h07_financial_20261014",
+    "memUsage": "9.398MiB / 7.62GiB",
+    "memPerc": "0.12%",
+    "cpuPerc": "0.02%",
+    "pids": "17"
+  },
+  {
+    "name": "supabase_kong_rrj_h07_financial_20261014",
+    "memUsage": "41.84MiB / 7.62GiB",
+    "memPerc": "0.54%",
+    "cpuPerc": "0.01%",
+    "pids": "2"
+  },
+  {
+    "name": "supabase_db_rrj_h07_financial_20261014",
+    "memUsage": "38.86MiB / 7.62GiB",
+    "memPerc": "0.50%",
+    "cpuPerc": "0.01%",
+    "pids": "10"
+  },
+  {
+    "name": "supabase_storage_rrj_manager_lifecycle_20261014",
+    "memUsage": "58.81MiB / 7.62GiB",
+    "memPerc": "0.75%",
+    "cpuPerc": "0.00%",
+    "pids": "12"
+  },
+  {
+    "name": "supabase_rest_rrj_manager_lifecycle_20261014",
+    "memUsage": "15.42MiB / 7.62GiB",
+    "memPerc": "0.20%",
+    "cpuPerc": "0.02%",
+    "pids": "32"
+  },
+  {
+    "name": "supabase_auth_rrj_manager_lifecycle_20261014",
+    "memUsage": "9.516MiB / 7.62GiB",
+    "memPerc": "0.12%",
+    "cpuPerc": "0.01%",
+    "pids": "17"
+  },
+  {
+    "name": "supabase_kong_rrj_manager_lifecycle_20261014",
+    "memUsage": "43.19MiB / 7.62GiB",
+    "memPerc": "0.55%",
+    "cpuPerc": "0.01%",
+    "pids": "2"
+  },
+  {
+    "name": "supabase_db_rrj_manager_lifecycle_20261014",
+    "memUsage": "33.02MiB / 7.62GiB",
+    "memPerc": "0.42%",
+    "cpuPerc": "0.01%",
+    "pids": "10"
+  },
+  {
+    "name": "supabase_storage_rrj_defense_demo_20261014_r3",
+    "memUsage": "59.46MiB / 7.62GiB",
+    "memPerc": "0.76%",
+    "cpuPerc": "0.01%",
+    "pids": "12"
+  },
+  {
+    "name": "supabase_rest_rrj_defense_demo_20261014_r3",
+    "memUsage": "9.195MiB / 7.62GiB",
+    "memPerc": "0.12%",
+    "cpuPerc": "0.01%",
+    "pids": "32"
+  },
+  {
+    "name": "supabase_auth_rrj_defense_demo_20261014_r3",
+    "memUsage": "9.605MiB / 7.62GiB",
+    "memPerc": "0.12%",
+    "cpuPerc": "0.00%",
+    "pids": "17"
+  },
+  {
+    "name": "supabase_kong_rrj_defense_demo_20261014_r3",
+    "memUsage": "43.87MiB / 7.62GiB",
+    "memPerc": "0.56%",
+    "cpuPerc": "0.01%",
+    "pids": "2"
+  },
+  {
+    "name": "supabase_db_rrj_defense_demo_20261014_r3",
+    "memUsage": "34.79MiB / 7.62GiB",
+    "memPerc": "0.45%",
+    "cpuPerc": "0.01%",
+    "pids": "10"
+  },
+  {
+    "name": "supabase_storage_rrj_phase3_prefix_20261014_a1",
+    "memUsage": "58.83MiB / 7.62GiB",
+    "memPerc": "0.75%",
+    "cpuPerc": "0.00%",
+    "pids": "12"
+  },
+  {
+    "name": "supabase_rest_rrj_phase3_prefix_20261014_a1",
+    "memUsage": "9.535MiB / 7.62GiB",
+    "memPerc": "0.12%",
+    "cpuPerc": "0.02%",
+    "pids": "31"
+  },
+  {
+    "name": "supabase_auth_rrj_phase3_prefix_20261014_a1",
+    "memUsage": "11.48MiB / 7.62GiB",
+    "memPerc": "0.15%",
+    "cpuPerc": "0.01%",
+    "pids": "17"
+  },
+  {
+    "name": "supabase_kong_rrj_phase3_prefix_20261014_a1",
+    "memUsage": "45.1MiB / 7.62GiB",
+    "memPerc": "0.58%",
+    "cpuPerc": "0.01%",
+    "pids": "2"
+  },
+  {
+    "name": "supabase_db_rrj_phase3_prefix_20261014_a1",
+    "memUsage": "36.61MiB / 7.62GiB",
+    "memPerc": "0.47%",
+    "cpuPerc": "0.01%",
+    "pids": "10"
+  },
+  {
+    "name": "supabase_storage_rrj_defense_demo_20261014_r2",
+    "memUsage": "57.17MiB / 7.62GiB",
+    "memPerc": "0.73%",
+    "cpuPerc": "0.00%",
+    "pids": "12"
+  },
+  {
+    "name": "supabase_rest_rrj_defense_demo_20261014_r2",
+    "memUsage": "13.24MiB / 7.62GiB",
+    "memPerc": "0.17%",
+    "cpuPerc": "0.02%",
+    "pids": "32"
+  },
+  {
+    "name": "supabase_auth_rrj_defense_demo_20261014_r2",
+    "memUsage": "9.52MiB / 7.62GiB",
+    "memPerc": "0.12%",
+    "cpuPerc": "0.00%",
+    "pids": "17"
+  },
+  {
+    "name": "supabase_kong_rrj_defense_demo_20261014_r2",
+    "memUsage": "42.22MiB / 7.62GiB",
+    "memPerc": "0.54%",
+    "cpuPerc": "0.01%",
+    "pids": "2"
+  },
+  {
+    "name": "supabase_db_rrj_defense_demo_20261014_r2",
+    "memUsage": "35.23MiB / 7.62GiB",
+    "memPerc": "0.45%",
+    "cpuPerc": "0.00%",
+    "pids": "10"
+  },
+  {
+    "name": "supabase_storage_rrj_defense_demo_20261014",
+    "memUsage": "57.98MiB / 7.62GiB",
+    "memPerc": "0.74%",
+    "cpuPerc": "0.00%",
+    "pids": "12"
+  },
+  {
+    "name": "supabase_rest_rrj_defense_demo_20261014",
+    "memUsage": "25.13MiB / 7.62GiB",
+    "memPerc": "0.32%",
+    "cpuPerc": "0.13%",
+    "pids": "33"
+  },
+  {
+    "name": "supabase_auth_rrj_defense_demo_20261014",
+    "memUsage": "11.79MiB / 7.62GiB",
+    "memPerc": "0.15%",
+    "cpuPerc": "0.00%",
+    "pids": "17"
+  },
+  {
+    "name": "supabase_kong_rrj_defense_demo_20261014",
+    "memUsage": "46.72MiB / 7.62GiB",
+    "memPerc": "0.60%",
+    "cpuPerc": "0.01%",
+    "pids": "2"
+  },
+  {
+    "name": "supabase_db_rrj_defense_demo_20261014",
+    "memUsage": "42.3MiB / 7.62GiB",
+    "memPerc": "0.54%",
+    "cpuPerc": "0.01%",
+    "pids": "11"
+  },
+  {
+    "name": "supabase_storage_rrj_recovery_20261014_target",
+    "memUsage": "59.56MiB / 7.62GiB",
+    "memPerc": "0.76%",
+    "cpuPerc": "0.00%",
+    "pids": "12"
+  },
+  {
+    "name": "supabase_rest_rrj_recovery_20261014_target",
+    "memUsage": "10.48MiB / 7.62GiB",
+    "memPerc": "0.13%",
+    "cpuPerc": "0.10%",
+    "pids": "30"
+  },
+  {
+    "name": "supabase_auth_rrj_recovery_20261014_target",
+    "memUsage": "9.52MiB / 7.62GiB",
+    "memPerc": "0.12%",
+    "cpuPerc": "0.01%",
+    "pids": "17"
+  },
+  {
+    "name": "supabase_kong_rrj_recovery_20261014_target",
+    "memUsage": "38.85MiB / 7.62GiB",
+    "memPerc": "0.50%",
+    "cpuPerc": "0.01%",
+    "pids": "2"
+  },
+  {
+    "name": "supabase_db_rrj_recovery_20261014_target",
+    "memUsage": "36.77MiB / 7.62GiB",
+    "memPerc": "0.47%",
+    "cpuPerc": "0.00%",
+    "pids": "10"
+  },
+  {
+    "name": "supabase_storage_rrj_recovery_20261014_source",
+    "memUsage": "59.06MiB / 7.62GiB",
+    "memPerc": "0.76%",
+    "cpuPerc": "0.00%",
+    "pids": "12"
+  },
+  {
+    "name": "supabase_rest_rrj_recovery_20261014_source",
+    "memUsage": "9.766MiB / 7.62GiB",
+    "memPerc": "0.13%",
+    "cpuPerc": "0.08%",
+    "pids": "30"
+  },
+  {
+    "name": "supabase_auth_rrj_recovery_20261014_source",
+    "memUsage": "9.363MiB / 7.62GiB",
+    "memPerc": "0.12%",
+    "cpuPerc": "0.02%",
+    "pids": "17"
+  },
+  {
+    "name": "supabase_kong_rrj_recovery_20261014_source",
+    "memUsage": "43.14MiB / 7.62GiB",
+    "memPerc": "0.55%",
+    "cpuPerc": "0.01%",
+    "pids": "2"
+  },
+  {
+    "name": "supabase_db_rrj_recovery_20261014_source",
+    "memUsage": "36.92MiB / 7.62GiB",
+    "memPerc": "0.47%",
+    "cpuPerc": "0.00%",
+    "pids": "10"
+  },
+  {
+    "name": "supabase_storage_rrj_rc_synthetic_replay_20261013",
+    "memUsage": "65.73MiB / 7.62GiB",
+    "memPerc": "0.84%",
+    "cpuPerc": "0.37%",
+    "pids": "12"
+  },
+  {
+    "name": "supabase_rest_rrj_rc_synthetic_replay_20261013",
+    "memUsage": "15.05MiB / 7.62GiB",
+    "memPerc": "0.19%",
+    "cpuPerc": "0.02%",
+    "pids": "31"
+  },
+  {
+    "name": "supabase_auth_rrj_rc_synthetic_replay_20261013",
+    "memUsage": "7.164MiB / 7.62GiB",
+    "memPerc": "0.09%",
+    "cpuPerc": "0.00%",
+    "pids": "17"
+  },
+  {
+    "name": "supabase_kong_rrj_rc_synthetic_replay_20261013",
+    "memUsage": "44.67MiB / 7.62GiB",
+    "memPerc": "0.57%",
+    "cpuPerc": "0.01%",
+    "pids": "3"
+  },
+  {
+    "name": "supabase_db_rrj_rc_synthetic_replay_20261013",
+    "memUsage": "36.78MiB / 7.62GiB",
+    "memPerc": "0.47%",
+    "cpuPerc": "0.02%",
+    "pids": "11"
+  },
+  {
+    "name": "supabase_storage_isolated-stack",
+    "memUsage": "60.55MiB / 7.62GiB",
+    "memPerc": "0.78%",
+    "cpuPerc": "0.01%",
+    "pids": "12"
+  },
+  {
+    "name": "supabase_rest_isolated-stack",
+    "memUsage": "16.91MiB / 7.62GiB",
+    "memPerc": "0.22%",
+    "cpuPerc": "0.02%",
+    "pids": "33"
+  },
+  {
+    "name": "supabase_auth_isolated-stack",
+    "memUsage": "9.238MiB / 7.62GiB",
+    "memPerc": "0.12%",
+    "cpuPerc": "0.02%",
+    "pids": "17"
+  },
+  {
+    "name": "supabase_kong_isolated-stack",
+    "memUsage": "39.83MiB / 7.62GiB",
+    "memPerc": "0.51%",
+    "cpuPerc": "0.01%",
+    "pids": "2"
+  },
+  {
+    "name": "supabase_db_isolated-stack",
+    "memUsage": "38.72MiB / 7.62GiB",
+    "memPerc": "0.50%",
+    "cpuPerc": "0.00%",
+    "pids": "10"
+  },
+  {
+    "name": "supabase_studio_rrj_phase8_sim",
+    "memUsage": "117.7MiB / 7.62GiB",
+    "memPerc": "1.51%",
+    "cpuPerc": "0.00%",
+    "pids": "12"
+  },
+  {
+    "name": "supabase_pg_meta_rrj_phase8_sim",
+    "memUsage": "51.69MiB / 7.62GiB",
+    "memPerc": "0.66%",
+    "cpuPerc": "0.37%",
+    "pids": "13"
+  },
+  {
+    "name": "supabase_storage_rrj_phase8_sim",
+    "memUsage": "72.64MiB / 7.62GiB",
+    "memPerc": "0.93%",
+    "cpuPerc": "0.38%",
+    "pids": "12"
+  },
+  {
+    "name": "supabase_rest_rrj_phase8_sim",
+    "memUsage": "14.68MiB / 7.62GiB",
+    "memPerc": "0.19%",
+    "cpuPerc": "0.09%",
+    "pids": "33"
+  },
+  {
+    "name": "supabase_realtime_rrj_phase8_sim",
+    "memUsage": "188.4MiB / 7.62GiB",
+    "memPerc": "2.41%",
+    "cpuPerc": "0.37%",
+    "pids": "48"
+  },
+  {
+    "name": "supabase_inbucket_rrj_phase8_sim",
+    "memUsage": "4.355MiB / 7.62GiB",
+    "memPerc": "0.06%",
+    "cpuPerc": "0.00%",
+    "pids": "10"
+  },
+  {
+    "name": "supabase_auth_rrj_phase8_sim",
+    "memUsage": "6.941MiB / 7.62GiB",
+    "memPerc": "0.09%",
+    "cpuPerc": "0.00%",
+    "pids": "17"
+  },
+  {
+    "name": "supabase_kong_rrj_phase8_sim",
+    "memUsage": "43.71MiB / 7.62GiB",
+    "memPerc": "0.56%",
+    "cpuPerc": "0.01%",
+    "pids": "3"
+  },
+  {
+    "name": "supabase_vector_rrj_phase8_sim",
+    "memUsage": "28.68MiB / 7.62GiB",
+    "memPerc": "0.37%",
+    "cpuPerc": "0.06%",
+    "pids": "14"
+  },
+  {
+    "name": "supabase_analytics_rrj_phase8_sim",
+    "memUsage": "869.5MiB / 7.62GiB",
+    "memPerc": "11.14%",
+    "cpuPerc": "0.81%",
+    "pids": "62"
+  },
+  {
+    "name": "supabase_db_rrj_phase8_sim",
+    "memUsage": "75.33MiB / 7.62GiB",
+    "memPerc": "0.97%",
+    "cpuPerc": "0.08%",
+    "pids": "30"
+  },
+  {
+    "name": "supabase_studio_my-local-todo-app",
+    "memUsage": "116MiB / 7.62GiB",
+    "memPerc": "1.49%",
+    "cpuPerc": "0.00%",
+    "pids": "14"
+  },
+  {
+    "name": "supabase_pg_meta_my-local-todo-app",
+    "memUsage": "52MiB / 7.62GiB",
+    "memPerc": "0.67%",
+    "cpuPerc": "0.42%",
+    "pids": "13"
+  },
+  {
+    "name": "supabase_storage_my-local-todo-app",
+    "memUsage": "65.26MiB / 7.62GiB",
+    "memPerc": "0.84%",
+    "cpuPerc": "0.58%",
+    "pids": "12"
+  },
+  {
+    "name": "supabase_rest_my-local-todo-app",
+    "memUsage": "10.25MiB / 7.62GiB",
+    "memPerc": "0.13%",
+    "cpuPerc": "0.01%",
+    "pids": "30"
+  },
+  {
+    "name": "supabase_realtime_my-local-todo-app",
+    "memUsage": "191.5MiB / 7.62GiB",
+    "memPerc": "2.45%",
+    "cpuPerc": "0.72%",
+    "pids": "48"
+  },
+  {
+    "name": "supabase_inbucket_my-local-todo-app",
+    "memUsage": "4.184MiB / 7.62GiB",
+    "memPerc": "0.05%",
+    "cpuPerc": "0.00%",
+    "pids": "8"
+  },
+  {
+    "name": "supabase_auth_my-local-todo-app",
+    "memUsage": "7.293MiB / 7.62GiB",
+    "memPerc": "0.09%",
+    "cpuPerc": "0.00%",
+    "pids": "17"
+  },
+  {
+    "name": "supabase_kong_my-local-todo-app",
+    "memUsage": "43.72MiB / 7.62GiB",
+    "memPerc": "0.56%",
+    "cpuPerc": "0.01%",
+    "pids": "3"
+  },
+  {
+    "name": "supabase_vector_my-local-todo-app",
+    "memUsage": "27.62MiB / 7.62GiB",
+    "memPerc": "0.35%",
+    "cpuPerc": "0.06%",
+    "pids": "14"
+  },
+  {
+    "name": "supabase_analytics_my-local-todo-app",
+    "memUsage": "856MiB / 7.62GiB",
+    "memPerc": "10.97%",
+    "cpuPerc": "1.87%",
+    "pids": "64"
+  },
+  {
+    "name": "supabase_db_my-local-todo-app",
+    "memUsage": "76.71MiB / 7.62GiB",
+    "memPerc": "0.98%",
+    "cpuPerc": "0.46%",
+    "pids": "30"
+  }
+]

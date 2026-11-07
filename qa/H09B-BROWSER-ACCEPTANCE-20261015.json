@@ -1,0 +1,58 @@
+{
+  "dateManila": "2026-10-15",
+  "overall": "PARTIAL",
+  "stack": "rrj_h09_order_flow_20261015",
+  "apiOrigin": "http://127.0.0.1:48321",
+  "mode": "Fresh authenticated headless Chrome on one preserved isolated synthetic database. Test-only Vite overlay added port 48321 to demo-mode allowlist; no repository source edit.",
+  "continuousOrder": "ORD-000025",
+  "browserResults": {
+    "customerRequiredOptionalCheckoutAndSyntheticProof": "PASS",
+    "cashierPaymentVerification": "PASS",
+    "kdsConfirmedPreparingReady": "PASS",
+    "cashierReadyReleaseAndRiderOffer": "PASS",
+    "riderWebAcceptPickupStartProofComplete": "PASS",
+    "customerDeliveredHistoryAndTracking": "PASS",
+    "separateCashierRejectAndCustomerResubmit": "PASS",
+    "separateResubmittedCashierVerifyAndTransactionHistory": "PASS",
+    "freshWalkInPosAndReceipt": "PASS",
+    "shiftScreen": "PASS",
+    "invalidResumedCartGuardNewRun": "NOT TESTED",
+    "invalidKdsSecretNewRun": "NOT TESTED",
+    "wrongRoleDuplicateAndNetworkRetryNewRun": "NOT TESTED",
+    "recipeStockOnceOnlyNewBrowserOrder": "NOT TESTED",
+    "shiftJournalFinalReconciliation": "BLOCKED",
+    "androidEmulatorParity": "NOT TESTED"
+  },
+  "separateOrderNumbers": {
+    "cashierBrowserVerified": "ORD-000021",
+    "cashierBrowserRejected": "ORD-000022",
+    "cashierBrowserWalkInPos": "ORD-000023",
+    "customerBrowserResubmitted": "ORD-000024"
+  },
+  "observedSameDatabaseFacts": {
+    "continuousOrderItemPrice": 175,
+    "continuousOrderDeliveryFee": 50,
+    "continuousOrderServerTotal": 225,
+    "continuousOrderFinalStatus": "delivered",
+    "continuousOrderPayment": "verified",
+    "continuousOrderReceiptCount": 1,
+    "continuousOrderAssignmentCount": 1,
+    "continuousOrderInventoryLedgerCount": 0,
+    "walkInPosTotal": 175,
+    "walkInPosPayment": "cash verified",
+    "walkInPosReceiptCount": 1,
+    "resubmittedPaymentIdentityPreserved": true,
+    "resubmittedProofPathChanged": true,
+    "resubmittedReceiptCountBeforeVerification": 0,
+    "resubmittedReceiptCountAfterVerification": 1,
+    "priorH09RecipeStock": "Prior H-09 API probe on this same database recorded synthetic 10 to 9, one -1 ledger entry; not a new H-09B browser stock sale."
+  },
+  "environment": {
+    "initialAuthAndRestTimeout": true,
+    "normalDesktopRestartRecoveredOnce": true,
+    "authAndDockerBecameUnresponsiveAgainDuringFinalEdgeAudit": true,
+    "forcedResetOrVolumeDeletion": false
+  },
+  "priorEvidenceBoundary": "H-09 invalid saved-cart Chrome and ten API groups remain prior evidence only. H-09B edge audit was interrupted before new denial assertions completed.",
+  "externalBoundaries": "No hosted operation, real GCash settlement, physical delivery, or Android device run. Hosted release remains NO-GO."
+}

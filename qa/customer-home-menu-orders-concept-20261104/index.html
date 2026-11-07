@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RRJ customer concept · Home, Menu, Orders</title>
+  <meta name="description" content="Standalone visual concept for the RRJ customer ordering experience.">
+  <link rel="stylesheet" href="concept.css">
+  <script src="concept.js" defer></script>
+</head>
+<body>
+  <div class="concept-note">Visual concept only. Sample menu snapshot from 3 Nov 2026. No live orders or payments.</div>
+  <header class="site-header">
+    <div class="shell header-inner">
+      <a class="brand" href="#home" aria-label="RRJ's Food-Haus Home"><img src="../../src/assets/brand/rrj-logo.jpg" alt="" width="42" height="42"><span><strong>RRJ’s Food-Haus</strong><small>Halal kitchen</small></span></a>
+      <nav class="desktop-nav" aria-label="Main navigation"><a href="#home" data-nav="home">Home</a><a href="#menu" data-nav="menu">Menu</a></nav>
+      <div class="header-actions"><a class="header-cart" href="#cart" aria-label="View cart">Cart <span id="header-cart-count" aria-hidden="true">0</span></a><a class="header-profile" href="#profile" data-nav="profile">Profile</a></div>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="screen home-screen" data-screen="home" aria-labelledby="home-title">
+      <div class="home-intro"><div><h1 id="home-title">Comfort food, made for sharing.</h1><p>Browse the dishes at RRJ’s Food-Haus.</p><a class="primary-action" href="#menu">Explore the menu</a></div><img src="../../src/assets/brand/rrj-restaurant.jpg" alt="RRJ's Food-Haus outdoor dining area" width="420" height="245"></div>
+      <div class="section-head"><div><h2>Featured dishes</h2><p>A starting point for the menu.</p></div><a class="text-action" href="#menu">View menu</a></div>
+      <div class="feature-grid">
+        <article class="feature-card" data-add="chicken-bicol-express"><span class="feature-image"><img src="../../public/menu/bicol-express.jpg" alt="" width="320" height="210"></span><span class="feature-copy"><strong>Chicken Bicol Express</strong><span>₱130.00</span></span><button class="feature-add" type="button" aria-label="Add Chicken Bicol Express to cart">Add to cart</button></article>
+        <article class="feature-card" data-add="crispy-beef-tadyang"><span class="feature-image"><img src="../../public/menu/beef-tadyang.jpg" alt="" width="320" height="210"></span><span class="feature-copy"><strong>Crispy Beef Tadyang</strong><span>₱185.00</span></span><button class="feature-add" type="button" aria-label="Add Crispy Beef Tadyang to cart">Add to cart</button></article>
+        <article class="feature-card" data-add="fried-rice"><span class="feature-image"><img src="../../public/menu/fried-rice.jpg" alt="" width="320" height="210"></span><span class="feature-copy"><strong>Fried Rice</strong><span>₱45.00</span></span><button class="feature-add" type="button" aria-label="Add Fried Rice to cart">Add to cart</button></article>
+      </div>
+    </section>
+
+    <section class="screen menu-screen" data-screen="menu" aria-labelledby="menu-title" hidden>
+      <div class="menu-heading"><div><h1 id="menu-title">Menu</h1><p>Find a dish, then build your order.</p></div></div>
+      <div class="menu-workspace">
+        <div class="menu-main">
+          <div class="menu-toolbar"><label class="search-field"><span class="sr-only">Search dishes</span><input type="search" placeholder="Search dishes" aria-label="Search dishes" disabled></label><div class="category-strip" aria-label="Menu categories"><span class="category active">All dishes</span><span class="category">Viands</span><span class="category">Rice</span></div></div>
+          <div class="section-head menu-section-head"><div><h2>Available dishes</h2><p>Select a dish to add it to your cart.</p></div></div>
+          <div class="dish-grid">
+            <article class="dish-card" data-add="chicken-bicol-express"><img src="../../public/menu/bicol-express.jpg" alt="" width="150" height="150"><span class="dish-copy"><span class="dish-name">Chicken Bicol Express</span><span class="dish-description">Spicy chicken in coconut milk</span><strong>₱130.00</strong></span><button class="dish-action" type="button" aria-label="Add Chicken Bicol Express to cart">Add to cart</button></article>
+            <article class="dish-card" data-add="crispy-beef-tadyang"><img src="../../public/menu/beef-tadyang.jpg" alt="" width="150" height="150"><span class="dish-copy"><span class="dish-name">Crispy Beef Tadyang</span><span class="dish-description">Crispy beef ribs with garlic and spices</span><strong>₱185.00</strong></span><button class="dish-action" type="button" aria-label="Add Crispy Beef Tadyang to cart">Add to cart</button></article>
+            <article class="dish-card" data-add="fried-rice"><img src="../../public/menu/fried-rice.jpg" alt="" width="150" height="150"><span class="dish-copy"><span class="dish-name">Fried Rice</span><span class="dish-description">Rice</span><strong>₱45.00</strong></span><button class="dish-action" type="button" aria-label="Add Fried Rice to cart">Add to cart</button></article>
+          </div>
+        </div>
+        <aside class="cart-panel" aria-label="Cart preview"><div><h2>Your cart</h2><p class="cart-empty" id="side-cart-empty">Your cart is empty. Choose a dish to begin.</p><ul class="cart-items" id="side-cart-items" aria-label="Items in cart"></ul></div><div class="cart-bottom"><div><span>Sample item subtotal</span><strong id="side-total">₱0.00</strong></div><button class="primary-action muted-action" id="side-checkout" type="button" disabled>Continue to checkout</button></div></aside>
+      </div>
+    </section>
+
+    <section class="screen profile-screen" data-screen="profile" aria-labelledby="profile-title" hidden>
+      <h1 id="profile-title">Profile</h1><p class="page-lead">Your account and orders in one place.</p>
+      <div class="profile-layout"><div class="account-placeholder"><div class="avatar" aria-hidden="true">J</div><div><h2>Your account</h2><p>Contact details and account settings stay here.</p></div></div><nav class="profile-links" aria-label="Profile sections"><a class="profile-link" href="#orders"><span><strong>Orders</strong><small>Current orders and order history</small></span></a><div class="profile-link noninteractive"><span><strong>Contact details</strong><small>Your saved phone number</small></span></div></nav></div>
+    </section>
+
+    <section class="screen orders-screen" data-screen="orders" aria-labelledby="orders-title" hidden>
+      <a class="back-link" href="#profile">Back to profile</a><div class="section-head orders-heading"><div><h1 id="orders-title">Orders</h1><p>Track a current order or review a past one.</p></div></div>
+      <div class="orders-layout"><div class="orders-main"><h2>Current orders</h2><article class="order-card"><div><span class="order-state">Example state</span><h3>Your current order</h3><p>Order number, placed time, and total come from the server.</p></div><a href="#order-detail">View order status</a></article><h2 class="past-heading">Past orders</h2><article class="order-card quiet"><div><h3>Previous orders</h3><p>Past orders appear here when your account has them.</p></div></article></div></div>
+    </section>
+
+    <section class="screen detail-screen" data-screen="order-detail" aria-labelledby="order-detail-title" hidden><a class="back-link" href="#orders">Back to orders</a><div class="detail-layout"><div><h1 id="order-detail-title">Order status</h1><p class="page-lead">The latest status and next step appear here.</p><div class="status-block"><h2>Status from server</h2><p>Your order timeline stays connected to this detail view.</p></div></div><aside class="detail-side"><h2>Payment and order details</h2><p>Confirmed amount, payment state, and any required follow-up stay with the order.</p></aside></div></section>
+
+    <section class="screen cart-screen" data-screen="cart" aria-labelledby="cart-title" hidden><a class="back-link" href="#menu">Back to menu</a><h1 id="cart-title">Cart</h1><p class="page-lead">Sample item amounts. Final charges are confirmed in the live checkout.</p><div class="status-block"><h2 id="cart-state-title">Your cart is empty</h2><ul class="cart-items" id="cart-items" aria-label="Cart items"></ul><div class="cart-full-total" id="cart-full-total" hidden><span>Sample item subtotal</span><strong id="cart-total">₱0.00</strong></div><button class="primary-action cart-checkout-action" id="cart-checkout" type="button" disabled>Continue to checkout</button><a class="text-action" href="#menu">Browse the menu</a></div></section>
+
+    <section class="screen checkout-screen" data-screen="checkout" aria-labelledby="checkout-title" hidden><a class="back-link" href="#menu">Back to menu</a><h1 id="checkout-title">Checkout preview</h1><p class="page-lead">Review the server-confirmed amount in the live checkout.</p><div class="checkout-preview"><div class="status-block"><h2>Your items</h2><ul class="cart-items" id="checkout-items" aria-label="Items for checkout"></ul></div><aside class="detail-side"><h2>Amount to review</h2><div class="cart-full-total"><span>Sample item subtotal</span><strong id="checkout-subtotal">₱0.00</strong></div><p>Delivery fee and final payable amount are confirmed by the server before an order is created.</p></aside></div></section>
+  </main>
+  <nav class="mobile-nav" aria-label="Main navigation"><a href="#home" data-nav="home">Home</a><a href="#menu" data-nav="menu">Menu</a><a href="#cart" data-nav="cart">Cart <span id="mobile-cart-count" hidden>0</span></a><a href="#profile" data-nav="profile">Profile</a></nav>
+  <div class="cart-toast" id="cart-toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>

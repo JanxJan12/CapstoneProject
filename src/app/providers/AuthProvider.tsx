@@ -3,25 +3,17 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
 
-import type {
-  Session as SupabaseAuthSession,
-} from "@supabase/supabase-js";
+import type { Session as SupabaseAuthSession } from "@supabase/supabase-js";
 
 import { supabase } from "@/lib/supabase";
-import {
-  clearSession,
-  type Session as AppSession,
-} from "@/data/session";
+import { clearSession, type Session as AppSession } from "@/data/session";
 
-import type {
-  AccountRole,
-} from "@/data/accountRole";
-
-
+import type { AccountRole } from "@/data/accountRole";
 
 interface ProfileRow {
   id: string;
@@ -35,11 +27,11 @@ interface AuthContextValue {
   session: AppSession | null;
   loading: boolean;
   authError: string | null;
+  retrySession: () => Promise<void>;
   logout: () => Promise<void>;
 }
 
-const AuthContext =
-  createContext<AuthContextValue | null>(null);
+const AuthContext = createContext<AuthContextValue | null>(null);
 
 const DATABASE_ROLES: AccountRole[] = [
   "customer",
@@ -48,22 +40,15 @@ const DATABASE_ROLES: AccountRole[] = [
   "rider",
 ];
 
-function isDatabaseRole(
-  value: unknown,
-): value is AccountRole {
-  return DATABASE_ROLES.includes(
-    value as AccountRole,
-  );
+function isDatabaseRole(value: unknown): value is AccountRole {
+  return DATABASE_ROLES.includes(value as AccountRole);
 }
 
 function getDisplayName(
   profile: ProfileRow,
   authSession: SupabaseAuthSession,
 ): string {
-  const profileName = [
-    profile.first_name,
-    profile.last_name,
-  ]
+  const profileName = [profile.first_name, profile.last_name]
     .filter(Boolean)
     .join(" ")
     .trim();
@@ -72,46 +57,40 @@ function getDisplayName(
     return profileName;
   }
 
-  const metadataName =
-    authSession.user.user_metadata?.full_name;
+  const metadataName = authSession.user.user_metadata?.full_name;
 
-  if (
-    typeof metadataName === "string" &&
-    metadataName.trim()
-  ) {
+  if (typeof metadataName === "string" && metadataName.trim()) {
     return metadataName.trim();
   }
 
-  return (
-    authSession.user.email ??
-    "RRJ User"
-  );
+  return authSession.user.email ?? "RRJ User";
 }
 
-export function AuthProvider({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export function AuthProvider({ children }: { children: ReactNode }) {
   /*
    * Authentication now comes only from Supabase.
    *
    * Old prototype/demo sessions are no longer trusted.
    */
-  const [session, setSession] =
-    useState<AppSession | null>(null);
+  const [session, setSession] = useState<AppSession | null>(null);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [loading, setLoading] = useState(true);
 
-  const [authError, setAuthError] =
-    useState<string | null>(null);
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  const mountedRef = useRef(true);
+  const authRequestRef = useRef(0);
+  const sessionUserIdRef = useRef<string | null>(null);
+  const deniedSessionMessageRef = useRef<string | null>(null);
 
   const loadSupabaseSession = useCallback(
     async (
-      authSession:
-        SupabaseAuthSession | null,
+      authSession: SupabaseAuthSession | null,
+      requestId: number,
     ): Promise<void> => {
+      const isCurrentRequest = () =>
+        mountedRef.current && requestId === authRequestRef.current;
+
       /*
        * No real Supabase session means the user is
        * not authenticated.
@@ -120,38 +99,50 @@ export function AuthProvider({
        * may still exist in sessionStorage.
        */
       if (!authSession?.user) {
+        if (!isCurrentRequest()) {
+          return;
+        }
+
+        const deniedMessage = deniedSessionMessageRef.current;
+
+        deniedSessionMessageRef.current = null;
+        sessionUserIdRef.current = null;
+
         clearSession();
 
         setSession(null);
-        setAuthError(null);
+        setAuthError(deniedMessage);
         setLoading(false);
 
         return;
       }
 
-      const { data, error } =
-        await supabase
-          .from("profiles")
-          .select(
-            `
+      if (sessionUserIdRef.current !== authSession.user.id) {
+        sessionUserIdRef.current = null;
+        setSession(null);
+        setLoading(true);
+      }
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select(
+          `
               id,
               first_name,
               last_name,
               role,
               is_active
             `,
-          )
-          .eq(
-            "id",
-            authSession.user.id,
-          )
-          .single();
+        )
+        .eq("id", authSession.user.id)
+        .single();
+
+      if (!isCurrentRequest()) {
+        return;
+      }
 
       if (error) {
-        console.error(
-          "Unable to load profile:",
-          error.message,
-        );
+        console.error("Unable to load profile:", error.message);
 
         setSession(null);
 
@@ -164,39 +155,56 @@ export function AuthProvider({
         return;
       }
 
-      const profile =
-        data as ProfileRow;
+      const profile = data as ProfileRow;
 
-      if (
-        !isDatabaseRole(profile.role)
-      ) {
-        await supabase.auth.signOut();
+      if (!isDatabaseRole(profile.role)) {
+        const message = "This account has an unsupported role.";
+
+        deniedSessionMessageRef.current = message;
 
         clearSession();
 
+        sessionUserIdRef.current = null;
         setSession(null);
-
-        setAuthError(
-          "This account has an unsupported role.",
-        );
-
+        setAuthError(message);
         setLoading(false);
+
+        const { error: signOutError } = await supabase.auth.signOut({
+          scope: "local",
+        });
+
+        if (signOutError) {
+          console.error(
+            "Unable to clear unsupported session:",
+            signOutError.message,
+          );
+        }
 
         return;
       }
 
       if (!profile.is_active) {
-        await supabase.auth.signOut();
+        const message = "This account has been disabled.";
+
+        deniedSessionMessageRef.current = message;
 
         clearSession();
 
+        sessionUserIdRef.current = null;
         setSession(null);
-
-        setAuthError(
-          "This account has been disabled.",
-        );
-
+        setAuthError(message);
         setLoading(false);
+
+        const { error: signOutError } = await supabase.auth.signOut({
+          scope: "local",
+        });
+
+        if (signOutError) {
+          console.error(
+            "Unable to clear disabled session:",
+            signOutError.message,
+          );
+        }
 
         return;
       }
@@ -208,27 +216,23 @@ export function AuthProvider({
        */
       clearSession();
 
-      const expiresAt =
-        authSession.expires_at
-          ? authSession.expires_at * 1000
-          : Date.now() +
-            60 * 60 * 1000;
+      const expiresAt = authSession.expires_at
+        ? authSession.expires_at * 1000
+        : Date.now() + 60 * 60 * 1000;
 
-    setSession({
-      id: profile.id,
+      sessionUserIdRef.current = authSession.user.id;
 
-      role: profile.role,
+      setSession({
+        id: profile.id,
 
-      name: getDisplayName(
-        profile,
-        authSession,
-      ),
+        role: profile.role,
 
-      email:
-        authSession.user.email ?? "",
+        name: getDisplayName(profile, authSession),
 
-      expiresAt,
-    });
+        email: authSession.user.email ?? "",
+
+        expiresAt,
+      });
 
       setAuthError(null);
       setLoading(false);
@@ -236,91 +240,79 @@ export function AuthProvider({
     [],
   );
 
+  const retrySession = useCallback(async (): Promise<void> => {
+    const requestId = ++authRequestRef.current;
+
+    deniedSessionMessageRef.current = null;
+    setAuthError(null);
+    setLoading(true);
+
+    const {
+      data: { session: currentSession },
+      error,
+    } = await supabase.auth.getSession();
+
+    if (!mountedRef.current || requestId !== authRequestRef.current) {
+      return;
+    }
+
+    if (error) {
+      console.error("Unable to restore session:", error.message);
+
+      setAuthError("Unable to restore your login session.");
+      setLoading(false);
+
+      return;
+    }
+
+    await loadSupabaseSession(currentSession, requestId);
+  }, [loadSupabaseSession]);
+
   useEffect(() => {
-    let mounted = true;
+    mountedRef.current = true;
 
-    const initializeAuthentication =
-      async (): Promise<void> => {
-        const {
-          data: {
-            session: currentSession,
-          },
-          error,
-        } =
-          await supabase.auth.getSession();
-
-        if (!mounted) {
-          return;
-        }
-
-        if (error) {
-          console.error(
-            "Unable to restore session:",
-            error.message,
-          );
-
-          setAuthError(
-            "Unable to restore your login session.",
-          );
-
-          setLoading(false);
-
-          return;
-        }
-
-        await loadSupabaseSession(
-          currentSession,
-        );
-      };
-
-    void initializeAuthentication();
+    void retrySession();
 
     const {
       data: { subscription },
-    } =
-      supabase.auth.onAuthStateChange(
-        (_event, nextSession) => {
-          window.setTimeout(() => {
-            if (mounted) {
-              void loadSupabaseSession(
-                nextSession,
-              );
-            }
-          }, 0);
-        },
-      );
+    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      const requestId = ++authRequestRef.current;
+
+      window.setTimeout(() => {
+        if (mountedRef.current) {
+          void loadSupabaseSession(nextSession, requestId);
+        }
+      }, 0);
+    });
 
     return () => {
-      mounted = false;
+      mountedRef.current = false;
+      authRequestRef.current += 1;
 
       subscription.unsubscribe();
     };
-  }, [loadSupabaseSession]);
+  }, [loadSupabaseSession, retrySession]);
 
-  const logout =
-    useCallback(
-      async (): Promise<void> => {
-        clearSession();
+  const logout = useCallback(async (): Promise<void> => {
+    authRequestRef.current += 1;
+    deniedSessionMessageRef.current = null;
+    sessionUserIdRef.current = null;
 
-        setSession(null);
-        setAuthError(null);
+    clearSession();
 
-        const { error } =
-          await supabase.auth.signOut();
+    setSession(null);
+    setAuthError(null);
 
-        if (error) {
-          console.error(
-            "Unable to sign out:",
-            error.message,
-          );
+    const { error } = await supabase.auth.signOut();
 
-          setAuthError(
-            "You were logged out locally, but Supabase returned an error.",
-          );
-        }
-      },
-      [],
-    );
+    if (error) {
+      console.error("Unable to sign out:", error.message);
+
+      setAuthError(
+        "You were logged out locally, but Supabase returned an error.",
+      );
+    }
+  }, []);
 
   return (
     <AuthContext.Provider
@@ -328,6 +320,7 @@ export function AuthProvider({
         session,
         loading,
         authError,
+        retrySession,
         logout,
       }}
     >
@@ -336,15 +329,11 @@ export function AuthProvider({
   );
 }
 
-export function useAuth():
-  AuthContextValue {
-  const context =
-    useContext(AuthContext);
+export function useAuth(): AuthContextValue {
+  const context = useContext(AuthContext);
 
   if (!context) {
-    throw new Error(
-      "useAuth must be used inside AuthProvider",
-    );
+    throw new Error("useAuth must be used inside AuthProvider");
   }
 
   return context;

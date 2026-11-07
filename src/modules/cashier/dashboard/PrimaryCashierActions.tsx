@@ -10,7 +10,7 @@ import type { CashierAttentionSummary } from "../types";
 
 interface ActionButtonProps {
   label: string;
-  detail: string;
+  detail?: string;
   icon: ElementType;
   onClick: () => void;
   count?: number;
@@ -50,7 +50,7 @@ export function PrimaryCashierActions({
         disabled={!shiftActive}
         onClick={onNewOrder}
         className="
-          cashier-action group flex min-h-[60px] items-center gap-3
+          cashier-action group flex min-h-[72px] items-center gap-3
           rounded-xl bg-gradient-to-r from-primary to-orange-600
           px-4 text-left text-white
           shadow-[0_6px_16px_rgba(184,79,10,0.18)]
@@ -66,18 +66,15 @@ export function PrimaryCashierActions({
           disabled:hover:translate-y-0
         "
       >
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/15">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/15">
           <ShoppingCart className="h-5 w-5" aria-hidden="true" />
         </span>
 
         <span className="min-w-0 flex-1">
-          <span className="block text-[13px] font-black">
-            New Walk-in Order
+          <span className="block text-[15px] font-black">
+            New walk-in order
           </span>
 
-          <span className="mt-0.5 block text-[10px] font-semibold text-white/75">
-            Start dine-in or take-out sale
-          </span>
         </span>
 
         <kbd className="rounded-md border border-white/20 bg-white/10 px-2 py-1 font-mono text-[9px] font-black text-white/90">
@@ -87,39 +84,27 @@ export function PrimaryCashierActions({
 
       <div className="grid grid-cols-2 gap-1.5 xl:grid-cols-4">
         <SecondaryAction
-          label="Verify Payments"
-          detail={
-            attention.pendingPayments > 0
-              ? `${attention.pendingPayments} waiting`
-              : "None waiting"
-          }
+          label="Review payments"
           icon={CreditCard}
           count={attention.pendingPayments}
           onClick={onVerifyPayments}
         />
 
         <SecondaryAction
-          label="Release Orders"
-          detail={
-            attention.readyOrders > 0
-              ? `${attention.readyOrders} ready`
-              : "None ready"
-          }
+          label="Ready orders"
           icon={PackageCheck}
           count={attention.readyOrders}
           onClick={onReleaseOrders}
         />
 
         <SecondaryAction
-          label="Search Order"
-          detail="Find a transaction"
+          label="Find order"
           icon={Search}
           onClick={onSearchOrder}
         />
 
         <SecondaryAction
-          label="Reprint Receipt"
-          detail="Recent receipts"
+          label="Reprint receipt"
           icon={Printer}
           onClick={onReprintReceipt}
         />
@@ -142,7 +127,7 @@ function SecondaryAction({
       type="button"
       onClick={onClick}
       className="
-        cashier-action group flex min-h-[52px] items-center gap-2
+        cashier-action group flex min-h-[64px] items-center gap-2.5
         rounded-[10px] border border-border/60 bg-white/45
         px-2.5 text-left transition
         hover:border-primary/20
@@ -156,27 +141,27 @@ function SecondaryAction({
     >
       <span
         className="
-          flex h-8 w-8 shrink-0 items-center justify-center
+          flex h-10 w-10 shrink-0 items-center justify-center
           rounded-lg bg-muted/65 text-primary/80
           transition group-hover:bg-primary/10 group-hover:text-primary
         "
       >
-        <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+        <Icon className="h-4 w-4" aria-hidden="true" />
       </span>
 
       <span className="min-w-0 flex-1">
-        <span className="block text-[10px] font-black leading-4 text-foreground/90">
+        <span className="block text-xs font-black leading-4 text-foreground/90">
           {label}
         </span>
 
-        <span
+        {detail ? <span
           className={[
-            "mt-0.5 block truncate text-[9px] font-semibold",
+            "mt-0.5 block text-[9px] font-semibold leading-3",
             hasCount ? "text-primary" : "text-muted-foreground",
           ].join(" ")}
         >
           {detail}
-        </span>
+        </span> : null}
       </span>
 
       {hasCount ? (

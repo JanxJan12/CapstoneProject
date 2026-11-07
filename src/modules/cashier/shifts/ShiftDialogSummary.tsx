@@ -35,11 +35,13 @@ export function VarianceIndicator({
   return (
     <div
       className={`flex items-center justify-between rounded-xl border px-4 py-3 ${tone}`}
+      role="status"
+      aria-live="polite"
     >
       <span className="flex items-center gap-2 text-sm font-black">
-        <Icon className="h-4 w-4" aria-hidden="true" /> {outcome}
+        <Icon className="h-4 w-4" aria-hidden="true" /> {outcome === "Short" ? "Shortage" : outcome === "Over" ? "Overage" : "Balanced"}
       </span>
-      <span className="text-sm font-black">{formatMoney(variance)}</span>
+      <span className="text-sm font-black">{formatMoney(Math.abs(variance))}</span>
     </div>
   );
 }

@@ -9,14 +9,12 @@ export interface WalkInSaleResult {
   orderNumber: string;
 
   transactionId: string;
-  transactionNumber: string;
   receiptNumber: string;
 
   paymentId: string;
   shiftId: string;
 
   subtotal: number;
-  discountAmount: number;
   taxAmount: number;
   grandTotal: number;
 
@@ -33,14 +31,12 @@ interface DatabaseWalkInSaleRow {
   order_number: string;
 
   transaction_id: string;
-  transaction_number: string;
   receipt_number: string;
 
   payment_id: string;
   shift_id: string;
 
   subtotal: number | string;
-  discount_amount: number | string;
   tax_amount: number | string;
   grand_total: number | string;
 
@@ -138,6 +134,8 @@ export async function createWalkInSale(
           (modifier) => modifier.id,
         ) ?? [],
 
+      ...(item.mealOption ? { meal_option: item.mealOption } : {}),
+
       note:
         item.note?.trim() || null,
     }),
@@ -159,23 +157,6 @@ export async function createWalkInSale(
 
         p_contact_number:
           input.contactNumber?.trim() ||
-          null,
-
-        p_table_number:
-          fulfillmentType === "dine_in"
-            ? input.tableNumber?.trim() ||
-              null
-            : null,
-
-        p_discount_type:
-          input.discountType,
-
-        p_discount_reference:
-          input.discountReference?.trim() ||
-          null,
-
-        p_order_instructions:
-          input.orderInstructions?.trim() ||
           null,
 
         p_payment_method:
@@ -234,9 +215,6 @@ export async function createWalkInSale(
     transactionId:
       row.transaction_id,
 
-    transactionNumber:
-      row.transaction_number,
-
     receiptNumber:
       row.receipt_number,
 
@@ -250,12 +228,6 @@ export async function createWalkInSale(
       parseRequiredNumber(
         row.subtotal,
         "subtotal",
-      ),
-
-    discountAmount:
-      parseRequiredNumber(
-        row.discount_amount,
-        "discount amount",
       ),
 
     taxAmount:

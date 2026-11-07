@@ -8,7 +8,6 @@ export const CASHIER_STATE_VERSION = 6;
 export const CASHIER_TERMINAL = "Counter Terminal 01";
 export const CASHIER_LOCALE = "en-PH";
 export const CASHIER_CURRENCY = "PHP";
-export const DISCOUNT_RATE = 0.2;
 export const POS_TAX_ENABLED = false;
 export const POS_TAX_RATE = 0.12;
 export const DEFAULT_DELAY_THRESHOLD_MINUTES = 20;
@@ -30,7 +29,7 @@ export const POS_BEST_SELLER_LIMIT = 8;
 export const POS_RECENT_SEARCH_LIMIT = 6;
 export const POS_ITEM_NOTE_MAX_LENGTH = 120;
 export const MAX_ACTIVITY_RECORDS = 40;
-export const MENU_GRID_ROW_HEIGHT_PX = 190;
+export const MENU_GRID_ROW_HEIGHT_PX = 152;
 export const MENU_GRID_OVERSCAN_ROWS = 2;
 export const OPTIMISTIC_DELAY_MS = {
   fast: 160,
@@ -68,29 +67,12 @@ export const ACTIVE_ORDER_STATUSES: OrderStatus[] = [
   "Picked Up",
   "Out for Delivery",
 ];
-export const CANCELLABLE_STATUSES: OrderStatus[] = [
-  "Awaiting Payment",
-  "Confirmed",
-  "Preparing",
-  "Ready",
-  "Waiting for Rider",
-];
-
 export const PAYMENT_REJECTION_REASONS = [
   "Wrong Amount",
   "Unreadable Proof",
   "Duplicate Payment",
-  "Fake Screenshot",
+  "Invalid Proof",
   "Reference Not Found",
-  "Other",
-] as const;
-
-export const SHIFT_VARIANCE_REASONS = [
-  "Counting Error",
-  "Incorrect Change",
-  "Cash Payout",
-  "Missing Receipt",
-  "Unrecorded Refund",
   "Other",
 ] as const;
 
@@ -154,12 +136,28 @@ export const formatTimeOnly = (value: string | Date, includeSeconds = false) =>
     second: includeSeconds ? "2-digit" : undefined,
   }).format(typeof value === "string" ? new Date(value) : value);
 
-export const minutesSince = (iso: string) =>
-  Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 60_000));
+export const minutesSince = (iso: string) => {
+  const timestamp = new Date(iso).getTime();
+  return Number.isFinite(timestamp)
+    ? Math.max(0, Math.floor((Date.now() - timestamp) / 60_000))
+    : Number.NaN;
+};
+
+export function formatElapsedMinutes(minutes: number) {
+  if (!Number.isFinite(minutes)) return "Time unavailable";
+  const safeMinutes = Math.max(0, Math.floor(minutes));
+  if (safeMinutes < 1) return "Just now";
+  if (safeMinutes < 60) return `${safeMinutes} min`;
+  if (safeMinutes < 1_440) {
+    const hours = Math.floor(safeMinutes / 60);
+    const rest = safeMinutes % 60;
+    return rest ? `${hours} hr ${rest} min` : `${hours} hr`;
+  }
+  const days = Math.floor(safeMinutes / 1_440);
+  const hours = Math.floor((safeMinutes % 1_440) / 60);
+  return `${days} ${days === 1 ? "day" : "days"}${hours ? ` ${hours} hr` : ""}`;
+}
 
 export const formatElapsed = (iso: string) => {
-  const minutes = minutesSince(iso);
-  if (minutes < 1) return "Just now";
-  if (minutes < 60) return `${minutes} min`;
-  return `${Math.floor(minutes / 60)}h ${minutes % 60}m`;
+  return formatElapsedMinutes(minutesSince(iso));
 };

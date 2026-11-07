@@ -404,9 +404,21 @@ function mapRiderApplication(
 
 async function createRiderDocumentSignedUrl(
   path: string | null,
+  riderId: string,
+  documentKind: "valid-id" | "or-cr" | "photo",
 ): Promise<string | null> {
   if (!path) {
     return null;
+  }
+
+  const parts = path.split("/");
+  if (
+    parts.length !== 3 ||
+    parts[0] !== riderId ||
+    parts[1] !== documentKind ||
+    !parts[2]
+  ) {
+    throw new Error("Rider document path does not match this application.");
   }
 
   const { data, error } = await supabase.storage
@@ -417,11 +429,7 @@ async function createRiderDocumentSignedUrl(
     );
 
   if (error || !data?.signedUrl) {
-    throw new Error(
-      `Unable to open rider document: ${
-        error?.message ?? "No signed URL was returned."
-      }`,
-    );
+    throw new Error("Rider document could not be opened.");
   }
 
   return data.signedUrl;
@@ -527,27 +535,30 @@ export async function getManagerRiderApplication(
   const application =
     mapRiderApplication(row);
 
-  const [
-    validIdUrl,
-    orCrDocumentUrl,
-    riderPhotoUrl,
-  ] = await Promise.all([
+  const [validId, orCrDocument, riderPhoto] = await Promise.allSettled([
     createRiderDocumentSignedUrl(
       application.validIdPath,
+      application.id,
+      "valid-id",
     ),
     createRiderDocumentSignedUrl(
       application.orCrDocumentPath,
+      application.id,
+      "or-cr",
     ),
     createRiderDocumentSignedUrl(
       application.riderPhotoPath,
+      application.id,
+      "photo",
     ),
   ]);
 
   return {
     ...application,
-    validIdUrl,
-    orCrDocumentUrl,
-    riderPhotoUrl,
+    validIdUrl: validId.status === "fulfilled" ? validId.value : null,
+    orCrDocumentUrl:
+      orCrDocument.status === "fulfilled" ? orCrDocument.value : null,
+    riderPhotoUrl: riderPhoto.status === "fulfilled" ? riderPhoto.value : null,
   };
 }
 

@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "orderNumber": "ORD-000012",
+  "firstPayment": "rejected",
+  "secondPayment": "verified",
+  "finalOrderStatus": "confirmed",
+  "boundary": "Local synthetic proof submission only; no external GCash settlement."
+}

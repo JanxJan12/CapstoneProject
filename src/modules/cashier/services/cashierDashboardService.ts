@@ -13,15 +13,27 @@ import type {
   Payment,
 } from "../types";
 import { calculateShiftTotals } from "./shiftService";
+import { isOlderCashierOrder } from "../dashboard/workQueuePresentation";
 
-const minutesBetween = (startedAt: string, now: number) =>
-  Math.max(0, Math.floor((now - new Date(startedAt).getTime()) / 60_000));
+const minutesBetween = (startedAt: string, now: number) => {
+  const timestamp = new Date(startedAt).getTime();
+  return Number.isFinite(timestamp)
+    ? Math.max(0, Math.floor((now - timestamp) / 60_000))
+    : 0;
+};
 
-const latestStageTimestamp = (order: Order) =>
-  [...order.timeline].reverse().find((event) => event.status === order.status)
-    ?.timestamp ??
-  order.updatedAt ??
-  order.createdAt;
+export const latestStageTimestamp = (order: Order) => {
+  // Operational edits add same-status audit events. They must not restart the stage clock.
+  let stageStart: string | undefined;
+  for (const event of order.timeline) {
+    if (event.status === order.status) {
+      stageStart ??= event.timestamp;
+    } else {
+      stageStart = undefined;
+    }
+  }
+  return stageStart ?? order.updatedAt ?? order.createdAt;
+};
 
 const pendingPaymentFor = (state: CashierState, order: Order) =>
   state.payments.find(
@@ -84,6 +96,15 @@ function getStageDetails(state: CashierState, order: Order): StageDetails {
   }
 
   if (order.status === "Ready") {
+    if (order.type === "Delivery" && order.orderChannel === "online") {
+      return {
+        stage: "ready_for_handoff",
+        label: "Ready · Rider offer pending in Kitchen",
+        nextAction: "view_details",
+        startedAt: stageStartedAt,
+        delayThreshold: CASHIER_STAGE_DELAY_THRESHOLDS.readyForHandoff,
+      };
+    }
     return {
       stage: "ready_for_handoff",
       label: "Ready for handoff",
@@ -93,23 +114,20 @@ function getStageDetails(state: CashierState, order: Order): StageDetails {
     };
   }
 
-  if (order.status === "Waiting for Rider" && !order.assignedRider) {
+  if (order.status === "Waiting for Rider") {
     return {
       stage: "rider_assignment",
-      label: "Waiting for rider",
+      label: order.riderStatus ?? "Waiting for rider",
       nextAction: "view_details",
       startedAt: stageStartedAt,
       delayThreshold: CASHIER_STAGE_DELAY_THRESHOLDS.riderAssignment,
     };
   }
 
-  if (
-    order.status === "Waiting for Rider" ||
-    order.status === "Rider Accepted"
-  ) {
+  if (order.status === "Rider Accepted") {
     return {
       stage: "rider_assigned",
-      label: order.assignedRider ? "Rider assigned" : "Rider accepted",
+      label: "Rider accepted",
       nextAction: "view_details",
       startedAt: stageStartedAt,
     };
@@ -143,36 +161,26 @@ const getPriority = (
 
 /**
  * Normalized dashboard read model. This is the client-side equivalent of a
- * future get_cashier_action_queue(shift_id) RPC and is the dashboard's only
+ * future get_cashier_action_queue RPC and is the dashboard's only
  * order/payment aggregation boundary.
  */
 export function getCashierActionQueue(
   state: CashierState,
-  shiftId?: string,
   now = Date.now(),
 ): CashierActionQueueItem[] {
-  const shift = shiftId
-    ? state.shifts.find((entry) => entry.id === shiftId)
-    : undefined;
-
   return state.orders
     .filter((order) => ACTIVE_ORDER_STATUSES.includes(order.status))
-    .filter(
-      (order) =>
-        !shift ||
-        !order.shiftId ||
-        order.shiftId === shift.id ||
-        order.type === "Delivery",
-    )
     .map((order) => {
       const details = getStageDetails(state, order);
       const waitingMinutes = minutesBetween(details.startedAt, now);
       const isDelayed =
+        !isOlderCashierOrder(order.createdAt, now) &&
         details.delayThreshold !== undefined &&
         waitingMinutes > details.delayThreshold;
 
       return {
         orderId: order.id,
+        createdAt: order.createdAt,
         customerName: order.customerName || "Walk-in Customer",
         orderType: order.type,
         totalAmount: order.total,
@@ -181,6 +189,8 @@ export function getCashierActionQueue(
         nextAction: details.nextAction,
         waitingMinutes,
         isDelayed,
+        orderAgeReview: !isOlderCashierOrder(order.createdAt, now) &&
+          minutesBetween(order.createdAt, now) > state.delayedThresholdMinutes,
         priority: getPriority(details.nextAction, isDelayed),
         orderStatus: order.status,
         stageStartedAt: details.startedAt,

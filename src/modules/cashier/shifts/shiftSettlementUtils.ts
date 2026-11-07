@@ -27,3 +27,6 @@ export const getVarianceOutcomeFromAmount = (
   variance: number,
 ): Exclude<ShiftVarianceOutcome, "In progress"> =>
   variance === 0 ? "Balanced" : variance > 0 ? "Over" : "Short";
+
+export const cashVariance = (actual: number, expected: number) =>
+  Math.round((actual - expected) * 100) / 100;

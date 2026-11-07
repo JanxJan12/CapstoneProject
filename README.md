@@ -34,12 +34,16 @@ src/
   modules/      Role- and workflow-based feature modules
   styles/       Global styles, design tokens, fonts, and Tailwind entrypoints
   types/        Cross-feature TypeScript contracts
-docs/           Architecture notes, design references, and project guidelines
+docs/           Project documentation and module guides
 public/         Static assets served without bundler processing
+qa/             Verification reports, screenshots, and deployment evidence
 scripts/        Build helpers and deterministic workflow checks
+  demo/         Isolated demonstration setup and smoke checks
+  fixtures/     Synthetic data, mocks, and local test configurations
+supabase/       Database migrations, functions, and SQL tests
 ```
 
-See [docs/architecture.md](docs/architecture.md) for module boundaries and import conventions.
+`qa/`, `scripts/demo/`, and `scripts/fixtures/` support verification and demonstrations. They are not application runtime assets. Keep the source files and evidence for future checks; local fixture results do not establish hosted acceptance. The ignored `.tmp/` directory may contain private demo credentials, database snapshots, and deployment artifacts, so review its contents before any cleanup.
 
 ## Production build
 
@@ -48,3 +52,4 @@ npm.cmd run build
 ```
 
 The optimized output is generated in `dist/` and is intentionally excluded from version control.
+`dist/` can be regenerated with this command. `node_modules/` can be restored with `npm.cmd install`.

@@ -1,0 +1,424 @@
+{
+  "dateManila": "2026-10-15",
+  "stack": "rrj_h09_order_flow_20261015",
+  "api": "http://127.0.0.1:48321",
+  "environment": {
+    "endpoints": [
+      {
+        "path": "auth/v1/health",
+        "status": 200,
+        "milliseconds": 37
+      },
+      {
+        "path": "rest/v1/",
+        "status": 200,
+        "milliseconds": 43
+      }
+    ],
+    "migrationCount": 53,
+    "canonicalMigrationHashesMatching": 52,
+    "canonicalMigrationFileCount": 52
+  },
+  "reconciliationStatus": "PASS",
+  "edgeStatus": "PASS",
+  "orders": [
+    {
+      "order_number": "ORD-000016",
+      "id": "2207bb36-acc5-4cc3-9894-20d9e3457b92",
+      "order_channel": "online",
+      "current_status": "ready",
+      "subtotal": 209,
+      "delivery_fee": 50,
+      "grand_total": 259,
+      "items": [
+        {
+          "id": "54120b78-3253-49a6-a2ad-d81639c299d3",
+          "menuItemId": "9e098744-86a0-40c0-a835-f2b7baf7b27b",
+          "name": "Chicken Biryani",
+          "quantity": 1,
+          "unitPrice": 209,
+          "lineTotal": 209,
+          "modifiers": [],
+          "recipeIngredients": 1
+        }
+      ],
+      "payments": [
+        {
+          "id": "768ddb23-2954-41b9-b1ee-fc1d7fdfbddb",
+          "status": "verified",
+          "method": "gcash",
+          "amount": 259,
+          "verifiedAt": "2026-10-15T06:04:38.747504+00:00",
+          "proofMetadataPresent": true,
+          "privateObjectPresent": true
+        }
+      ],
+      "receipts": [
+        {
+          "id": "4af5d807-5e70-44e7-879f-cef3173dec12",
+          "receipt": "RCP-000011",
+          "shiftId": "4ad0aa22-b65a-4325-8c74-3277139549e2",
+          "status": "completed",
+          "paymentId": "768ddb23-2954-41b9-b1ee-fc1d7fdfbddb"
+        }
+      ],
+      "statuses": [
+        "waiting_payment_verification",
+        "waiting_payment_verification",
+        "confirmed",
+        "preparing",
+        "ready"
+      ],
+      "assignments": null,
+      "inventoryledgercount": 1
+    },
+    {
+      "order_number": "ORD-000023",
+      "id": "d9155f1e-6272-48df-af85-a2ebbc889a6e",
+      "order_channel": "walk_in",
+      "current_status": "confirmed",
+      "subtotal": 175,
+      "delivery_fee": 0,
+      "grand_total": 175,
+      "items": [
+        {
+          "id": "0f721035-62a8-45ef-91f6-47fcb5607efc",
+          "menuItemId": "e3582a30-22da-4b56-b1df-c0abfb2e45be",
+          "name": "H09 Synthetic Order Item",
+          "quantity": 1,
+          "unitPrice": 175,
+          "lineTotal": 175,
+          "modifiers": [
+            {
+              "id": "extra-rice",
+              "name": "Extra rice",
+              "price": 35
+            },
+            {
+              "id": "h09-choice",
+              "name": "H09 required choice",
+              "price": 10
+            }
+          ],
+          "recipeIngredients": 0
+        }
+      ],
+      "payments": [
+        {
+          "id": "7332892f-245d-4134-8b88-913c2c14d769",
+          "status": "verified",
+          "method": "cash",
+          "amount": 175,
+          "verifiedAt": "2026-10-15T06:35:08.718614+00:00",
+          "proofMetadataPresent": false,
+          "privateObjectPresent": false
+        }
+      ],
+      "receipts": [
+        {
+          "id": "99c60afd-9ad8-473a-b73e-0d945176443c",
+          "receipt": "RCP-000014",
+          "shiftId": "213ab694-17e9-4ce6-860d-d95d1e4929ee",
+          "status": "completed",
+          "paymentId": "7332892f-245d-4134-8b88-913c2c14d769"
+        }
+      ],
+      "statuses": [
+        "confirmed"
+      ],
+      "assignments": null,
+      "inventoryledgercount": 0
+    },
+    {
+      "order_number": "ORD-000024",
+      "id": "952b99d6-1f06-49dc-9ed3-4f26e96900d3",
+      "order_channel": "online",
+      "current_status": "confirmed",
+      "subtotal": 175,
+      "delivery_fee": 50,
+      "grand_total": 225,
+      "items": [
+        {
+          "id": "210b8f7b-19b1-4876-8de3-d7316048eeb5",
+          "menuItemId": "e3582a30-22da-4b56-b1df-c0abfb2e45be",
+          "name": "H09 Synthetic Order Item",
+          "quantity": 1,
+          "unitPrice": 175,
+          "lineTotal": 175,
+          "modifiers": [
+            {
+              "id": "extra-rice",
+              "name": "Extra rice",
+              "price": 35
+            },
+            {
+              "id": "h09-choice",
+              "name": "H09 required choice",
+              "price": 10
+            }
+          ],
+          "recipeIngredients": 0
+        }
+      ],
+      "payments": [
+        {
+          "id": "9b51670b-987a-43df-a9d0-20b7c34bd027",
+          "status": "verified",
+          "method": "gcash",
+          "amount": 225,
+          "verifiedAt": "2026-10-15T06:51:35.716254+00:00",
+          "proofMetadataPresent": true,
+          "privateObjectPresent": true
+        }
+      ],
+      "receipts": [
+        {
+          "id": "dc899074-dd84-4b38-91bd-90204fa1ceef",
+          "receipt": "RCP-000016",
+          "shiftId": "84e42ea3-1574-49e7-9c72-6f140de9be62",
+          "status": "completed",
+          "paymentId": "9b51670b-987a-43df-a9d0-20b7c34bd027"
+        }
+      ],
+      "statuses": [
+        "waiting_payment_verification",
+        "waiting_payment_verification",
+        "waiting_payment_verification",
+        "waiting_payment_verification",
+        "confirmed"
+      ],
+      "assignments": null,
+      "inventoryledgercount": 0
+    },
+    {
+      "order_number": "ORD-000025",
+      "id": "faf474e7-1e6e-41ed-9bd5-0a08cf66a597",
+      "order_channel": "online",
+      "current_status": "delivered",
+      "subtotal": 175,
+      "delivery_fee": 50,
+      "grand_total": 225,
+      "items": [
+        {
+          "id": "fef3c065-6d74-4dae-a02d-2dfc21fa56da",
+          "menuItemId": "e3582a30-22da-4b56-b1df-c0abfb2e45be",
+          "name": "H09 Synthetic Order Item",
+          "quantity": 1,
+          "unitPrice": 175,
+          "lineTotal": 175,
+          "modifiers": [
+            {
+              "id": "extra-rice",
+              "name": "Extra rice",
+              "price": 35
+            },
+            {
+              "id": "h09-choice",
+              "name": "H09 required choice",
+              "price": 10
+            }
+          ],
+          "recipeIngredients": 0
+        }
+      ],
+      "payments": [
+        {
+          "id": "5f662d91-c364-4fa5-a3bf-bb11a4a6f804",
+          "status": "verified",
+          "method": "gcash",
+          "amount": 225,
+          "verifiedAt": "2026-10-15T06:43:28.702252+00:00",
+          "proofMetadataPresent": true,
+          "privateObjectPresent": true
+        }
+      ],
+      "receipts": [
+        {
+          "id": "de97781b-bfe8-4c1a-9ef7-9c770bcabe00",
+          "receipt": "RCP-000015",
+          "shiftId": "84e42ea3-1574-49e7-9c72-6f140de9be62",
+          "status": "completed",
+          "paymentId": "5f662d91-c364-4fa5-a3bf-bb11a4a6f804"
+        }
+      ],
+      "statuses": [
+        "waiting_payment_verification",
+        "waiting_payment_verification",
+        "confirmed",
+        "preparing",
+        "ready",
+        "waiting_for_rider",
+        "rider_accepted",
+        "picked_up",
+        "out_for_delivery",
+        "delivered"
+      ],
+      "assignments": [
+        {
+          "id": "0aa51ff8-df7c-49b9-a0c1-58504ef1726f",
+          "status": "delivered",
+          "riderId": "ba4744e0-133e-42da-85cd-37c2e20a82ea",
+          "proofMetadataPresent": true,
+          "privateObjectPresent": true
+        }
+      ],
+      "inventoryledgercount": 0
+    }
+  ],
+  "shifts": [
+    {
+      "id": "4ad0aa22-b65a-4325-8c74-3277139549e2",
+      "status": "open",
+      "opening_cash": 0,
+      "expected_cash": null,
+      "actual_cash": null,
+      "variance": null,
+      "started_at": "2026-10-15T06:04:38.244808+00:00",
+      "ended_at": null,
+      "receipt_count": 1,
+      "cash_receipts": 0,
+      "gcash_receipts": 259,
+      "verified_receipt_total": 259
+    },
+    {
+      "id": "213ab694-17e9-4ce6-860d-d95d1e4929ee",
+      "status": "open",
+      "opening_cash": 0,
+      "expected_cash": null,
+      "actual_cash": null,
+      "variance": null,
+      "started_at": "2026-10-15T06:34:26.730843+00:00",
+      "ended_at": null,
+      "receipt_count": 2,
+      "cash_receipts": 175,
+      "gcash_receipts": 205,
+      "verified_receipt_total": 380
+    },
+    {
+      "id": "84e42ea3-1574-49e7-9c72-6f140de9be62",
+      "status": "open",
+      "opening_cash": 0,
+      "expected_cash": null,
+      "actual_cash": null,
+      "variance": null,
+      "started_at": "2026-10-15T06:36:26.811043+00:00",
+      "ended_at": null,
+      "receipt_count": 2,
+      "cash_receipts": 0,
+      "gcash_receipts": 450,
+      "verified_receipt_total": 450
+    }
+  ],
+  "stock": [
+    {
+      "order_id": "2207bb36-acc5-4cc3-9894-20d9e3457b92",
+      "ledger_id": "2f2cd46a-91b6-476d-bf07-9fdabf73618a",
+      "inventory_item_id": "f3bcd723-761c-4bc3-8294-d5c547021bde",
+      "quantity_change": -1,
+      "quantity_before": 10,
+      "quantity_after": 9,
+      "aggregate_on_hand": 9,
+      "batch_sum": 9,
+      "allocations": [
+        {
+          "batchId": "b866ff7e-87a2-4b0e-ad9b-1c0243b76b5b",
+          "quantity": 1,
+          "batchOnHand": 9
+        }
+      ]
+    }
+  ],
+  "edge": {
+    "customerCashierQueue": {
+      "status": 403,
+      "code": "42501",
+      "message": "Only an active cashier account may read online payments."
+    },
+    "riderCashierQueue": {
+      "status": 403,
+      "code": "42501",
+      "message": "Only an active cashier account may read online payments."
+    },
+    "invalidKdsSecret": {
+      "status": 400,
+      "code": "P0001",
+      "message": "Invalid or inactive kitchen terminal credential."
+    },
+    "validKdsQueue": {
+      "status": 200,
+      "code": null,
+      "message": null
+    },
+    "staleKdsAdvance": {
+      "status": 400,
+      "code": "P0001",
+      "message": "Kitchen transition rejected because the order status has changed. Expected confirmed, current delivered."
+    },
+    "staleVerification": {
+      "status": 409,
+      "code": "23505",
+      "message": "This payment or order has already been processed by another cashier transaction."
+    },
+    "staleRelease": {
+      "status": 400,
+      "code": "P0001",
+      "message": "Only ready orders may be released."
+    },
+    "staleRiderAdvance": {
+      "status": 400,
+      "code": "P0001",
+      "message": "Delivery transition rejected because the assignment status has changed. Expected accepted, current delivered."
+    },
+    "staleRiderCompletion": {
+      "status": 400,
+      "code": "P0001",
+      "message": "Only an out-for-delivery assignment may be completed."
+    },
+    "customerRiderAdvance": {
+      "status": 400,
+      "code": "P0001",
+      "message": "Only an active approved rider may update a delivery."
+    },
+    "customerVerifyPayment": {
+      "status": 403,
+      "code": "42501",
+      "message": "Only an active cashier account may verify a customer GCash payment."
+    },
+    "verifiedPaymentResubmit": {
+      "status": 400,
+      "code": "22023",
+      "message": "This order is no longer waiting for payment verification."
+    }
+  },
+  "post": [
+    {
+      "order_number": "ORD-000016",
+      "payment_count": 1,
+      "receipt_count": 1,
+      "ledger_count": 1,
+      "assignment_count": 0
+    },
+    {
+      "order_number": "ORD-000023",
+      "payment_count": 1,
+      "receipt_count": 1,
+      "ledger_count": 0,
+      "assignment_count": 0
+    },
+    {
+      "order_number": "ORD-000024",
+      "payment_count": 1,
+      "receipt_count": 1,
+      "ledger_count": 0,
+      "assignment_count": 0
+    },
+    {
+      "order_number": "ORD-000025",
+      "payment_count": 1,
+      "receipt_count": 1,
+      "ledger_count": 0,
+      "assignment_count": 1
+    }
+  ],
+  "boundary": "Actual preserved H09 synthetic database. Edge checks are authenticated API, not browser evidence. No proof bytes or private paths exported."
+}

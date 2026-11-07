@@ -1,0 +1,1399 @@
+{
+  "tier": 2,
+  "results": [
+    {
+      "scenario": "p1",
+      "width": 360,
+      "overview": "ORDER STATUS\n\nWaiting Payment Verification\n\nPAYMENT STATUS\n\nNot submitted\n\nSERVICE TYPE\n\nDelivery",
+      "steps": [
+        {
+          "label": "Waiting for Payment Verification",
+          "checked": false
+        },
+        {
+          "label": "Confirmed",
+          "checked": false
+        },
+        {
+          "label": "Preparing",
+          "checked": false
+        },
+        {
+          "label": "Ready",
+          "checked": false
+        },
+        {
+          "label": "Waiting for Rider",
+          "checked": false
+        },
+        {
+          "label": "Rider Accepted",
+          "checked": false
+        },
+        {
+          "label": "Picked Up",
+          "checked": false
+        },
+        {
+          "label": "Out for Delivery",
+          "checked": false
+        },
+        {
+          "label": "Delivered",
+          "checked": false
+        }
+      ],
+      "overflow": false,
+      "paymentAction": true
+    },
+    {
+      "scenario": "p1",
+      "width": 390,
+      "overview": "ORDER STATUS\n\nWaiting Payment Verification\n\nPAYMENT STATUS\n\nNot submitted\n\nSERVICE TYPE\n\nDelivery",
+      "steps": [
+        {
+          "label": "Waiting for Payment Verification",
+          "checked": false
+        },
+        {
+          "label": "Confirmed",
+          "checked": false
+        },
+        {
+          "label": "Preparing",
+          "checked": false
+        },
+        {
+          "label": "Ready",
+          "checked": false
+        },
+        {
+          "label": "Waiting for Rider",
+          "checked": false
+        },
+        {
+          "label": "Rider Accepted",
+          "checked": false
+        },
+        {
+          "label": "Picked Up",
+          "checked": false
+        },
+        {
+          "label": "Out for Delivery",
+          "checked": false
+        },
+        {
+          "label": "Delivered",
+          "checked": false
+        }
+      ],
+      "overflow": false,
+      "paymentAction": true
+    },
+    {
+      "scenario": "p1",
+      "width": 768,
+      "overview": "ORDER STATUS\n\nWaiting Payment Verification\n\nPAYMENT STATUS\n\nNot submitted\n\nSERVICE TYPE\n\nDelivery",
+      "steps": [
+        {
+          "label": "Waiting for Payment Verification",
+          "checked": false
+        },
+        {
+          "label": "Confirmed",
+          "checked": false
+        },
+        {
+          "label": "Preparing",
+          "checked": false
+        },
+        {
+          "label": "Ready",
+          "checked": false
+        },
+        {
+          "label": "Waiting for Rider",
+          "checked": false
+        },
+        {
+          "label": "Rider Accepted",
+          "checked": false
+        },
+        {
+          "label": "Picked Up",
+          "checked": false
+        },
+        {
+          "label": "Out for Delivery",
+          "checked": false
+        },
+        {
+          "label": "Delivered",
+          "checked": false
+        }
+      ],
+      "overflow": false,
+      "paymentAction": true
+    },
+    {
+      "scenario": "p1",
+      "width": 1366,
+      "overview": "ORDER STATUS\n\nWaiting Payment Verification\n\nPAYMENT STATUS\n\nNot submitted\n\nSERVICE TYPE\n\nDelivery",
+      "steps": [
+        {
+          "label": "Waiting for Payment Verification",
+          "checked": false
+        },
+        {
+          "label": "Confirmed",
+          "checked": false
+        },
+        {
+          "label": "Preparing",
+          "checked": false
+        },
+        {
+          "label": "Ready",
+          "checked": false
+        },
+        {
+          "label": "Waiting for Rider",
+          "checked": false
+        },
+        {
+          "label": "Rider Accepted",
+          "checked": false
+        },
+        {
+          "label": "Picked Up",
+          "checked": false
+        },
+        {
+          "label": "Out for Delivery",
+          "checked": false
+        },
+        {
+          "label": "Delivered",
+          "checked": false
+        }
+      ],
+      "overflow": false,
+      "paymentAction": true
+    },
+    {
+      "scenario": "p2",
+      "width": 360,
+      "overview": "ORDER STATUS\n\nWaiting Payment Verification\n\nPAYMENT STATUS\n\nAwaiting Cashier verification\n\nSERVICE TYPE\n\nDelivery",
+      "steps": [
+        {
+          "label": "Waiting for Payment Verification",
+          "checked": false
+        },
+        {
+          "label": "Confirmed",
+          "checked": false
+        },
+        {
+          "label": "Preparing",
+          "checked": false
+        },
+        {
+          "label": "Ready",
+          "checked": false
+        },
+        {
+          "label": "Waiting for Rider",
+          "checked": false
+        },
+        {
+          "label": "Rider Accepted",
+          "checked": false
+        },
+        {
+          "label": "Picked Up",
+          "checked": false
+        },
+        {
+          "label": "Out for Delivery",
+          "checked": false
+        },
+        {
+          "label": "Delivered",
+          "checked": false
+        }
+      ],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "p2",
+      "width": 390,
+      "overview": "ORDER STATUS\n\nWaiting Payment Verification\n\nPAYMENT STATUS\n\nAwaiting Cashier verification\n\nSERVICE TYPE\n\nDelivery",
+      "steps": [
+        {
+          "label": "Waiting for Payment Verification",
+          "checked": false
+        },
+        {
+          "label": "Confirmed",
+          "checked": false
+        },
+        {
+          "label": "Preparing",
+          "checked": false
+        },
+        {
+          "label": "Ready",
+          "checked": false
+        },
+        {
+          "label": "Waiting for Rider",
+          "checked": false
+        },
+        {
+          "label": "Rider Accepted",
+          "checked": false
+        },
+        {
+          "label": "Picked Up",
+          "checked": false
+        },
+        {
+          "label": "Out for Delivery",
+          "checked": false
+        },
+        {
+          "label": "Delivered",
+          "checked": false
+        }
+      ],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "p2",
+      "width": 768,
+      "overview": "ORDER STATUS\n\nWaiting Payment Verification\n\nPAYMENT STATUS\n\nAwaiting Cashier verification\n\nSERVICE TYPE\n\nDelivery",
+      "steps": [
+        {
+          "label": "Waiting for Payment Verification",
+          "checked": false
+        },
+        {
+          "label": "Confirmed",
+          "checked": false
+        },
+        {
+          "label": "Preparing",
+          "checked": false
+        },
+        {
+          "label": "Ready",
+          "checked": false
+        },
+        {
+          "label": "Waiting for Rider",
+          "checked": false
+        },
+        {
+          "label": "Rider Accepted",
+          "checked": false
+        },
+        {
+          "label": "Picked Up",
+          "checked": false
+        },
+        {
+          "label": "Out for Delivery",
+          "checked": false
+        },
+        {
+          "label": "Delivered",
+          "checked": false
+        }
+      ],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "p2",
+      "width": 1366,
+      "overview": "ORDER STATUS\n\nWaiting Payment Verification\n\nPAYMENT STATUS\n\nAwaiting Cashier verification\n\nSERVICE TYPE\n\nDelivery",
+      "steps": [
+        {
+          "label": "Waiting for Payment Verification",
+          "checked": false
+        },
+        {
+          "label": "Confirmed",
+          "checked": false
+        },
+        {
+          "label": "Preparing",
+          "checked": false
+        },
+        {
+          "label": "Ready",
+          "checked": false
+        },
+        {
+          "label": "Waiting for Rider",
+          "checked": false
+        },
+        {
+          "label": "Rider Accepted",
+          "checked": false
+        },
+        {
+          "label": "Picked Up",
+          "checked": false
+        },
+        {
+          "label": "Out for Delivery",
+          "checked": false
+        },
+        {
+          "label": "Delivered",
+          "checked": false
+        }
+      ],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "p3",
+      "width": 360,
+      "overview": "ORDER STATUS\n\nWaiting Payment Verification\n\nPAYMENT STATUS\n\nNeeds resubmission\n\nSERVICE TYPE\n\nDelivery",
+      "steps": [
+        {
+          "label": "Waiting for Payment Verification",
+          "checked": false
+        },
+        {
+          "label": "Confirmed",
+          "checked": false
+        },
+        {
+          "label": "Preparing",
+          "checked": false
+        },
+        {
+          "label": "Ready",
+          "checked": false
+        },
+        {
+          "label": "Waiting for Rider",
+          "checked": false
+        },
+        {
+          "label": "Rider Accepted",
+          "checked": false
+        },
+        {
+          "label": "Picked Up",
+          "checked": false
+        },
+        {
+          "label": "Out for Delivery",
+          "checked": false
+        },
+        {
+          "label": "Delivered",
+          "checked": false
+        }
+      ],
+      "overflow": false,
+      "paymentAction": true
+    },
+    {
+      "scenario": "p3",
+      "width": 390,
+      "overview": "ORDER STATUS\n\nWaiting Payment Verification\n\nPAYMENT STATUS\n\nNeeds resubmission\n\nSERVICE TYPE\n\nDelivery",
+      "steps": [
+        {
+          "label": "Waiting for Payment Verification",
+          "checked": false
+        },
+        {
+          "label": "Confirmed",
+          "checked": false
+        },
+        {
+          "label": "Preparing",
+          "checked": false
+        },
+        {
+          "label": "Ready",
+          "checked": false
+        },
+        {
+          "label": "Waiting for Rider",
+          "checked": false
+        },
+        {
+          "label": "Rider Accepted",
+          "checked": false
+        },
+        {
+          "label": "Picked Up",
+          "checked": false
+        },
+        {
+          "label": "Out for Delivery",
+          "checked": false
+        },
+        {
+          "label": "Delivered",
+          "checked": false
+        }
+      ],
+      "overflow": false,
+      "paymentAction": true
+    },
+    {
+      "scenario": "p3",
+      "width": 768,
+      "overview": "ORDER STATUS\n\nWaiting Payment Verification\n\nPAYMENT STATUS\n\nNeeds resubmission\n\nSERVICE TYPE\n\nDelivery",
+      "steps": [
+        {
+          "label": "Waiting for Payment Verification",
+          "checked": false
+        },
+        {
+          "label": "Confirmed",
+          "checked": false
+        },
+        {
+          "label": "Preparing",
+          "checked": false
+        },
+        {
+          "label": "Ready",
+          "checked": false
+        },
+        {
+          "label": "Waiting for Rider",
+          "checked": false
+        },
+        {
+          "label": "Rider Accepted",
+          "checked": false
+        },
+        {
+          "label": "Picked Up",
+          "checked": false
+        },
+        {
+          "label": "Out for Delivery",
+          "checked": false
+        },
+        {
+          "label": "Delivered",
+          "checked": false
+        }
+      ],
+      "overflow": false,
+      "paymentAction": true
+    },
+    {
+      "scenario": "p3",
+      "width": 1366,
+      "overview": "ORDER STATUS\n\nWaiting Payment Verification\n\nPAYMENT STATUS\n\nNeeds resubmission\n\nSERVICE TYPE\n\nDelivery",
+      "steps": [
+        {
+          "label": "Waiting for Payment Verification",
+          "checked": false
+        },
+        {
+          "label": "Confirmed",
+          "checked": false
+        },
+        {
+          "label": "Preparing",
+          "checked": false
+        },
+        {
+          "label": "Ready",
+          "checked": false
+        },
+        {
+          "label": "Waiting for Rider",
+          "checked": false
+        },
+        {
+          "label": "Rider Accepted",
+          "checked": false
+        },
+        {
+          "label": "Picked Up",
+          "checked": false
+        },
+        {
+          "label": "Out for Delivery",
+          "checked": false
+        },
+        {
+          "label": "Delivered",
+          "checked": false
+        }
+      ],
+      "overflow": false,
+      "paymentAction": true
+    },
+    {
+      "scenario": "p5",
+      "width": 360,
+      "overview": "ORDER STATUS\n\nCancelled\n\nPAYMENT STATUS\n\nRejected before cancellation\n\nSERVICE TYPE\n\nDelivery",
+      "steps": [],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "p5",
+      "width": 390,
+      "overview": "ORDER STATUS\n\nCancelled\n\nPAYMENT STATUS\n\nRejected before cancellation\n\nSERVICE TYPE\n\nDelivery",
+      "steps": [],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "p5",
+      "width": 768,
+      "overview": "ORDER STATUS\n\nCancelled\n\nPAYMENT STATUS\n\nRejected before cancellation\n\nSERVICE TYPE\n\nDelivery",
+      "steps": [],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "p5",
+      "width": 1366,
+      "overview": "ORDER STATUS\n\nCancelled\n\nPAYMENT STATUS\n\nRejected before cancellation\n\nSERVICE TYPE\n\nDelivery",
+      "steps": [],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "t1",
+      "width": 360,
+      "overview": "ORDER STATUS\n\nCompleted\n\nPAYMENT STATUS\n\nVerified\n\nSERVICE TYPE\n\nTakeout",
+      "steps": [
+        {
+          "label": "Waiting for Payment Verification",
+          "checked": true
+        },
+        {
+          "label": "Confirmed",
+          "checked": true
+        },
+        {
+          "label": "Preparing",
+          "checked": true
+        },
+        {
+          "label": "Ready",
+          "checked": true
+        },
+        {
+          "label": "Completed",
+          "checked": true
+        }
+      ],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "t1",
+      "width": 390,
+      "overview": "ORDER STATUS\n\nCompleted\n\nPAYMENT STATUS\n\nVerified\n\nSERVICE TYPE\n\nTakeout",
+      "steps": [
+        {
+          "label": "Waiting for Payment Verification",
+          "checked": true
+        },
+        {
+          "label": "Confirmed",
+          "checked": true
+        },
+        {
+          "label": "Preparing",
+          "checked": true
+        },
+        {
+          "label": "Ready",
+          "checked": true
+        },
+        {
+          "label": "Completed",
+          "checked": true
+        }
+      ],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "t1",
+      "width": 768,
+      "overview": "ORDER STATUS\n\nCompleted\n\nPAYMENT STATUS\n\nVerified\n\nSERVICE TYPE\n\nTakeout",
+      "steps": [
+        {
+          "label": "Waiting for Payment Verification",
+          "checked": true
+        },
+        {
+          "label": "Confirmed",
+          "checked": true
+        },
+        {
+          "label": "Preparing",
+          "checked": true
+        },
+        {
+          "label": "Ready",
+          "checked": true
+        },
+        {
+          "label": "Completed",
+          "checked": true
+        }
+      ],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "t1",
+      "width": 1366,
+      "overview": "ORDER STATUS\n\nCompleted\n\nPAYMENT STATUS\n\nVerified\n\nSERVICE TYPE\n\nTakeout",
+      "steps": [
+        {
+          "label": "Waiting for Payment Verification",
+          "checked": true
+        },
+        {
+          "label": "Confirmed",
+          "checked": true
+        },
+        {
+          "label": "Preparing",
+          "checked": true
+        },
+        {
+          "label": "Ready",
+          "checked": true
+        },
+        {
+          "label": "Completed",
+          "checked": true
+        }
+      ],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "t2",
+      "width": 360,
+      "overview": "ORDER STATUS\n\nCompleted\n\nPAYMENT STATUS\n\nVerified\n\nSERVICE TYPE\n\nDine In",
+      "steps": [
+        {
+          "label": "Waiting for Payment Verification",
+          "checked": true
+        },
+        {
+          "label": "Confirmed",
+          "checked": true
+        },
+        {
+          "label": "Preparing",
+          "checked": true
+        },
+        {
+          "label": "Ready",
+          "checked": true
+        },
+        {
+          "label": "Completed",
+          "checked": true
+        }
+      ],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "t2",
+      "width": 390,
+      "overview": "ORDER STATUS\n\nCompleted\n\nPAYMENT STATUS\n\nVerified\n\nSERVICE TYPE\n\nDine In",
+      "steps": [
+        {
+          "label": "Waiting for Payment Verification",
+          "checked": true
+        },
+        {
+          "label": "Confirmed",
+          "checked": true
+        },
+        {
+          "label": "Preparing",
+          "checked": true
+        },
+        {
+          "label": "Ready",
+          "checked": true
+        },
+        {
+          "label": "Completed",
+          "checked": true
+        }
+      ],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "t2",
+      "width": 768,
+      "overview": "ORDER STATUS\n\nCompleted\n\nPAYMENT STATUS\n\nVerified\n\nSERVICE TYPE\n\nDine In",
+      "steps": [
+        {
+          "label": "Waiting for Payment Verification",
+          "checked": true
+        },
+        {
+          "label": "Confirmed",
+          "checked": true
+        },
+        {
+          "label": "Preparing",
+          "checked": true
+        },
+        {
+          "label": "Ready",
+          "checked": true
+        },
+        {
+          "label": "Completed",
+          "checked": true
+        }
+      ],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "t2",
+      "width": 1366,
+      "overview": "ORDER STATUS\n\nCompleted\n\nPAYMENT STATUS\n\nVerified\n\nSERVICE TYPE\n\nDine In",
+      "steps": [
+        {
+          "label": "Waiting for Payment Verification",
+          "checked": true
+        },
+        {
+          "label": "Confirmed",
+          "checked": true
+        },
+        {
+          "label": "Preparing",
+          "checked": true
+        },
+        {
+          "label": "Ready",
+          "checked": true
+        },
+        {
+          "label": "Completed",
+          "checked": true
+        }
+      ],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "t3",
+      "width": 360,
+      "overview": "ORDER STATUS\n\nRider Accepted\n\nPAYMENT STATUS\n\nVerified\n\nSERVICE TYPE\n\nDelivery",
+      "steps": [
+        {
+          "label": "Waiting for Payment Verification",
+          "checked": true
+        },
+        {
+          "label": "Confirmed",
+          "checked": true
+        },
+        {
+          "label": "Preparing",
+          "checked": true
+        },
+        {
+          "label": "Ready",
+          "checked": true
+        },
+        {
+          "label": "Waiting for Rider",
+          "checked": true
+        },
+        {
+          "label": "Rider Accepted",
+          "checked": false
+        },
+        {
+          "label": "Picked Up",
+          "checked": false
+        },
+        {
+          "label": "Out for Delivery",
+          "checked": false
+        },
+        {
+          "label": "Delivered",
+          "checked": false
+        }
+      ],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "t3",
+      "width": 390,
+      "overview": "ORDER STATUS\n\nRider Accepted\n\nPAYMENT STATUS\n\nVerified\n\nSERVICE TYPE\n\nDelivery",
+      "steps": [
+        {
+          "label": "Waiting for Payment Verification",
+          "checked": true
+        },
+        {
+          "label": "Confirmed",
+          "checked": true
+        },
+        {
+          "label": "Preparing",
+          "checked": true
+        },
+        {
+          "label": "Ready",
+          "checked": true
+        },
+        {
+          "label": "Waiting for Rider",
+          "checked": true
+        },
+        {
+          "label": "Rider Accepted",
+          "checked": false
+        },
+        {
+          "label": "Picked Up",
+          "checked": false
+        },
+        {
+          "label": "Out for Delivery",
+          "checked": false
+        },
+        {
+          "label": "Delivered",
+          "checked": false
+        }
+      ],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "t3",
+      "width": 768,
+      "overview": "ORDER STATUS\n\nRider Accepted\n\nPAYMENT STATUS\n\nVerified\n\nSERVICE TYPE\n\nDelivery",
+      "steps": [
+        {
+          "label": "Waiting for Payment Verification",
+          "checked": true
+        },
+        {
+          "label": "Confirmed",
+          "checked": true
+        },
+        {
+          "label": "Preparing",
+          "checked": true
+        },
+        {
+          "label": "Ready",
+          "checked": true
+        },
+        {
+          "label": "Waiting for Rider",
+          "checked": true
+        },
+        {
+          "label": "Rider Accepted",
+          "checked": false
+        },
+        {
+          "label": "Picked Up",
+          "checked": false
+        },
+        {
+          "label": "Out for Delivery",
+          "checked": false
+        },
+        {
+          "label": "Delivered",
+          "checked": false
+        }
+      ],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "t3",
+      "width": 1366,
+      "overview": "ORDER STATUS\n\nRider Accepted\n\nPAYMENT STATUS\n\nVerified\n\nSERVICE TYPE\n\nDelivery",
+      "steps": [
+        {
+          "label": "Waiting for Payment Verification",
+          "checked": true
+        },
+        {
+          "label": "Confirmed",
+          "checked": true
+        },
+        {
+          "label": "Preparing",
+          "checked": true
+        },
+        {
+          "label": "Ready",
+          "checked": true
+        },
+        {
+          "label": "Waiting for Rider",
+          "checked": true
+        },
+        {
+          "label": "Rider Accepted",
+          "checked": false
+        },
+        {
+          "label": "Picked Up",
+          "checked": false
+        },
+        {
+          "label": "Out for Delivery",
+          "checked": false
+        },
+        {
+          "label": "Delivered",
+          "checked": false
+        }
+      ],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "t4",
+      "width": 360,
+      "overview": "ORDER STATUS\n\nDelivered\n\nPAYMENT STATUS\n\nVerified\n\nSERVICE TYPE\n\nDelivery",
+      "steps": [
+        {
+          "label": "Waiting for Payment Verification",
+          "checked": true
+        },
+        {
+          "label": "Confirmed",
+          "checked": true
+        },
+        {
+          "label": "Preparing",
+          "checked": true
+        },
+        {
+          "label": "Ready",
+          "checked": true
+        },
+        {
+          "label": "Waiting for Rider",
+          "checked": true
+        },
+        {
+          "label": "Rider Accepted",
+          "checked": true
+        },
+        {
+          "label": "Picked Up",
+          "checked": true
+        },
+        {
+          "label": "Out for Delivery",
+          "checked": true
+        },
+        {
+          "label": "Delivered",
+          "checked": true
+        }
+      ],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "t4",
+      "width": 390,
+      "overview": "ORDER STATUS\n\nDelivered\n\nPAYMENT STATUS\n\nVerified\n\nSERVICE TYPE\n\nDelivery",
+      "steps": [
+        {
+          "label": "Waiting for Payment Verification",
+          "checked": true
+        },
+        {
+          "label": "Confirmed",
+          "checked": true
+        },
+        {
+          "label": "Preparing",
+          "checked": true
+        },
+        {
+          "label": "Ready",
+          "checked": true
+        },
+        {
+          "label": "Waiting for Rider",
+          "checked": true
+        },
+        {
+          "label": "Rider Accepted",
+          "checked": true
+        },
+        {
+          "label": "Picked Up",
+          "checked": true
+        },
+        {
+          "label": "Out for Delivery",
+          "checked": true
+        },
+        {
+          "label": "Delivered",
+          "checked": true
+        }
+      ],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "t4",
+      "width": 768,
+      "overview": "ORDER STATUS\n\nDelivered\n\nPAYMENT STATUS\n\nVerified\n\nSERVICE TYPE\n\nDelivery",
+      "steps": [
+        {
+          "label": "Waiting for Payment Verification",
+          "checked": true
+        },
+        {
+          "label": "Confirmed",
+          "checked": true
+        },
+        {
+          "label": "Preparing",
+          "checked": true
+        },
+        {
+          "label": "Ready",
+          "checked": true
+        },
+        {
+          "label": "Waiting for Rider",
+          "checked": true
+        },
+        {
+          "label": "Rider Accepted",
+          "checked": true
+        },
+        {
+          "label": "Picked Up",
+          "checked": true
+        },
+        {
+          "label": "Out for Delivery",
+          "checked": true
+        },
+        {
+          "label": "Delivered",
+          "checked": true
+        }
+      ],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "t4",
+      "width": 1366,
+      "overview": "ORDER STATUS\n\nDelivered\n\nPAYMENT STATUS\n\nVerified\n\nSERVICE TYPE\n\nDelivery",
+      "steps": [
+        {
+          "label": "Waiting for Payment Verification",
+          "checked": true
+        },
+        {
+          "label": "Confirmed",
+          "checked": true
+        },
+        {
+          "label": "Preparing",
+          "checked": true
+        },
+        {
+          "label": "Ready",
+          "checked": true
+        },
+        {
+          "label": "Waiting for Rider",
+          "checked": true
+        },
+        {
+          "label": "Rider Accepted",
+          "checked": true
+        },
+        {
+          "label": "Picked Up",
+          "checked": true
+        },
+        {
+          "label": "Out for Delivery",
+          "checked": true
+        },
+        {
+          "label": "Delivered",
+          "checked": true
+        }
+      ],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "t5",
+      "width": 360,
+      "overview": "ORDER STATUS\n\nCancelled\n\nPAYMENT STATUS\n\nVerified\n\nSERVICE TYPE\n\nTakeout",
+      "steps": [],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "t5",
+      "width": 390,
+      "overview": "ORDER STATUS\n\nCancelled\n\nPAYMENT STATUS\n\nVerified\n\nSERVICE TYPE\n\nTakeout",
+      "steps": [],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "t5",
+      "width": 768,
+      "overview": "ORDER STATUS\n\nCancelled\n\nPAYMENT STATUS\n\nVerified\n\nSERVICE TYPE\n\nTakeout",
+      "steps": [],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "t5",
+      "width": 1366,
+      "overview": "ORDER STATUS\n\nCancelled\n\nPAYMENT STATUS\n\nVerified\n\nSERVICE TYPE\n\nTakeout",
+      "steps": [],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "t6",
+      "width": 360,
+      "overview": "ORDER STATUS\n\nWaiting Payment Verification\n\nPAYMENT STATUS\n\nAwaiting Cashier verification\n\nSERVICE TYPE\n\nTakeout",
+      "steps": [
+        {
+          "label": "Waiting for Payment Verification",
+          "checked": false
+        },
+        {
+          "label": "Confirmed",
+          "checked": false
+        },
+        {
+          "label": "Preparing",
+          "checked": false
+        },
+        {
+          "label": "Ready",
+          "checked": false
+        },
+        {
+          "label": "Completed",
+          "checked": false
+        }
+      ],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "t6",
+      "width": 390,
+      "overview": "ORDER STATUS\n\nWaiting Payment Verification\n\nPAYMENT STATUS\n\nAwaiting Cashier verification\n\nSERVICE TYPE\n\nTakeout",
+      "steps": [
+        {
+          "label": "Waiting for Payment Verification",
+          "checked": false
+        },
+        {
+          "label": "Confirmed",
+          "checked": false
+        },
+        {
+          "label": "Preparing",
+          "checked": false
+        },
+        {
+          "label": "Ready",
+          "checked": false
+        },
+        {
+          "label": "Completed",
+          "checked": false
+        }
+      ],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "t6",
+      "width": 768,
+      "overview": "ORDER STATUS\n\nWaiting Payment Verification\n\nPAYMENT STATUS\n\nAwaiting Cashier verification\n\nSERVICE TYPE\n\nTakeout",
+      "steps": [
+        {
+          "label": "Waiting for Payment Verification",
+          "checked": false
+        },
+        {
+          "label": "Confirmed",
+          "checked": false
+        },
+        {
+          "label": "Preparing",
+          "checked": false
+        },
+        {
+          "label": "Ready",
+          "checked": false
+        },
+        {
+          "label": "Completed",
+          "checked": false
+        }
+      ],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "t6",
+      "width": 1366,
+      "overview": "ORDER STATUS\n\nWaiting Payment Verification\n\nPAYMENT STATUS\n\nAwaiting Cashier verification\n\nSERVICE TYPE\n\nTakeout",
+      "steps": [
+        {
+          "label": "Waiting for Payment Verification",
+          "checked": false
+        },
+        {
+          "label": "Confirmed",
+          "checked": false
+        },
+        {
+          "label": "Preparing",
+          "checked": false
+        },
+        {
+          "label": "Ready",
+          "checked": false
+        },
+        {
+          "label": "Completed",
+          "checked": false
+        }
+      ],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "empty",
+      "width": 360,
+      "overview": "",
+      "steps": [],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "empty",
+      "width": 390,
+      "overview": "",
+      "steps": [],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "empty",
+      "width": 768,
+      "overview": "",
+      "steps": [],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "empty",
+      "width": 1366,
+      "overview": "",
+      "steps": [],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "error",
+      "width": 360,
+      "overview": "",
+      "steps": [],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "error",
+      "width": 390,
+      "overview": "",
+      "steps": [],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "error",
+      "width": 768,
+      "overview": "",
+      "steps": [],
+      "overflow": false,
+      "paymentAction": false
+    },
+    {
+      "scenario": "error",
+      "width": 1366,
+      "overview": "",
+      "steps": [],
+      "overflow": false,
+      "paymentAction": false
+    }
+  ],
+  "p4": "pending transition clears resubmission after refresh and remount",
+  "historyNavigation": "Orders to Track Order passed",
+  "blockedNonLoopback": [
+    "https://fonts.googleapis.com/css2",
+    "https://fonts.googleapis.com/css2",
+    "https://fonts.googleapis.com/css2",
+    "https://fonts.googleapis.com/css2",
+    "https://fonts.googleapis.com/css2",
+    "https://fonts.googleapis.com/css2",
+    "https://fonts.googleapis.com/css2",
+    "https://fonts.googleapis.com/css2",
+    "https://fonts.googleapis.com/css2",
+    "https://fonts.googleapis.com/css2",
+    "https://fonts.googleapis.com/css2",
+    "https://fonts.googleapis.com/css2",
+    "https://fonts.googleapis.com/css2",
+    "https://fonts.googleapis.com/css2"
+  ]
+}

@@ -12,19 +12,48 @@ export const DEFAULT_POS_FORM: POSForm = {
   contactNumber: "",
   deliveryAddress: "",
   orderType: "Dine-in",
-  tableNumber: "",
   paymentMethod: "Cash",
   amountTendered: 0,
   gcashReference: "",
   gcashConfirmed: false,
-  discountType: "None",
-  discountReference: "",
-  orderInstructions: "",
 };
 
 type StoredCartLine = Omit<OrderItem, "id"> & { lineId?: string };
 let lineSequence = 0;
 export const createLineId = () => `POS-LINE-${Date.now()}-${++lineSequence}`;
+const PENDING_POS_REQUEST_KEY = "rrj_cashier_pos_pending_request_v1";
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const pendingRequestKey = (cashierId: string) => `${PENDING_POS_REQUEST_KEY}:${cashierId}`;
+
+export function loadPendingPOSRequest(cashierId: string): string | null {
+  try {
+    const saved: unknown = JSON.parse(sessionStorage.getItem(pendingRequestKey(cashierId)) ?? "null");
+    if (!saved || typeof saved !== "object" || !("cashierId" in saved) ||
+      !("requestId" in saved) || saved.cashierId !== cashierId ||
+      typeof saved.requestId !== "string" || !UUID_PATTERN.test(saved.requestId)) return null;
+    return saved.requestId;
+  } catch {
+    return null;
+  }
+}
+
+export function savePendingPOSRequest(cashierId: string, requestId: string): boolean {
+  try {
+    sessionStorage.setItem(pendingRequestKey(cashierId), JSON.stringify({ cashierId, requestId }));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function clearPendingPOSRequest(cashierId: string, requestId: string) {
+  if (loadPendingPOSRequest(cashierId) !== requestId) return;
+  try {
+    sessionStorage.removeItem(pendingRequestKey(cashierId));
+  } catch {
+    // A confirmed sale is already reflected in server-authoritative Cashier state.
+  }
+}
 
 export function loadPOSDraft(): { cart: POSCartLine[]; form: POSForm } {
   try {
@@ -40,7 +69,6 @@ export function loadPOSDraft(): { cart: POSCartLine[]; form: POSForm } {
         : [],
       form: {
         ...DEFAULT_POS_FORM,
-        ...saved?.form,
         orderType:
           saved?.form?.orderType === "Take-out" ||
           saved?.form?.orderType === "Delivery"
@@ -49,9 +77,8 @@ export function loadPOSDraft(): { cart: POSCartLine[]; form: POSForm } {
         customerName: "",
         contactNumber: "",
         deliveryAddress: "",
-        tableNumber: "",
-        discountType: "None",
-        discountReference: "",
+        paymentMethod: "Cash",
+        gcashReference: "",
         gcashConfirmed: false,
       },
     };

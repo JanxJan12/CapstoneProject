@@ -1,0 +1,8 @@
+.customer-app { box-sizing: border-box; background: var(--color-paper); color: var(--color-ink); font-family: var(--font-body); line-height: 1.5; caret-color: var(--color-accent); }
+.customer-app *, .customer-app *::before, .customer-app *::after { box-sizing: border-box; }
+.customer-app ::selection { background: color-mix(in oklab, var(--color-accent) 22%, transparent); color: var(--color-ink); }
+.customer-app :is(button, a, input, textarea, select):focus-visible { outline: 3px solid var(--color-focus); outline-offset: 2px; }
+.customer-app :is(button, input, textarea, select) { font-family: var(--font-body); }
+.customer-app :is(h1, h2, h3) { font-family: var(--font-display); line-height: 1.16; letter-spacing: -0.025em; text-wrap: balance; }
+.customer-app [hidden] { display: none !important; }
+@media (prefers-reduced-motion: reduce) { .customer-app *, .customer-app *::before, .customer-app *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; } }

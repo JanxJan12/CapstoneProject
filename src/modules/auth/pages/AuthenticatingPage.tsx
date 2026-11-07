@@ -343,7 +343,7 @@ export function AuthenticatingPage() {
 
         <p className="text-sm text-muted-foreground">
           {step === "error"
-            ? "Use a Google account assigned to a manager or cashier."
+            ? "Use a Google account assigned as a manager or cashier."
             : "You will be redirected based on your assigned role."}
         </p>
       </div>

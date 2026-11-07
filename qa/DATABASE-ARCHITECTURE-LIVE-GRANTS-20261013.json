@@ -1,0 +1,1050 @@
+{
+  "project": "zhzluhqvysvsadwuugpa",
+  "functions": [
+    {
+      "signature": "accept_rider_offer(uuid)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "adjust_inventory_batch_stock(uuid,uuid,numeric,numeric,text,uuid,text)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "adjust_inventory_stock_legacy_aggregate(uuid,numeric,text,uuid)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": false
+    },
+    {
+      "signature": "adjust_inventory_stock(uuid,numeric,text,uuid)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "advance_kds_order(uuid,text,uuid,order_status)",
+      "anon_execute": true,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "advance_replenishment_request(uuid,text,text)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "advance_rider_delivery(uuid,delivery_assignment_status)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "assert_batch_inventory_consistent(uuid)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": false
+    },
+    {
+      "signature": "assert_inventory_available_for_requested_items(jsonb)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": false
+    },
+    {
+      "signature": "cancel_order(uuid,text)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "close_cashier_shift(numeric,text,text)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "close_inventory_request_short(uuid,integer,text)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "close_replenishment_from_receiving()",
+      "anon_execute": false,
+      "security_definer": false,
+      "authenticated_execute": false
+    },
+    {
+      "signature": "complete_rider_delivery(uuid,text)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "create_receiving_report_draft(uuid,text,text,uuid,timestamp with time zone,text,text)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "create_replenishment_request(uuid,uuid,numeric,timestamp with time zone,text,text)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "create_walk_in_sale(uuid,fulfillment_type,text,text,text,text,text,text,payment_method,numeric,text,jsonb)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "current_user_role()",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "deduct_inventory_for_confirmed_order(uuid)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": false
+    },
+    {
+      "signature": "deduct_inventory_on_confirmed_history()",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": false
+    },
+    {
+      "signature": "delete_empty_receiving_report_draft(uuid)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "derive_inventory_use_by_date(timestamp with time zone,smallint)",
+      "anon_execute": false,
+      "security_definer": false,
+      "authenticated_execute": false
+    },
+    {
+      "signature": "enforce_inventory_batch_allocation_integrity()",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": false
+    },
+    {
+      "signature": "enforce_inventory_batch_shelf_life()",
+      "anon_execute": true,
+      "security_definer": false,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "enforce_inventory_item_quantity_policy()",
+      "anon_execute": true,
+      "security_definer": false,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "enforce_inventory_related_quantity_scale()",
+      "anon_execute": true,
+      "security_definer": false,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "enforce_receiving_item_shelf_life()",
+      "anon_execute": true,
+      "security_definer": false,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "get_cashier_online_payments()",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "get_cashier_sale(uuid)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "get_current_shift_cashier_sales()",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "get_current_shift_walk_in_sales()",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "get_customer_order_payment(uuid)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "get_inventory_request_proposal(timestamp with time zone)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "get_inventory_request_register()",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "get_kds_queue(uuid,text)",
+      "anon_execute": true,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "get_manager_customers()",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "get_manager_dashboard()",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "get_manager_inventory_batch_context()",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "get_manager_inventory_item_detail(uuid)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "get_manager_inventory_movements(uuid,text,date,date,timestamp with time zone,uuid,integer)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "get_manager_inventory_stock_summary()",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "get_manager_inventory_transactions(integer)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "get_manager_inventory()",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "get_manager_menu_items()",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "get_manager_orders(integer)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "get_manager_paid_order_cancellation(uuid)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "get_manager_receiving_documents(text,text,text,date,date,integer,integer)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "get_manager_receiving_workspace(uuid)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "get_manager_rider_application(uuid)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "get_manager_riders()",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "get_manager_sales_report(date,date)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "get_menu_effective_availability()",
+      "anon_execute": true,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "get_open_cashier_shift()",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "get_replenishment_requests()",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "guard_inventory_request_line()",
+      "anon_execute": true,
+      "security_definer": false,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "guard_inventory_request_receiving()",
+      "anon_execute": true,
+      "security_definer": false,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "guard_linked_replenishment_line()",
+      "anon_execute": false,
+      "security_definer": false,
+      "authenticated_execute": false
+    },
+    {
+      "signature": "guard_linked_replenishment_report()",
+      "anon_execute": false,
+      "security_definer": false,
+      "authenticated_execute": false
+    },
+    {
+      "signature": "guard_open_inventory_request_master()",
+      "anon_execute": true,
+      "security_definer": false,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "guard_open_replenishment_item_unit()",
+      "anon_execute": false,
+      "security_definer": false,
+      "authenticated_execute": false
+    },
+    {
+      "signature": "guard_production_replenishment_request()",
+      "anon_execute": false,
+      "security_definer": false,
+      "authenticated_execute": false
+    },
+    {
+      "signature": "handle_new_auth_user()",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": false
+    },
+    {
+      "signature": "initialize_inventory_opening_balance(uuid,jsonb,text,uuid)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "inventory_quantity_matches_scale(numeric,smallint)",
+      "anon_execute": false,
+      "security_definer": false,
+      "authenticated_execute": false
+    },
+    {
+      "signature": "inventory_request_manager_required()",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": false
+    },
+    {
+      "signature": "inventory_usable_quantity(uuid)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": false
+    },
+    {
+      "signature": "issue_inventory_request(uuid,text,timestamp with time zone,text,jsonb,jsonb)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "mutate_inventory_batch_quantity(uuid,uuid,numeric,numeric,text,text,uuid,inventory_transaction_type)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": false
+    },
+    {
+      "signature": "offer_order_to_next_rider(uuid)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "place_customer_order(text,text,text,text,jsonb,uuid)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "post_receiving_report(uuid)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "provision_kds_terminal(text)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "receive_inventory_stock_legacy_aggregate(uuid,numeric,text,uuid)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": false
+    },
+    {
+      "signature": "receive_inventory_stock(uuid,numeric,text,uuid)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "reconcile_inventory_request_receiving()",
+      "anon_execute": true,
+      "security_definer": false,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "record_batch_inventory_waste(uuid,uuid,numeric,numeric,text,uuid,text)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "record_inventory_request_event(uuid,integer,text,jsonb)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "record_inventory_waste_legacy_aggregate(uuid,numeric,text,uuid)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": false
+    },
+    {
+      "signature": "record_inventory_waste(uuid,numeric,text,uuid)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "refresh_receiving_item_shelf_life()",
+      "anon_execute": true,
+      "security_definer": false,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "reject_customer_gcash_payment(uuid,text,text)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "reject_rider_offer(uuid,text)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "release_ready_order(uuid,text)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "remove_receiving_report_item(uuid,uuid)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "revise_inventory_request(uuid,integer,text,timestamp with time zone,text,jsonb,jsonb)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "save_receiving_report_item(uuid,uuid,uuid,uuid,numeric,numeric,numeric,numeric,text,text,date,date,text)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "set_manager_menu_item_availability(uuid,boolean)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "set_manager_rider_approval_status(uuid,rider_approval_status)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "set_rider_availability(rider_availability_status)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "set_updated_at()",
+      "anon_execute": true,
+      "security_definer": false,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "settle_paid_order_cancellation(uuid,text,text,payment_method,text,boolean,boolean)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "start_cashier_shift(text,numeric)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "start_inventory_request_receiving(uuid,integer,uuid,text,text)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "start_replenishment_receiving(uuid)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "submit_customer_payment(uuid,text,text)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "submit_rider_application(text,text,text,text,text,text,text,text)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "update_cashier_order_operational_details(uuid,text,text,text,text,text)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "update_receiving_report_draft(uuid,text,text,uuid,timestamp with time zone,text,text)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "verify_customer_gcash_payment(uuid,uuid)",
+      "anon_execute": false,
+      "security_definer": true,
+      "authenticated_execute": true
+    },
+    {
+      "signature": "verify_kds_terminal(uuid,text)",
+      "anon_execute": true,
+      "security_definer": true,
+      "authenticated_execute": true
+    }
+  ],
+  "table_grants": [
+    {
+      "table": "cashier_shifts",
+      "anon_delete": false,
+      "anon_insert": false,
+      "anon_select": false,
+      "anon_update": false,
+      "anon_maintain": false,
+      "authenticated_delete": false,
+      "authenticated_insert": false,
+      "authenticated_select": true,
+      "authenticated_update": false,
+      "authenticated_maintain": true
+    },
+    {
+      "table": "cashier_transactions",
+      "anon_delete": false,
+      "anon_insert": false,
+      "anon_select": false,
+      "anon_update": false,
+      "anon_maintain": false,
+      "authenticated_delete": false,
+      "authenticated_insert": false,
+      "authenticated_select": true,
+      "authenticated_update": false,
+      "authenticated_maintain": true
+    },
+    {
+      "table": "delivery_assignments",
+      "anon_delete": false,
+      "anon_insert": false,
+      "anon_select": true,
+      "anon_update": false,
+      "anon_maintain": false,
+      "authenticated_delete": false,
+      "authenticated_insert": false,
+      "authenticated_select": true,
+      "authenticated_update": false,
+      "authenticated_maintain": false
+    },
+    {
+      "table": "inventory_batches",
+      "anon_delete": false,
+      "anon_insert": false,
+      "anon_select": false,
+      "anon_update": false,
+      "anon_maintain": false,
+      "authenticated_delete": false,
+      "authenticated_insert": false,
+      "authenticated_select": false,
+      "authenticated_update": false,
+      "authenticated_maintain": false
+    },
+    {
+      "table": "inventory_items",
+      "anon_delete": false,
+      "anon_insert": false,
+      "anon_select": true,
+      "anon_update": false,
+      "anon_maintain": false,
+      "authenticated_delete": false,
+      "authenticated_insert": false,
+      "authenticated_select": true,
+      "authenticated_update": false,
+      "authenticated_maintain": false
+    },
+    {
+      "table": "inventory_opening_balances",
+      "anon_delete": false,
+      "anon_insert": false,
+      "anon_select": false,
+      "anon_update": false,
+      "anon_maintain": false,
+      "authenticated_delete": false,
+      "authenticated_insert": false,
+      "authenticated_select": false,
+      "authenticated_update": false,
+      "authenticated_maintain": false
+    },
+    {
+      "table": "inventory_request_documents",
+      "anon_delete": false,
+      "anon_insert": false,
+      "anon_select": false,
+      "anon_update": false,
+      "anon_maintain": false,
+      "authenticated_delete": false,
+      "authenticated_insert": false,
+      "authenticated_select": false,
+      "authenticated_update": false,
+      "authenticated_maintain": false
+    },
+    {
+      "table": "inventory_request_events",
+      "anon_delete": false,
+      "anon_insert": false,
+      "anon_select": false,
+      "anon_update": false,
+      "anon_maintain": false,
+      "authenticated_delete": false,
+      "authenticated_insert": false,
+      "authenticated_select": false,
+      "authenticated_update": false,
+      "authenticated_maintain": false
+    },
+    {
+      "table": "inventory_request_lines",
+      "anon_delete": false,
+      "anon_insert": false,
+      "anon_select": false,
+      "anon_update": false,
+      "anon_maintain": false,
+      "authenticated_delete": false,
+      "authenticated_insert": false,
+      "authenticated_select": false,
+      "authenticated_update": false,
+      "authenticated_maintain": false
+    },
+    {
+      "table": "inventory_request_revisions",
+      "anon_delete": false,
+      "anon_insert": false,
+      "anon_select": false,
+      "anon_update": false,
+      "anon_maintain": false,
+      "authenticated_delete": false,
+      "authenticated_insert": false,
+      "authenticated_select": false,
+      "authenticated_update": false,
+      "authenticated_maintain": false
+    },
+    {
+      "table": "inventory_transaction_batch_allocations",
+      "anon_delete": false,
+      "anon_insert": false,
+      "anon_select": false,
+      "anon_update": false,
+      "anon_maintain": false,
+      "authenticated_delete": false,
+      "authenticated_insert": false,
+      "authenticated_select": false,
+      "authenticated_update": false,
+      "authenticated_maintain": false
+    },
+    {
+      "table": "inventory_transactions",
+      "anon_delete": false,
+      "anon_insert": false,
+      "anon_select": true,
+      "anon_update": false,
+      "anon_maintain": false,
+      "authenticated_delete": false,
+      "authenticated_insert": false,
+      "authenticated_select": true,
+      "authenticated_update": false,
+      "authenticated_maintain": false
+    },
+    {
+      "table": "kds_terminals",
+      "anon_delete": false,
+      "anon_insert": false,
+      "anon_select": false,
+      "anon_update": false,
+      "anon_maintain": false,
+      "authenticated_delete": false,
+      "authenticated_insert": false,
+      "authenticated_select": false,
+      "authenticated_update": false,
+      "authenticated_maintain": false
+    },
+    {
+      "table": "menu_categories",
+      "anon_delete": false,
+      "anon_insert": false,
+      "anon_select": true,
+      "anon_update": false,
+      "anon_maintain": false,
+      "authenticated_delete": false,
+      "authenticated_insert": false,
+      "authenticated_select": true,
+      "authenticated_update": false,
+      "authenticated_maintain": false
+    },
+    {
+      "table": "menu_ingredients",
+      "anon_delete": false,
+      "anon_insert": false,
+      "anon_select": true,
+      "anon_update": false,
+      "anon_maintain": false,
+      "authenticated_delete": false,
+      "authenticated_insert": false,
+      "authenticated_select": true,
+      "authenticated_update": false,
+      "authenticated_maintain": false
+    },
+    {
+      "table": "menu_item_modifier_groups",
+      "anon_delete": false,
+      "anon_insert": false,
+      "anon_select": false,
+      "anon_update": false,
+      "anon_maintain": false,
+      "authenticated_delete": false,
+      "authenticated_insert": false,
+      "authenticated_select": false,
+      "authenticated_update": false,
+      "authenticated_maintain": false
+    },
+    {
+      "table": "menu_items",
+      "anon_delete": false,
+      "anon_insert": false,
+      "anon_select": true,
+      "anon_update": false,
+      "anon_maintain": false,
+      "authenticated_delete": false,
+      "authenticated_insert": false,
+      "authenticated_select": true,
+      "authenticated_update": false,
+      "authenticated_maintain": false
+    },
+    {
+      "table": "menu_modifier_groups",
+      "anon_delete": false,
+      "anon_insert": false,
+      "anon_select": false,
+      "anon_update": false,
+      "anon_maintain": false,
+      "authenticated_delete": false,
+      "authenticated_insert": false,
+      "authenticated_select": false,
+      "authenticated_update": false,
+      "authenticated_maintain": false
+    },
+    {
+      "table": "menu_modifier_options",
+      "anon_delete": false,
+      "anon_insert": false,
+      "anon_select": false,
+      "anon_update": false,
+      "anon_maintain": false,
+      "authenticated_delete": false,
+      "authenticated_insert": false,
+      "authenticated_select": false,
+      "authenticated_update": false,
+      "authenticated_maintain": false
+    },
+    {
+      "table": "order_items",
+      "anon_delete": false,
+      "anon_insert": false,
+      "anon_select": true,
+      "anon_update": false,
+      "anon_maintain": false,
+      "authenticated_delete": false,
+      "authenticated_insert": false,
+      "authenticated_select": true,
+      "authenticated_update": false,
+      "authenticated_maintain": false
+    },
+    {
+      "table": "order_status_history",
+      "anon_delete": false,
+      "anon_insert": false,
+      "anon_select": true,
+      "anon_update": false,
+      "anon_maintain": false,
+      "authenticated_delete": false,
+      "authenticated_insert": false,
+      "authenticated_select": true,
+      "authenticated_update": false,
+      "authenticated_maintain": false
+    },
+    {
+      "table": "orders",
+      "anon_delete": false,
+      "anon_insert": false,
+      "anon_select": true,
+      "anon_update": false,
+      "anon_maintain": false,
+      "authenticated_delete": false,
+      "authenticated_insert": false,
+      "authenticated_select": true,
+      "authenticated_update": false,
+      "authenticated_maintain": false
+    },
+    {
+      "table": "paid_order_cancellations",
+      "anon_delete": false,
+      "anon_insert": false,
+      "anon_select": false,
+      "anon_update": false,
+      "anon_maintain": false,
+      "authenticated_delete": false,
+      "authenticated_insert": false,
+      "authenticated_select": false,
+      "authenticated_update": false,
+      "authenticated_maintain": false
+    },
+    {
+      "table": "payments",
+      "anon_delete": false,
+      "anon_insert": false,
+      "anon_select": true,
+      "anon_update": false,
+      "anon_maintain": false,
+      "authenticated_delete": false,
+      "authenticated_insert": false,
+      "authenticated_select": true,
+      "authenticated_update": false,
+      "authenticated_maintain": false
+    },
+    {
+      "table": "production_replenishment_requests",
+      "anon_delete": false,
+      "anon_insert": false,
+      "anon_select": false,
+      "anon_update": false,
+      "anon_maintain": false,
+      "authenticated_delete": false,
+      "authenticated_insert": false,
+      "authenticated_select": false,
+      "authenticated_update": false,
+      "authenticated_maintain": false
+    },
+    {
+      "table": "production_replenishment_status_events",
+      "anon_delete": false,
+      "anon_insert": false,
+      "anon_select": false,
+      "anon_update": false,
+      "anon_maintain": false,
+      "authenticated_delete": false,
+      "authenticated_insert": false,
+      "authenticated_select": false,
+      "authenticated_update": false,
+      "authenticated_maintain": false
+    },
+    {
+      "table": "profiles",
+      "anon_delete": false,
+      "anon_insert": false,
+      "anon_select": false,
+      "anon_update": false,
+      "anon_maintain": false,
+      "authenticated_delete": false,
+      "authenticated_insert": false,
+      "authenticated_select": true,
+      "authenticated_update": false,
+      "authenticated_maintain": false
+    },
+    {
+      "table": "purchase_order_items",
+      "anon_delete": false,
+      "anon_insert": false,
+      "anon_select": true,
+      "anon_update": false,
+      "anon_maintain": false,
+      "authenticated_delete": false,
+      "authenticated_insert": false,
+      "authenticated_select": true,
+      "authenticated_update": false,
+      "authenticated_maintain": false
+    },
+    {
+      "table": "purchase_orders",
+      "anon_delete": false,
+      "anon_insert": false,
+      "anon_select": true,
+      "anon_update": false,
+      "anon_maintain": false,
+      "authenticated_delete": false,
+      "authenticated_insert": false,
+      "authenticated_select": true,
+      "authenticated_update": false,
+      "authenticated_maintain": false
+    },
+    {
+      "table": "receiving_report_items",
+      "anon_delete": false,
+      "anon_insert": false,
+      "anon_select": false,
+      "anon_update": false,
+      "anon_maintain": false,
+      "authenticated_delete": false,
+      "authenticated_insert": false,
+      "authenticated_select": false,
+      "authenticated_update": false,
+      "authenticated_maintain": false
+    },
+    {
+      "table": "receiving_reports",
+      "anon_delete": false,
+      "anon_insert": false,
+      "anon_select": false,
+      "anon_update": false,
+      "anon_maintain": false,
+      "authenticated_delete": false,
+      "authenticated_insert": false,
+      "authenticated_select": false,
+      "authenticated_update": false,
+      "authenticated_maintain": false
+    },
+    {
+      "table": "riders",
+      "anon_delete": false,
+      "anon_insert": false,
+      "anon_select": false,
+      "anon_update": false,
+      "anon_maintain": false,
+      "authenticated_delete": false,
+      "authenticated_insert": false,
+      "authenticated_select": true,
+      "authenticated_update": false,
+      "authenticated_maintain": true
+    },
+    {
+      "table": "supplier_items",
+      "anon_delete": false,
+      "anon_insert": false,
+      "anon_select": true,
+      "anon_update": false,
+      "anon_maintain": false,
+      "authenticated_delete": false,
+      "authenticated_insert": false,
+      "authenticated_select": true,
+      "authenticated_update": false,
+      "authenticated_maintain": false
+    },
+    {
+      "table": "suppliers",
+      "anon_delete": false,
+      "anon_insert": false,
+      "anon_select": true,
+      "anon_update": false,
+      "anon_maintain": false,
+      "authenticated_delete": false,
+      "authenticated_insert": false,
+      "authenticated_select": true,
+      "authenticated_update": false,
+      "authenticated_maintain": false
+    }
+  ],
+  "captured_at_utc": "2026-10-13T07:24:45.586652+00:00"
+}

@@ -1,11 +1,12 @@
-import { ConfirmationDialog, ErrorBanner } from "../components";
+import { useEffect, useRef, useState } from "react";
+import { CashierButton, ConfirmationDialog, ErrorBanner } from "../components";
 import { MenuGrid } from "./MenuGrid";
-import { ModifierDrawer } from "./ModifierDrawer";
+import { ChoiceDrawer } from "./ChoiceDrawer";
 import { NewOrderDialog } from "./NewOrderDialog";
 import { OrderTypeGate } from "./OrderTypeGate";
-import { OrderReviewDrawer } from "./OrderReviewDrawer";
 import { PaymentPanel } from "./PaymentPanel";
 import { POSOrderHeader } from "./POSOrderHeader";
+import { POSOrderSidebar } from "./POSOrderSidebar";
 import { ReceiptPanel } from "./ReceiptPanel";
 import { TransactionBar } from "./TransactionBar";
 import { POSTransactionState } from "./types";
@@ -13,10 +14,20 @@ import { useWalkInPOSController } from "./useWalkInPOSController";
 
 export function WalkInPOSPage({
   onDirtyChange,
+  onOpenShift,
 }: {
   onDirtyChange: (dirty: boolean) => void;
+  onOpenShift: () => void;
 }) {
   const pos = useWalkInPOSController(onDirtyChange);
+  const [orderPanelExpanded, setOrderPanelExpanded] = useState(() => pos.cart.length > 0);
+  const [mobileOrderOpen, setMobileOrderOpen] = useState(false);
+  const previousCartLength = useRef(pos.cart.length);
+  useEffect(() => {
+    if (previousCartLength.current === 0 && pos.cart.length > 0) setOrderPanelExpanded(true);
+    if (pos.cart.length === 0) setOrderPanelExpanded(false);
+    previousCartLength.current = pos.cart.length;
+  }, [pos.cart.length]);
   const confirmation = getConfirmationCopy(pos.pendingAction?.type);
   const lastItem = pos.cart.at(-1);
   const lastItemCode = pos.state.menuItems.find(
@@ -24,68 +35,34 @@ export function WalkInPOSPage({
   )?.code;
   const drawerOpen =
     Boolean(pos.selectedItem) ||
-    pos.transactionState === POSTransactionState.ORDER_REVIEW ||
     pos.transactionState === POSTransactionState.PAYMENT ||
     pos.transactionState === POSTransactionState.RECEIPT;
   const orderTypeGateOpen =
     !pos.orderTypeSelected &&
     pos.transactionState !== POSTransactionState.RECEIPT;
-  const changingOrderType =
-    orderTypeGateOpen && pos.transactionState === POSTransactionState.ORDERING;
+  useEffect(() => {
+    if (orderTypeGateOpen) setMobileOrderOpen(false);
+  }, [orderTypeGateOpen]);
   const closeDrawer = () => {
     if (pos.selectedItem) pos.closeCustomize();
-    else if (pos.transactionState === POSTransactionState.ORDER_REVIEW) {
-      pos.backToOrdering();
-    } else if (pos.transactionState === POSTransactionState.PAYMENT) {
-      pos.backToReview();
-    }
+    else if (pos.transactionState === POSTransactionState.PAYMENT) pos.backToOrdering();
   };
 
   const drawer = pos.selectedItem ? (
-    <ModifierDrawer
+    <ChoiceDrawer
       item={pos.selectedItem}
       initialLine={pos.editingLine}
       currentQuantity={pos.currentSelectedQuantity}
       onCancel={pos.closeCustomize}
       onAdd={pos.addCustomizedItem}
     />
-  ) : pos.transactionState === POSTransactionState.ORDER_REVIEW ? (
-    <OrderReviewDrawer
-      orderNumber={pos.orderNumber}
-      orderType={pos.walkInOrderType}
-      items={pos.cart}
-      values={pos.values}
-      optionsOpen={pos.optionsOpen}
-      subtotal={pos.subtotal}
-      discountAmount={pos.discountAmount}
-      taxAmount={pos.taxAmount}
-      taxEnabled={pos.taxEnabled}
-      total={pos.total}
-      canContinue={pos.canContinueToPayment}
-      disabledReason={pos.summaryDisabledReason}
-      register={pos.register}
-      errors={pos.errors}
-      onOptionsOpenChange={pos.setOptionsOpen}
-      onAdjust={pos.adjust}
-      onQuantityChange={pos.setLineQuantity}
-      onRemove={pos.requestRemove}
-      onDuplicate={pos.duplicate}
-      onNoteChange={pos.note}
-      onCustomize={pos.editLine}
-      onReorder={pos.reorder}
-      onClear={() => pos.setPendingAction({ type: "clear" })}
-      onClose={pos.backToOrdering}
-      onContinue={pos.continueToPayment}
-    />
   ) : pos.transactionState === POSTransactionState.PAYMENT ? (
     <PaymentPanel
       orderNumber={pos.orderNumber}
       subtotal={pos.subtotal}
-      discountAmount={pos.discountAmount}
       taxAmount={pos.taxAmount}
       taxEnabled={pos.taxEnabled}
       total={pos.total}
-      paymentMethod={pos.values.paymentMethod}
       tendered={pos.tendered}
       register={pos.register}
       errors={pos.errors}
@@ -96,7 +73,7 @@ export function WalkInPOSPage({
       confirmRef={pos.confirmOrderRef}
       submitLabel="Confirm & Send"
       onTenderedChange={pos.setTendered}
-      onBackToSummary={pos.backToReview}
+      onBackToOrder={pos.backToOrdering}
       onConfirm={pos.submitOrder}
     />
   ) : pos.transactionState === POSTransactionState.RECEIPT &&
@@ -110,6 +87,65 @@ export function WalkInPOSPage({
       onNewOrder={pos.closeReceipt}
     />
   ) : null;
+
+  if (pos.recoveryStatus || pos.submittingSale) {
+    return (
+      <section className="mx-auto flex min-h-[320px] max-w-xl flex-col justify-center gap-4 p-6" aria-live="polite">
+        <h2 className="text-xl font-bold">{pos.recoveryStatus ? "Checking walk-in sale" : "Submitting walk-in sale"}</h2>
+        <p role="status" className="text-sm">
+          {pos.submittingSale && !pos.recoveryStatus
+            ? "Waiting for the sale response. Keep this order open."
+            : pos.recoveryStatus === "checking"
+            ? "Checking the transaction before another sale can be started."
+            : pos.error || "The sale outcome is not yet confirmed. Check its status before another sale."}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          The sale request is preserved in this tab. An empty current-shift search does not prove that the sale failed.
+        </p>
+        {pos.recoveryStatus ? (
+          <CashierButton
+            disabled={pos.recoveryStatus === "checking"}
+            loading={pos.recoveryStatus === "checking"}
+            onClick={() => void pos.checkSaleStatus()}
+          >
+            Check transaction status
+          </CashierButton>
+        ) : null}
+        {pos.canRetrySameSale ? (
+          <CashierButton variant="secondary" onClick={pos.retrySameSale}>
+            Retry the same sale request
+          </CashierButton>
+        ) : null}
+      </section>
+    );
+  }
+
+  const orderEditorProps = {
+    items: pos.cart,
+    orderNumber: pos.orderNumber,
+    orderType: pos.walkInOrderType,
+    subtotal: pos.subtotal,
+    taxAmount: pos.taxAmount,
+    taxEnabled: pos.taxEnabled,
+    total: pos.total,
+    shiftOpen: Boolean(pos.activeShift),
+    busy: pos.loading || pos.transactionState === POSTransactionState.RECEIPT,
+    canContinue: pos.canContinueToPayment,
+    disabledReason: pos.summaryDisabledReason,
+    onOpenShift,
+    onAdjust: pos.adjust,
+    onQuantityChange: pos.setLineQuantity,
+    onRemove: pos.requestRemove,
+    onReorder: pos.reorder,
+    onClear: () => pos.setPendingAction({ type: "clear" as const }),
+    onPayment: pos.beginPayment,
+  };
+  const closeMobileOrder = () => {
+    setMobileOrderOpen(false);
+    window.requestAnimationFrame(() =>
+      document.querySelector<HTMLButtonElement>(".pos-view-order")?.focus(),
+    );
+  };
 
   return (
     <div
@@ -142,7 +178,7 @@ export function WalkInPOSPage({
           onHold={() => pos.runQuickAction("hold")}
           onCancel={pos.requestCancel}
           onReopen={pos.reopenHeld}
-          onChangeOrderType={pos.requestOrderTypeChange}
+          onSelectOrderType={pos.selectOrderType}
         />
       ) : null}
 
@@ -152,29 +188,39 @@ export function WalkInPOSPage({
         </div>
       ) : null}
 
-      <main className="pos-workspace min-h-0 flex-1">
-        {orderTypeGateOpen ? (
-          <OrderTypeGate
-            busy={pos.loading}
-            currentType={pos.walkInOrderType}
-            onSelect={pos.selectOrderType}
-            onCancel={changingOrderType ? pos.cancelOrderTypeChange : undefined}
+      <div className="pos-entry-layout min-h-0 flex-1" data-order-panel={orderPanelExpanded ? "expanded" : "collapsed"}>
+        <main className="pos-workspace min-h-0 flex-1">
+          {orderTypeGateOpen ? (
+            <OrderTypeGate
+              busy={pos.loading}
+              shiftOpen={Boolean(pos.activeShift)}
+              currentType={pos.walkInOrderType}
+              onSelect={pos.selectOrderType}
+              onOpenShift={onOpenShift}
+            />
+          ) : (
+            <MenuGrid
+              menuItems={pos.state.menuItems}
+              cart={pos.cart}
+              category={pos.category}
+              search={pos.search}
+              bestSellerIds={pos.bestSellerIds}
+              activeItemId={pos.activeSearchItemId}
+              onCategoryChange={pos.setCategory}
+              onSelect={pos.openCustomize}
+              onQuickAdd={pos.addItem}
+            />
+          )}
+        </main>
+
+        {!orderTypeGateOpen ? (
+          <POSOrderSidebar
+            {...orderEditorProps}
+            expanded={orderPanelExpanded}
+            onToggle={() => setOrderPanelExpanded((expanded) => !expanded)}
           />
-        ) : (
-          <MenuGrid
-            menuItems={pos.state.menuItems}
-            cart={pos.cart}
-            category={pos.category}
-            search={pos.search}
-            bestSellerIds={pos.bestSellerIds}
-            activeItemId={pos.activeSearchItemId}
-            heldOrderCount={pos.state.heldOrders.length}
-            onCategoryChange={pos.setCategory}
-            onSelect={pos.openCustomize}
-            onQuickAdd={pos.addItem}
-          />
-        )}
-      </main>
+        ) : null}
+      </div>
 
       {!orderTypeGateOpen ? (
         <TransactionBar
@@ -186,12 +232,27 @@ export function WalkInPOSPage({
           busy={
             pos.loading || pos.transactionState === POSTransactionState.RECEIPT
           }
+          shiftOpen={Boolean(pos.activeShift)}
+          onOpenShift={onOpenShift}
           paymentRef={pos.checkoutRef}
           onAdjust={pos.adjust}
           onUndoLast={pos.undoLastAdd}
-          onReview={pos.openOrderReview}
+          onViewOrder={() => setMobileOrderOpen(true)}
           onPayment={pos.beginPayment}
         />
+      ) : null}
+
+      {mobileOrderOpen && !orderTypeGateOpen ? (
+        <div className="pos-mobile-order-overlay">
+          <button type="button" className="pos-mobile-order-backdrop" aria-label="Close current order" tabIndex={-1} onClick={closeMobileOrder} />
+          <POSOrderSidebar
+            {...orderEditorProps}
+            detailsId="pos-mobile-order-details"
+            expanded
+            focusToggle
+            onToggle={closeMobileOrder}
+          />
+        </div>
       ) : null}
 
       {drawerOpen ? (
@@ -213,9 +274,7 @@ export function WalkInPOSPage({
             aria-label={
               pos.selectedItem
                 ? `Customize ${pos.selectedItem.name}`
-                : pos.transactionState === POSTransactionState.ORDER_REVIEW
-                  ? "Review current order"
-                  : pos.transactionState === POSTransactionState.PAYMENT
+                : pos.transactionState === POSTransactionState.PAYMENT
                     ? "Take payment"
                     : "Completed order receipt"
             }
@@ -273,7 +332,7 @@ function getConfirmationCopy(type?: "clear" | "cancel" | "remove" | "reopen") {
   if (type === "clear") {
     return {
       title: "Clear the entire order?",
-      description: "All items, notes, and payment details will be removed.",
+      description: "All items and payment details will be removed.",
       confirmLabel: "Clear order",
     };
   }

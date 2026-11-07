@@ -1,0 +1,313 @@
+{
+  "nodes": [
+    {
+      "id": "foodpanda_observation_document",
+      "label": "Foodpanda indexed page observation",
+      "file_type": "document",
+      "source_file": "C:\\Users\\Janmari\\Downloads\\Capstone Project\\qa\\foodpanda-carriedo-graph-corpus\\foodpanda-observation.md",
+      "source_location": "1-19",
+      "source_url": "https://www.foodpanda.ph/restaurant/d8wg/jollibee-carriedo",
+      "captured_at": "2026-11-04",
+      "_origin": "semantic"
+    },
+    {
+      "id": "foodpanda_observation_restaurant_entry",
+      "label": "Jollibee Carriedo restaurant entry",
+      "file_type": "concept",
+      "source_file": "C:\\Users\\Janmari\\Downloads\\Capstone Project\\qa\\foodpanda-carriedo-graph-corpus\\foodpanda-observation.md",
+      "source_location": "5-7",
+      "source_url": "https://www.foodpanda.ph/restaurant/d8wg/jollibee-carriedo",
+      "captured_at": "2026-11-04",
+      "_origin": "semantic"
+    },
+    {
+      "id": "foodpanda_observation_menu_search",
+      "label": "Search in menu",
+      "file_type": "concept",
+      "source_file": "C:\\Users\\Janmari\\Downloads\\Capstone Project\\qa\\foodpanda-carriedo-graph-corpus\\foodpanda-observation.md",
+      "source_location": "9-11",
+      "source_url": "https://www.foodpanda.ph/restaurant/d8wg/jollibee-carriedo",
+      "captured_at": "2026-11-04",
+      "_origin": "semantic"
+    },
+    {
+      "id": "foodpanda_observation_menu_categories",
+      "label": "Menu categories",
+      "file_type": "concept",
+      "source_file": "C:\\Users\\Janmari\\Downloads\\Capstone Project\\qa\\foodpanda-carriedo-graph-corpus\\foodpanda-observation.md",
+      "source_location": "9-11",
+      "source_url": "https://www.foodpanda.ph/restaurant/d8wg/jollibee-carriedo",
+      "captured_at": "2026-11-04",
+      "_origin": "semantic"
+    },
+    {
+      "id": "foodpanda_observation_product_rows",
+      "label": "Grouped product rows with names and prices",
+      "file_type": "concept",
+      "source_file": "C:\\Users\\Janmari\\Downloads\\Capstone Project\\qa\\foodpanda-carriedo-graph-corpus\\foodpanda-observation.md",
+      "source_location": "13-15",
+      "source_url": "https://www.foodpanda.ph/restaurant/d8wg/jollibee-carriedo",
+      "captured_at": "2026-11-04",
+      "_origin": "semantic"
+    },
+    {
+      "id": "foodpanda_observation_evidence_limit",
+      "label": "Indexed page evidence limit",
+      "file_type": "rationale",
+      "source_file": "C:\\Users\\Janmari\\Downloads\\Capstone Project\\qa\\foodpanda-carriedo-graph-corpus\\foodpanda-observation.md",
+      "source_location": "17-19",
+      "source_url": "https://www.foodpanda.ph/restaurant/d8wg/jollibee-carriedo",
+      "captured_at": "2026-11-04",
+      "rationale": "Indexed text does not expose cart, checkout, payment, or tracking; direct fetch returned HTTP 403.",
+      "_origin": "semantic"
+    },
+    {
+      "id": "rrj_map_document",
+      "label": "RRJ customer module presentation mapping",
+      "file_type": "document",
+      "source_file": "C:\\Users\\Janmari\\Downloads\\Capstone Project\\qa\\foodpanda-carriedo-graph-corpus\\rrj-map.md",
+      "source_location": "1-13",
+      "_origin": "semantic"
+    },
+    {
+      "id": "rrj_map_customer_menu",
+      "label": "RRJ Menu search, categories, and product facts",
+      "file_type": "concept",
+      "source_file": "C:\\Users\\Janmari\\Downloads\\Capstone Project\\qa\\foodpanda-carriedo-graph-corpus\\rrj-map.md",
+      "source_location": "5-7",
+      "_origin": "semantic"
+    },
+    {
+      "id": "rrj_map_item_detail",
+      "label": "RRJ item detail choices, quantity, price, and Add to Cart",
+      "file_type": "concept",
+      "source_file": "C:\\Users\\Janmari\\Downloads\\Capstone Project\\qa\\foodpanda-carriedo-graph-corpus\\rrj-map.md",
+      "source_location": "9",
+      "_origin": "semantic"
+    },
+    {
+      "id": "rrj_map_unverified_marketplace_claims",
+      "label": "Ratings, popularity, deals, and minimum order lack RRJ evidence",
+      "file_type": "rationale",
+      "source_file": "C:\\Users\\Janmari\\Downloads\\Capstone Project\\qa\\foodpanda-carriedo-graph-corpus\\rrj-map.md",
+      "source_location": "11",
+      "rationale": "RRJ lacks verified data for these marketplace claims.",
+      "_origin": "semantic"
+    },
+    {
+      "id": "rrj_map_checkout_tracking_boundary",
+      "label": "RRJ checkout and tracking require separate review",
+      "file_type": "rationale",
+      "source_file": "C:\\Users\\Janmari\\Downloads\\Capstone Project\\qa\\foodpanda-carriedo-graph-corpus\\rrj-map.md",
+      "source_location": "13",
+      "rationale": "The indexed page does not show cart or checkout.",
+      "_origin": "semantic"
+    }
+  ],
+  "edges": [
+    {
+      "source": "rrj_map_document",
+      "target": "foodpanda_observation_document",
+      "relation": "cites",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "C:\\Users\\Janmari\\Downloads\\Capstone Project\\qa\\foodpanda-carriedo-graph-corpus\\rrj-map.md",
+      "source_location": "3",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "foodpanda_observation_restaurant_entry",
+      "target": "foodpanda_observation_menu_search",
+      "relation": "precedes",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "C:\\Users\\Janmari\\Downloads\\Capstone Project\\qa\\foodpanda-carriedo-graph-corpus\\foodpanda-observation.md",
+      "source_location": "5-11",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "foodpanda_observation_menu_search",
+      "target": "foodpanda_observation_menu_categories",
+      "relation": "precedes",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "C:\\Users\\Janmari\\Downloads\\Capstone Project\\qa\\foodpanda-carriedo-graph-corpus\\foodpanda-observation.md",
+      "source_location": "11",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "foodpanda_observation_menu_categories",
+      "target": "foodpanda_observation_product_rows",
+      "relation": "groups",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "C:\\Users\\Janmari\\Downloads\\Capstone Project\\qa\\foodpanda-carriedo-graph-corpus\\foodpanda-observation.md",
+      "source_location": "13-15",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "rrj_map_customer_menu",
+      "target": "foodpanda_observation_menu_search",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "C:\\Users\\Janmari\\Downloads\\Capstone Project\\qa\\foodpanda-carriedo-graph-corpus\\rrj-map.md",
+      "source_location": "7",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "rrj_map_customer_menu",
+      "target": "foodpanda_observation_product_rows",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "C:\\Users\\Janmari\\Downloads\\Capstone Project\\qa\\foodpanda-carriedo-graph-corpus\\rrj-map.md",
+      "source_location": "9",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "rrj_map_checkout_tracking_boundary",
+      "target": "foodpanda_observation_evidence_limit",
+      "relation": "supported_by",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "C:\\Users\\Janmari\\Downloads\\Capstone Project\\qa\\foodpanda-carriedo-graph-corpus\\rrj-map.md",
+      "source_location": "13",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "foodpanda_observation_document",
+      "target": "foodpanda_observation_restaurant_entry",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "C:\\Users\\Janmari\\Downloads\\Capstone Project\\qa\\foodpanda-carriedo-graph-corpus\\foodpanda-observation.md",
+      "source_location": "5-7",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "foodpanda_observation_document",
+      "target": "foodpanda_observation_menu_search",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "C:\\Users\\Janmari\\Downloads\\Capstone Project\\qa\\foodpanda-carriedo-graph-corpus\\foodpanda-observation.md",
+      "source_location": "9-11",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "foodpanda_observation_document",
+      "target": "foodpanda_observation_product_rows",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "C:\\Users\\Janmari\\Downloads\\Capstone Project\\qa\\foodpanda-carriedo-graph-corpus\\foodpanda-observation.md",
+      "source_location": "13-15",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "foodpanda_observation_document",
+      "target": "foodpanda_observation_evidence_limit",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "C:\\Users\\Janmari\\Downloads\\Capstone Project\\qa\\foodpanda-carriedo-graph-corpus\\foodpanda-observation.md",
+      "source_location": "17-19",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "rrj_map_document",
+      "target": "rrj_map_customer_menu",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "C:\\Users\\Janmari\\Downloads\\Capstone Project\\qa\\foodpanda-carriedo-graph-corpus\\rrj-map.md",
+      "source_location": "5-7",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "rrj_map_document",
+      "target": "rrj_map_item_detail",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "C:\\Users\\Janmari\\Downloads\\Capstone Project\\qa\\foodpanda-carriedo-graph-corpus\\rrj-map.md",
+      "source_location": "9",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "rrj_map_document",
+      "target": "rrj_map_unverified_marketplace_claims",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "C:\\Users\\Janmari\\Downloads\\Capstone Project\\qa\\foodpanda-carriedo-graph-corpus\\rrj-map.md",
+      "source_location": "11",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "rrj_map_document",
+      "target": "rrj_map_checkout_tracking_boundary",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "C:\\Users\\Janmari\\Downloads\\Capstone Project\\qa\\foodpanda-carriedo-graph-corpus\\rrj-map.md",
+      "source_location": "13",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "rrj_map_item_detail",
+      "target": "foodpanda_observation_product_rows",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": "C:\\Users\\Janmari\\Downloads\\Capstone Project\\qa\\foodpanda-carriedo-graph-corpus\\rrj-map.md",
+      "source_location": "9",
+      "weight": 1.0,
+      "_origin": "semantic"
+    },
+    {
+      "source": "rrj_map_unverified_marketplace_claims",
+      "target": "foodpanda_observation_restaurant_entry",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "C:\\Users\\Janmari\\Downloads\\Capstone Project\\qa\\foodpanda-carriedo-graph-corpus\\rrj-map.md",
+      "source_location": "11",
+      "weight": 1.0,
+      "_origin": "semantic"
+    }
+  ],
+  "hyperedges": [
+    {
+      "id": "foodpanda_observation_menu_discovery",
+      "label": "Foodpanda menu discovery sequence",
+      "nodes": [
+        "foodpanda_observation_menu_search",
+        "foodpanda_observation_menu_categories",
+        "foodpanda_observation_product_rows"
+      ],
+      "relation": "menu_discovery",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "C:\\Users\\Janmari\\Downloads\\Capstone Project\\qa\\foodpanda-carriedo-graph-corpus\\foodpanda-observation.md"
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

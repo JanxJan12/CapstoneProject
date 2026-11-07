@@ -15,6 +15,7 @@ export interface RiderDeliveryItem {
   quantity: number;
   unitPrice: number;
   specialInstructions?: string;
+  modifiers: string[];
 }
 
 export interface RiderDeliveryRequest {
@@ -34,7 +35,6 @@ export interface RiderDeliveryRequest {
   deliveryFee: number;
   total: number;
 
-  notes?: string;
 
   assignedAt: string;
 
@@ -42,6 +42,7 @@ export interface RiderDeliveryRequest {
 }
 
 export interface RiderProfile {
+  approvalStatus: "pending" | "approved" | "rejected" | "suspended";
   contactNumber?: string;
   driverLicenseNumber?: string;
   plateNumber?: string;
@@ -64,12 +65,64 @@ export interface AdvanceRiderDeliveryResult {
     | "out_for_delivery";
 }
 
+export class RiderAdvanceRejectedError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "RiderAdvanceRejectedError";
+  }
+}
+
 export interface CompleteRiderDeliveryResult {
   assignment_id: string;
   order_id: string;
   assignment_status: "delivered";
   order_status: "delivered";
   proof_of_delivery_path: string;
+}
+
+export class RiderCompletionRejectedError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "RiderCompletionRejectedError";
+  }
+}
+
+export interface RiderCompletionSnapshot {
+  assignmentId: string;
+  orderId: string;
+  assignmentStatus: RiderAssignmentStatus;
+  orderStatus: string;
+  proofPath: string | null;
+}
+
+export async function fetchRiderCompletionSnapshot(
+  assignmentId: string,
+): Promise<RiderCompletionSnapshot | null> {
+  // Both reads are restricted to this rider's assignment and assigned order by RLS.
+  const { data: assignment, error: assignmentError } = await supabase
+    .from("delivery_assignments")
+    .select("id, order_id, status, proof_of_delivery_path")
+    .eq("id", assignmentId)
+    .maybeSingle();
+  if (assignmentError) throw new Error("Could not check the delivery status. Try again.");
+  if (!assignment) return null;
+  if (assignment.id !== assignmentId) throw new Error("The delivery assignment could not be verified.");
+
+  const { data: order, error: orderError } = await supabase
+    .from("orders")
+    .select("id, current_status")
+    .eq("id", assignment.order_id)
+    .maybeSingle();
+  if (orderError || !order || order.id !== assignment.order_id) {
+    throw new Error("Could not check the order status. Try again.");
+  }
+  return {
+    assignmentId: assignment.id,
+    orderId: assignment.order_id,
+    assignmentStatus: assignment.status as RiderAssignmentStatus,
+    orderStatus: order.current_status,
+    proofPath: assignment.proof_of_delivery_path,
+  };
 }
 
 export interface RiderDashboardStats {
@@ -94,7 +147,6 @@ interface OrderRow {
   subtotal: number | string;
   delivery_fee: number | string;
   grand_total: number | string;
-  notes: string | null;
 }
 
 interface OrderItemRow {
@@ -104,6 +156,15 @@ interface OrderItemRow {
   quantity: number;
   unit_price: number | string;
   special_instructions: string | null;
+  modifiers: unknown;
+}
+
+function modifierNames(snapshot: unknown): string[] {
+  if (!Array.isArray(snapshot)) return [];
+  return snapshot.flatMap((entry) =>
+    entry && typeof entry === "object" && "name" in entry &&
+    typeof entry.name === "string" ? [entry.name] : [],
+  );
 }
 
 export interface SetRiderAvailabilityResult {
@@ -127,6 +188,39 @@ export interface AcceptRiderOfferResult {
   order_number: string;
   assignment_status: "accepted";
   order_status: "rider_accepted";
+}
+
+export class RiderOfferRejectedError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "RiderOfferRejectedError";
+  }
+}
+
+export interface RiderAssignmentSnapshot {
+  assignmentId: string;
+  orderId: string;
+  status: RiderAssignmentStatus;
+}
+
+export async function fetchRiderAssignmentSnapshot(
+  assignmentId: string,
+): Promise<RiderAssignmentSnapshot | null> {
+  // RLS restricts this exact assignment read to the authenticated rider.
+  const { data, error } = await supabase
+    .from("delivery_assignments")
+    .select("id, order_id, status")
+    .eq("id", assignmentId)
+    .maybeSingle();
+  if (error) throw new Error("Could not check the delivery assignment. Try again.");
+  if (!data) return null;
+  const status = data.status as RiderAssignmentStatus;
+  if (data.id !== assignmentId || ![
+    "offered", "accepted", "rejected", "picked_up", "out_for_delivery", "delivered", "cancelled",
+  ].includes(status)) {
+    throw new Error("The delivery assignment could not be verified. Try again.");
+  }
+  return { assignmentId: data.id, orderId: data.order_id, status };
 }
 
 export interface RiderProfileStats {
@@ -205,8 +299,7 @@ export async function fetchRiderOffers():
         landmark,
         subtotal,
         delivery_fee,
-        grand_total,
-        notes
+        grand_total
       `)
       .in("id", orderIds),
 
@@ -218,7 +311,8 @@ export async function fetchRiderOffers():
         item_name,
         quantity,
         unit_price,
-        special_instructions
+        special_instructions,
+        modifiers
       `)
       .in("order_id", orderIds)
       .order("created_at", {
@@ -272,6 +366,7 @@ export async function fetchRiderOffers():
       specialInstructions:
         item.special_instructions?.trim() ||
         undefined,
+      modifiers: modifierNames(item.modifiers),
     });
 
     itemsByOrder.set(
@@ -334,10 +429,6 @@ export async function fetchRiderOffers():
               order.grand_total,
             ),
 
-          notes:
-            order.notes?.trim() ||
-            undefined,
-
           assignedAt:
             assignment.assigned_at,
 
@@ -371,9 +462,17 @@ export async function acceptRiderOffer(
   );
 
   if (error) {
-    throw new Error(
-      `Unable to accept delivery: ${error.message}`,
-    );
+    const message = /must be available/i.test(error.message)
+      ? "Set your availability to Available before accepting."
+      : /already have an active delivery/i.test(error.message)
+        ? "Finish your active delivery before accepting another."
+        : /no longer available|no longer waiting|not found/i.test(error.message)
+          ? "This offer is no longer available. Check your offers."
+          : "The offer could not be accepted. Check its current status.";
+    if (/^[A-Z0-9]{5}$/i.test(error.code ?? "")) {
+      throw new RiderOfferRejectedError(message);
+    }
+    throw new Error("The acceptance response is uncertain. Check the delivery assignment.");
   }
 
   const result = (
@@ -382,8 +481,13 @@ export async function acceptRiderOffer(
 
   if (!result) {
     throw new Error(
-      "The delivery was accepted, but no updated assignment was returned.",
+      "The acceptance response is uncertain. Check the delivery assignment.",
     );
+  }
+
+  if (result.assignment_id !== normalizedId || result.assignment_status !== "accepted" ||
+    result.order_status !== "rider_accepted") {
+    throw new Error("The acceptance response did not match this offer. Check the delivery assignment.");
   }
 
   return result;
@@ -448,8 +552,7 @@ export async function fetchActiveRiderDelivery():
         landmark,
         subtotal,
         delivery_fee,
-        grand_total,
-        notes
+        grand_total
       `)
       .eq("id", assignment.order_id)
       .single(),
@@ -462,7 +565,8 @@ export async function fetchActiveRiderDelivery():
         item_name,
         quantity,
         unit_price,
-        special_instructions
+        special_instructions,
+        modifiers
       `)
       .eq("order_id", assignment.order_id)
       .order("created_at", {
@@ -522,10 +626,6 @@ export async function fetchActiveRiderDelivery():
     total:
       toNumber(order.grand_total),
 
-    notes:
-      order.notes?.trim() ||
-      undefined,
-
     assignedAt:
       assignment.assigned_at,
 
@@ -544,6 +644,7 @@ export async function fetchActiveRiderDelivery():
       specialInstructions:
         item.special_instructions?.trim() ||
         undefined,
+      modifiers: modifierNames(item.modifiers),
     })),
   };
 }
@@ -596,7 +697,8 @@ export async function fetchRiderProfile():
         plate_number,
         motor_brand,
         motor_model,
-        availability_status
+        availability_status,
+        approval_status
       `)
       .eq("id", userId)
       .single(),
@@ -615,6 +717,7 @@ export async function fetchRiderProfile():
   }
 
   return {
+    approvalStatus: riderData.approval_status,
     contactNumber:
       profileData.contact_number?.trim() ||
       undefined,
@@ -667,9 +770,10 @@ export async function advanceRiderDelivery(
     );
 
   if (error) {
-    throw new Error(
-      `Unable to update delivery status: ${error.message}`,
-    );
+    if (error.code === "P0001") {
+      throw new RiderAdvanceRejectedError(`Unable to update delivery status: ${error.message}`);
+    }
+    throw new Error("The delivery transition response is uncertain. Check its status.");
   }
 
   const result = (
@@ -680,8 +784,16 @@ export async function advanceRiderDelivery(
 
   if (!result) {
     throw new Error(
-      "The delivery status was updated, but no result was returned.",
+      "The delivery transition response is uncertain. Check its status.",
     );
+  }
+
+  const expectedNextStatus = expectedAssignmentStatus === "accepted"
+    ? "picked_up" : "out_for_delivery";
+  if (result.assignment_id !== normalizedId ||
+    result.assignment_status !== expectedNextStatus ||
+    result.order_status !== expectedNextStatus) {
+    throw new Error("The delivery transition response did not match this assignment. Check its status.");
   }
 
   return result;
@@ -823,9 +935,10 @@ export async function completeRiderDelivery(
   );
 
   if (error) {
-    throw new Error(
-      `Unable to complete delivery: ${error.message}`,
-    );
+    if (error.code === "P0001") {
+      throw new RiderCompletionRejectedError(`Unable to complete delivery: ${error.message}`);
+    }
+    throw new Error("The completion response is uncertain. Check the delivery status.");
   }
 
   const result = (
@@ -836,8 +949,15 @@ export async function completeRiderDelivery(
 
   if (!result) {
     throw new Error(
-      "The delivery was completed, but no updated result was returned.",
+      "The completion response is uncertain. Check the delivery status.",
     );
+  }
+
+  if (result.assignment_id !== normalizedAssignmentId ||
+    result.assignment_status !== "delivered" ||
+    result.order_status !== "delivered" ||
+    result.proof_of_delivery_path !== normalizedProofPath) {
+    throw new Error("The completion response did not match this delivery. Check its status.");
   }
 
   return result;

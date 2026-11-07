@@ -90,7 +90,6 @@ export interface CloseCashierShiftResult {
   expectedCash: number;
   actualCash: number;
   variance: number;
-  varianceReason?: string;
   startedAt: string;
   endedAt: string;
 }
@@ -106,7 +105,6 @@ interface DatabaseCloseShiftRow {
   expected_cash: number | string;
   actual_cash: number | string;
   variance: number | string;
-  variance_reason: string | null;
   status: "open" | "closed";
   started_at: string;
   ended_at: string;
@@ -114,13 +112,9 @@ interface DatabaseCloseShiftRow {
 
 export async function closeCashierShift(
   actualCash: number,
-  varianceReason?: string,
-  notes?: string,
 ): Promise<CloseCashierShiftResult> {
   const { data, error } = await supabase.rpc("close_cashier_shift", {
     p_actual_cash: actualCash,
-    p_variance_reason: varianceReason?.trim() || null,
-    p_notes: notes?.trim() || null,
   });
 
   if (error) {
@@ -169,7 +163,6 @@ export async function closeCashierShift(
     expectedCash,
     actualCash: actualCashReturned,
     variance,
-    varianceReason: row.variance_reason ?? undefined,
     startedAt: row.started_at,
     endedAt: row.ended_at,
   };

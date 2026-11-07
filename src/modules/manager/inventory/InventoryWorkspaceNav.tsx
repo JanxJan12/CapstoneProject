@@ -11,18 +11,22 @@ export type InventoryWorkspacePage =
   | "stock-receiving"
   | "adjustment"
   | "waste-spoilage"
-  | "inv-transactions";
+  | "inv-transactions"
+  | "inventory-audit"
+  | "replenishment";
 
 const INVENTORY_WORKSPACE_ITEMS: Array<{
   id: InventoryWorkspacePage;
   label: string;
   icon: typeof LayoutGrid;
 }> = [
-  { id: "inventory", label: "Overview", icon: LayoutGrid },
-  { id: "stock-receiving", label: "Stock Receiving", icon: ArrowDownToLine },
-  { id: "adjustment", label: "Adjustments", icon: SlidersHorizontal },
+  { id: "inventory", label: "Stock Monitor", icon: LayoutGrid },
+  { id: "replenishment", label: "Requests", icon: ClipboardList },
+  { id: "stock-receiving", label: "Receiving", icon: ArrowDownToLine },
+  { id: "inv-transactions", label: "Stock Movements", icon: ClipboardList },
   { id: "waste-spoilage", label: "Waste / Spoilage", icon: Trash2 },
-  { id: "inv-transactions", label: "Transactions", icon: ClipboardList },
+  { id: "adjustment", label: "Stock Adjustment", icon: SlidersHorizontal },
+  { id: "inventory-audit", label: "Audit", icon: ClipboardList },
 ];
 
 export function InventoryWorkspaceNav({

@@ -1,0 +1,157 @@
+{
+  "communities": {
+    "0": [
+      "foodpanda_observation_menu_categories",
+      "foodpanda_observation_menu_search",
+      "foodpanda_observation_product_rows",
+      "rrj_map_customer_menu",
+      "rrj_map_item_detail"
+    ],
+    "1": [
+      "foodpanda_observation_document",
+      "foodpanda_observation_evidence_limit",
+      "rrj_map_checkout_tracking_boundary",
+      "rrj_map_document"
+    ],
+    "2": [
+      "foodpanda_observation_restaurant_entry",
+      "rrj_map_unverified_marketplace_claims"
+    ]
+  },
+  "cohesion": {
+    "0": 0.5,
+    "1": 0.6666666666666666,
+    "2": 1.0
+  },
+  "gods": [
+    {
+      "id": "foodpanda_observation_document",
+      "label": "Foodpanda indexed page observation",
+      "degree": 5
+    },
+    {
+      "id": "rrj_map_document",
+      "label": "RRJ customer module presentation mapping",
+      "degree": 5
+    },
+    {
+      "id": "foodpanda_observation_menu_search",
+      "label": "Search in menu",
+      "degree": 4
+    },
+    {
+      "id": "foodpanda_observation_product_rows",
+      "label": "Grouped product rows with names and prices",
+      "degree": 4
+    },
+    {
+      "id": "foodpanda_observation_restaurant_entry",
+      "label": "Jollibee Carriedo restaurant entry",
+      "degree": 3
+    },
+    {
+      "id": "rrj_map_customer_menu",
+      "label": "RRJ Menu search, categories, and product facts",
+      "degree": 3
+    },
+    {
+      "id": "foodpanda_observation_menu_categories",
+      "label": "Menu categories",
+      "degree": 2
+    },
+    {
+      "id": "foodpanda_observation_evidence_limit",
+      "label": "Indexed page evidence limit",
+      "degree": 2
+    },
+    {
+      "id": "rrj_map_item_detail",
+      "label": "RRJ item detail choices, quantity, price, and Add to Cart",
+      "degree": 2
+    },
+    {
+      "id": "rrj_map_unverified_marketplace_claims",
+      "label": "Ratings, popularity, deals, and minimum order lack RRJ evidence",
+      "degree": 2
+    }
+  ],
+  "surprises": [
+    {
+      "source": "RRJ Menu search, categories, and product facts",
+      "target": "Search in menu",
+      "source_files": [
+        "rrj-map.md",
+        "foodpanda-observation.md"
+      ],
+      "confidence": "INFERRED",
+      "relation": "semantically_similar_to",
+      "why": "inferred connection - not explicitly stated in source; semantically similar concepts with no structural link"
+    },
+    {
+      "source": "RRJ Menu search, categories, and product facts",
+      "target": "Grouped product rows with names and prices",
+      "source_files": [
+        "rrj-map.md",
+        "foodpanda-observation.md"
+      ],
+      "confidence": "INFERRED",
+      "relation": "semantically_similar_to",
+      "why": "inferred connection - not explicitly stated in source; semantically similar concepts with no structural link"
+    },
+    {
+      "source": "RRJ item detail choices, quantity, price, and Add to Cart",
+      "target": "Grouped product rows with names and prices",
+      "source_files": [
+        "rrj-map.md",
+        "foodpanda-observation.md"
+      ],
+      "confidence": "INFERRED",
+      "relation": "semantically_similar_to",
+      "why": "inferred connection - not explicitly stated in source; semantically similar concepts with no structural link"
+    },
+    {
+      "source": "RRJ customer module presentation mapping",
+      "target": "Foodpanda indexed page observation",
+      "source_files": [
+        "rrj-map.md",
+        "foodpanda-observation.md"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "cites",
+      "why": "cross-file semantic connection"
+    },
+    {
+      "source": "Ratings, popularity, deals, and minimum order lack RRJ evidence",
+      "target": "Jollibee Carriedo restaurant entry",
+      "source_files": [
+        "rrj-map.md",
+        "foodpanda-observation.md"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "cross-file semantic connection"
+    }
+  ],
+  "questions": [
+    {
+      "type": "bridge_node",
+      "question": "Why does `RRJ customer module presentation mapping` connect `Community 1` to `Community 0`, `Community 2`?",
+      "why": "High betweenness centrality (0.306) - this node is a cross-community bridge."
+    },
+    {
+      "type": "verify_inferred",
+      "question": "Are the 2 inferred relationships involving `Grouped product rows with names and prices` (e.g. with `RRJ Menu search, categories, and product facts` and `RRJ item detail choices, quantity, price, and Add to Cart`) actually correct?",
+      "why": "`Grouped product rows with names and prices` has 2 INFERRED edges - model-reasoned connections that need verification."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `Foodpanda indexed page observation` connect `Community 1` to `Community 0`, `Community 2`?",
+      "why": "High betweenness centrality (0.303) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `Grouped product rows with names and prices` connect `Community 0` to `Community 1`?",
+      "why": "High betweenness centrality (0.145) - this node is a cross-community bridge."
+    }
+  ]
+}

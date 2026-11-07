@@ -1,0 +1,349 @@
+{
+  "dateManila": "2026-10-15",
+  "overall": "PARTIAL",
+  "stacks": {
+    "orderFlow": "rrj_h09_order_flow_20261015",
+    "shiftFixture": "rrj_h08c_history_20261015"
+  },
+  "checks": {
+    "writeRequestBlockedBeforeServerRetry": "PASS",
+    "riderDuplicateCompletionBrowser": "PASS",
+    "riderStaleCompletionApi": "PASS",
+    "crossRoleBrowserMatrix": "PASS",
+    "kitchenTerminalGate": "PASS",
+    "closedShiftSnapshot": "PASS",
+    "dockerAuthRootCause": "NOT PROVEN"
+  },
+  "writeRetry": {
+    "status": "PASS",
+    "stack": "rrj_h09_order_flow_20261015",
+    "orderNumber": "ORD-000026",
+    "beforeOrders": 25,
+    "afterBlockedOrders": 25,
+    "afterRetryOrders": 26,
+    "visibleError": "Unable to place your order: TypeError: Failed to fetch",
+    "orderRowCounts": {
+      "payments": 0,
+      "receipts": 0,
+      "inventoryLedger": 0
+    },
+    "requestBoundary": "Chrome Network.setBlockedURLs prevented the first POST before server delivery. It does not test a server-completed write with a lost response. Second click reached server once; no payment claim was submitted."
+  },
+  "riderApi": {
+    "http": 400,
+    "code": "P0001",
+    "message": "Only an out-for-delivery assignment may be completed.",
+    "noPostChange": true
+  },
+  "matrix": [
+    {
+      "role": "customer",
+      "attempted": "/cashier",
+      "redirectPath": "/customer",
+      "status": "PASS",
+      "sensitiveTextVisible": false
+    },
+    {
+      "role": "customer",
+      "attempted": "/manager",
+      "redirectPath": "/customer",
+      "status": "PASS",
+      "sensitiveTextVisible": false
+    },
+    {
+      "role": "customer",
+      "attempted": "/rider",
+      "redirectPath": "/customer",
+      "status": "PASS",
+      "sensitiveTextVisible": false
+    },
+    {
+      "role": "customer",
+      "attempted": "/production",
+      "redirectPath": "/customer",
+      "status": "PASS",
+      "sensitiveTextVisible": false
+    },
+    {
+      "role": "cashier",
+      "attempted": "/manager",
+      "redirectPath": "/cashier",
+      "status": "PASS",
+      "sensitiveTextVisible": false
+    },
+    {
+      "role": "cashier",
+      "attempted": "/rider",
+      "redirectPath": "/cashier",
+      "status": "PASS",
+      "sensitiveTextVisible": false
+    },
+    {
+      "role": "cashier",
+      "attempted": "/production",
+      "redirectPath": "/cashier",
+      "status": "PASS",
+      "sensitiveTextVisible": false
+    },
+    {
+      "role": "cashier",
+      "attempted": "/customer",
+      "redirectPath": "/customer",
+      "status": "PASS",
+      "publicShell": true,
+      "sensitiveTextVisible": false
+    },
+    {
+      "role": "manager",
+      "attempted": "/cashier",
+      "redirectPath": "/manager",
+      "status": "PASS",
+      "sensitiveTextVisible": false
+    },
+    {
+      "role": "manager",
+      "attempted": "/rider",
+      "redirectPath": "/manager",
+      "status": "PASS",
+      "sensitiveTextVisible": false
+    },
+    {
+      "role": "manager",
+      "attempted": "/production",
+      "redirectPath": "/manager",
+      "status": "PASS",
+      "sensitiveTextVisible": false
+    },
+    {
+      "role": "manager",
+      "attempted": "/customer",
+      "redirectPath": "/customer",
+      "status": "PASS",
+      "publicShell": true,
+      "sensitiveTextVisible": false
+    },
+    {
+      "role": "rider",
+      "attempted": "/cashier",
+      "redirectPath": "/rider",
+      "status": "PASS",
+      "sensitiveTextVisible": false
+    },
+    {
+      "role": "rider",
+      "attempted": "/manager",
+      "redirectPath": "/rider",
+      "status": "PASS",
+      "sensitiveTextVisible": false
+    },
+    {
+      "role": "rider",
+      "attempted": "/production",
+      "redirectPath": "/rider",
+      "status": "PASS",
+      "sensitiveTextVisible": false
+    },
+    {
+      "role": "rider",
+      "attempted": "/customer",
+      "redirectPath": "/customer",
+      "status": "PASS",
+      "publicShell": true,
+      "sensitiveTextVisible": false
+    }
+  ],
+  "riderBrowser": {
+    "order": "ORD-000025",
+    "historyVisible": true,
+    "completionActions": [],
+    "status": "PASS"
+  },
+  "kitchen": {
+    "status": "PASS",
+    "terminalGateText": "DEFENSE DEMO · Synthetic sample data · No real payments or restaurant stock\nActivate Kitchen Terminal\n\nEnter the terminal ID and private device secret provided by an RRJ manager.\n\nTerminal ID\nDevice Secret\nActivate Kitchen Terminal\n\nKitchen staff do not need individual accounts. This credential identifies the authorized kitchen terminal itself.",
+    "staffRoleGrantsQueue": false
+  },
+  "shift": {
+    "status": "PASS",
+    "stack": "rrj_h08c_history_20261015",
+    "fixture": "H09D independent synthetic closed shift",
+    "shiftId": "b770a015-3e6e-431a-b28a-350b69c425e7",
+    "before": {
+      "completedReceipts": 2,
+      "snapshot": {
+        "openingCash": 20,
+        "expectedCash": 30,
+        "actualCash": 29,
+        "variance": -1
+      }
+    },
+    "after": {
+      "completedReceipts": 1,
+      "snapshotHashUnchanged": true
+    },
+    "browser": {
+      "cashier": {
+        "textPresent": true,
+        "snapshotActualVisible": true
+      },
+      "manager": {
+        "textPresent": true,
+        "snapshotActualVisible": true
+      }
+    }
+  },
+  "database": {
+    "totalOrders": 26,
+    "migrationEntries": 53,
+    "canonicalHashesMatching": 52,
+    "canonicalHashCount": 52,
+    "beforeStale": [
+      {
+        "order_number": "ORD-000016",
+        "id": "2207bb36-acc5-4cc3-9894-20d9e3457b92",
+        "current_status": "ready",
+        "payment_count": 1,
+        "receipt_count": 1,
+        "stock_count": 1,
+        "assignment_count": 0,
+        "delivery_proof_count": 0
+      },
+      {
+        "order_number": "ORD-000023",
+        "id": "d9155f1e-6272-48df-af85-a2ebbc889a6e",
+        "current_status": "confirmed",
+        "payment_count": 1,
+        "receipt_count": 1,
+        "stock_count": 0,
+        "assignment_count": 0,
+        "delivery_proof_count": 0
+      },
+      {
+        "order_number": "ORD-000024",
+        "id": "952b99d6-1f06-49dc-9ed3-4f26e96900d3",
+        "current_status": "confirmed",
+        "payment_count": 1,
+        "receipt_count": 1,
+        "stock_count": 0,
+        "assignment_count": 0,
+        "delivery_proof_count": 0
+      },
+      {
+        "order_number": "ORD-000025",
+        "id": "faf474e7-1e6e-41ed-9bd5-0a08cf66a597",
+        "current_status": "delivered",
+        "payment_count": 1,
+        "receipt_count": 1,
+        "stock_count": 0,
+        "assignment_count": 1,
+        "delivery_proof_count": 1
+      },
+      {
+        "order_number": "ORD-000026",
+        "id": "af878e2e-4644-423a-a563-e9a812a44487",
+        "current_status": "waiting_payment_verification",
+        "payment_count": 0,
+        "receipt_count": 0,
+        "stock_count": 0,
+        "assignment_count": 0,
+        "delivery_proof_count": 0
+      }
+    ],
+    "afterStale": [
+      {
+        "order_number": "ORD-000016",
+        "id": "2207bb36-acc5-4cc3-9894-20d9e3457b92",
+        "current_status": "ready",
+        "payment_count": 1,
+        "receipt_count": 1,
+        "stock_count": 1,
+        "assignment_count": 0,
+        "delivery_proof_count": 0
+      },
+      {
+        "order_number": "ORD-000023",
+        "id": "d9155f1e-6272-48df-af85-a2ebbc889a6e",
+        "current_status": "confirmed",
+        "payment_count": 1,
+        "receipt_count": 1,
+        "stock_count": 0,
+        "assignment_count": 0,
+        "delivery_proof_count": 0
+      },
+      {
+        "order_number": "ORD-000024",
+        "id": "952b99d6-1f06-49dc-9ed3-4f26e96900d3",
+        "current_status": "confirmed",
+        "payment_count": 1,
+        "receipt_count": 1,
+        "stock_count": 0,
+        "assignment_count": 0,
+        "delivery_proof_count": 0
+      },
+      {
+        "order_number": "ORD-000025",
+        "id": "faf474e7-1e6e-41ed-9bd5-0a08cf66a597",
+        "current_status": "delivered",
+        "payment_count": 1,
+        "receipt_count": 1,
+        "stock_count": 0,
+        "assignment_count": 1,
+        "delivery_proof_count": 1
+      },
+      {
+        "order_number": "ORD-000026",
+        "id": "af878e2e-4644-423a-a563-e9a812a44487",
+        "current_status": "waiting_payment_verification",
+        "payment_count": 0,
+        "receipt_count": 0,
+        "stock_count": 0,
+        "assignment_count": 0,
+        "delivery_proof_count": 0
+      }
+    ]
+  },
+  "environment": {
+    "endpoints": [
+      {
+        "path": "auth/v1/health",
+        "status": 200,
+        "milliseconds": 4
+      },
+      {
+        "path": "rest/v1/",
+        "status": 200,
+        "milliseconds": 104
+      }
+    ],
+    "databaseContainerHealth": "healthy",
+    "databaseContainerRunning": true,
+    "databaseContainerRestartCount": null,
+    "authStartupDnsFailureObserved": true,
+    "authRecovered": true,
+    "rootCauseProven": false,
+    "laterAuthHealthTimedOutSeconds": 5,
+    "laterDockerSqlCallHung": true,
+    "laterCallsStoppedWithoutStackMutation": true,
+    "laterSqlReconciliation": "NOT TESTED"
+  },
+  "screenshotLimit": "The write failure screenshot captured the upper checkout viewport; the lower error alert was asserted from the rendered DOM and its text is in write-retry-result.json. A second screenshot attempt stalled on local Auth/Docker.",
+  "screenshots": [
+    "customer-authorized.png",
+    "cashier-authorized.png",
+    "manager-authorized.png",
+    "rider-authorized.png",
+    "rider-delivered-history.png",
+    "kitchen-terminal-gate.png",
+    "modifier-detail.png",
+    "cart.png",
+    "write-blocked-visible-error.png",
+    "write-retry-created-order.png",
+    "h09d-cashier-closed-shift.png",
+    "h09d-manager-closed-shift.png"
+  ],
+  "applicationSourceFilesModified": [],
+  "migrationFilesModified": [],
+  "standaloneRiderFilesModified": [],
+  "hostedOperations": [],
+  "hostedRelease": "NO-GO"
+}

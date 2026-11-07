@@ -13,6 +13,7 @@ import {
   loadKdsSession,
   saveKdsSession,
   verifyKdsTerminal,
+  KdsTerminalError,
   type KdsTerminalCredential,
   type VerifiedKdsTerminal,
 } from "./services/kdsTerminalService";
@@ -60,12 +61,13 @@ export function KitchenApp() {
         if (cancelled) return;
 
         setTerminal(verified);
-      } catch {
+      } catch (caught) {
         clearKdsSession();
 
         if (cancelled) return;
 
         setTerminal(null);
+        setError(caught instanceof KdsTerminalError ? caught.message : "Could not verify the saved terminal. Enter its credentials to try again.");
       } finally {
         if (!cancelled) {
           setCheckingSession(false);
@@ -103,9 +105,12 @@ export function KitchenApp() {
       setTerminalSecret("");
     } catch (caught) {
       setError(
-        caught instanceof Error
+        caught instanceof KdsTerminalError || caught instanceof Error &&
+          (caught.message === "Terminal ID is required." ||
+            caught.message === "Enter a valid terminal ID." ||
+            caught.message === "Device secret is required.")
           ? caught.message
-          : "Unable to activate the kitchen terminal.",
+          : "Could not verify the kitchen terminal. Check the connection and try again.",
       );
     } finally {
       setActivating(false);
@@ -119,6 +124,14 @@ export function KitchenApp() {
     setTerminalId("");
     setTerminalSecret("");
     setError("");
+  };
+
+  const handleAccessLost = () => {
+    clearKdsSession();
+    setTerminal(null);
+    setTerminalId("");
+    setTerminalSecret("");
+    setError("Kitchen terminal access was rejected. Ask a manager to check the device credential, then activate again.");
   };
 
   if (checkingSession) {
@@ -175,7 +188,7 @@ export function KitchenApp() {
         </CashierButton>
       </div>
 
-      <KitchenQueue />
+      <KitchenQueue onAccessLost={handleAccessLost} />
     </AppShell>
   );
 }

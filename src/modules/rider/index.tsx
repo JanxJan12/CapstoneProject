@@ -1,4 +1,4 @@
-import {useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Bike, LayoutDashboard, History, User,
   MapPin, Phone, Check, X, ArrowLeft, Upload, Camera,
@@ -10,6 +10,8 @@ import {
   advanceRiderDelivery,
   completeRiderDelivery,
   fetchActiveRiderDelivery,
+  fetchRiderAssignmentSnapshot,
+  fetchRiderCompletionSnapshot,
   fetchRiderDashboardStats,
   fetchRiderDeliveryHistory,
   fetchRiderOffers,
@@ -19,6 +21,9 @@ import {
   setRiderAvailability,
   subscribeToRiderAssignmentChanges,
   uploadRiderDeliveryProof,
+  RiderAdvanceRejectedError,
+  RiderCompletionRejectedError,
+  RiderOfferRejectedError,
   type RiderActiveDelivery,
   type RiderDashboardStats,
   type RiderDeliveryHistoryItem,
@@ -84,14 +89,14 @@ function BottomNav({ active, onSelect }: { active: BottomTab; onSelect: (t: Bott
   );
 }
 
-function RiderRetryButton({ onRetry }: { onRetry: () => void }) {
+function RiderRetryButton({ onRetry, label = "Try Again" }: { onRetry: () => void; label?: string }) {
   return (
     <button
       type="button"
       onClick={onRetry}
       className="mt-3 min-h-11 rounded-xl border border-red-300 bg-white px-4 text-sm font-bold text-red-700 hover:bg-red-100"
     >
-      Try Again
+      {label}
     </button>
   );
 }
@@ -474,7 +479,18 @@ function HomeTab({ onNav }: { onNav: (s: RiderScreen) => void }) {
 
 // ── Delivery Requests ────────────────────────────────────────────
 
-function DeliveryRequestsTab() {
+interface PendingOfferAcceptance {
+  assignmentId: string;
+  orderId: string;
+  rejectionMessage?: string;
+}
+
+function DeliveryRequestsTab({ pendingOffer, setPendingOffer, onViewDelivery, onViewHistory }: {
+  pendingOffer: PendingOfferAcceptance | null;
+  setPendingOffer: (offer: PendingOfferAcceptance | null) => void;
+  onViewDelivery: () => void;
+  onViewHistory: () => void;
+}) {
   const [offers, setOffers] =
     useState<RiderDeliveryRequest[]>([]);
 
@@ -483,7 +499,18 @@ function DeliveryRequestsTab() {
 
   const [error, setError] =
     useState("");
+  const [notice, setNotice] = useState("");
+  const [acceptedDeliveryComplete, setAcceptedDeliveryComplete] = useState(false);
+  const [checkingAssignment, setCheckingAssignment] = useState(false);
   const [offerLoadAttempt, setOfferLoadAttempt] = useState(0);
+  const offerLoadVersion = useRef(0);
+  const reconciliationVersion = useRef(0);
+  const acceptanceInFlight = useRef(false);
+  const reconciliationInFlight = useRef(false);
+  const mounted = useRef(true);
+  const pendingOfferRef = useRef(pendingOffer);
+  pendingOfferRef.current = pendingOffer;
+  const resolvedOfferIds = useRef(new Set<string>());
 
   const [acceptingId, setAcceptingId] =
     useState<string | null>(null);
@@ -500,30 +527,30 @@ function DeliveryRequestsTab() {
   const loadOffers = async (
     showLoading = true,
   ) => {
+    const version = ++offerLoadVersion.current;
     if (showLoading) {
       setLoading(true);
     }
 
-    setError("");
+    if (!pendingOfferRef.current) setError("");
 
     try {
       const nextOffers =
         await fetchRiderOffers();
 
-      if (active) {
-        setOffers(nextOffers);
+      if (active && version === offerLoadVersion.current) {
+        setOffers(nextOffers.filter((offer) => !resolvedOfferIds.current.has(offer.assignmentId)));
       }
     } catch (caught) {
-      if (active) {
+      if (active && version === offerLoadVersion.current && !pendingOfferRef.current) {
         setError(
-          caught instanceof Error
-            ? caught.message
-            : "Unable to load delivery requests.",
+          "Unable to load delivery requests. Try again.",
         );
       }
     } finally {
       if (
         active &&
+        version === offerLoadVersion.current &&
         showLoading
       ) {
         setLoading(false);
@@ -561,44 +588,140 @@ function DeliveryRequestsTab() {
 
   return () => {
     active = false;
+    offerLoadVersion.current += 1;
     unsubscribe?.();
   };
 }, [offerLoadAttempt]);
 
-  const handleAccept = async (
-    assignmentId: string,
+  const reconcileOffer = async (
+    offer: PendingOfferAcceptance,
   ) => {
-    if (acceptingId || rejectingId) {
+    if (reconciliationInFlight.current) return;
+    reconciliationInFlight.current = true;
+    const version = ++reconciliationVersion.current;
+    setCheckingAssignment(true);
+    setError("");
+    try {
+      const snapshot = await fetchRiderAssignmentSnapshot(offer.assignmentId);
+      if (!mounted.current || version !== reconciliationVersion.current) return;
+
+      if (snapshot?.orderId !== offer.orderId) {
+        setError("The acceptance result is uncertain. Check the delivery assignment before taking another offer action.");
+        return;
+      }
+
+      if (["accepted", "picked_up", "out_for_delivery", "delivered"].includes(snapshot.status)) {
+        resolvedOfferIds.current.add(offer.assignmentId);
+        setOffers((current) => current.filter((entry) => entry.assignmentId !== offer.assignmentId));
+        setPendingOffer(null);
+        setError("");
+        const complete = snapshot.status === "delivered";
+        setAcceptedDeliveryComplete(complete);
+        setNotice(complete
+          ? "This delivery was accepted and completed. Open History to review it."
+          : "Delivery accepted. Open Home to view your active delivery.");
+        return;
+      }
+
+      if (snapshot.status === "rejected" || snapshot.status === "cancelled") {
+        resolvedOfferIds.current.add(offer.assignmentId);
+        setOffers((current) => current.filter((entry) => entry.assignmentId !== offer.assignmentId));
+        setPendingOffer(null);
+        setNotice("");
+        setError("This delivery offer is no longer available.");
+        return;
+      }
+
+      if (offer.rejectionMessage && snapshot.status === "offered") {
+        const loadVersion = ++offerLoadVersion.current;
+        const freshOffers = await fetchRiderOffers();
+        if (!mounted.current || version !== reconciliationVersion.current ||
+          loadVersion !== offerLoadVersion.current) return;
+        setOffers(freshOffers.filter((entry) => !resolvedOfferIds.current.has(entry.assignmentId)));
+        setPendingOffer(null);
+        setNotice("");
+        setError(offer.rejectionMessage);
+        return;
+      }
+
+      setError("The acceptance result is uncertain. Check the delivery assignment before taking another offer action.");
+    } catch {
+      if (mounted.current && version === reconciliationVersion.current) {
+        setError(offer.rejectionMessage
+          ? "The offer was rejected, but its current state could not be refreshed. Check the assignment again before taking another action."
+          : "The acceptance result is uncertain. Check the delivery assignment before taking another offer action.");
+      }
+    } finally {
+      reconciliationInFlight.current = false;
+      if (mounted.current && version === reconciliationVersion.current) {
+        setCheckingAssignment(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    mounted.current = true;
+    if (pendingOffer && !acceptanceInFlight.current) {
+      void reconcileOffer(pendingOffer);
+    }
+    return () => {
+      mounted.current = false;
+      reconciliationVersion.current += 1;
+    };
+  }, []);
+
+  const handleAccept = async (
+    offer: RiderDeliveryRequest,
+  ) => {
+    if (acceptanceInFlight.current || acceptingId || rejectingId || pendingOfferRef.current) {
       return;
     }
 
-    setAcceptingId(assignmentId);
+    const identity = { assignmentId: offer.assignmentId, orderId: offer.orderId };
+    acceptanceInFlight.current = true;
+    setPendingOffer(identity);
+    setAcceptingId(offer.assignmentId);
     setError("");
+    setNotice("");
 
     try {
-      await acceptRiderOffer(
-        assignmentId,
-      );
-
-      const nextOffers =
-        await fetchRiderOffers();
-
-      setOffers(nextOffers);
+      const result = await acceptRiderOffer(offer.assignmentId);
+      if (!mounted.current) return;
+      if (result.order_id !== offer.orderId) {
+        await reconcileOffer(identity);
+      } else {
+        resolvedOfferIds.current.add(offer.assignmentId);
+        setOffers((current) => current.filter((entry) => entry.assignmentId !== offer.assignmentId));
+        setPendingOffer(null);
+        setAcceptedDeliveryComplete(false);
+        setNotice("Delivery accepted. Open Home to view your active delivery.");
+        setError("");
+        try {
+          const version = ++offerLoadVersion.current;
+          const nextOffers = await fetchRiderOffers();
+          if (mounted.current && version === offerLoadVersion.current) {
+            setOffers(nextOffers.filter((entry) => !resolvedOfferIds.current.has(entry.assignmentId)));
+          }
+        } catch {
+          // The validated RPC result remains authoritative if this list reload fails.
+        }
+      }
     } catch (caught) {
-      setError(
-        caught instanceof Error
-          ? caught.message
-          : "Unable to accept the delivery.",
-      );
+      const unresolved = caught instanceof RiderOfferRejectedError
+        ? { ...identity, rejectionMessage: caught.message }
+        : identity;
+      setPendingOffer(unresolved);
+      if (mounted.current) await reconcileOffer(unresolved);
     } finally {
-      setAcceptingId(null);
+      if (mounted.current) setAcceptingId(null);
+      acceptanceInFlight.current = false;
     }
   };
 
   const handleReject = async (
     assignmentId: string,
   ) => {
-    if (acceptingId || rejectingId) {
+    if (acceptingId || rejectingId || pendingOffer || acceptanceInFlight.current) {
       return;
     }
 
@@ -646,6 +769,14 @@ function DeliveryRequestsTab() {
       </div>
 
       <div className="rider-content bg-background flex-1 px-4 pt-4 overflow-y-auto">
+        {notice && (
+          <div role="status" className="mb-4 rounded-xl border border-green-200 bg-green-50 p-3 text-sm font-semibold text-green-800">
+            {notice}
+            <button type="button" onClick={acceptedDeliveryComplete ? onViewHistory : onViewDelivery} className="mt-2 block min-h-11 font-bold underline">
+              {acceptedDeliveryComplete ? "View delivery history" : "View active delivery"}
+            </button>
+          </div>
+        )}
         {loading && (
           <div className="bg-card rounded-xl border border-border p-4 text-center">
             <p className="text-sm text-muted-foreground">
@@ -654,19 +785,25 @@ function DeliveryRequestsTab() {
           </div>
         )}
 
-        {!loading && error && (
+        {checkingAssignment && (
+          <div role="status" className="mb-4 rounded-xl border border-blue-200 bg-blue-50 p-3 text-sm font-semibold text-blue-800">
+            Checking the delivery assignment…
+          </div>
+        )}
+
+        {!loading && !checkingAssignment && error && (
           <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3">
             <p className="text-sm font-semibold text-red-700">
               {error}
             </p>
-            <RiderRetryButton
-              onRetry={() => setOfferLoadAttempt((attempt) => attempt + 1)}
-            />
+            <RiderRetryButton label={pendingOffer ? "Check assignment" : "Try Again"} onRetry={() => pendingOffer
+              ? void reconcileOffer(pendingOffer)
+              : setOfferLoadAttempt((attempt) => attempt + 1)} />
           </div>
         )}
 
         {!loading &&
-          !error &&
+          !error && !checkingAssignment &&
           offers.length === 0 && (
             <div className="bg-card rounded-xl border border-border p-5 text-center">
               <Bike className="mx-auto h-7 w-7 text-muted-foreground/50" />
@@ -682,7 +819,7 @@ function DeliveryRequestsTab() {
           )}
 
         {!loading &&
-          !error &&
+          !error && !checkingAssignment &&
           offers.map((offer) => (
             <div
               key={offer.assignmentId}
@@ -757,12 +894,11 @@ function DeliveryRequestsTab() {
                   type="button"
                   disabled={
                     acceptingId !== null ||
-                    rejectingId !== null
+                    rejectingId !== null ||
+                    pendingOffer !== null
                   }
                   onClick={() => {
-                    void handleAccept(
-                      offer.assignmentId,
-                    );
+                    void handleAccept(offer);
                   }}
                   className="py-3 rounded-xl bg-primary text-white text-base font-bold flex items-center justify-center gap-1 disabled:opacity-60"
                 >
@@ -778,7 +914,8 @@ function DeliveryRequestsTab() {
                   type="button"
                   disabled={
                     acceptingId !== null ||
-                    rejectingId !== null
+                    rejectingId !== null ||
+                    pendingOffer !== null
                   }
                   onClick={() => {
                     void handleReject(
@@ -801,12 +938,18 @@ function DeliveryRequestsTab() {
                 </p>
 
                 {offer.items.map((item) => (
-                  <p
+                  <div
                     key={item.id}
                     className="text-sm"
                   >
                     {item.quantity} × {item.name}
-                  </p>
+                    {item.modifiers.length ? (
+                      <p className="ml-4 text-xs text-muted-foreground">{item.modifiers.join(", ")}</p>
+                    ) : null}
+                    {item.specialInstructions ? (
+                      <p className="ml-4 text-xs text-muted-foreground">{item.specialInstructions}</p>
+                    ) : null}
+                  </div>
                 ))}
 
               </div>
@@ -833,26 +976,58 @@ function DeliveryDetailScreen({
   const [error, setError] =
     useState("");
   const [deliveryLoadAttempt, setDeliveryLoadAttempt] = useState(0);
-  
-  const [updatingStatus, setUpdatingStatus] =
-  useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [checkingStatus, setCheckingStatus] = useState(false);
+  const [notice, setNotice] = useState("");
+  const [pendingAdvance, setPendingAdvance] = useState<{
+    assignmentId: string;
+    orderId: string;
+    source: "accepted" | "picked_up";
+    target: "picked_up" | "out_for_delivery";
+    rejection?: string;
+  } | null>(null);
+  const advanceInFlight = useRef(false);
+  const checkInFlight = useRef(false);
+  const requestVersion = useRef(0);
+  const mounted = useRef(true);
+
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      requestVersion.current += 1;
+    };
+  }, []);
 
   useEffect(() => {
     let active = true;
+    const version = ++requestVersion.current;
 
     const loadDelivery = async () => {
       setLoading(true);
       setError("");
+      setDelivery(null);
 
       try {
         const nextDelivery =
           await fetchActiveRiderDelivery();
 
-        if (active) {
-          setDelivery(nextDelivery);
+        if (nextDelivery) {
+          const snapshot = await fetchRiderCompletionSnapshot(nextDelivery.assignmentId);
+          if (!snapshot || snapshot.orderId !== nextDelivery.orderId ||
+            !(["accepted", "picked_up", "out_for_delivery"].includes(snapshot.assignmentStatus)) ||
+            snapshot.orderStatus !== (snapshot.assignmentStatus === "accepted"
+              ? "rider_accepted" : snapshot.assignmentStatus)) {
+            throw new Error("Could not verify the active delivery status. Check again.");
+          }
+          if (active && mounted.current && version === requestVersion.current) {
+            setDelivery({ ...nextDelivery, assignmentStatus: snapshot.assignmentStatus as RiderActiveDelivery["assignmentStatus"] });
+          }
+        } else if (active && mounted.current && version === requestVersion.current) {
+          setDelivery(null);
         }
       } catch (caught) {
-        if (active) {
+        if (active && mounted.current && version === requestVersion.current) {
           setError(
             caught instanceof Error
               ? caught.message
@@ -860,7 +1035,7 @@ function DeliveryDetailScreen({
           );
         }
       } finally {
-        if (active) {
+        if (active && mounted.current && version === requestVersion.current) {
           setLoading(false);
         }
       }
@@ -870,53 +1045,94 @@ function DeliveryDetailScreen({
 
     return () => {
       active = false;
+      requestVersion.current += 1;
     };
   }, [deliveryLoadAttempt]);
 
-  const handleAdvanceStatus = async () => {
-  if (!delivery || updatingStatus) {
-    return;
-  }
-
-  if (
-    delivery.assignmentStatus ===
-    "out_for_delivery"
-  ) {
-    return;
-  }
-
-  setUpdatingStatus(true);
-  setError("");
-
-  try {
-    if (
-      delivery.assignmentStatus !== "accepted" &&
-      delivery.assignmentStatus !== "picked_up"
-    ) {
-      throw new Error(
-        "This delivery cannot be advanced from its current status.",
-      );
+  const reconcileAdvance = async (pending: NonNullable<typeof pendingAdvance>) => {
+    if (checkInFlight.current) return;
+    checkInFlight.current = true;
+    const version = ++requestVersion.current;
+    setCheckingStatus(true);
+    setError("");
+    try {
+      const snapshot = await fetchRiderCompletionSnapshot(pending.assignmentId);
+      if (!mounted.current || version !== requestVersion.current) return;
+      if (snapshot?.orderId !== pending.orderId) {
+        setError("The transition result is uncertain. Check this assignment again.");
+      } else if (
+        (snapshot.assignmentStatus === pending.target && snapshot.orderStatus === pending.target) ||
+        (pending.source === "accepted" && snapshot.assignmentStatus === "out_for_delivery" && snapshot.orderStatus === "out_for_delivery")
+      ) {
+        setPendingAdvance(null);
+        setDelivery((current) => current?.assignmentId === pending.assignmentId && current.orderId === pending.orderId
+          ? { ...current, assignmentStatus: snapshot.assignmentStatus as RiderActiveDelivery["assignmentStatus"] }
+          : current);
+        setNotice(pending.source === "accepted" ? "Pickup confirmed." : "Delivery started.");
+      } else if (snapshot.assignmentStatus === "delivered" && snapshot.orderStatus === "delivered") {
+        setPendingAdvance(null);
+        setDelivery(null);
+        setNotice("This delivery is complete. Open History to review it.");
+      } else if (pending.rejection && snapshot.assignmentStatus === pending.source &&
+        snapshot.orderStatus === (pending.source === "accepted" ? "rider_accepted" : "picked_up")) {
+        setPendingAdvance(null);
+        setError(pending.rejection);
+      } else {
+        setError("The transition is not confirmed. Check status again before taking another action.");
+      }
+    } catch {
+      if (mounted.current && version === requestVersion.current) {
+        setError("Could not check this delivery's status. The transition may have succeeded. Check status again.");
+      }
+    } finally {
+      checkInFlight.current = false;
+      if (mounted.current && version === requestVersion.current) setCheckingStatus(false);
     }
+  };
 
-    await advanceRiderDelivery(
-      delivery.assignmentId,
-      delivery.assignmentStatus,
-    );
+  const handleAdvanceStatus = async () => {
+    if (!delivery || loading || updatingStatus || pendingAdvance || advanceInFlight.current ||
+      (delivery.assignmentStatus !== "accepted" && delivery.assignmentStatus !== "picked_up")) return;
 
-    const nextDelivery =
-      await fetchActiveRiderDelivery();
-
-    setDelivery(nextDelivery);
-  } catch (caught) {
-    setError(
-      caught instanceof Error
-        ? caught.message
-        : "Unable to update delivery status.",
-    );
-  } finally {
-    setUpdatingStatus(false);
-  }
-};
+    const source = delivery.assignmentStatus;
+    const pending = {
+      assignmentId: delivery.assignmentId,
+      orderId: delivery.orderId,
+      source,
+      target: source === "accepted" ? "picked_up" as const : "out_for_delivery" as const,
+    };
+    advanceInFlight.current = true;
+    setUpdatingStatus(true);
+    setPendingAdvance(pending);
+    setError("");
+    setNotice("");
+    const version = ++requestVersion.current;
+    try {
+      const result = await advanceRiderDelivery(pending.assignmentId, pending.source);
+      if (!mounted.current || version !== requestVersion.current) return;
+      if (result.order_id !== pending.orderId) {
+        await reconcileAdvance(pending);
+        return;
+      }
+      setDelivery((current) => current?.assignmentId === pending.assignmentId && current.orderId === pending.orderId
+        ? { ...current, assignmentStatus: pending.target }
+        : current);
+      setPendingAdvance(null);
+      setNotice(source === "accepted" ? "Pickup confirmed." : "Delivery started.");
+    } catch (caught) {
+      if (mounted.current && version === requestVersion.current) {
+        const outcome = {
+          ...pending,
+          rejection: caught instanceof RiderAdvanceRejectedError ? caught.message : undefined,
+        };
+        setPendingAdvance(outcome);
+        await reconcileAdvance(outcome);
+      }
+    } finally {
+      advanceInFlight.current = false;
+      if (mounted.current) setUpdatingStatus(false);
+    }
+  };
 
   const statusLabel =
     delivery?.assignmentStatus === "accepted"
@@ -931,6 +1147,8 @@ function DeliveryDetailScreen({
     <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
       <div className="rider-header bg-primary px-4 py-4 flex items-center gap-3 flex-shrink-0">
         <button
+          type="button"
+          disabled={updatingStatus || pendingAdvance !== null}
           onClick={() => onNav("home")}
           aria-label="Back"
           className="w-11 h-11 shrink-0 rounded-xl bg-white/20 flex items-center justify-center"
@@ -944,6 +1162,11 @@ function DeliveryDetailScreen({
       </div>
 
       <div className="rider-content flex-1 bg-background overflow-y-auto px-4 py-3">
+        {notice && !loading && (
+          <div role="status" className="mb-3 rounded-xl border border-green-200 bg-green-50 p-3 text-sm font-semibold text-green-800">
+            {notice}
+          </div>
+        )}
         {loading && (
           <div className="bg-card rounded-xl border border-border p-4 text-center">
             <p className="text-sm text-muted-foreground">
@@ -958,13 +1181,22 @@ function DeliveryDetailScreen({
               {error}
             </p>
             <RiderRetryButton
-              onRetry={() => setDeliveryLoadAttempt((attempt) => attempt + 1)}
+              label={pendingAdvance ? "Check status" : "Try Again"}
+              onRetry={() => pendingAdvance
+                ? void reconcileAdvance(pendingAdvance)
+                : setDeliveryLoadAttempt((attempt) => attempt + 1)}
             />
           </div>
         )}
 
+        {!loading && checkingStatus && (
+          <div role="status" className="mb-3 rounded-xl border border-blue-200 bg-blue-50 p-3 text-sm font-semibold text-blue-800">
+            Checking this delivery's status…
+          </div>
+        )}
+
         {!loading &&
-          !error &&
+          !error && !pendingAdvance &&
           !delivery && (
             <div className="bg-card rounded-xl border border-border p-5 text-center">
               <Bike className="w-7 h-7 mx-auto text-muted-foreground/50" />
@@ -976,7 +1208,7 @@ function DeliveryDetailScreen({
           )}
 
         {!loading &&
-          !error &&
+          (!error || pendingAdvance) &&
           delivery && (
             <>
               <div className="rider-order-heading flex flex-wrap items-start justify-between gap-2 mb-4">
@@ -1050,6 +1282,8 @@ function DeliveryDetailScreen({
                 type="button"
                 disabled={
                   updatingStatus ||
+                  checkingStatus ||
+                  pendingAdvance !== null ||
                   delivery.assignmentStatus ===
                     "out_for_delivery"
                 }
@@ -1072,6 +1306,7 @@ function DeliveryDetailScreen({
               <button
                 type="button"
                 disabled={
+                  pendingAdvance !== null ||
                   delivery.assignmentStatus !==
                   "out_for_delivery"
                 }
@@ -1098,6 +1333,12 @@ function DeliveryDetailScreen({
                     >
                       <span>
                         {item.name}
+                        {item.modifiers.length ? (
+                          <span className="block text-xs text-muted-foreground">{item.modifiers.join(", ")}</span>
+                        ) : null}
+                        {item.specialInstructions ? (
+                          <span className="block text-xs text-muted-foreground">{item.specialInstructions}</span>
+                        ) : null}
                       </span>
 
                       <span className="font-bold">
@@ -1131,18 +1372,6 @@ function DeliveryDetailScreen({
                   </span>
                 </div>
               </div>
-
-              {delivery.notes && (
-                <div className="bg-card rounded-xl border border-border p-3 mb-3">
-                  <p className="text-xs font-bold text-muted-foreground uppercase mb-1">
-                    Order Notes
-                  </p>
-
-                  <p className="text-sm">
-                    {delivery.notes}
-                  </p>
-                </div>
-              )}
 
             </>
           )}
@@ -1327,12 +1556,11 @@ function NavAssistScreen({
                 <Navigation className="w-8 h-8 mx-auto text-blue-600 mb-2" />
 
                 <p className="text-base font-bold text-blue-700">
-                  Open turn-by-turn navigation
+                  Open address in Google Maps
                 </p>
 
                 <p className="text-sm text-blue-600 mt-1">
-                  Google Maps will use the delivery
-                  address as your destination.
+                  Google Maps will receive the delivery address as a destination. Check the route there.
                 </p>
               </div>
 
@@ -1375,6 +1603,25 @@ function UploadProofScreen({
   const [error, setError] =
     useState("");
   const [proofLoadAttempt, setProofLoadAttempt] = useState(0);
+  const [pendingCompletion, setPendingCompletion] = useState<{
+    assignmentId: string;
+    orderId: string;
+    proofPath: string;
+    rejection?: string;
+  } | null>(null);
+  const [checkingCompletion, setCheckingCompletion] = useState(false);
+  const completionInFlight = useRef(false);
+  const checkInFlight = useRef(false);
+  const completionVersion = useRef(0);
+  const mounted = useRef(true);
+
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      completionVersion.current += 1;
+    };
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -1429,7 +1676,7 @@ function UploadProofScreen({
   const handleFileChange = (
     file: File | undefined,
   ) => {
-    if (!file) {
+    if (!file || submitting || pendingCompletion || completionInFlight.current) {
       return;
     }
 
@@ -1461,15 +1708,54 @@ function UploadProofScreen({
     setSelectedFile(file);
   };
 
+  const reconcileCompletion = async (
+    pending: { assignmentId: string; orderId: string; proofPath: string; rejection?: string },
+  ) => {
+    if (checkInFlight.current) return;
+    checkInFlight.current = true;
+    const version = ++completionVersion.current;
+    setCheckingCompletion(true);
+    setError("");
+    try {
+      const snapshot = await fetchRiderCompletionSnapshot(pending.assignmentId);
+      if (!mounted.current || version !== completionVersion.current) return;
+
+      if (snapshot?.orderId !== pending.orderId) {
+        setError("The completion result is uncertain. Check this delivery again before taking another action.");
+      } else if (snapshot.assignmentStatus === "delivered" &&
+        snapshot.orderStatus === "delivered" &&
+        snapshot.proofPath === pending.proofPath) {
+        setPendingCompletion(null);
+        onNav("home");
+      } else if (pending.rejection && snapshot.assignmentStatus === "out_for_delivery" &&
+        snapshot.orderStatus === "out_for_delivery") {
+        setPendingCompletion(null);
+        setError(pending.rejection);
+      } else {
+        setError("Completion is not confirmed for this delivery. Check its status again; do not resubmit the photo.");
+      }
+    } catch {
+      if (mounted.current && version === completionVersion.current) {
+        setError("Could not check this delivery's status. The completion result is uncertain. Check again; do not resubmit the photo.");
+      }
+    } finally {
+      checkInFlight.current = false;
+      if (mounted.current && version === completionVersion.current) setCheckingCompletion(false);
+    }
+  };
+
   const handleSubmit = async () => {
     if (
       !delivery ||
       !selectedFile ||
-      submitting
+      submitting ||
+      pendingCompletion ||
+      completionInFlight.current
     ) {
       return;
     }
 
+    completionInFlight.current = true;
     setSubmitting(true);
     setError("");
 
@@ -1487,20 +1773,33 @@ function UploadProofScreen({
         setProofPath(uploadedPath);
       }
 
-      await completeRiderDelivery(
-        delivery.assignmentId,
-        uploadedPath,
-      );
-
-      onNav("home");
+      const pending = {
+        assignmentId: delivery.assignmentId,
+        orderId: delivery.orderId,
+        proofPath: uploadedPath,
+      };
+      setPendingCompletion(pending);
+      let rejection: string | undefined;
+      try {
+        const result = await completeRiderDelivery(pending.assignmentId, pending.proofPath);
+        if (result.order_id !== pending.orderId) {
+          throw new Error("The completion response did not match this delivery.");
+        }
+      } catch (caught) {
+        if (caught instanceof RiderCompletionRejectedError) rejection = caught.message;
+      }
+      if (mounted.current) {
+        const outcome = { ...pending, rejection };
+        setPendingCompletion(outcome);
+        await reconcileCompletion(outcome);
+      }
     } catch (caught) {
-      setError(
-        caught instanceof Error
-          ? caught.message
-          : "Unable to complete delivery.",
+      if (mounted.current) setError(
+        caught instanceof Error ? caught.message : "Unable to upload proof of delivery.",
       );
     } finally {
-      setSubmitting(false);
+      completionInFlight.current = false;
+      if (mounted.current) setSubmitting(false);
     }
   };
 
@@ -1509,6 +1808,7 @@ function UploadProofScreen({
       <div className="rider-header bg-primary px-4 py-4 flex items-center gap-3 flex-shrink-0">
         <button
           type="button"
+          disabled={submitting || pendingCompletion !== null}
           onClick={() =>
             onNav("delivery-detail")
           }
@@ -1553,6 +1853,15 @@ function UploadProofScreen({
           </div>
         )}
 
+        {!loading && pendingCompletion && (
+          <div role="status" className="mb-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm font-semibold text-amber-900">
+            {checkingCompletion ? "Checking this delivery's status…" : "Delivery completion is awaiting confirmation. Do not submit the photo again."}
+            {!checkingCompletion && !submitting && (
+              <RiderRetryButton label="Check delivery status" onRetry={() => void reconcileCompletion(pendingCompletion)} />
+            )}
+          </div>
+        )}
+
         {!loading && delivery && (
           <>
             <div className="rounded-xl border border-border bg-card p-4 mb-4">
@@ -1575,7 +1884,7 @@ function UploadProofScreen({
                   <Check className="w-8 h-8 text-green-500" />
 
                   <p className="text-sm font-semibold text-green-800" role="status">
-                    {proofPath ? "Photo uploaded · completion still required" : "Photo selected · ready to submit"}
+                    {pendingCompletion ? "Photo uploaded · checking delivery status" : proofPath ? "Photo uploaded · completion still required" : "Photo selected · ready to submit"}
                   </p>
                   <p className="text-sm font-bold text-green-700 text-center break-all">
                     {selectedFile.name}
@@ -1602,7 +1911,7 @@ function UploadProofScreen({
             </div>
 
             <div className="grid grid-cols-2 gap-2 mb-4">
-              <label className="py-2.5 rounded-xl border border-border bg-card text-sm font-semibold flex items-center justify-center gap-1.5 cursor-pointer">
+              <label className="min-h-11 py-2.5 rounded-xl border border-border bg-card text-sm font-semibold flex items-center justify-center gap-1.5 cursor-pointer focus-within:ring-2 focus-within:ring-primary">
                 <Camera className="w-3.5 h-3.5" />
                 Camera
 
@@ -1610,8 +1919,8 @@ function UploadProofScreen({
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
                   capture="environment"
-                  className="hidden"
-                  disabled={submitting}
+                  className="sr-only"
+                  disabled={submitting || pendingCompletion !== null}
                   onChange={(event) => {
                     handleFileChange(
                       event.target.files?.[0],
@@ -1622,15 +1931,15 @@ function UploadProofScreen({
                 />
               </label>
 
-              <label className="py-2.5 rounded-xl border border-border bg-card text-sm font-semibold flex items-center justify-center gap-1.5 cursor-pointer">
+              <label className="min-h-11 py-2.5 rounded-xl border border-border bg-card text-sm font-semibold flex items-center justify-center gap-1.5 cursor-pointer focus-within:ring-2 focus-within:ring-primary">
                 <ImageIcon className="w-3.5 h-3.5" />
                 Gallery
 
                 <input
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
-                  className="hidden"
-                  disabled={submitting}
+                  className="sr-only"
+                  disabled={submitting || pendingCompletion !== null}
                   onChange={(event) => {
                     handleFileChange(
                       event.target.files?.[0],
@@ -1653,7 +1962,8 @@ function UploadProofScreen({
               type="button"
               disabled={
                 !selectedFile ||
-                submitting
+                submitting ||
+                pendingCompletion !== null
               }
               onClick={() => {
                 void handleSubmit();
@@ -2056,8 +2366,25 @@ function ProfileTab() {
 
 // ── Root Rider App ────────────────────────────────────────────────
 export function RiderApp() {
+  const { logout } = useAuth();
+  const [approval, setApproval] = useState<RiderProfile["approvalStatus"]>();
+  const [approvalError, setApprovalError] = useState("");
+  const [approvalLoading, setApprovalLoading] = useState(true);
+  const [approvalAttempt, setApprovalAttempt] = useState(0);
   const [screen, setScreen] = useState<RiderScreen>("home");
   const [activeTab, setActiveTab] = useState<BottomTab>("home");
+  const [pendingOffer, setPendingOffer] = useState<PendingOfferAcceptance | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    setApprovalLoading(true);
+    setApprovalError("");
+    void fetchRiderProfile().then(
+      (profile) => { if (active) setApproval(profile.approvalStatus); },
+      (error) => { if (active) setApprovalError(error instanceof Error ? error.message : "Unable to check Rider approval."); },
+    ).finally(() => { if (active) setApprovalLoading(false); });
+    return () => { active = false; };
+  }, [approvalAttempt]);
 
   // Screens that show bottom navigation
   const MAIN_SCREENS: RiderScreen[] = ["home", "requests", "history", "profile"];
@@ -2070,6 +2397,42 @@ export function RiderApp() {
     };
     setScreen(tabToScreen[tab]);
   };
+
+  if (approvalLoading || approvalError || approval !== "approved") {
+    const heading = approvalLoading
+      ? "Checking Rider access"
+      : approvalError
+        ? "Rider access unavailable"
+        : approval === "pending"
+          ? "Application pending"
+          : approval === "rejected"
+            ? "Application not approved"
+            : approval === "suspended"
+              ? "Rider access suspended"
+              : "Rider profile unavailable";
+    const detail = approvalError || (approval === "pending"
+      ? "A manager must approve your Rider application before you can receive offers."
+      : approval === "rejected"
+        ? "Your Rider application was not approved. Contact a manager for details."
+        : approval === "suspended"
+          ? "Contact a manager before resuming deliveries."
+          : "Checking the current approval status with the server.");
+    return (
+      <div className="rider-app flex min-h-screen items-center justify-center bg-background p-4">
+        <section className="w-full max-w-md rounded-2xl border border-border bg-card p-6 text-center" role={approvalError ? "alert" : "status"}>
+          <Bike className="mx-auto h-10 w-10 text-primary" aria-hidden="true" />
+          <h1 className="mt-4 text-xl font-bold">{heading}</h1>
+          <p className="mt-2 text-sm text-muted-foreground">{detail}</p>
+          {!approvalLoading ? (
+            <div className="mt-5 grid gap-2 sm:grid-cols-2">
+              <button type="button" onClick={() => setApprovalAttempt((attempt) => attempt + 1)} className="min-h-11 rounded-xl bg-primary px-4 text-sm font-bold text-white">Check status</button>
+              <button type="button" onClick={() => void logout()} className="min-h-11 rounded-xl border border-border px-4 text-sm font-bold">Sign out</button>
+            </div>
+          ) : null}
+        </section>
+      </div>
+    );
+  }
 
   return (
     <PhoneShell>
@@ -2084,7 +2447,12 @@ export function RiderApp() {
               
               setScreen(nextScreen);
             }} /> )}
-          {activeTab === "deliveries" && (<DeliveryRequestsTab />)}
+          {activeTab === "deliveries" && (<DeliveryRequestsTab
+            pendingOffer={pendingOffer}
+            setPendingOffer={setPendingOffer}
+            onViewDelivery={() => handleTabSelect("home")}
+            onViewHistory={() => handleTabSelect("history")}
+          />)}
           {activeTab === "history"    && <HistoryTab />}
           {activeTab === "profile"    && <ProfileTab />}
           <BottomNav active={activeTab} onSelect={handleTabSelect} />

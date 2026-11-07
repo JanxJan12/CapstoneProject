@@ -5,13 +5,13 @@ import type { WalkInOrderType } from "./types";
 const ORDER_TYPES = [
   {
     type: "Dine-in",
-    description: "Serve the order for dining at RRJ Food-House.",
+    description: "Serve here",
     shortcut: "D",
     icon: Utensils,
   },
   {
     type: "Take-out",
-    description: "Pack the order for counter pickup.",
+    description: "Pack for pickup",
     shortcut: "T",
     icon: ShoppingBag,
   },
@@ -19,14 +19,18 @@ const ORDER_TYPES = [
 
 export function OrderTypeGate({
   busy,
+  shiftOpen,
   currentType,
   onCancel,
   onSelect,
+  onOpenShift,
 }: {
   busy: boolean;
+  shiftOpen: boolean;
   currentType: WalkInOrderType;
   onCancel?: () => void;
   onSelect: (type: WalkInOrderType) => void;
+  onOpenShift: () => void;
 }) {
   useEffect(() => {
     const handleShortcut = (event: KeyboardEvent) => {
@@ -62,16 +66,18 @@ export function OrderTypeGate({
     <section className="pos-order-type-gate" aria-labelledby="order-type-title">
       <div className="pos-order-type-content">
         <p className="pos-order-type-eyebrow">
-          {changingExistingOrder ? "Active order" : "New order · Step 1"}
+          {changingExistingOrder ? "Active order" : "Walk-in POS"}
         </p>
         <h1 id="order-type-title">
           {changingExistingOrder ? "Change order type" : "Select order type"}
         </h1>
-        <p className="pos-order-type-intro">
-          {changingExistingOrder
-            ? "Choose a new fulfillment type. Current order items are preserved."
-            : "Choose how this order will be fulfilled. The menu opens next."}
-        </p>
+        {changingExistingOrder ? <p className="pos-order-type-intro">Items stay in the order.</p> : null}
+        {!shiftOpen ? (
+          <div className="pos-order-type-shift-note" role="status">
+            <span>Shift closed · Browse the menu, then open a shift before payment.</span>
+            <button type="button" onClick={onOpenShift}>Open shift</button>
+          </div>
+        ) : null}
 
         <div className="pos-order-type-options" aria-label="Order type">
           {ORDER_TYPES.map(
@@ -105,10 +111,6 @@ export function OrderTypeGate({
             ),
           )}
         </div>
-
-        <p className="pos-order-type-hint">
-          Select a card or press <kbd>D</kbd> / <kbd>T</kbd>
-        </p>
 
         {onCancel ? (
           <button

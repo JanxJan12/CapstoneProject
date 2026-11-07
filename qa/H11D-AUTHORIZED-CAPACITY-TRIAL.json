@@ -1,0 +1,63 @@
+{
+  "phase": "H-11D",
+  "h11fContinuation": {
+    "result": "BLOCKED_PENDING_MANUAL_OS_RESTART_AND_POST_BOOT_AUDIT",
+    "trialResumed": false,
+    "capacityGainMeasured": false,
+    "evidence": "qa/H11F-WINDOWS-RESTART-AND-RECOVERY.json"
+  },
+  "h11fPostBoot": {
+    "protectedServicesBoundedRecoveryVerified": true,
+    "result": "BLOCKED_CAPACITY_AND_IDLE_RESTORE_CONDITIONS",
+    "trialResumed": false,
+    "stopOrRestorePerformed": false,
+    "capacityGainMeasured": false,
+    "evidence": "qa/H11F-WINDOWS-RESTART-AND-RECOVERY.json"
+  },
+  "h11eContinuation": {
+    "result": "BLOCKED_DURING_GRACEFUL_DOCKER_DESKTOP_STOP",
+    "maintenanceAttempted": "docker desktop restart --timeout 120",
+    "restartCompleted": false,
+    "h11dTrialResumed": false,
+    "evidence": "qa/H11E-GRACEFUL-DOCKER-MAINTENANCE.json"
+  },
+  "capturedAtManila": "2026-10-16T01:38:27+08:00",
+  "authorization": "Owner-authorized bounded reversible pause of verified idle RRJ-owned synthetic fixtures only",
+  "result": "BLOCKED_BEFORE_MUTATION",
+  "preflight": {
+    "dockerVersion": "ETIMEDOUT_8s",
+    "dockerPs": "ETIMEDOUT_8s",
+    "wslMeminfo": "ETIMEDOUT_8s",
+    "wslStatus": "RESPONDED_DEFAULT_DOCKER_DESKTOP_WSL2",
+    "windowsFreePhysicalKiB": 3592868,
+    "windowsVisiblePhysicalKiB": 16493360,
+    "h09Auth": "TIMEOUT_3s",
+    "h09Rest": "TIMEOUT_3s",
+    "canonicalDemoAuth": "TIMEOUT_3s",
+    "canonicalDemoRest": "NO_CAPTURED_RESULT",
+    "activeLocalProfileJournal": false
+  },
+  "historicalInventorySource": "qa/H11C-SANITIZED-INVENTORY.json",
+  "historicalInventoryIsCurrent": false,
+  "candidateEligibility": [
+    {"project":"rrj_h07_financial_20261014","decision":"EXCLUDED_CURRENT_STATE_IDLE_DEPENDENCIES_UNVERIFIED","historicalIds":["74b5ba6d38ca","f8c4f6885aa9","d8b130694c1d","e8f7b6161dd3","db4249c0ec4c"]},
+    {"project":"rrj_h08b_history_20261015","decision":"EXCLUDED_CURRENT_STATE_IDLE_DEPENDENCIES_UNVERIFIED","historicalIds":["1cc9c7088cba","4f23e160669b","e3685155639e","4e7af74404e1","c7716c7d279e"]},
+    {"project":"rrj_manager_lifecycle_20261014","decision":"EXCLUDED_CURRENT_STATE_IDLE_DEPENDENCIES_UNVERIFIED","historicalIds":["b7f9e3a021fe","dcdd656c805d","caca8252418a","7088583f5d03","8d75e1ef2533"]},
+    {"project":"rrj_phase3_prefix_20261014_a1","decision":"EXCLUDED_CURRENT_STATE_IDLE_DEPENDENCIES_UNVERIFIED","historicalIds":["ae137e6fa583","04cf7973e393","de14fe3d9d51","0129b244cbaa","8d9ccc55fd6b"]},
+    {"project":"rrj_defense_demo_20261014_r2","decision":"EXCLUDED_VARIANT_USE_DEPENDENCIES_UNVERIFIED","historicalIds":["fadb21325353","30d5bf2f23a1","e133aed5720f","56c80a5f8803","beec6b1192ca"]},
+    {"project":"rrj_defense_demo_20261014_r3","decision":"EXCLUDED_VARIANT_USE_DEPENDENCIES_UNVERIFIED","historicalIds":["bdd4c001c232","a47c5ff84b74","92bb64389b29","08696de9d4e4","85e0d9d47432"]},
+    {"project":"rrj_phase8_sim","decision":"SPECIALIST_EXCLUDED","historicalIds":["7b74a27c4f03","e8027b107be7","21337dc139d7","ba0909dcc96a","33b54d736e83","240232e06d4b","69e08c98aa8e","05248ee14735","fd2fcefdfbc8","2877b8ab0d4d","bf3087423191","f4dc2b611561"]},
+    {"project":"rrj_rc_synthetic_replay_20261013","decision":"SPECIALIST_EXCLUDED_NO_VERIFIED_RESTART_PORTS","historicalIds":["5a15b115b197","aee7e2307389","85c59c5ec0b5","e77021711b8d","9410f82c405e"]},
+    {"project":"rrj_h08c_history_20261015","decision":"SPECIALIST_EXCLUDED_LOG_DEPENDENCY_AND_USE_UNVERIFIED","historicalIds":["d99279ea81a3","36204297b02b","bb74cd675941","3cde5a00ddf7","feebac47f5fa","ff427135d2df","0ad2bab7e2eb","862664844b42","d3bd5187fb2a","ab7d705432f5","2d9de3b44279","774017228b5e"]}
+  ],
+  "protectedProjects": ["rrj_h09_order_flow_20261015","rrj_defense_demo_20261014","rrj_recovery_20261014_source","rrj_recovery_20261014_target","isolated-stack","my-local-todo-app","<unlabeled>"],
+  "stopLog": [],
+  "restoreLog": [],
+  "liveContainerCount": null,
+  "liveWslAvailableMiB": null,
+  "liveWslSwapUsedMiB": null,
+  "measuredCapacityGainMiB": null,
+  "soakPerformed": false,
+  "hostedContact": false,
+  "wslConfigurationChanged": false
+}

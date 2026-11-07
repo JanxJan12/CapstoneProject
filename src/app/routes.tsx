@@ -6,6 +6,7 @@ import {
 
 import { Shell } from "./Shell";
 import { RequireAuth } from "./RequireAuth";
+import { RouteErrorPage } from "./RouteErrorPage";
 
 const AuthApp = lazy(() =>
   import("../modules/auth").then((module) => ({
@@ -93,6 +94,7 @@ export const router = createBrowserRouter([
   {
     path: "/",
     Component: Shell,
+    errorElement: <RouteErrorPage />,
 
     children: [
       {
@@ -145,7 +147,7 @@ export const router = createBrowserRouter([
 
       // Protected cashier route
       {
-        path: "cashier",
+        path: "cashier/*",
         element: (
           <RequireAuth role="cashier">
             <RouteBoundary>

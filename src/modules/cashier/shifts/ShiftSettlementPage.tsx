@@ -1,56 +1,48 @@
-import { AlertTriangle, Banknote, PlayCircle, StopCircle } from "lucide-react";
+import { AlertTriangle, PlayCircle, StopCircle } from "lucide-react";
 import {
   CashierButton,
-  EmptyState,
   ErrorBanner,
-  PageHeader,
 } from "../components";
 import { EndShiftDialog } from "./EndShiftDialog";
-import { ShiftAuditTable } from "./ShiftAuditTable";
+import { ClosedShiftHistory } from "./ClosedShiftHistory";
 import { ShiftOverview } from "./ShiftOverview";
-import { ShiftReportDialog } from "./ShiftReportDialog";
 import { StartShiftDialog } from "./StartShiftDialog";
 import { useShiftSettlement } from "./useShiftSettlement";
 
-export function ShiftSettlementPage() {
+export function ShiftSettlementPage({ onReviewPayments }: { onReviewPayments: () => void }) {
   const settlement = useShiftSettlement();
   const pendingCount = settlement.pendingPayments.length;
 
   return (
     <div className="cashier-page">
-      <PageHeader
-        title="Shift Settlement"
-        description="Reconcile the cash drawer first, then review supporting financial activity and the settlement audit trail"
-        actions={
-          settlement.activeShift ? (
-            <CashierButton
-              variant="danger"
-              title={
-                pendingCount
-                  ? "Resolve all pending payments before ending the shift"
-                  : undefined
-              }
-              onClick={settlement.openEndDialog}
-            >
-              <StopCircle className="h-4 w-4" aria-hidden="true" /> End shift
-            </CashierButton>
-          ) : (
-            <CashierButton onClick={() => settlement.setStartOpen(true)}>
-              <PlayCircle className="h-4 w-4" aria-hidden="true" /> Start new
-              shift
-            </CashierButton>
-          )
-        }
-      />
+      <header className="flex flex-col gap-3 border-b border-border/70 pb-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-black tracking-tight">Shift Settlement</h1>
+          <p className="mt-1 text-sm text-muted-foreground" role="status">
+            {settlement.activeShift ? "Open shift · Review the drawer before closing" : "Open a shift to take walk-in payments"}
+          </p>
+        </div>
+        {settlement.activeShift ? (
+          <CashierButton
+            variant={pendingCount ? "secondary" : "danger"}
+            disabled={Boolean(pendingCount) || settlement.loading}
+            title={pendingCount ? "Review the Cashier payment queue before ending the shift" : undefined}
+            onClick={settlement.openEndDialog}
+          >
+            <StopCircle aria-hidden="true" /> Review end shift
+          </CashierButton>
+        ) : (
+          <CashierButton onClick={() => settlement.setStartOpen(true)}>
+            <PlayCircle aria-hidden="true" /> Start new shift
+          </CashierButton>
+        )}
+      </header>
       {settlement.error ? (
-        <ErrorBanner
-          message={settlement.error}
-          onRetry={() => settlement.setError("")}
-        />
+        <ErrorBanner message={settlement.error} />
       ) : null}
       {settlement.activeShift && pendingCount ? (
         <section
-          className="flex flex-col gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-red-800 shadow-[0_2px_10px_rgba(153,27,27,0.04)] sm:flex-row sm:items-center sm:justify-between"
+          className="flex flex-col gap-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-amber-950 sm:flex-row sm:items-center sm:justify-between"
           role="alert"
         >
           <div className="flex gap-3">
@@ -59,36 +51,22 @@ export function ShiftSettlementPage() {
               aria-hidden="true"
             />
             <div>
-              <p className="text-xs font-black">Shift closure blocked</p>
-              <p className="mt-1 text-[11px]">
-                {pendingCount} pending payment{pendingCount === 1 ? "" : "s"}{" "}
-                must be verified or rejected first.
-              </p>
+              <p className="text-sm font-bold">Payment review needs attention</p>
+              <p className="mt-0.5 text-xs">{pendingCount} payment{pendingCount === 1 ? "" : "s"} awaiting review before closure.</p>
             </div>
           </div>
-          <span className="rounded-full border border-red-200 bg-white px-3 py-1.5 text-[9px] font-black uppercase tracking-widest">
-            {pendingCount} unresolved
-          </span>
+          <CashierButton variant="secondary" onClick={onReviewPayments}>
+            Review {pendingCount === 1 ? "Payment" : "Payments"}
+          </CashierButton>
         </section>
       ) : null}
-      {settlement.latest ? (
+      {settlement.activeShift ? (
         <ShiftOverview
-          shift={settlement.latest}
-          totals={settlement.totals}
-          active={Boolean(settlement.activeShift)}
-          onReport={settlement.setReportShiftId}
+          shift={settlement.activeShift}
+          totals={settlement.shiftTotals}
         />
-      ) : (
-        <EmptyState
-          icon={Banknote}
-          title="No shift records yet"
-          description="Start a shift to record opening cash and begin the cashier audit trail."
-        />
-      )}
-      <ShiftAuditTable
-        shifts={settlement.state.shifts}
-        onReport={settlement.setReportShiftId}
-      />
+      ) : null}
+      <ClosedShiftHistory refreshKey={settlement.activeShift?.id ?? "closed"} />
       <StartShiftDialog
         open={settlement.startOpen}
         loading={settlement.loading}
@@ -101,18 +79,15 @@ export function ShiftSettlementPage() {
         <EndShiftDialog
           open={settlement.endOpen}
           loading={settlement.loading}
+          shiftId={settlement.activeShift.id}
+          openingCash={settlement.activeShift.openingCash}
           totals={settlement.shiftTotals}
           pendingPaymentCount={pendingCount}
+          onReviewPayments={onReviewPayments}
           onOpenChange={settlement.setEndOpen}
           onConfirm={settlement.handleEnd}
         />
       ) : null}
-      <ShiftReportDialog
-        shift={settlement.reportShift}
-        totals={settlement.reportTotals}
-        open={Boolean(settlement.reportShift)}
-        onClose={() => settlement.setReportShiftId(undefined)}
-      />
     </div>
   );
 }

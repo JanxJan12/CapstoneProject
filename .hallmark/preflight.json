@@ -1,0 +1,12 @@
+{
+  "scanned": "2026-11-04",
+  "findings": {
+    "fonts": "Segoe UI from src/modules/customer/tokens.css",
+    "palette": "RRJ warm paper, dark ink, and amber from src/modules/customer/tokens.css",
+    "motion": "motion package and scoped CSS with reduced-motion fallback",
+    "spacing": "Tailwind utilities and scoped customer CSS",
+    "framework": "React, Vite, TypeScript, Tailwind"
+  },
+  "preserve": ["RRJ logo and restaurant photo", "catalog and image paths", "routes and handlers", "server quote and GCash flow", "persisted order states"],
+  "introduce": ["menu-led Home composition", "focused order and account layouts", "shared responsive presentation"]
+}

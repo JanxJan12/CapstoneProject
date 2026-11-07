@@ -6,7 +6,8 @@
   "scripts": {
     "build": "vite build && node scripts/prepare-sites-build.mjs",
     "dev": "vite",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "verify:quality": "node scripts/verify-non-workflow-quality.mjs"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",

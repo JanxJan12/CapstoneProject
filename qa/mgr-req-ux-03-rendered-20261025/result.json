@@ -1,0 +1,28 @@
+{
+  "checks": [
+    {
+      "width": 1280,
+      "suggestionRows": true,
+      "deliberateItemSelection": true,
+      "attentionDisclosure": true,
+      "noOverflow": true,
+      "explicitReviewAndIssue": true
+    },
+    {
+      "width": 820,
+      "suggestionRows": true,
+      "deliberateItemSelection": true,
+      "attentionDisclosure": true,
+      "noOverflow": true
+    },
+    {
+      "width": 390,
+      "suggestionRows": true,
+      "deliberateItemSelection": true,
+      "attentionDisclosure": true,
+      "noOverflow": true
+    }
+  ],
+  "browserExceptions": [],
+  "networkWrites": 0
+}

@@ -1,0 +1,57 @@
+%% RRJ'S FOOD-HOUSE - Suppliers and purchasing
+%% Source: hosted PostgreSQL pg_catalog, captured 2026-10-26T20:58:45.038881+00:00
+%% Field types are Mermaid-safe tokens. Exact PostgreSQL types, nullability and defaults are in hosted-public-catalog.json and column-dictionary.html.
+erDiagram
+  suppliers {
+    uuid id PK
+    character_varying_150 name
+    character_varying_150 contact_person
+    character_varying_20 contact_number
+    character_varying_150 email
+    text address
+    boolean is_active
+    timestamp_with_time_zone created_at
+    timestamp_with_time_zone updated_at
+  }
+  supplier_items {
+    uuid id PK
+    uuid supplier_id FK,UK
+    uuid inventory_item_id FK,UK
+    numeric_12_2 price_per_unit
+    boolean is_preferred
+    timestamp_with_time_zone created_at
+    timestamp_with_time_zone updated_at
+  }
+  purchase_orders {
+    uuid id PK
+    character_varying_50 po_number UK
+    uuid supplier_id FK
+    uuid created_by FK
+    purchase_order_status status
+    timestamp_with_time_zone ordered_at
+    timestamp_with_time_zone received_at
+    numeric_12_2 total_amount
+    text notes
+    timestamp_with_time_zone created_at
+    timestamp_with_time_zone updated_at
+  }
+  purchase_order_items {
+    uuid id PK
+    uuid purchase_order_id FK,UK
+    uuid inventory_item_id FK,UK
+    numeric_12_3 quantity_ordered
+    numeric_12_3 quantity_received
+    numeric_12_2 unit_cost
+    numeric_12_2 total_cost
+    timestamp_with_time_zone received_at
+    date expiration_date
+    timestamp_with_time_zone created_at
+    timestamp_with_time_zone updated_at
+    numeric_12_3 secondary_quantity_ordered
+    numeric_12_3 secondary_quantity_received
+    numeric_12_3 quantity_cancelled
+    numeric_12_3 quantity_remaining
+  }
+  purchase_orders ||--o{ purchase_order_items : "R063 purchase_order_items_purchase_order_id_fkey"
+  suppliers ||--o{ purchase_orders : "R065 purchase_orders_supplier_id_fkey"
+  suppliers ||--o{ supplier_items : "R080 supplier_items_supplier_id_fkey"

@@ -1,7 +1,16 @@
 import { supabase } from "@/lib/supabase";
+import {
+  applyCashierAssignmentStatuses,
+  fetchCashierAssignmentStatuses,
+} from "./cashierAssignmentService";
+import {
+  applyCashierOrderPaymentSummaries,
+  loadCashierOrderPaymentSummaries,
+} from "./cashierOrderPaymentResolution";
 import type {
   Order,
   OrderItem,
+  OrderItemModifier,
   OrderOperationalEditInput,
   OrderStatus,
   OrderTimelineEvent,
@@ -40,14 +49,12 @@ interface DatabaseOrderRow {
   fulfillment_type: DatabaseFulfillmentType;
   customer_name: string | null;
   customer_contact_number: string | null;
-  table_number: string | null;
   delivery_address: string | null;
   landmark: string | null;
   current_status: DatabaseOrderStatus;
   subtotal: number | string;
   delivery_fee: number | string;
   grand_total: number | string;
-  notes: string | null;
   confirmed_at: string | null;
   created_at: string;
   completed_at: string | null;
@@ -63,6 +70,7 @@ interface DatabaseOrderItemRow {
   unit_price: number | string;
   line_total: number | string;
   special_instructions: string | null;
+  modifiers: unknown;
   created_at: string;
 }
 
@@ -73,6 +81,17 @@ interface DatabaseOrderHistoryRow {
   changed_by: string | null;
   notes: string | null;
   created_at: string;
+}
+
+async function fetchCashierOrderPaymentSummaries(orderIds: string[]) {
+  return loadCashierOrderPaymentSummaries(orderIds, async (batch) => {
+    const { data, error } = await supabase.rpc(
+      "get_cashier_order_payment_summaries",
+      { p_order_ids: batch },
+    );
+    if (error) throw new Error(`Unable to load cashier payment summaries: ${error.message}`);
+    return data;
+  });
 }
 
 /**
@@ -115,7 +134,6 @@ interface UpdateOrderOperationalDetailsResult {
 
 export async function releaseReadyCashierOrder(
   databaseOrderId: string,
-  notes?: string,
 ): Promise<ReleaseReadyOrderResult> {
   const normalizedId = databaseOrderId.trim();
 
@@ -129,7 +147,6 @@ export async function releaseReadyCashierOrder(
     "release_ready_order",
     {
       p_order_id: normalizedId,
-      p_notes: notes?.trim() || null,
     },
   );
 
@@ -259,11 +276,8 @@ export async function updateCashierOrderOperationalDetails(
       p_order_id: normalizedId,
       p_customer_name: input.customerName.trim(),
       p_contact_number: input.contactNumber.trim(),
-      p_table_number: input.tableNumber?.trim() || null,
       p_delivery_address:
         input.deliveryAddress?.trim() || null,
-      p_order_instructions:
-        input.orderInstructions?.trim() || null,
     },
   );
 
@@ -286,6 +300,27 @@ export async function updateCashierOrderOperationalDetails(
   return result;
 }
 
+export async function confirmCashierOrderOperationalDetails(
+  databaseOrderId: string,
+  input: OrderOperationalEditInput,
+): Promise<Pick<Order, "customerName" | "contactNumber" | "deliveryAddress">> {
+  const { data, error } = await supabase.from("orders")
+    .select("customer_name, customer_contact_number, delivery_address")
+    .eq("id", databaseOrderId).single();
+  if (error || !data) throw new Error("Order saved, but the updated details could not be confirmed. Retry refresh before editing again.");
+  const confirmed = {
+    customerName: data.customer_name?.trim() || "",
+    contactNumber: data.customer_contact_number?.trim() || "",
+    deliveryAddress: data.delivery_address?.trim() || undefined,
+  };
+  if (confirmed.customerName !== input.customerName.trim() ||
+      confirmed.contactNumber !== input.contactNumber.trim() ||
+      confirmed.deliveryAddress !== (input.deliveryAddress?.trim() || undefined)) {
+    throw new Error("Order saved, but the refreshed details do not match. Retry refresh before editing again.");
+  }
+  return confirmed;
+}
+
 export async function fetchCashierOrders(): Promise<Order[]> {
   const { data: orderData, error: orderError } = await supabase
     .from("orders")
@@ -298,14 +333,12 @@ export async function fetchCashierOrders(): Promise<Order[]> {
       fulfillment_type,
       customer_name,
       customer_contact_number,
-      table_number,
       delivery_address,
       landmark,
       current_status,
       subtotal,
       delivery_fee,
       grand_total,
-      notes,
       confirmed_at,
       created_at,
       completed_at,
@@ -342,6 +375,7 @@ export async function fetchCashierOrders(): Promise<Order[]> {
         unit_price,
         line_total,
         special_instructions,
+        modifiers,
         created_at
       `)
       .in("order_id", orderIds)
@@ -380,16 +414,35 @@ export async function fetchCashierOrders(): Promise<Order[]> {
   const itemsByOrder = groupItemsByOrder(items);
   const historyByOrder = groupHistoryByOrder(history);
 
-  return orders.map((order) =>
+  let mappedOrders = orders.map((order) =>
     mapDatabaseOrderToCashierOrder(
       order,
       itemsByOrder.get(order.id) ?? [],
       historyByOrder.get(order.id) ?? [],
     ),
   );
+  const walkInOrderIds = mappedOrders.flatMap((order) =>
+    order.orderChannel === "walk_in" && order.databaseId ? [order.databaseId] : [],
+  );
+  if (walkInOrderIds.length) {
+    try {
+      const summaries = await fetchCashierOrderPaymentSummaries(walkInOrderIds);
+      mappedOrders = applyCashierOrderPaymentSummaries(mappedOrders, summaries);
+    } catch (error) {
+      // A financial read failure must never promote an unresolved order to Verified.
+      console.error("Unable to resolve cashier order payments:", error);
+    }
+  }
+  try {
+    const assignments = await fetchCashierAssignmentStatuses(mappedOrders);
+    return applyCashierAssignmentStatuses(mappedOrders, assignments);
+  } catch (error) {
+    console.error("Unable to read Cashier rider assignment status:", error);
+    return applyCashierAssignmentStatuses(mappedOrders, null);
+  }
 }
 
-function mapDatabaseOrderToCashierOrder(
+export function mapDatabaseOrderToCashierOrder(
   order: DatabaseOrderRow,
   items: DatabaseOrderItemRow[],
   history: DatabaseOrderHistoryRow[],
@@ -414,11 +467,6 @@ function mapDatabaseOrderToCashierOrder(
     contactNumber:
       order.customer_contact_number?.trim() || "—",
 
-    tableNumber:
-      order.fulfillment_type === "dine_in"
-        ? order.table_number?.trim() || undefined
-        : undefined,
-
     deliveryAddress:
       order.delivery_address?.trim() || undefined,
 
@@ -430,21 +478,15 @@ function mapDatabaseOrderToCashierOrder(
     items: items.map(mapOrderItem),
 
     subtotal: toNumber(order.subtotal),
-
-    discountType: null,
-
-    discountAmount: 0,
+    deliveryFee: toNumber(order.delivery_fee),
 
     taxAmount: 0,
 
     total: toNumber(order.grand_total),
 
-    orderInstructions:
-      order.notes?.trim() || undefined,
+    paymentMethod: "Unknown",
 
-    paymentMethod: mapPaymentMethod(order.order_channel),
-
-    paymentStatus: getFallbackPaymentStatus(order.order_channel),
+    paymentStatus: "Unknown",
 
     status: mapOrderStatus(order.current_status),
 
@@ -475,9 +517,23 @@ function mapOrderItem(
     name: item.item_name?.trim() || "Menu Item",
     unitPrice: toNumber(item.unit_price),
     quantity: item.quantity,
+    lineTotal: toNumber(item.line_total),
     note:
       item.special_instructions?.trim() || undefined,
+    modifiers: mapStoredModifiers(item.modifiers),
   };
+}
+
+function mapStoredModifiers(value: unknown): OrderItemModifier[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const modifiers = value.flatMap((entry): OrderItemModifier[] => {
+    if (!entry || typeof entry !== "object") return [];
+    const item = entry as Record<string, unknown>;
+    const price = Number(item.price);
+    if (typeof item.id !== "string" || typeof item.name !== "string" || !Number.isFinite(price)) return [];
+    return [{ id: item.id, name: item.name, price }];
+  });
+  return modifiers.length ? modifiers : undefined;
 }
 
 function mapTimelineEvent(
@@ -490,7 +546,11 @@ function mapTimelineEvent(
       history.notes?.trim() ||
       getDefaultTimelineLabel(history.status),
     timestamp: history.created_at,
-    actor: history.changed_by ? "Staff / Customer" : "System",
+    actor: history.changed_by
+      ? `Account ${history.changed_by}`
+      : ["Kitchen started preparation", "Kitchen marked order ready"].includes(history.notes?.trim() ?? "")
+        ? "Kitchen terminal"
+        : "System / terminal",
   };
 }
 
@@ -553,25 +613,6 @@ function mapFulfillmentType(
     default:
       return assertNever(fulfillmentType);
   }
-}
-
-function mapPaymentMethod(
-  orderChannel: DatabaseOrderChannel,
-): PaymentMethod {
-  /*
-   * Temporary compatibility mapping.
-   *
-   * Current online customer checkout is represented as GCash
-   * in the existing cashier UI. This will be replaced when
-   * PayMongo/payment records become the source of truth.
-   */
-  return orderChannel === "online" ? "GCash" : "Cash";
-}
-
-function getFallbackPaymentStatus(
-  orderChannel: DatabaseOrderChannel,
-): PaymentStatus {
-  return orderChannel === "online" ? "Unpaid" : "Verified";
 }
 
 function mapRiderStatus(

@@ -1,4551 +1,32 @@
 import { supabase } from "@/lib/supabase";
-import { gcashMerchantConfig } from "@/config/paymentConfig";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { useAuth } from "@/app/providers/AuthProvider";
-import {
-  ShoppingCart,
-  ArrowLeft,
-  Plus,
-  Minus,
-  Upload,
-  Check,
-  Loader2,
-  ChefHat,
-  User,
-  Phone,
-  Search,
-  Menu as MenuIcon,
-  X,
-  BadgeCheck,
-  ChevronRight,
-  MapPin,
-  Sparkles,
-  Truck,
-  LogOut,
-} from "lucide-react";
-import { ImageWithFallback } from "@/components/media/ImageWithFallback";
-import rrjLogo from "@/assets/brand/rrj-logo.jpg";
-import rrjPhoto from "@/assets/brand/rrj-restaurant.jpg";
+import { Check, ShoppingCart } from "lucide-react";
+import { canAddCurrentCustomerProduct, customerErrorMessage, currentCustomerProduct,
+  customerProductPricesChanged, isCurrentCustomerMenuResponse } from "./customerBatch1";
+import { customerViewSearch, isCustomerOrderId, parseCustomerViewSearch, type CustomerUrlView } from "./customerTrackingUrl";
+import { TrackingPage } from "./customerTrackingPage";
+import { CustNav } from "./customerNav";
+import { HomePage, MenuPage, MenuDetailPage } from "./customerMenuPages";
+import { CartPage } from "./customerCartPage";
+import { CheckoutPage } from "./customerCheckoutPage";
+import { CUSTOMER_ORDER_REQUEST_STORAGE_KEY } from "./customerCheckoutRecovery";
+import { CUSTOMER_CART_STORAGE_KEY, CUSTOMER_RESUME_PAGE_STORAGE_KEY } from "./customerStorageKeys";
+import { customerLineKey, customerUnitPrice, loadCustomerDrinkChoiceRows, loadCustomerFixedMealPrices, reconcileCustomerCart, fetchCustomerEffectiveAvailability } from "./customerCatalog";
+import { HistoryPage } from "./customerHistoryPage";
+import { ProfilePage } from "./customerProfilePage";
+import type { CustomerPage } from "./customerPageTypes";
+import type { CartItem, CustomerDrinkChoiceOption, DatabaseMenuCategory, DatabaseMenuItem, DatabaseMenuEffectiveAvailability, CustomerDatabaseMenuItem } from "./customerTypes";
+import "./customer-ui.css";
 
-type CustomerPage =
-  | "home" | "menu" | "menu-detail" | "cart" | "checkout"
-  | "tracking" | "history" | "profile";
-
-type CartItem =
-  CustomerDatabaseMenuItem & {
-    qty: number;
-  };
-
-interface DatabaseMenuCategory {
-  id: string;
-  name: string;
-}
-
-interface DatabaseMenuItem {
-  id: string;
-  category_id: string;
-  name: string;
-  description: string | null;
-  price: number;
-  image_path: string | null;
-  is_available: boolean;
-  is_active: boolean;
-}
-
-interface DatabaseMenuEffectiveAvailability {
-  menu_item_id: string;
-  effective_available: boolean;
-}
-
-interface CustomerDatabaseMenuItem {
-  id: string;
-  name: string;
-  desc: string;
-  price: number;
-  category: string;
-  available: boolean;
-  imagePath: string | null;
-}
-
-async function fetchCustomerEffectiveAvailability(): Promise<
-  Map<string, boolean>
-> {
-  const { data, error } = await supabase.rpc(
-    "get_menu_effective_availability",
-  );
-
-  if (error) {
-    throw new Error(
-      `Unable to refresh menu availability: ${error.message}`,
-    );
-  }
-
-  if (!Array.isArray(data)) {
-    throw new Error(
-      "The server returned an invalid menu availability result.",
-    );
-  }
-
-  const availabilityByItemId = new Map<string, boolean>();
-
-  for (const value of data as unknown[]) {
-    if (!value || typeof value !== "object" || Array.isArray(value)) {
-      throw new Error(
-        "The server returned an invalid menu availability entry.",
-      );
-    }
-
-    const row = value as Record<string, unknown>;
-
-    if (
-      typeof row.menu_item_id !== "string" ||
-      typeof row.effective_available !== "boolean"
-    ) {
-      throw new Error(
-        "The server returned an incomplete menu availability entry.",
-      );
-    }
-
-    availabilityByItemId.set(
-      row.menu_item_id,
-      row.effective_available,
-    );
-  }
-
-  return availabilityByItemId;
-}
-
-const CUSTOMER_CART_STORAGE_KEY = "rrj_customer_cart_v2";
-const CUSTOMER_RESUME_PAGE_STORAGE_KEY ="rrj_customer_resume_page_v1";
 const CUSTOMER_MENU_AVAILABILITY_FRESHNESS_MS = 5_000;
 
-const CUSTOMER_ORDER_REQUEST_STORAGE_KEY =
-  "rrj_customer_order_request_v1";
-
-interface StoredCustomerOrderRequest {
-  requestId: string;
-  fingerprint: string;
-}
-
-function getOrCreateCustomerOrderRequestId(
-  fingerprint: string,
-): string {
-  try {
-    const stored = sessionStorage.getItem(
-      CUSTOMER_ORDER_REQUEST_STORAGE_KEY,
-    );
-
-    if (stored) {
-      const parsed = JSON.parse(
-        stored,
-      ) as Partial<StoredCustomerOrderRequest>;
-
-      if (
-        typeof parsed.requestId === "string" &&
-        parsed.requestId.length > 0 &&
-        parsed.fingerprint === fingerprint
-      ) {
-        return parsed.requestId;
-      }
-    }
-  } catch {
-    // Fall through and create a new request ID.
-  }
-
-  const requestId = crypto.randomUUID();
-
-  try {
-    sessionStorage.setItem(
-      CUSTOMER_ORDER_REQUEST_STORAGE_KEY,
-      JSON.stringify({
-        requestId,
-        fingerprint,
-      }),
-    );
-  } catch {
-    // The current in-memory request can still proceed.
-  }
-
-  return requestId;
-}
-
-function clearCustomerOrderRequestId(
-  requestId: string,
-): void {
-  try {
-    const stored = sessionStorage.getItem(
-      CUSTOMER_ORDER_REQUEST_STORAGE_KEY,
-    );
-
-    if (!stored) {
-      return;
-    }
-
-    const parsed = JSON.parse(
-      stored,
-    ) as Partial<StoredCustomerOrderRequest>;
-
-    if (parsed.requestId === requestId) {
-      sessionStorage.removeItem(
-        CUSTOMER_ORDER_REQUEST_STORAGE_KEY,
-      );
-    }
-  } catch {
-    sessionStorage.removeItem(
-      CUSTOMER_ORDER_REQUEST_STORAGE_KEY,
-    );
-  }
-}
-
-const ORDER_STEPS = [
-  {
-    status: "waiting_payment_verification",
-    label: "Waiting for Payment Verification",
-  },
-  {
-    status: "confirmed",
-    label: "Confirmed",
-  },
-  {
-    status: "preparing",
-    label: "Preparing",
-  },
-  {
-    status: "ready",
-    label: "Ready",
-  },
-  {
-    status: "waiting_for_rider",
-    label: "Waiting for Rider",
-  },
-  {
-    status: "rider_accepted",
-    label: "Rider Accepted",
-  },
-  {
-    status: "picked_up",
-    label: "Picked Up",
-  },
-  {
-    status: "out_for_delivery",
-    label: "Out for Delivery",
-  },
-  {
-    status: "delivered",
-    label: "Delivered",
-  },
-] as const;
-
-const NAV_LINKS: { id: CustomerPage; label: string }[] = [
-  { id: "home",     label: "Home"        },
-  { id: "menu",     label: "Menu"        },
-  { id: "tracking", label: "Track Order" },
-  { id: "history",  label: "Orders"      },
-];
-
-const CATEGORY_META: Record<string, { emoji: string; gradient: string }> = {
-  All: { emoji: "✦", gradient: "from-orange-100 via-amber-50 to-rose-100" },
-  Viands: { emoji: "🍛", gradient: "from-amber-100 via-orange-50 to-red-100" },
-  Soups: { emoji: "🥣", gradient: "from-emerald-100 via-lime-50 to-amber-100" },
-  Rice: { emoji: "🍚", gradient: "from-stone-100 via-white to-amber-100" },
-  Vegetables: { emoji: "🥬", gradient: "from-lime-100 via-emerald-50 to-teal-100" },
-  Beverages: { emoji: "🥤", gradient: "from-sky-100 via-cyan-50 to-orange-100" },
-};
-
-function MenuVisual({ item, large = false }: { item: CustomerDatabaseMenuItem; large?: boolean }) {
-  const meta = CATEGORY_META[item.category] ?? CATEGORY_META.All;
-  return (
-    <div className={`customer-menu-visual relative flex items-center justify-center overflow-hidden bg-gradient-to-br ${meta.gradient} ${large ? "h-56 sm:h-72" : "h-32 sm:h-40"}`}>
-      <div className="absolute left-5 top-4 h-12 w-12 rounded-full bg-white/45 blur-xl" />
-      <div className="absolute bottom-3 right-4 h-14 w-14 rounded-full bg-primary/10 blur-xl" />
-      <div className={`customer-dish-plate ${large ? "h-36 w-36 sm:h-44 sm:w-44" : "h-20 w-20 sm:h-24 sm:w-24"}`}>
-        <span className={large ? "text-6xl sm:text-7xl" : "text-4xl sm:text-5xl"} aria-hidden="true">{meta.emoji}</span>
-      </div>
-      <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full border border-emerald-200/80 bg-white/80 px-2 py-1 text-[8px] font-extrabold uppercase tracking-wider text-emerald-700 shadow-sm backdrop-blur">
-        <BadgeCheck className="h-3 w-3" /> Halal
-      </span>
-    </div>
-  );
-}
-
-function FoodCard({
-  item,
-  onAdd,
-  onView,
-}: {
-  item: CustomerDatabaseMenuItem;
-  onAdd: (
-    item: CustomerDatabaseMenuItem,
-  ) => void;
-  onView?: (
-    item: CustomerDatabaseMenuItem,
-  ) => void;
-}) {
-  return (
-    <article className="customer-food-card group flex min-h-full flex-col overflow-hidden rounded-2xl border border-border/80 bg-card">
-      <button
-        type="button"
-        onClick={() => onView?.(item)}
-        disabled={!onView}
-        className="block w-full text-left disabled:cursor-default"
-        aria-label={onView ? `View ${item.name}` : undefined}
-      >
-        <MenuVisual item={item} />
-      </button>
-      <div className="flex flex-1 flex-col p-4">
-        <div className="mb-2 flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <span
-              className={`mb-1.5 inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                item.available
-                  ? "bg-emerald-50 text-emerald-700"
-                  : "bg-stone-100 text-stone-600"
-              }`}
-            >
-              {item.available ? "Available" : "Unavailable today"}
-            </span>
-            <h3 className="line-clamp-2 text-base font-extrabold leading-5 text-foreground">
-              {item.name}
-            </h3>
-          </div>
-          <span className="flex-none text-lg font-black tracking-tight text-primary">
-            ₱{item.price}
-          </span>
-        </div>
-        <p className="mb-4 line-clamp-2 min-h-10 text-sm leading-5 text-muted-foreground">
-          {item.desc || "No description provided."}
-        </p>
-        <button
-          type="button"
-          onClick={() => onAdd(item)}
-          disabled={!item.available}
-          className="mt-auto flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#211914] px-4 text-sm font-extrabold text-white shadow-sm transition-colors hover:bg-primary disabled:cursor-not-allowed disabled:bg-stone-200 disabled:text-stone-500"
-        >
-          {item.available ? (
-            <>
-              <Plus className="h-4 w-4" /> Add to order
-            </>
-          ) : (
-            "Unavailable today"
-          )}
-        </button>
-      </div>
-    </article>
-  );
-}
-
-function CustomerMenuFeedback({
-  loading,
-  error,
-  onRetry,
-}: {
-  loading: boolean;
-  error: string | null;
-  onRetry: () => void;
-}) {
-  return (
-    <div
-      role={error ? "alert" : "status"}
-      className={`flex min-h-40 flex-col items-center justify-center rounded-2xl border px-5 py-8 text-center ${
-        error
-          ? "border-red-200 bg-red-50"
-          : "border-border bg-card"
-      }`}
-    >
-      {loading ? (
-        <>
-          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-50 text-primary">
-            <Loader2 className="h-5 w-5 animate-spin" />
-          </span>
-          <p className="mt-3 text-base font-bold text-foreground">
-            Loading menu…
-          </p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Getting today&apos;s available dishes.
-          </p>
-        </>
-      ) : (
-        <>
-          <p className="text-base font-bold text-red-700">
-            Unable to load the menu
-          </p>
-          <p className="mt-1 max-w-md text-sm leading-5 text-red-600">{error}</p>
-          <button
-            type="button"
-            onClick={onRetry}
-            className="mt-4 min-h-11 rounded-xl border border-red-300 bg-white px-4 text-sm font-bold text-red-700 hover:bg-red-100"
-          >
-            Try Again
-          </button>
-        </>
-      )}
-    </div>
-  );
-}
-
-// ── Shared Customer Nav ──────────────────────────────────────────
-function CustNav({
-  cart,
-  onNav,
-  currentPage,
-}: {
-  cart: CartItem[];
-  onNav: (page: CustomerPage) => void;
-  currentPage: CustomerPage;
-}) {
-  const navigate = useNavigate();
-  const { session, logout } = useAuth();
-
-  const isCustomerSignedIn =
-    session?.role === "customer";
-
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [accountMenuOpen, setAccountMenuOpen] =
-    useState(false);
-  const [signingOut, setSigningOut] =
-    useState(false);
-
-  const totalItems = cart.reduce(
-    (sum, cartItem) => sum + cartItem.qty,
-    0,
-  );
-
-  const handleSignOut = async (): Promise<void> => {
-    if (signingOut) {
-      return;
-    }
-
-    setSigningOut(true);
-    setAccountMenuOpen(false);
-    setMenuOpen(false);
-
-    await logout();
-
-    navigate("/auth?portal=customer", {
-      replace: true,
-    });
-  };
-
-  const handleSignIn = () => {
-    navigate("/auth?portal=customer");
-  };
-
-  return (
-    <header className="customer-nav sticky top-0 z-30 flex flex-shrink-0 items-center justify-between gap-2 border-b border-border/70 bg-card/85 px-3 py-2.5 shadow-[0_8px_30px_rgba(64,40,25,0.04)] backdrop-blur-xl sm:px-5 lg:px-6">
-      {/* Logo */}
-      <button
-        type="button"
-        onClick={() => onNav("home")}
-        className="flex min-h-11 flex-shrink-0 items-center gap-2.5 rounded-xl pr-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-      >
-        <div className="h-9 w-9 flex-shrink-0 overflow-hidden rounded-xl bg-zinc-900 shadow-md ring-1 ring-black/10">
-          <ImageWithFallback
-            src={rrjLogo}
-            alt="RRJ's Food-Haus"
-            className="h-full w-full object-contain"
-          />
-        </div>
-
-        <span className="hidden lg:block">
-          <span className="block font-['Fraunces'] text-sm font-bold leading-none text-foreground">
-            RRJ&apos;s Food-Haus
-          </span>
-
-          <span className="mt-1 flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-[0.12em] text-emerald-700">
-            <BadgeCheck className="h-3 w-3" />
-            Halal kitchen
-          </span>
-        </span>
-      </button>
-
-      {/* Desktop navigation */}
-      <nav className="hidden min-w-0 items-center gap-1 rounded-xl border border-border/70 bg-background/60 p-1 md:flex">
-        {NAV_LINKS.map((navItem) => (
-          <button
-            key={navItem.id}
-            type="button"
-            onClick={() => onNav(navItem.id)}
-            aria-current={
-              currentPage === navItem.id
-                ? "page"
-                : undefined
-            }
-            className={`min-h-10 rounded-lg px-3 text-sm font-extrabold transition-all lg:px-4 ${
-              currentPage === navItem.id
-                ? "bg-[#211914] text-white shadow-sm"
-                : "text-muted-foreground hover:bg-white hover:text-foreground"
-            }`}
-          >
-            {navItem.label}
-          </button>
-        ))}
-      </nav>
-
-      {/* Right actions */}
-      <div className="flex items-center gap-2">
-        {/* Cart */}
-        <button
-          type="button"
-          onClick={() => onNav("cart")}
-          aria-current={currentPage === "cart" || currentPage === "checkout" ? "page" : undefined}
-          className={`relative flex min-h-11 items-center gap-1.5 rounded-xl px-3.5 text-sm font-extrabold text-white shadow-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${currentPage === "cart" || currentPage === "checkout" ? "bg-[#211914] shadow-black/10" : "bg-primary shadow-orange-900/10 hover:bg-amber-800"}`}
-        >
-          <ShoppingCart className="h-4 w-4" />
-
-          <span className="hidden sm:inline">
-            Cart
-          </span>
-
-          {totalItems > 0 && (
-            <motion.span
-              key={totalItems}
-              initial={{ scale: 0.55 }}
-              animate={{ scale: 1 }}
-              className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-300 px-1 text-[10px] font-black text-[#211914] ring-2 ring-white"
-            >
-              {totalItems}
-            </motion.span>
-          )}
-        </button>
-
-        {/* Desktop account */}
-        {isCustomerSignedIn ? (
-          <div className="relative hidden sm:block">
-            <button
-              type="button"
-              onClick={() =>
-                setAccountMenuOpen(
-                  (currentValue) => !currentValue,
-                )
-              }
-              aria-label="Open profile menu"
-              aria-haspopup="menu"
-              aria-expanded={accountMenuOpen}
-              className={`flex min-h-11 items-center justify-center gap-2 rounded-xl border bg-white px-3 text-sm font-extrabold transition-colors ${
-                accountMenuOpen
-                  ? "border-primary text-primary"
-                  : "border-border text-muted-foreground hover:bg-muted hover:text-foreground"
-              }`}
-            >
-              <User className="h-4 w-4" />
-              <span className="hidden lg:inline">Profile</span>
-            </button>
-
-            <AnimatePresence>
-              {accountMenuOpen && (
-                <>
-                  <button
-                    type="button"
-                    aria-label="Close account menu"
-                    onClick={() =>
-                      setAccountMenuOpen(false)
-                    }
-                    className="fixed inset-0 z-40 cursor-default"
-                  />
-
-                  <motion.div
-                    role="menu"
-                    initial={{
-                      opacity: 0,
-                      y: -6,
-                      scale: 0.97,
-                    }}
-                    animate={{
-                      opacity: 1,
-                      y: 0,
-                      scale: 1,
-                    }}
-                    exit={{
-                      opacity: 0,
-                      y: -6,
-                      scale: 0.97,
-                    }}
-                    transition={{
-                      duration: 0.14,
-                    }}
-                    className="absolute right-0 top-[calc(100%+0.6rem)] z-50 w-48 overflow-hidden rounded-xl border border-border bg-white p-1.5 shadow-xl shadow-black/10"
-                  >
-                    <button
-                      type="button"
-                      role="menuitem"
-                      onClick={() => {
-                        setAccountMenuOpen(false);
-                        onNav("profile");
-                      }}
-                      className="flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-bold text-foreground hover:bg-muted"
-                    >
-                      <User className="h-4 w-4 text-muted-foreground" />
-                      My Profile
-                    </button>
-
-                    <div className="my-1 border-t border-border" />
-
-                    <button
-                      type="button"
-                      role="menuitem"
-                      onClick={() => {
-                        void handleSignOut();
-                      }}
-                      disabled={signingOut}
-                      className="flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-bold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {signingOut ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <LogOut className="h-4 w-4" />
-                      )}
-
-                      {signingOut
-                        ? "Signing out…"
-                        : "Sign Out"}
-                    </button>
-                  </motion.div>
-                </>
-              )}
-            </AnimatePresence>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={handleSignIn}
-            className="hidden min-h-11 items-center gap-2 rounded-xl border border-border bg-white px-4 text-sm font-extrabold text-foreground shadow-sm hover:border-primary/30 hover:bg-amber-50/40 sm:flex"
-          >
-            <User className="h-4 w-4 text-primary" />
-            Sign In
-          </button>
-        )}
-
-        {/* Mobile hamburger */}
-        <button
-          type="button"
-          onClick={() => setMenuOpen(true)}
-          aria-label="Open navigation"
-          className="flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-white hover:bg-muted md:hidden"
-        >
-          <MenuIcon className="h-4 w-4 text-muted-foreground" />
-        </button>
-      </div>
-
-      {/* Mobile drawer */}
-      <AnimatePresence>
-        {menuOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 md:hidden"
-          >
-            <button
-              type="button"
-              aria-label="Close navigation"
-              className="absolute inset-0 h-full w-full bg-black/45 backdrop-blur-sm"
-              onClick={() => setMenuOpen(false)}
-            />
-
-            <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{
-                type: "spring",
-                stiffness: 360,
-                damping: 34,
-              }}
-              className="absolute right-0 top-0 flex h-full w-[min(19rem,86vw)] flex-col bg-[#1d1713] text-white shadow-2xl"
-            >
-              {/* Mobile header */}
-              <div className="flex items-center justify-between border-b border-white/10 px-4 py-4">
-                <div className="flex items-center gap-2.5">
-                  <div className="h-9 w-9 overflow-hidden rounded-xl bg-black ring-1 ring-white/15">
-                    <ImageWithFallback
-                      src={rrjLogo}
-                      alt="RRJ's Food-Haus"
-                      className="h-full w-full object-contain"
-                    />
-                  </div>
-
-                  <div>
-                    <span className="block font-['Fraunces'] text-sm font-bold">
-                      RRJ&apos;s Food-Haus
-                    </span>
-
-                    <span className="text-[8px] font-extrabold uppercase tracking-widest text-emerald-300">
-                      Halal kitchen
-                    </span>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setMenuOpen(false)}
-                  aria-label="Close navigation"
-                  className="flex h-11 w-11 items-center justify-center rounded-xl text-white/60 hover:bg-white/10 hover:text-white"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-
-              {/* Mobile navigation */}
-              <nav className="flex flex-col gap-1 p-3">
-                {NAV_LINKS.map((navItem) => (
-                  <button
-                    key={navItem.id}
-                    type="button"
-                    onClick={() => {
-                      onNav(navItem.id);
-                      setMenuOpen(false);
-                    }}
-                    aria-current={currentPage === navItem.id ? "page" : undefined}
-                    className={`flex min-h-12 items-center justify-between rounded-xl px-4 text-left text-sm font-bold transition-colors ${
-                      currentPage === navItem.id
-                        ? "bg-primary text-white"
-                        : "text-white/65 hover:bg-white/[0.07] hover:text-white"
-                    }`}
-                  >
-                    {navItem.label}
-
-                    <ChevronRight className="h-4 w-4 opacity-50" />
-                  </button>
-                ))}
-
-                {isCustomerSignedIn && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onNav("profile");
-                      setMenuOpen(false);
-                    }}
-                    aria-current={currentPage === "profile" ? "page" : undefined}
-                    className={`flex min-h-12 items-center justify-between rounded-xl px-4 text-left text-sm font-bold transition-colors ${
-                      currentPage === "profile"
-                        ? "bg-primary text-white"
-                        : "text-white/65 hover:bg-white/[0.07] hover:text-white"
-                    }`}
-                  >
-                    Profile
-
-                    <ChevronRight className="h-4 w-4 opacity-50" />
-                  </button>
-                )}
-              </nav>
-
-              {/* Mobile account action */}
-              <div className="mt-auto border-t border-white/10 p-4">
-                {isCustomerSignedIn ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      void handleSignOut();
-                    }}
-                    disabled={signingOut}
-                    className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-red-500/15 px-4 text-sm font-bold text-red-200 hover:bg-red-500/25 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {signingOut ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <LogOut className="h-4 w-4" />
-                    )}
-
-                    {signingOut
-                      ? "Signing out…"
-                      : "Sign Out"}
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMenuOpen(false);
-                      handleSignIn();
-                    }}
-                    className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-bold text-white hover:bg-amber-700"
-                  >
-                    <User className="h-4 w-4" />
-                    Sign In
-                  </button>
-                )}
-
-                <p className="mt-4 text-[10px] leading-relaxed text-white/35">
-                  Halal Filipino comfort food
-                  <br />
-                  Made with care since 2021.
-                </p>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </header>
-  );
-}
-
-// ── Home ──────────────────────────────────────────────────────────
-function HomePage({
-  cart,
-  menuItems,
-  categories,
-  menuLoading,
-  menuError,
-  onNav,
-  onBrowseCategory,
-  onRetryMenu,
-  onAddToCart,
-}: {
-  cart: CartItem[];
-  menuItems: CustomerDatabaseMenuItem[];
-  categories: DatabaseMenuCategory[];
-  menuLoading: boolean;
-  menuError: string | null;
-  onNav: (page: CustomerPage) => void;
-  onBrowseCategory: (category: string) => void;
-  onRetryMenu: () => void;
-  onAddToCart: (
-    item: CustomerDatabaseMenuItem,
-  ) => void;
-}) {
-  return (
-    <div className="flex flex-col h-full overflow-hidden">
-      <CustNav cart={cart} onNav={onNav} currentPage="home" />
-      <div className="customer-storefront flex-1 overflow-y-auto">
-        {/* Hero */}
-        <div className="relative h-[16rem] overflow-hidden sm:h-[22rem] lg:h-[25rem]">
-          <ImageWithFallback src={rrjPhoto} alt="RRJ's Food-Haus restaurant" className="h-full w-full object-cover object-[center_66%] transition-transform duration-[12s] ease-out hover:scale-[1.035]" />
-          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(20,14,11,.94)_0%,rgba(23,16,12,.66)_52%,rgba(20,14,11,.16)_100%)]" />
-          <div className="absolute inset-0 flex items-center px-5 sm:px-10 lg:px-16">
-            <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }} className="max-w-xl">
-              <p className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-emerald-300/20 bg-emerald-300/10 px-2.5 py-1 text-xs font-extrabold uppercase tracking-[0.12em] text-emerald-200 backdrop-blur"><BadgeCheck className="h-3.5 w-3.5" /> Halal kitchen</p>
-              <h1 className="mb-2 font-['Fraunces'] text-3xl font-semibold leading-[0.98] tracking-[-0.04em] text-white sm:mb-4 sm:text-5xl lg:text-6xl">
-                Comfort food,<br /><span className="text-amber-300">made for sharing.</span>
-              </h1>
-              <p className="mb-4 max-w-md text-xs leading-relaxed text-white/68 sm:mb-7 sm:text-sm">
-                Fresh halal Filipino favorites, cooked with care and brought from our kitchen to your table.
-              </p>
-              <div className="flex gap-2">
-                <button onClick={() => onNav("menu")} className="flex min-h-11 items-center gap-2 rounded-xl bg-primary px-4 text-xs font-extrabold text-primary-foreground shadow-lg shadow-black/20 hover:bg-amber-700 sm:min-h-12 sm:px-6 sm:text-sm">
-                  Explore the menu <ChevronRight className="h-4 w-4" />
-                </button>
-                <button onClick={() => onNav("tracking")} className="flex min-h-11 items-center gap-1.5 rounded-xl border border-white/15 bg-white/10 px-3 text-xs font-bold text-white backdrop-blur hover:bg-white/20 sm:min-h-12 sm:px-5 sm:text-sm">
-                  <MapPin className="w-3.5 h-3.5" /> Track order
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-
-        {/* Categories */}
-        <div className="mx-auto w-full max-w-7xl px-4 py-5 sm:px-6 sm:py-8 lg:px-10">
-          <div className="mb-7 grid grid-cols-3 overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm">
-            {[
-              { icon: BadgeCheck, title: "Halal kitchen", sub: "Prepared with care" },
-              { icon: Sparkles, title: "Freshly cooked", sub: "Made when you order" },
-              { icon: Truck, title: "Local delivery", sub: "Simple order tracking" },
-            ].map(({ icon: Icon, title, sub }, index) => (
-              <div key={title} className={`flex items-center justify-center gap-2 px-2 py-3 sm:gap-3 sm:px-4 sm:py-4 ${index ? "border-l border-border/70" : ""}`}>
-                <div className="hidden h-9 w-9 flex-none items-center justify-center rounded-xl bg-amber-50 text-primary sm:flex"><Icon className="h-4 w-4" /></div>
-                <div className="min-w-0 text-center sm:text-left"><p className="truncate text-[9px] font-extrabold text-foreground sm:text-xs">{title}</p><p className="hidden truncate text-[9px] text-muted-foreground sm:block">{sub}</p></div>
-              </div>
-            ))}
-          </div>
-
-          {menuLoading || menuError ? (
-            <CustomerMenuFeedback
-              loading={menuLoading}
-              error={menuError}
-              onRetry={onRetryMenu}
-            />
-          ) : menuItems.length === 0 ? (
-            <div className="flex min-h-44 flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card/75 px-6 py-8 text-center">
-              <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-xl">🍽️</div>
-              <h2 className="text-base font-extrabold text-foreground">The menu is empty right now</h2>
-              <p className="mt-1 max-w-sm text-sm leading-5 text-muted-foreground">Please check again when dishes have been added to the menu.</p>
-            </div>
-          ) : (
-            <>
-          <div className="mb-3 flex items-end justify-between sm:mb-4">
-            <div><p className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-primary/70">Find your craving</p><h2 className="font-['Fraunces'] text-xl font-semibold text-foreground sm:text-2xl">Browse by category</h2></div>
-          </div>
-          <div className="mb-8 grid grid-cols-2 gap-2 min-[480px]:grid-cols-3 sm:mb-11 sm:grid-cols-6 sm:gap-3">
-            {[
-                "All",
-                ...categories.map(
-                  (category) => category.name,
-                ),
-              ].map((cat) => {
-                const meta =
-                  CATEGORY_META[cat] ??
-                  CATEGORY_META.All;
-
-                return (
-                  <button
-                    key={cat}
-                    onClick={() => onBrowseCategory(cat)}
-                    className="group flex min-h-[5.8rem] flex-col items-center justify-center gap-1.5 rounded-2xl border border-border/80 bg-card p-2 shadow-sm transition-all hover:-translate-y-1 hover:border-primary/25 hover:shadow-lg sm:min-h-[7rem] sm:gap-2"
-                  >
-                    <div
-                      className={`flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br text-xl shadow-inner transition-transform group-hover:scale-110 group-hover:-rotate-3 sm:h-12 sm:w-12 sm:text-2xl ${meta.gradient}`}
-                    >
-                      <span aria-hidden="true">
-                        {meta.emoji}
-                      </span>
-                    </div>
-
-                    <span className="text-xs font-extrabold text-foreground">
-                      {cat}
-                    </span>
-                  </button>
-                );
-              })}
-          </div>
-
-          <div className="mb-3 flex items-end justify-between sm:mb-4">
-            <div><p className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-primary/70">From our menu</p><h2 className="font-['Fraunces'] text-xl font-semibold text-foreground sm:text-2xl">Available dishes</h2></div>
-            <button onClick={() => onNav("menu")} className="flex min-h-10 items-center gap-1 rounded-lg px-2 text-[10px] font-extrabold text-primary hover:bg-primary/5 sm:text-xs">View all <ChevronRight className="h-3.5 w-3.5" /></button>
-          </div>
-          <div className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 lg:grid-cols-4">
-            {menuItems.filter((m) => m.available).slice(0, 4).map((item) => (
-              <FoodCard key={item.id} item={item} onAdd={onAddToCart} />
-            ))}
-          </div>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ── Menu Browse ───────────────────────────────────────────────────
-function MenuPage({
-  cart,
-  menuItems,
-  categories,
-  menuLoading,
-  menuError,
-  selectedCategory,
-  onNav,
-  onCategoryChange,
-  onRetryMenu,
-  onAddToCart,
-  onViewDetail,
-}: {
-  cart: CartItem[];
-  menuItems: CustomerDatabaseMenuItem[];
-  categories: DatabaseMenuCategory[];
-  menuLoading: boolean;
-  menuError: string | null;
-  selectedCategory: string;
-  onNav: (page: CustomerPage) => void;
-  onCategoryChange: (category: string) => void;
-  onRetryMenu: () => void;
-  onAddToCart: (
-    item: CustomerDatabaseMenuItem,
-  ) => void;
-  onViewDetail: (
-    item: CustomerDatabaseMenuItem,
-  ) => void;
-}) {
-  const [search, setSearch] = useState("");
-  const cats = [
-  "All",
-  ...categories.map(
-    (category) => category.name,
-  ),
-  ];
-  const cat = cats.includes(selectedCategory)
-    ? selectedCategory
-    : "All";
-  const filtered = menuItems.filter(
-    (m) => (cat === "All" || m.category === cat) &&
-    m.name.toLowerCase().includes(search.toLowerCase())
-  );
-
-  return (
-    <div className="flex flex-col h-full overflow-hidden">
-      <CustNav cart={cart} onNav={onNav} currentPage="menu" />
-      <div className="customer-storefront flex-1 overflow-y-auto px-4 py-5 sm:px-6 sm:py-8 md:px-10">
-        <div className="mx-auto max-w-7xl">
-        <div className="mb-5 flex items-end justify-between gap-3 sm:mb-7">
-          <div>
-            <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-primary/75">Order from our kitchen</p>
-            <h1 className="mt-1 font-['Fraunces'] text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">Browse the menu</h1>
-          </div>
-          {!menuLoading && !menuError ? (
-            <span className="hidden rounded-full border border-border bg-card px-3 py-1.5 text-xs font-bold text-muted-foreground shadow-sm sm:block">{filtered.length} dishes shown</span>
-          ) : null}
-        </div>
-        {menuLoading || menuError ? (
-          <CustomerMenuFeedback
-            loading={menuLoading}
-            error={menuError}
-            onRetry={onRetryMenu}
-          />
-        ) : (
-          <>
-        {/* Search + filters */}
-        <section className="customer-menu-toolbar sticky top-0 z-20 mb-6 rounded-2xl border border-border/80 bg-background/95 p-3 shadow-[0_10px_30px_rgba(64,40,25,0.07)] backdrop-blur sm:mb-8 sm:p-4">
-          <div className="flex flex-col gap-3 md:flex-row md:items-end">
-          <label className="min-w-0 flex-1 md:max-w-md">
-            <span className="mb-1.5 block text-sm font-bold text-foreground">Search the menu</span>
-            <span className="relative block">
-              <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <input placeholder="Search by dish name" value={search} onChange={(e) => setSearch(e.target.value)}
-                aria-label="Search menu"
-                className="h-12 w-full rounded-xl border border-border bg-card pl-10 pr-11 text-base shadow-sm outline-none transition-all placeholder:text-muted-foreground/60 focus:border-primary/45 focus:ring-4 focus:ring-primary/10" />
-              {search ? (
-                <button
-                  type="button"
-                  onClick={() => setSearch("")}
-                  aria-label="Clear search"
-                  className="absolute right-1.5 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              ) : null}
-            </span>
-          </label>
-          <div className="min-w-0 flex-1">
-            <p className="mb-1.5 text-sm font-bold text-foreground">Category</p>
-            <div className="flex gap-2 overflow-x-auto pb-1">
-              {cats.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => onCategoryChange(c)}
-                  aria-pressed={cat === c}
-                  className={`min-h-11 flex-none whitespace-nowrap rounded-xl border px-4 text-sm font-extrabold transition-all ${cat === c ? "border-[#211914] bg-[#211914] text-white shadow-sm" : "border-border bg-card text-muted-foreground hover:border-primary/25 hover:text-foreground"}`}
-                >
-                  {c}
-                </button>
-              ))}
-            </div>
-          </div>
-          </div>
-          <div className="mt-3 flex min-h-8 flex-wrap items-center justify-between gap-2 border-t border-border/70 pt-3">
-            <p className="text-sm text-muted-foreground">
-              Showing <span className="font-bold text-foreground">{filtered.length}</span> {filtered.length === 1 ? "dish" : "dishes"} in <span className="font-bold text-foreground">{cat}</span>
-              {search ? <> for <span className="font-bold text-foreground">“{search}”</span></> : null}
-            </p>
-            {(search || cat !== "All") ? (
-              <button
-                type="button"
-                onClick={() => { setSearch(""); onCategoryChange("All"); }}
-                className="min-h-10 rounded-lg px-3 text-sm font-bold text-primary hover:bg-primary/5"
-              >
-                Clear filters
-              </button>
-            ) : null}
-          </div>
-        </section>
-        {filtered.length > 0 ? (
-          <div className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {filtered.map((item) => <FoodCard key={item.id} item={item} onAdd={onAddToCart} onView={onViewDetail} />)}
-          </div>
-        ) : (
-          <div className="flex min-h-44 flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card/70 px-6 py-8 text-center">
-            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-xl">🍽️</div>
-            <h2 className="text-base font-extrabold text-foreground">No matching dishes</h2>
-            <p className="mt-1 max-w-sm text-sm leading-5 text-muted-foreground">Try another dish name or return to all categories.</p>
-            <button onClick={() => { setSearch(""); onCategoryChange("All"); }} className="mt-4 min-h-11 rounded-xl bg-[#211914] px-4 text-sm font-extrabold text-white hover:bg-primary">Clear filters</button>
-          </div>
-        )}
-          </>
-        )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ── Menu Detail ───────────────────────────────────────────────────
-function MenuDetailPage({
-  item,
-  cart,
-  onNav,
-  onAddToCart,
-}: {
-  item: CustomerDatabaseMenuItem;
-  cart: CartItem[];
-  onNav: (page: CustomerPage) => void;
-  onAddToCart: (
-    item: CustomerDatabaseMenuItem,
-  ) => void;
-}) {
-  const [qty, setQty] = useState(1);
-  return (
-    <div className="flex flex-col h-full overflow-hidden">
-      <CustNav cart={cart} onNav={onNav} currentPage="menu" />
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-5 sm:py-8">
-          <button onClick={() => onNav("menu")} className="mb-5 flex min-h-11 items-center gap-1.5 rounded-xl pr-3 text-sm font-bold text-muted-foreground hover:text-foreground sm:mb-6">
-            <ArrowLeft className="w-4 h-4" /> Back to Menu
-          </button>
-          <div className="grid grid-cols-1 gap-5 overflow-hidden rounded-3xl border border-border/80 bg-card p-3 shadow-[0_24px_70px_rgba(65,42,26,.09)] sm:gap-8 sm:p-5 md:grid-cols-2">
-            <div className="overflow-hidden rounded-2xl"><MenuVisual item={item} large /></div>
-            <div className="flex flex-col">
-              <div className="mb-2 flex flex-wrap items-center gap-2"><span className="text-xs font-extrabold uppercase tracking-wide text-primary">{item.category}</span><span className="h-1 w-1 rounded-full bg-border" /><span className="inline-flex items-center gap-1 text-xs font-extrabold text-emerald-700"><BadgeCheck className="h-3.5 w-3.5" /> Halal</span><span className={`rounded-full px-2 py-0.5 text-xs font-bold ${item.available ? "bg-emerald-50 text-emerald-700" : "bg-stone-100 text-stone-600"}`}>{item.available ? "Available" : "Unavailable today"}</span></div>
-              <h1 className="mb-3 font-['Fraunces'] text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">{item.name}</h1>
-              <p className="text-muted-foreground mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base">{item.desc}</p>
-              <p className="text-2xl sm:text-3xl font-bold text-primary mb-4 sm:mb-6">₱{item.price}</p>
-              <div className="flex items-center gap-3 sm:gap-4">
-                <div className="flex min-h-12 items-center gap-3 rounded-xl border border-border px-2">
-                  <button onClick={() => setQty(Math.max(1, qty - 1))} aria-label="Decrease quantity" className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted"><Minus className="w-3 h-3" /></button>
-                  <span className="font-bold w-6 text-center">{qty}</span>
-                  <button onClick={() => setQty(qty + 1)} aria-label="Increase quantity" className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted"><Plus className="w-3 h-3" /></button>
-                </div>
-                <button
-                  onClick={() => { for (let i = 0; i < qty; i++) onAddToCart(item); onNav("cart"); }}
-                  disabled={!item.available}
-                  className="min-h-12 flex-1 rounded-xl bg-primary px-3 text-sm font-extrabold text-primary-foreground shadow-lg shadow-orange-900/10 hover:bg-amber-800 disabled:cursor-not-allowed disabled:bg-stone-200 disabled:text-stone-500 disabled:shadow-none">
-                  {item.available ? `Add to Cart · ₱${item.price * qty}` : "Unavailable today"}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ── Cart ─────────────────────────────────────────────────────────
-function CartPage({
-  cart,
-  availabilityRefreshing,
-  availabilityError,
-  onNav,
-  onQtyChange,
-  onRemove,
-}: {
-  cart: CartItem[];
-  availabilityRefreshing: boolean;
-  availabilityError: string | null;
-  onNav: (p: CustomerPage) => void;
-  onQtyChange: (id: string,qty: number,) => void;
-  onRemove: (id: string) => void;
-}) {
-  const subtotal = cart.reduce((s, c) => s + c.price * c.qty, 0);
-  const unavailableItems = cart.filter((item) => !item.available);
-  const unavailableItemNames = unavailableItems
-    .map((item) => item.name)
-    .join(", ");
-  return (
-    <div className="flex flex-col h-full overflow-hidden">
-      <CustNav cart={cart} onNav={onNav} currentPage="cart" />
-      <div className="customer-storefront flex-1 overflow-y-auto">
-        <div className="mx-auto w-full max-w-5xl px-4 py-5 sm:px-6 sm:py-8">
-          <div className="mb-5 flex items-end justify-between gap-3 sm:mb-7">
-            <div>
-              <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-primary/75">Review your order</p>
-              <h1 className="mt-1 font-['Fraunces'] text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">Your cart</h1>
-            </div>
-            {cart.length > 0 ? (
-              <span className="rounded-full border border-border bg-card px-3 py-1.5 text-xs font-bold text-muted-foreground shadow-sm">
-                {cart.reduce((sum, item) => sum + item.qty, 0)} {cart.reduce((sum, item) => sum + item.qty, 0) === 1 ? "item" : "items"}
-              </span>
-            ) : null}
-          </div>
-          {availabilityError ? (
-            <div role="alert" className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium leading-5 text-red-800">
-              {availabilityError} Try checkout again when the connection is available.
-            </div>
-          ) : null}
-          {unavailableItems.length > 0 ? (
-            <div role="alert" className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium leading-5 text-amber-900">
-              Availability changed for {unavailableItemNames}. Your cart was kept; remove the unavailable {unavailableItems.length === 1 ? "item" : "items"} before checkout.
-            </div>
-          ) : null}
-          {cart.length === 0 ? (
-            <div className="flex min-h-52 flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card/75 px-6 py-10 text-center">
-              <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-primary">
-                <ShoppingCart className="h-5 w-5" />
-              </span>
-              <h2 className="text-base font-extrabold text-foreground">Your cart is empty</h2>
-              <p className="mt-1 max-w-sm text-sm leading-5 text-muted-foreground">Choose a dish from the menu to start your order.</p>
-              <button onClick={() => onNav("menu")} className="mt-4 min-h-11 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground hover:bg-amber-800">Browse the menu</button>
-            </div>
-          ) : (
-            <div className="grid gap-5 lg:grid-cols-[minmax(0,1.45fr)_minmax(19rem,0.75fr)] lg:items-start">
-              {/* Items */}
-              <section aria-labelledby="cart-items-heading" className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_10px_30px_rgba(64,40,25,0.05)]">
-                <div className="flex items-center justify-between border-b border-border/80 px-4 py-3.5 sm:px-5">
-                  <h2 id="cart-items-heading" className="text-base font-extrabold text-foreground">Order items</h2>
-                  <button type="button" onClick={() => onNav("menu")} className="min-h-10 rounded-lg px-3 text-sm font-bold text-primary hover:bg-primary/5">Add more</button>
-                </div>
-                <div className="divide-y divide-border/80">
-                {cart.map((item) => (
-                  <div key={item.id} className="grid grid-cols-[3.5rem_minmax(0,1fr)] gap-3 p-4 sm:grid-cols-[4rem_minmax(0,1fr)_auto] sm:items-center sm:gap-4 sm:px-5">
-                    <div className={`flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br text-2xl sm:h-16 sm:w-16 sm:text-3xl ${CATEGORY_META[item.category]?.gradient ?? CATEGORY_META.All.gradient}`}>
-                      <span aria-hidden="true">{CATEGORY_META[item.category]?.emoji ?? CATEGORY_META.All.emoji}</span>
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-base font-extrabold leading-5 text-foreground">{item.name}</p>
-                      <p className="mt-1 text-sm text-muted-foreground">₱{item.price} each</p>
-                      {!item.available ? (
-                        <p className="mt-1 text-sm font-bold text-amber-800">Unavailable after the latest stock check</p>
-                      ) : null}
-                      <div className="mt-3 flex flex-wrap items-center gap-3 sm:mt-2">
-                        <div className="flex items-center rounded-xl border border-border bg-background p-1" aria-label={`Quantity for ${item.name}`}>
-                          <button onClick={() => onQtyChange(item.id, item.qty - 1)} aria-label={`Decrease ${item.name} quantity`} className="flex h-9 w-9 items-center justify-center rounded-lg text-foreground hover:bg-muted"><Minus className="h-3.5 w-3.5" /></button>
-                          <span className="w-8 text-center text-sm font-extrabold" aria-live="polite">{item.qty}</span>
-                          <button onClick={() => onQtyChange(item.id, item.qty + 1)} aria-label={`Increase ${item.name} quantity`} className="flex h-9 w-9 items-center justify-center rounded-lg text-foreground hover:bg-muted"><Plus className="h-3.5 w-3.5" /></button>
-                        </div>
-                        <button onClick={() => onRemove(item.id)} className="min-h-10 rounded-lg px-2 text-sm font-bold text-red-600 hover:bg-red-50">Remove</button>
-                      </div>
-                    </div>
-                    <div className="col-start-2 text-left sm:col-auto sm:text-right">
-                      <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Line total</p>
-                      <p className="mt-1 text-lg font-black text-foreground">₱{item.price * item.qty}</p>
-                    </div>
-                  </div>
-                ))}
-                </div>
-              </section>
-              {/* Summary */}
-              <aside>
-                <div className="rounded-2xl border border-border bg-card p-4 shadow-[0_10px_30px_rgba(64,40,25,0.05)] sm:p-5 lg:sticky lg:top-4">
-                  <div className="mb-4 flex items-center justify-between gap-3">
-                    <h2 className="text-base font-extrabold text-foreground">Estimated total</h2>
-                    <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-800">Estimate</span>
-                  </div>
-                  <div className="space-y-3 text-sm">
-                    <div className="flex justify-between gap-3"><span className="text-muted-foreground">Estimated subtotal</span><span className="font-bold text-foreground">₱{subtotal}</span></div>
-                    <div className="flex justify-between gap-3"><span className="text-muted-foreground">Estimated delivery fee</span><span className="font-bold text-foreground">₱50</span></div>
-                    <div className="flex items-end justify-between gap-3 border-t border-border pt-4"><span className="font-extrabold text-foreground">Estimated total</span><span className="text-2xl font-black tracking-tight text-primary">₱{subtotal + 50}</span></div>
-                  </div>
-                  <p className="mt-4 rounded-xl bg-muted/70 px-3 py-2.5 text-sm leading-5 text-muted-foreground">The server will confirm the delivery fee and final amount when your order is created.</p>
-                  <button
-                    onClick={() => onNav("checkout")}
-                    disabled={availabilityRefreshing}
-                    className="mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-extrabold text-primary-foreground shadow-sm hover:bg-amber-800 disabled:cursor-not-allowed disabled:bg-stone-200 disabled:text-stone-500 disabled:shadow-none"
-                  >
-                    {availabilityRefreshing ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" /> Checking availability…
-                      </>
-                    ) : unavailableItems.length > 0 ? (
-                      "Check availability again"
-                    ) : availabilityError ? (
-                      "Retry availability"
-                    ) : (
-                      <>Continue to checkout <ChevronRight className="h-4 w-4" /></>
-                    )}
-                  </button>
-                </div>
-              </aside>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-interface CheckoutCustomerProfile {
-  first_name: string | null;
-  last_name: string | null;
-  contact_number: string | null;
-}
-
-interface PlacedCustomerOrder {
-  order_id: string;
-  order_number: string;
-  subtotal: number;
-  delivery_fee: number;
-  grand_total: number;
-  current_status: string;
-}
-
-interface PendingCustomerPaymentSubmission {
-  order: PlacedCustomerOrder;
-  requestId: string;
-  proofImagePath?: string;
-}
-
-function parsePlacedCustomerOrder(value: unknown): PlacedCustomerOrder {
-  if (!value || typeof value !== "object") {
-    throw new Error(
-      "The server returned invalid order information.",
-    );
-  }
-
-  const row = value as Record<string, unknown>;
-  const subtotal = Number(row.subtotal);
-  const deliveryFee = Number(row.delivery_fee);
-  const grandTotal = Number(row.grand_total);
-  const hasNumericTotals = [
-    row.subtotal,
-    row.delivery_fee,
-    row.grand_total,
-  ].every(
-    (amount) =>
-      (typeof amount === "number" ||
-        (typeof amount === "string" && amount.trim().length > 0)),
-  );
-
-  if (
-    typeof row.order_id !== "string" ||
-    row.order_id.trim().length === 0 ||
-    typeof row.order_number !== "string" ||
-    row.order_number.trim().length === 0 ||
-    typeof row.current_status !== "string" ||
-    row.current_status.trim().length === 0 ||
-    !hasNumericTotals ||
-    !Number.isFinite(subtotal) ||
-    subtotal < 0 ||
-    !Number.isFinite(deliveryFee) ||
-    deliveryFee < 0 ||
-    !Number.isFinite(grandTotal) ||
-    grandTotal < 0
-  ) {
-    throw new Error(
-      "The server returned incomplete order information.",
-    );
-  }
-
-  return {
-    order_id: row.order_id,
-    order_number: row.order_number,
-    subtotal,
-    delivery_fee: deliveryFee,
-    grand_total: grandTotal,
-    current_status: row.current_status,
-  };
-}
-
-interface SubmittedCustomerPayment {
-  payment_id: string;
-  order_id: string;
-  amount: number | string;
-  payment_method: "gcash";
-  gcash_reference_number: string;
-  proof_image_path: string;
-  status: "pending";
-  created_at: string;
-}
-
-function getPaymentProofExtension(file: File): string {
-  const originalExtension = file.name
-    .split(".")
-    .pop()
-    ?.toLowerCase();
-
-  if (file.type === "image/png") {
-    return "png";
-  }
-
-  return originalExtension === "jpeg"
-    ? "jpeg"
-    : "jpg";
-}
-
-// ── Checkout ─────────────────────────────────────────────────────
-function CheckoutPage({
-  cart,
-  onNav,
-  onOrderPlaced,
-}: {
-  cart: CartItem[];
-  onNav: (page: CustomerPage) => void;
-  onOrderPlaced: (orderId: string) => void;
-}) {
-  const { session } = useAuth();
-
-  const subtotal = cart.reduce(
-    (sum, cartItem) =>
-      sum + cartItem.price * cartItem.qty,
-    0,
-  );
-
-  const [step, setStep] =
-    useState<"login" | "details" | "upload">(
-      "login",
-    );
-
-  const [googleLoading, setGoogleLoading] =
-    useState(false);
-
-  const [fullName, setFullName] =
-  useState("");
-
-  const [contactNumber, setContactNumber] =
-  useState("");
-
-  const [deliveryAddress, setDeliveryAddress] =
-  useState("");
-
-  const [landmark, setLandmark] =
-  useState("");
-
-  const [profileLoading, setProfileLoading] =
-  useState(false);
-
-  const [deliveryError, setDeliveryError] =
-  useState<string | null>(null);
-
-  const [placingOrder, setPlacingOrder] =
-  useState(false);
-
-const [placeOrderError, setPlaceOrderError] =
-  useState<string | null>(null);
-
-const [placedOrder, setPlacedOrder] =
-  useState<PlacedCustomerOrder | null>(
-    null,
-  );
-
-  const [
-    pendingPaymentSubmission,
-    setPendingPaymentSubmission,
-  ] = useState<PendingCustomerPaymentSubmission | null>(
-    null,
-  );
-
-  const [
-    gcashReferenceNumber,
-    setGcashReferenceNumber,
-  ] = useState("");
-
-  const [
-    gcashReferenceError,
-    setGcashReferenceError,
-  ] = useState<string | null>(null);
-
-  const [paymentProof, setPaymentProof] =
-  useState<File | null>(null);
-
-  const [paymentProofError, setPaymentProofError] =
-  useState<string | null>(null);
-
-  const paymentProofInputRef =
-  useRef<HTMLInputElement | null>(null);
-
-  const orderCreationInFlightRef = useRef(false);
-
-  const isCustomerSignedIn =
-    session?.role === "customer";
-
-useEffect(() => {
-  if (!isCustomerSignedIn) {
-    return;
-  }
-
-  let isMounted = true;
-
-  async function loadCheckoutCustomer() {
-    setProfileLoading(true);
-
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-
-    if (!isMounted) {
-      return;
-    }
-
-    if (userError || !user) {
-      console.error(
-        "Unable to load checkout user:",
-        userError?.message,
-      );
-
-      setProfileLoading(false);
-      return;
-    }
-
-    const {
-      data: profile,
-      error: profileError,
-    } = await supabase
-      .from("profiles")
-      .select(
-        `
-          first_name,
-          last_name,
-          contact_number
-        `,
-      )
-      .eq("id", user.id)
-      .single<CheckoutCustomerProfile>();
-
-    if (!isMounted) {
-      return;
-    }
-
-    if (profileError) {
-      console.error(
-        "Unable to load checkout profile:",
-        profileError.message,
-      );
-    }
-
-    const profileName = [
-      profile?.first_name,
-      profile?.last_name,
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .trim();
-
-    const googleName =
-      typeof user.user_metadata?.full_name ===
-      "string"
-        ? user.user_metadata.full_name
-        : "";
-
-    setFullName(
-      profileName ||
-        googleName ||
-        user.email?.split("@")[0] ||
-        "",
-    );
-
-    setContactNumber(
-      profile?.contact_number ?? "",
-    );
-
-    setProfileLoading(false);
-    setStep("details");
-  }
-
-  void loadCheckoutCustomer();
-
-  return () => {
-    isMounted = false;
-  };
-}, [isCustomerSignedIn]);
-
-  const handleCheckoutGoogleLogin = async () => {
-    if (googleLoading) {
-      return;
-    }
-
-    setGoogleLoading(true);
-
-    /*
-     * Remember that the customer was checking out.
-     * The cart itself is already preserved separately.
-     */
-    sessionStorage.setItem(
-      CUSTOMER_RESUME_PAGE_STORAGE_KEY,
-      "checkout",
-    );
-
-    const { error } =
-      await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo:
-            `${window.location.origin}/customer`,
-          queryParams: {
-            prompt: "select_account",
-          },
-        },
-      });
-
-    if (error) {
-      console.error(
-        "Checkout Google sign-in failed:",
-        error.message,
-      );
-
-      sessionStorage.removeItem(
-        CUSTOMER_RESUME_PAGE_STORAGE_KEY,
-      );
-
-      setGoogleLoading(false);
-
-      window.alert(
-        `Google sign-in failed: ${error.message}`,
-      );
-    }
-  };
-
-  const handleContinueToPayment = async () => {
-  if (placingOrder || orderCreationInFlightRef.current) {
-    return;
-  }
-
-  const cleanName = fullName.trim();
-  const cleanContact = contactNumber.trim();
-  const cleanAddress = deliveryAddress.trim();
-
-  if (!cleanName) {
-    setDeliveryError(
-      "Please enter your full name.",
-    );
-    return;
-  }
-
-  if (!cleanContact) {
-    setDeliveryError(
-      "Please enter your contact number.",
-    );
-    return;
-  }
-
-  if (!/^09\d{9}$/.test(cleanContact)) {
-    setDeliveryError(
-      "Enter an 11-digit Philippine mobile number starting with 09.",
-    );
-    return;
-  }
-
-  if (!cleanAddress) {
-    setDeliveryError(
-      "Please enter your delivery address.",
-    );
-    return;
-  }
-
-  if (!gcashMerchantConfig.isConfigured) {
-    setDeliveryError(
-      "GCash payment is temporarily unavailable. Please contact the store.",
-    );
-    return;
-  }
-
-  if (!isCustomerSignedIn) {
-    setDeliveryError(
-      "Please sign in before creating your order.",
-    );
-    return;
-  }
-
-  if (pendingPaymentSubmission?.order) {
-    setDeliveryError(null);
-    setStep("upload");
-    return;
-  }
-
-  if (cart.length === 0) {
-    setDeliveryError("Your cart is empty.");
-    return;
-  }
-
-  setDeliveryError(null);
-  setPlaceOrderError(null);
-  setPlacingOrder(true);
-  orderCreationInFlightRef.current = true;
-
-  try {
-const rpcItems = cart.map((item) => ({
-  id: item.id,
-  qty: item.qty,
-}));
-
-const requestFingerprint = JSON.stringify({
-  customerName: cleanName,
-  contactNumber: cleanContact,
-  deliveryAddress: cleanAddress,
-  landmark: landmark.trim(),
-  items: [...rpcItems].sort((a, b) =>
-    a.id.localeCompare(b.id),
-  ),
-});
-
-const orderRequestId =
-  getOrCreateCustomerOrderRequestId(
-    requestFingerprint,
-  );
-
-const {
-  data: orderData,
-  error: orderError,
-} = await supabase.rpc(
-  "place_customer_order",
-  {
-    p_customer_name: cleanName,
-    p_contact_number: cleanContact,
-    p_delivery_address: cleanAddress,
-    p_landmark:
-      landmark.trim() || null,
-    p_items: rpcItems,
-    p_request_id: orderRequestId,
-  },
-);
-
-if (orderError) {
-  throw new Error(
-    `Unable to place your order: ${orderError.message}`,
-  );
-}
-
-const orderResult =
-  Array.isArray(orderData) &&
-  orderData.length === 1
-    ? orderData[0]
-    : null;
-
-if (!orderResult) {
-  throw new Error(
-    "The order was submitted but no complete order information was returned.",
-  );
-}
-
-const createdOrder =
-  parsePlacedCustomerOrder(
-    orderResult,
-  );
-
-/*
- * The same idempotency request may be replayed after
- * the original order has already moved forward.
- *
- * Never create another order for that same request.
- */
-if (
-  createdOrder.current_status !==
-  "waiting_payment_verification"
-) {
-  clearCustomerOrderRequestId(
-    orderRequestId,
-  );
-
-  if (
-    createdOrder.current_status === "cancelled" ||
-    createdOrder.current_status === "rejected"
-  ) {
-    throw new Error(
-      `Order ${createdOrder.order_number} already exists but can no longer continue. You may create a new order.`,
-    );
-  }
-
-  /*
-   * The original order already progressed.
-   * Treat it as the successful order instead of creating
-   * another checkout attempt.
-   */
-  onOrderPlaced(
-    createdOrder.order_id,
-  );
-
-  return;
-}
-
-setPendingPaymentSubmission({
-  order: createdOrder,
-  requestId: orderRequestId,
-});
-
-setStep("upload");
-
-  } catch (error) {
-    console.error("Unable to create customer order:", error);
-
-    setDeliveryError(
-      error instanceof Error
-        ? error.message
-        : "Unable to create your order.",
-    );
-  } finally {
-    orderCreationInFlightRef.current = false;
-    setPlacingOrder(false);
-  }
-};
-
-const handlePaymentProofChange = (
-  event: React.ChangeEvent<HTMLInputElement>,
-) => {
-  if (pendingPaymentSubmission?.proofImagePath) {
-    event.target.value = "";
-    return;
-  }
-
-  const file = event.target.files?.[0];
-
-  if (!file) {
-    return;
-  }
-
-  const allowedTypes = [
-    "image/jpeg",
-    "image/png",
-  ];
-
-  if (!allowedTypes.includes(file.type)) {
-    setPaymentProof(null);
-
-    setPaymentProofError(
-      "Please select a JPG or PNG image.",
-    );
-
-    event.target.value = "";
-    return;
-  }
-
-  const maxSize = 5 * 1024 * 1024;
-
-  if (file.size > maxSize) {
-    setPaymentProof(null);
-
-    setPaymentProofError(
-      "The payment screenshot must be 5 MB or smaller.",
-    );
-
-    event.target.value = "";
-    return;
-  }
-
-  setPaymentProof(file);
-  setPaymentProofError(null);
-  setPlaceOrderError(null);
-};
-
-const handleRemovePaymentProof = () => {
-  if (pendingPaymentSubmission?.proofImagePath) {
-    return;
-  }
-
-  setPaymentProof(null);
-  setPaymentProofError(null);
-  setPlaceOrderError(null);
-
-  if (paymentProofInputRef.current) {
-    paymentProofInputRef.current.value = "";
-  }
-};
-
-const handlePlaceOrder = async () => {
-  if (placingOrder || placedOrder) {
-    return;
-  }
-
-  setPlaceOrderError(null);
-
-  const existingSubmission = pendingPaymentSubmission;
-
-  if (!existingSubmission?.order) {
-    setPlaceOrderError(
-      "Create your order before submitting a GCash payment.",
-    );
-    return;
-  }
-
-  if (!isCustomerSignedIn) {
-    setPlaceOrderError(
-      `Order ${existingSubmission.order.order_number} exists, but your signed-in customer account could not be confirmed. Please sign in and retry this payment submission.`,
-    );
-    return;
-  }
-
-  const normalizedReference =
-    gcashReferenceNumber.trim();
-
-  if (!normalizedReference) {
-    setGcashReferenceError(
-      "Please enter the GCash reference number.",
-    );
-    return;
-  }
-
-  setGcashReferenceError(null);
-
-  if (
-    !paymentProof &&
-    !pendingPaymentSubmission?.proofImagePath
-  ) {
-    setPaymentProofError(
-      "Please select your GCash payment screenshot.",
-    );
-    return;
-  }
-
-  setPaymentProofError(null);
-
-  setPlacingOrder(true);
-
-  try {
-    let submission = existingSubmission;
-
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      throw new Error(
-        `Order ${submission.order.order_number} was created, but your signed-in customer account could not be confirmed. Please sign in and retry this payment submission.`,
-      );
-    }
-
-    let proofImagePath =
-      submission.proofImagePath;
-
-    if (!proofImagePath) {
-      if (!paymentProof) {
-        throw new Error(
-          `Order ${submission.order.order_number} was created. Select your payment screenshot, then retry the payment submission.`,
-        );
-      }
-
-      const proofExtension =
-        getPaymentProofExtension(paymentProof);
-
-      proofImagePath = [
-        user.id,
-        submission.order.order_id,
-        `${crypto.randomUUID()}.${proofExtension}`,
-      ].join("/");
-
-      const { error: uploadError } =
-        await supabase.storage
-          .from("payment-proofs")
-          .upload(
-            proofImagePath,
-            paymentProof,
-            {
-              cacheControl: "3600",
-              contentType: paymentProof.type,
-              upsert: false,
-            },
-          );
-
-      if (uploadError) {
-        throw new Error(
-          `Order ${submission.order.order_number} was created, but the payment screenshot upload failed: ${uploadError.message}. Retry to continue with the same order.`,
-        );
-      }
-
-      submission = {
-        ...submission,
-        proofImagePath,
-      };
-
-      setPendingPaymentSubmission(submission);
-    }
-
-    const {
-      data: paymentData,
-      error: paymentError,
-    } = await supabase.rpc(
-      "submit_customer_payment",
-      {
-        p_order_id:
-          submission.order.order_id,
-        p_gcash_reference_number:
-          normalizedReference,
-        p_proof_image_path:
-          proofImagePath,
-      },
-    );
-
-    if (paymentError) {
-      throw new Error(
-        `Order ${submission.order.order_number} and its screenshot were saved, but the payment submission failed: ${paymentError.message}. Retry to continue with the same order.`,
-      );
-    }
-
-    const paymentResult =
-      Array.isArray(paymentData) &&
-      paymentData.length > 0
-        ? paymentData[0] as SubmittedCustomerPayment
-        : null;
-
-    if (
-      !paymentResult ||
-      !paymentResult.payment_id ||
-      paymentResult.order_id !==
-        submission.order.order_id ||
-      paymentResult.payment_method !== "gcash" ||
-      paymentResult.status !== "pending" ||
-      paymentResult.gcash_reference_number.trim().toLowerCase() !==
-        normalizedReference.toLowerCase() ||
-      paymentResult.proof_image_path !==
-        proofImagePath ||
-      !paymentResult.created_at ||
-      Number(paymentResult.amount) !==
-        submission.order.grand_total
-    ) {
-      throw new Error(
-        `Order ${submission.order.order_number} was created, but the server returned an invalid payment confirmation. Retry to confirm the same order payment.`,
-      );
-    }
-
-  clearCustomerOrderRequestId(
-    submission.requestId,
-  );
-
-  setPlacedOrder(
-    submission.order,
-  );
-
-  setPendingPaymentSubmission(
-    null,
-  );
-
-  onOrderPlaced(
-    submission.order.order_id,
-  );
-  } catch (error) {
-    console.error(
-      "Unable to complete customer payment submission:",
-      error,
-    );
-
-    setPlaceOrderError(
-      error instanceof Error
-        ? error.message
-        : "Unable to complete your payment submission.",
-    );
-  } finally {
-    setPlacingOrder(false);
-  }
-};
-
-return (
-  <div className="flex flex-col h-full overflow-hidden">
-      <CustNav cart={cart} onNav={onNav} currentPage="checkout" />
-      <div className="customer-storefront flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-6xl px-4 py-5 sm:px-6 sm:py-8">
-          <button onClick={() => onNav("cart")} className="mb-4 flex min-h-11 items-center gap-1.5 rounded-xl pr-3 text-sm font-bold text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4" /> Back to cart</button>
-          <div className="mb-5 sm:mb-7">
-            <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-primary/75">Complete your order</p>
-            <h1 className="mt-1 font-['Fraunces'] text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">Checkout</h1>
-            <p className="mt-1.5 max-w-xl text-sm leading-5 text-muted-foreground">Enter your delivery details, review the server-confirmed amount, then submit your GCash payment.</p>
-          </div>
-
-          {/* Steps */}
-          <div className="mb-5 grid grid-cols-3 overflow-hidden rounded-2xl border border-border bg-card p-1 shadow-sm sm:mb-7">
-            {[{ key: "login", label: "Sign In" }, { key: "details", label: "Delivery" }, { key: "upload", label: "Payment" }].map((s, i) => (
-              <div key={s.key} className={`flex min-h-12 items-center justify-center gap-2 rounded-xl px-2 text-xs font-extrabold sm:text-sm ${step === s.key ? "bg-[#211914] text-white shadow-sm" : i < ["login","details","upload"].indexOf(step) ? "text-emerald-700" : "text-muted-foreground"}`}>
-                <span className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-black ${step === s.key ? "bg-white/15 text-white" : i < ["login","details","upload"].indexOf(step) ? "bg-emerald-100 text-emerald-700" : "bg-muted text-muted-foreground"}`}>{i < ["login","details","upload"].indexOf(step) ? <Check className="h-3.5 w-3.5" /> : i + 1}</span>
-                <span className="truncate">{s.label}</span>
-              </div>
-            ))}
-          </div>
-
-          <div className="grid gap-5 lg:grid-cols-[minmax(0,1.3fr)_minmax(19rem,0.7fr)] lg:items-start">
-            <div>
-              {step === "login" && (
-                <section className="rounded-2xl border border-border bg-card p-5 shadow-[0_10px_30px_rgba(64,40,25,0.05)] sm:p-6">
-                  <span className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-50 text-primary"><User className="h-5 w-5" /></span>
-                  <h2 className="text-xl font-extrabold text-foreground">Sign in to continue</h2>
-                  <p className="mb-5 mt-1.5 text-sm leading-5 text-muted-foreground">Your account keeps this order connected to tracking and payment updates.</p>
-                  {profileLoading && isCustomerSignedIn ? (
-                    <div role="status" className="flex min-h-24 items-center justify-center gap-3 rounded-xl border border-border bg-background px-4 text-sm font-bold text-muted-foreground">
-                      <Loader2 className="h-4 w-4 animate-spin text-primary" /> Loading your saved details…
-                    </div>
-                  ) : (
-                    <button type="button" onClick={handleCheckoutGoogleLogin} disabled={googleLoading} className="flex min-h-12 w-full items-center justify-center gap-3 rounded-xl border border-border bg-white px-4 text-sm font-bold shadow-sm hover:bg-muted/60 disabled:cursor-wait disabled:opacity-70">
-                      <svg className="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-                      {googleLoading ? "Connecting to Google…" : "Continue with Google"}
-                    </button>
-                  )}
-                </section>
-              )}
-              {step === "details" && (
-                <section className="rounded-2xl border border-border bg-card p-5 shadow-[0_10px_30px_rgba(64,40,25,0.05)] sm:p-6">
-                  <div className="mb-5 flex items-start gap-3 border-b border-border pb-4">
-                    <span className="flex h-11 w-11 flex-none items-center justify-center rounded-2xl bg-amber-50 text-primary"><MapPin className="h-5 w-5" /></span>
-                    <div><h2 className="text-xl font-extrabold text-foreground">Delivery details</h2><p className="mt-1 text-sm leading-5 text-muted-foreground">All fields are required unless marked optional.</p></div>
-                  </div>
-                  <div className="mb-5 flex items-center gap-3 rounded-xl border border-border bg-background px-4 py-3">
-                    <span className="flex h-9 w-9 flex-none items-center justify-center rounded-xl bg-amber-50 text-primary"><Truck className="h-4 w-4" /></span>
-                    <div><p className="text-sm font-extrabold text-foreground">Delivery order</p><p className="mt-0.5 text-xs leading-4 text-muted-foreground">Your address is used for this order&apos;s delivery.</p></div>
-                  </div>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    {/* Full Name */}
-                    <div className="flex flex-col gap-1.5">
-                      <label
-                        htmlFor="checkout-full-name"
-                        className="text-sm font-bold text-foreground"
-                      >
-                        Full name <span className="text-primary" aria-hidden="true">*</span>
-                      </label>
-
-                      <input
-                        id="checkout-full-name"
-                        type="text"
-                        value={fullName}
-                        onChange={(event) =>
-                          setFullName(event.target.value)
-                        }
-                        placeholder={
-                          profileLoading
-                            ? "Loading customer name..."
-                            : "Enter your full name"
-                        }
-                        disabled={profileLoading}
-                        autoComplete="name"
-                        className="min-h-12 rounded-xl border border-border bg-input-background px-3.5 text-base outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary/50 disabled:cursor-wait disabled:opacity-60"
-                      />
-                    </div>
-
-                    {/* Contact Number */}
-                    <div className="flex flex-col gap-1.5">
-                      <label
-                        htmlFor="checkout-contact-number"
-                        className="text-sm font-bold text-foreground"
-                      >
-                        Contact number <span className="text-primary" aria-hidden="true">*</span>
-                      </label>
-
-                      <input
-                        id="checkout-contact-number"
-                        type="tel"
-                        value={contactNumber}
-                        onChange={(event) =>
-                          setContactNumber(event.target.value)
-                        }
-                        placeholder={
-                          profileLoading
-                            ? "Loading contact number..."
-                            : "09XXXXXXXXX"
-                        }
-                        disabled={profileLoading}
-                        autoComplete="tel"
-                        inputMode="tel"
-                        className="min-h-12 rounded-xl border border-border bg-input-background px-3.5 text-base outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary/50 disabled:cursor-wait disabled:opacity-60"
-                      />
-                    </div>
-
-                    {/* Delivery Address */}
-                    <div className="flex flex-col gap-1.5 sm:col-span-2">
-                      <label
-                        htmlFor="checkout-delivery-address"
-                        className="text-sm font-bold text-foreground"
-                      >
-                        Delivery address <span className="text-primary" aria-hidden="true">*</span>
-                      </label>
-
-                      <input
-                        id="checkout-delivery-address"
-                        type="text"
-                        value={deliveryAddress}
-                        onChange={(event) =>
-                          setDeliveryAddress(event.target.value)
-                        }
-                        placeholder="House no., street, barangay, city"
-                        autoComplete="street-address"
-                        className="min-h-12 rounded-xl border border-border bg-input-background px-3.5 text-base outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary/50"
-                      />
-                    </div>
-
-                    {/* Landmark */}
-                    <div className="flex flex-col gap-1.5 sm:col-span-2">
-                      <label
-                        htmlFor="checkout-landmark"
-                        className="text-sm font-bold text-foreground"
-                      >
-                        Landmark
-                        <span className="ml-1 font-normal text-muted-foreground">
-                          (Optional)
-                        </span>
-                      </label>
-
-                      <input
-                        id="checkout-landmark"
-                        type="text"
-                        value={landmark}
-                        onChange={(event) =>
-                          setLandmark(event.target.value)
-                        }
-                        placeholder="e.g. Near Jollibee, blue gate"
-                        className="min-h-12 rounded-xl border border-border bg-input-background px-3.5 text-base outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary/50"
-                      />
-                    </div>
-                  </div>
-                  {deliveryError && (
-  <div role="alert" className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
-    <p className="text-sm font-semibold leading-5 text-red-700">
-      {deliveryError}
-    </p>
-  </div>
-)}
-
-<button
-  type="button"
-  onClick={() => {
-    void handleContinueToPayment();
-  }}
-  disabled={placingOrder}
-  className="mt-5 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-extrabold text-primary-foreground shadow-sm hover:bg-amber-800 disabled:cursor-wait disabled:opacity-60"
->
-  {placingOrder && (
-    <Loader2 className="h-4 w-4 animate-spin" />
-  )}
-  {placingOrder
-    ? "Creating Order…"
-    : pendingPaymentSubmission?.order
-      ? "Continue to Payment"
-      : "Create Order & Continue to Payment"}
-</button>
-                  <p className="mt-3 text-center text-sm leading-5 text-muted-foreground">Continuing creates your order on the server, confirms the final amount, and opens GCash payment.</p>
-                </section>
-              )}
-              {step === "upload" &&
-                pendingPaymentSubmission?.order &&
-                gcashMerchantConfig.isConfigured && (
-                <section className="rounded-2xl border border-border bg-card p-5 shadow-[0_10px_30px_rgba(64,40,25,0.05)] sm:p-6">
-                  <div className="mb-5 flex items-start gap-3 border-b border-border pb-4">
-                    <span className="flex h-11 w-11 flex-none items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700"><BadgeCheck className="h-5 w-5" /></span>
-                    <div>
-                      <h2 className="text-xl font-extrabold text-foreground">Pay securely with GCash</h2>
-                      <p className="mt-1 text-sm leading-5 text-muted-foreground">Your order is created. Pay the confirmed amount, then submit the receipt details below.</p>
-                    </div>
-                  </div>
-
-                  <div className="mb-4 grid gap-3 sm:grid-cols-2">
-                    <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
-                      <p className="text-xs font-bold uppercase tracking-wide text-amber-800">Order number</p>
-                      <p className="mt-1 font-mono text-lg font-black text-amber-950">{pendingPaymentSubmission.order.order_number}</p>
-                    </div>
-                    <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 sm:text-right">
-                      <p className="text-xs font-bold uppercase tracking-wide text-emerald-800">Server-confirmed payment amount</p>
-                      <p className="mt-1 text-2xl font-black tracking-tight text-emerald-800">₱{pendingPaymentSubmission.order.grand_total}</p>
-                    </div>
-                  </div>
-
-                  <div className="mb-5 rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4">
-                    <p className="mb-3 text-sm font-extrabold text-emerald-900">Send payment to this merchant</p>
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <div><p className="text-xs font-bold uppercase tracking-wide text-emerald-700">Merchant name</p><p className="mt-1 text-base font-extrabold text-foreground">{gcashMerchantConfig.name}</p></div>
-                      <div><p className="text-xs font-bold uppercase tracking-wide text-emerald-700">Merchant number</p><p className="mt-1 font-mono text-base font-extrabold text-foreground">{gcashMerchantConfig.number}</p></div>
-                    </div>
-                    <ol className="mt-4 grid gap-2 border-t border-emerald-200/80 pt-4 text-sm leading-5 text-emerald-900 sm:grid-cols-3">
-                      <li className="flex gap-2"><span className="font-black">1.</span><span>Send the exact confirmed amount.</span></li>
-                      <li className="flex gap-2"><span className="font-black">2.</span><span>Copy the GCash reference number.</span></li>
-                      <li className="flex gap-2"><span className="font-black">3.</span><span>Upload a clear receipt screenshot.</span></li>
-                    </ol>
-                  </div>
-
-                  <div className="mb-5 flex flex-col gap-1.5">
-                    <label
-                      htmlFor="checkout-gcash-reference"
-                      className="text-sm font-bold text-foreground"
-                    >
-                      GCash reference number <span className="text-primary" aria-hidden="true">*</span>
-                    </label>
-
-                    <input
-                      id="checkout-gcash-reference"
-                      type="text"
-                      value={gcashReferenceNumber}
-                      onChange={(event) => {
-                        setGcashReferenceNumber(
-                          event.target.value,
-                        );
-                        setGcashReferenceError(null);
-                        setPlaceOrderError(null);
-                      }}
-                      placeholder="Enter the reference from your GCash receipt"
-                      autoComplete="off"
-                      disabled={placingOrder}
-                      className="min-h-12 rounded-xl border border-border bg-input-background px-3.5 text-base outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary/50 disabled:cursor-wait disabled:opacity-60"
-                    />
-
-                    {gcashReferenceError && (
-                      <p className="text-sm font-semibold text-red-700">
-                        {gcashReferenceError}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="mb-5">
-                    <div className="mb-2">
-                      <p className="text-sm font-bold text-foreground">Payment proof <span className="text-primary" aria-hidden="true">*</span></p>
-                      <p className="mt-0.5 text-sm text-muted-foreground">Upload the screenshot from this GCash payment.</p>
-                    </div>
-                    <input
-                      ref={paymentProofInputRef}
-                      type="file"
-                      accept="image/png,image/jpeg"
-                      onChange={handlePaymentProofChange}
-                      disabled={
-                        placingOrder ||
-                        Boolean(
-                          pendingPaymentSubmission?.proofImagePath,
-                        )
-                      }
-                      className="hidden"
-                    />
-
-                    {!paymentProof ? (
-                      <button
-                        type="button"
-                        onClick={() =>
-                          paymentProofInputRef.current?.click()
-                        }
-                        disabled={placingOrder}
-                        className="flex min-h-40 w-full cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-border bg-background/60 p-5 transition-colors hover:border-primary/40 hover:bg-primary/[0.02] disabled:cursor-wait disabled:opacity-60 sm:p-7"
-                      >
-                        <Upload className="h-8 w-8 text-muted-foreground/50 sm:h-10 sm:w-10" />
-
-                        <div className="text-center">
-                          <p className="text-base font-extrabold text-foreground">
-                            Choose payment screenshot
-                          </p>
-
-                          <p className="mt-1 text-sm text-muted-foreground">
-                            PNG or JPG, maximum 5 MB
-                          </p>
-                        </div>
-                      </button>
-                    ) : (
-                      <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4">
-                        <div className="flex items-start gap-3">
-                          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
-                            <Check className="h-5 w-5" />
-                          </div>
-
-                          <div className="min-w-0 flex-1">
-                            <p className="text-sm font-bold text-emerald-800">
-                              {pendingPaymentSubmission?.proofImagePath
-                                ? "Payment screenshot uploaded"
-                                : "Payment screenshot selected"}
-                            </p>
-
-                            <p className="mt-1 truncate text-sm font-semibold text-foreground">
-                              {paymentProof.name}
-                            </p>
-
-                            <p className="mt-0.5 text-xs text-muted-foreground">
-                              {(paymentProof.size / 1024 / 1024).toFixed(
-                                2,
-                              )}{" "}
-                              MB
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="mt-4 flex gap-2">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              paymentProofInputRef.current?.click()
-                            }
-                            disabled={
-                              placingOrder ||
-                              Boolean(
-                                pendingPaymentSubmission?.proofImagePath,
-                              )
-                            }
-                            className="min-h-11 flex-1 rounded-xl border border-border bg-white px-3 text-sm font-bold text-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
-                          >
-                            Change
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={handleRemovePaymentProof}
-                            disabled={
-                              placingOrder ||
-                              Boolean(
-                                pendingPaymentSubmission?.proofImagePath,
-                              )
-                            }
-                            className="min-h-11 flex-1 rounded-xl border border-red-200 bg-white px-3 text-sm font-bold text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    {paymentProofError && (
-                      <div role="alert" className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
-                        <p className="text-sm font-semibold leading-5 text-red-700">
-                          {paymentProofError}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  {!placedOrder && (
-                    <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
-                      <p className="text-sm font-bold text-amber-900">Your order is protected during retries</p>
-                      <p className="mt-1 text-sm leading-5 text-amber-800">If submission fails, retrying continues with order {pendingPaymentSubmission.order.order_number}; it does not create another order.</p>
-                    </div>
-                    )}
-
-                  {placeOrderError && (
-  <div role="alert" className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
-    <p className="text-sm font-bold text-red-800">Payment submission needs attention</p>
-    <p className="mt-1 text-sm font-medium leading-5 text-red-700">
-      {placeOrderError}
-    </p>
-  </div>
-)}
-
-{placedOrder ? (
-  <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-    <div className="flex items-start gap-3">
-      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
-        <Check className="h-5 w-5" />
-      </div>
-
-      <div>
-        <p className="text-base font-bold text-emerald-800">
-          Payment submitted successfully
-        </p>
-
-        <p className="mt-1 font-mono text-base font-extrabold text-foreground">
-          {placedOrder.order_number}
-        </p>
-
-        <p className="mt-1 text-sm text-muted-foreground">
-          Server-confirmed total: ₱
-          {placedOrder.grand_total}
-        </p>
-      </div>
-    </div>
-  </div>
-) : (
-  <button
-    type="button"
-    onClick={() => {
-      void handlePlaceOrder();
-    }}
-    disabled={placingOrder}
-    className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-extrabold text-primary-foreground shadow-sm hover:bg-amber-800 disabled:cursor-wait disabled:opacity-60"
-  >
-    {placingOrder ? (
-      <>
-        <Loader2 className="h-4 w-4 animate-spin" />
-        {pendingPaymentSubmission
-          ? "Submitting Payment…"
-          : "Creating Order…"}
-      </>
-    ) : (
-      placeOrderError
-        ? "Retry Payment Submission"
-        : "Submit GCash Payment"
-    )}
-  </button>
-)}
-                </section>
-              )}
-              {step === "upload" &&
-                (!pendingPaymentSubmission?.order ||
-                  !gcashMerchantConfig.isConfigured) && (
-                  <div className="rounded-xl border border-red-200 bg-red-50 p-5 sm:p-6">
-                    <p className="text-sm font-bold text-red-800">
-                      {!gcashMerchantConfig.isConfigured
-                        ? "GCash payment is temporarily unavailable. Please contact the store."
-                        : "No created order is available for this payment. Return to delivery details and create your order first."}
-                    </p>
-                  </div>
-                )}
-            </div>
-            {/* Order summary sidebar */}
-            <aside>
-              <div className="rounded-2xl border border-border bg-card p-4 shadow-[0_10px_30px_rgba(64,40,25,0.05)] sm:p-5 lg:sticky lg:top-4">
-                <div className="mb-4 flex items-center justify-between gap-3">
-                  <h2 className="text-base font-extrabold text-foreground">Order summary</h2>
-                  <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${pendingPaymentSubmission?.order ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-800"}`}>
-                    {pendingPaymentSubmission?.order ? "Confirmed" : "Estimate"}
-                  </span>
-                </div>
-                <div className="space-y-3 text-sm">
-                  {cart.map((c) => (
-                    <div key={c.id} className="flex justify-between gap-3">
-                      <span className="min-w-0 text-muted-foreground"><span className="font-bold text-foreground">{c.qty}×</span> {c.name}</span>
-                      <span className="flex-shrink-0 font-bold text-foreground">₱{c.price * c.qty}</span>
-                    </div>
-                  ))}
-                  {pendingPaymentSubmission?.order ? (
-                    <>
-                      <div className="flex justify-between gap-3 border-t border-border pt-3"><span className="text-muted-foreground">Server-confirmed subtotal</span><span className="font-bold text-foreground">₱{pendingPaymentSubmission.order.subtotal}</span></div>
-                      <div className="flex justify-between gap-3"><span className="text-muted-foreground">Server-confirmed delivery fee</span><span className="font-bold text-foreground">₱{pendingPaymentSubmission.order.delivery_fee}</span></div>
-                      <div className="flex items-end justify-between gap-3 border-t border-border pt-4"><span className="font-extrabold text-foreground">Server-confirmed total</span><span className="text-2xl font-black tracking-tight text-primary">₱{pendingPaymentSubmission.order.grand_total}</span></div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="flex justify-between gap-3 border-t border-border pt-3"><span className="text-muted-foreground">Estimated subtotal</span><span className="font-bold text-foreground">₱{subtotal}</span></div>
-                      <div className="flex justify-between gap-3"><span className="text-muted-foreground">Estimated delivery fee</span><span className="font-bold text-foreground">₱50</span></div>
-                      <div className="flex items-end justify-between gap-3 border-t border-border pt-4"><span className="font-extrabold text-foreground">Estimated total</span><span className="text-2xl font-black tracking-tight text-primary">₱{subtotal + 50}</span></div>
-                    </>
-                  )}
-                </div>
-                {!pendingPaymentSubmission?.order && (
-                  <p className="mt-4 rounded-xl bg-muted/70 px-3 py-2.5 text-sm leading-5 text-muted-foreground">The server confirms the delivery fee and final amount when your order is created.</p>
-                )}
-              </div>
-            </aside>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-interface CustomerTrackingOrderRow {
-  id: string;
-  order_number: string;
-  current_status: string;
-  fulfillment_type: string;
-  grand_total: number | string;
-  created_at: string;
-}
-
-interface CustomerTrackingHistoryRow {
-  status: string;
-  notes: string | null;
-  created_at: string;
-}
-
-interface CustomerTrackingPaymentRow {
-  payment_id: string;
-  order_id: string;
-  amount: number;
-  payment_method: "gcash";
-  gcash_reference_number: string;
-  payment_status: "pending" | "verified" | "rejected";
-  rejection_reason: string | null;
-  rejection_notes: string | null;
-  rejected_at: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-const CUSTOMER_UUID_PATTERN =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
-function isValidServerTimestamp(value: unknown): value is string {
-  return (
-    typeof value === "string" &&
-    value.length > 0 &&
-    Number.isFinite(Date.parse(value))
-  );
-}
-
-function parseCustomerTrackingPayment(
-  value: unknown,
-  expectedOrderId: string,
-): CustomerTrackingPaymentRow {
-  if (!value || typeof value !== "object") {
-    throw new Error("The server returned an invalid payment record.");
-  }
-
-  const row = value as Record<string, unknown>;
-  const amount = Number(row.amount);
-  const paymentStatus = row.payment_status;
-  const rejectionReason = row.rejection_reason;
-  const rejectionNotes = row.rejection_notes;
-  const rejectedAt = row.rejected_at;
-
-  if (
-    typeof row.payment_id !== "string" ||
-    !CUSTOMER_UUID_PATTERN.test(row.payment_id) ||
-    row.order_id !== expectedOrderId ||
-    row.payment_method !== "gcash" ||
-    !Number.isFinite(amount) ||
-    amount < 0 ||
-    typeof row.gcash_reference_number !== "string" ||
-    row.gcash_reference_number.trim().length === 0 ||
-    !["pending", "verified", "rejected"].includes(
-      String(paymentStatus),
-    ) ||
-    (rejectionReason !== null &&
-      typeof rejectionReason !== "string") ||
-    (rejectionNotes !== null &&
-      typeof rejectionNotes !== "string") ||
-    (rejectedAt !== null && !isValidServerTimestamp(rejectedAt)) ||
-    !isValidServerTimestamp(row.created_at) ||
-    !isValidServerTimestamp(row.updated_at)
-  ) {
-    throw new Error("The server returned malformed payment data.");
-  }
-
-  if (
-    paymentStatus === "rejected" &&
-    (typeof rejectionReason !== "string" ||
-      rejectionReason.trim().length === 0 ||
-      !isValidServerTimestamp(rejectedAt))
-  ) {
-    throw new Error("The rejected payment record is incomplete.");
-  }
-
-  return {
-    payment_id: row.payment_id,
-    order_id: expectedOrderId,
-    amount,
-    payment_method: "gcash",
-    gcash_reference_number: row.gcash_reference_number.trim(),
-    payment_status: paymentStatus as CustomerTrackingPaymentRow["payment_status"],
-    rejection_reason:
-      typeof rejectionReason === "string"
-        ? rejectionReason.trim()
-        : null,
-    rejection_notes:
-      typeof rejectionNotes === "string" && rejectionNotes.trim()
-        ? rejectionNotes.trim()
-        : null,
-    rejected_at: rejectedAt as string | null,
-    created_at: row.created_at,
-    updated_at: row.updated_at,
-  };
-}
-
-async function fetchCustomerTrackingPayment(
-  orderId: string,
-): Promise<CustomerTrackingPaymentRow | null> {
-  const { data, error } = await supabase.rpc(
-    "get_customer_order_payment",
-    { p_order_id: orderId },
-  );
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  if (!Array.isArray(data)) {
-    throw new Error("The server returned an invalid payment response.");
-  }
-
-  if (data.length === 0) {
-    return null;
-  }
-
-  if (data.length !== 1) {
-    throw new Error("The server returned multiple payments for one order.");
-  }
-
-  return parseCustomerTrackingPayment(data[0], orderId);
-}
-
-// ── Order Tracking ────────────────────────────────────────────────
-function TrackingPage({
-  cart,
-  onNav,
-  orderId,
-}: {
-  cart: CartItem[];
-  onNav: (page: CustomerPage) => void;
-  orderId: string | null;
-}) {
-  const [order, setOrder] =
-    useState<CustomerTrackingOrderRow | null>(
-      null,
-    );
-
-  const [statusHistory, setStatusHistory] =
-    useState<CustomerTrackingHistoryRow[]>([]);
-
-  const [payment, setPayment] =
-    useState<CustomerTrackingPaymentRow | null>(null);
-
-  const [resubmissionReference, setResubmissionReference] =
-    useState("");
-
-  const [resubmissionProof, setResubmissionProof] =
-    useState<File | null>(null);
-
-  const [resubmissionProofError, setResubmissionProofError] =
-    useState<string | null>(null);
-
-  const [resubmissionError, setResubmissionError] =
-    useState<string | null>(null);
-
-  const [resubmissionSuccess, setResubmissionSuccess] =
-    useState<string | null>(null);
-
-  const [resubmittingPayment, setResubmittingPayment] =
-    useState(false);
-
-  const [uploadedResubmission, setUploadedResubmission] =
-    useState<{
-      fileKey: string;
-      proofImagePath: string;
-    } | null>(null);
-
-  const resubmissionProofInputRef =
-    useRef<HTMLInputElement | null>(null);
-
-  const [loading, setLoading] =
-    useState(true);
-
-  const [errorMessage, setErrorMessage] =
-    useState<string | null>(null);
-  const [loadAttempt, setLoadAttempt] = useState(0);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    async function loadTrackingOrder() {
-      setLoading(true);
-      setErrorMessage(null);
-
-      let orderQuery = supabase
-        .from("orders")
-        .select(
-          `
-            id,
-            order_number,
-            current_status,
-            fulfillment_type,
-            grand_total,
-            created_at
-          `,
-        )
-        .order("created_at", {
-          ascending: false,
-        })
-        .limit(1);
-
-      if (orderId) {
-        orderQuery = supabase
-          .from("orders")
-          .select(
-            `
-              id,
-              order_number,
-              current_status,
-              fulfillment_type,
-              grand_total,
-              created_at
-            `,
-          )
-          .eq("id", orderId)
-          .limit(1);
-      }
-
-      const {
-        data: orderData,
-        error: orderError,
-      } = await orderQuery;
-
-      if (!isMounted) {
-        return;
-      }
-
-      if (orderError) {
-        console.error(
-          "Unable to load tracking order:",
-          orderError,
-        );
-
-        setErrorMessage(
-          orderError.message,
-        );
-
-        setLoading(false);
-        return;
-      }
-
-      const orderRows =
-        (orderData ??
-          []) as CustomerTrackingOrderRow[];
-
-      const selectedOrder =
-        orderRows[0] ?? null;
-
-      if (!selectedOrder) {
-        setOrder(null);
-        setStatusHistory([]);
-        setPayment(null);
-        setLoading(false);
-        return;
-      }
-
-      const [
-        historyResult,
-        selectedPayment,
-      ] = await Promise.all([
-        supabase
-          .from("order_status_history")
-          .select(
-            `
-              status,
-              notes,
-              created_at
-            `,
-          )
-          .eq(
-            "order_id",
-            selectedOrder.id,
-          )
-          .order("created_at", {
-            ascending: true,
-          }),
-        fetchCustomerTrackingPayment(
-          selectedOrder.id,
-        ),
-      ]);
-
-      if (!isMounted) {
-        return;
-      }
-
-      if (historyResult.error) {
-        console.error(
-          "Unable to load order status history:",
-          historyResult.error,
-        );
-
-        setErrorMessage(
-          historyResult.error.message,
-        );
-
-        setLoading(false);
-        return;
-      }
-
-      setOrder(selectedOrder);
-
-      setStatusHistory(
-        (historyResult.data ??
-          []) as CustomerTrackingHistoryRow[],
-      );
-
-      setPayment(selectedPayment);
-
-      setLoading(false);
-    }
-
-    void loadTrackingOrder().catch((error) => {
-      if (!isMounted) {
-        return;
-      }
-
-      console.error(
-        "Unable to load customer payment:",
-        error,
-      );
-
-      setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "Unable to load payment details.",
-      );
-      setLoading(false);
-    });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [loadAttempt, orderId]);
-
-  useEffect(() => {
-  if (!order?.id) {
-    return;
-  }
-
-  const trackedOrderId = order.id;
-
-  const refreshOrder = async () => {
-    const {
-      data,
-      error,
-    } = await supabase
-      .from("orders")
-      .select(
-        `
-          id,
-          order_number,
-          current_status,
-          fulfillment_type,
-          grand_total,
-          created_at
-        `,
-      )
-      .eq("id", trackedOrderId)
-      .single<CustomerTrackingOrderRow>();
-
-    if (error) {
-      console.error(
-        "Unable to refresh tracking order:",
-        error,
-      );
-      return;
-    }
-
-    setOrder(data);
-  };
-
-  const refreshStatusHistory = async () => {
-    const {
-      data,
-      error,
-    } = await supabase
-      .from("order_status_history")
-      .select(
-        `
-          status,
-          notes,
-          created_at
-        `,
-      )
-      .eq("order_id", trackedOrderId)
-      .order("created_at", {
-        ascending: true,
-      });
-
-    if (error) {
-      console.error(
-        "Unable to refresh order status history:",
-        error,
-      );
-      return;
-    }
-
-    setStatusHistory(
-      (data ??
-        []) as CustomerTrackingHistoryRow[],
-    );
-  };
-
-  const refreshPayment = async () => {
-    try {
-      setPayment(
-        await fetchCustomerTrackingPayment(
-          trackedOrderId,
-        ),
-      );
-    } catch (error) {
-      console.error(
-        "Unable to refresh tracked payment:",
-        error,
-      );
-    }
-  };
-
-  const channel = supabase
-    .channel(
-      `customer-order-tracking-${trackedOrderId}`,
-    )
-
-    .on(
-      "postgres_changes",
-      {
-        event: "UPDATE",
-        schema: "public",
-        table: "orders",
-        filter: `id=eq.${trackedOrderId}`,
-      },
-      () => {
-        void refreshOrder();
-        void refreshStatusHistory();
-        void refreshPayment();
-      },
-    )
-
-    .on(
-      "postgres_changes",
-      {
-        event: "INSERT",
-        schema: "public",
-        table: "order_status_history",
-        filter: `order_id=eq.${trackedOrderId}`,
-      },
-      () => {
-        void refreshOrder();
-        void refreshStatusHistory();
-        void refreshPayment();
-      },
-    )
-
-    .subscribe((status, error) => {
-      if (
-        status === "CHANNEL_ERROR" ||
-        status === "TIMED_OUT"
-      ) {
-        console.error(
-          "Customer tracking realtime error:",
-          status,
-          error,
-        );
-      }
-    });
-
-  return () => {
-    void supabase.removeChannel(channel);
-  };
-}, [order?.id]);
-
-  useEffect(() => {
-    setResubmissionReference("");
-    setResubmissionProof(null);
-    setResubmissionProofError(null);
-    setResubmissionError(null);
-    setResubmissionSuccess(null);
-    setUploadedResubmission(null);
-
-    if (resubmissionProofInputRef.current) {
-      resubmissionProofInputRef.current.value = "";
-    }
-  }, [order?.id]);
-
-  const handleResubmissionProofChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const file = event.target.files?.[0] ?? null;
-
-    setResubmissionProof(null);
-    setResubmissionProofError(null);
-    setResubmissionError(null);
-    setResubmissionSuccess(null);
-    setUploadedResubmission(null);
-
-    if (!file) {
-      return;
-    }
-
-    if (!["image/jpeg", "image/png"].includes(file.type)) {
-      setResubmissionProofError(
-        "Upload a JPG or PNG payment screenshot.",
-      );
-      event.target.value = "";
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      setResubmissionProofError(
-        "The payment screenshot must not exceed 5 MB.",
-      );
-      event.target.value = "";
-      return;
-    }
-
-    setResubmissionProof(file);
-  };
-
-  const handlePaymentResubmission = async () => {
-    if (
-      !order ||
-      order.current_status !== "waiting_payment_verification" ||
-      !payment ||
-      payment.payment_status !== "rejected"
-    ) {
-      setResubmissionError(
-        "This payment is no longer eligible for resubmission.",
-      );
-      return;
-    }
-
-    const normalizedReference = resubmissionReference.trim();
-
-    setResubmissionError(null);
-    setResubmissionSuccess(null);
-
-    if (!normalizedReference) {
-      setResubmissionError("Enter the GCash reference number.");
-      return;
-    }
-
-    if (normalizedReference.length > 100) {
-      setResubmissionError(
-        "The GCash reference number must be 100 characters or fewer.",
-      );
-      return;
-    }
-
-    if (!resubmissionProof) {
-      setResubmissionError("Upload the new GCash payment screenshot.");
-      return;
-    }
-
-    setResubmittingPayment(true);
-
-    try {
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
-
-      if (userError || !user) {
-        throw new Error(
-          "Your signed-in customer account could not be confirmed. Sign in and try again.",
-        );
-      }
-
-      const fileKey = [
-        resubmissionProof.name,
-        resubmissionProof.type,
-        resubmissionProof.size,
-        resubmissionProof.lastModified,
-      ].join(":");
-
-      let proofImagePath =
-        uploadedResubmission?.fileKey === fileKey
-          ? uploadedResubmission.proofImagePath
-          : null;
-
-      if (!proofImagePath) {
-        proofImagePath = [
-          user.id,
-          order.id,
-          `${crypto.randomUUID()}.${getPaymentProofExtension(
-            resubmissionProof,
-          )}`,
-        ].join("/");
-
-        const { error: uploadError } =
-          await supabase.storage
-            .from("payment-proofs")
-            .upload(
-              proofImagePath,
-              resubmissionProof,
-              {
-                cacheControl: "3600",
-                contentType: resubmissionProof.type,
-                upsert: false,
-              },
-            );
-
-        if (uploadError) {
-          throw new Error(
-            `The new payment screenshot could not be uploaded: ${uploadError.message}`,
-          );
-        }
-
-        setUploadedResubmission({
-          fileKey,
-          proofImagePath,
-        });
-      }
-
-      const { data: paymentData, error: paymentError } =
-        await supabase.rpc(
-          "submit_customer_payment",
-          {
-            p_order_id: order.id,
-            p_gcash_reference_number: normalizedReference,
-            p_proof_image_path: proofImagePath,
-          },
-        );
-
-      if (paymentError) {
-        throw new Error(paymentError.message);
-      }
-
-      const paymentResult =
-        Array.isArray(paymentData) && paymentData.length === 1
-          ? (paymentData[0] as Partial<SubmittedCustomerPayment>)
-          : null;
-
-      if (
-        !paymentResult ||
-        paymentResult.payment_id !== payment.payment_id ||
-        paymentResult.order_id !== order.id ||
-        paymentResult.payment_method !== "gcash" ||
-        paymentResult.status !== "pending" ||
-        typeof paymentResult.gcash_reference_number !== "string" ||
-        paymentResult.gcash_reference_number.trim() !==
-          normalizedReference ||
-        paymentResult.proof_image_path !== proofImagePath ||
-        Number(paymentResult.amount) !== Number(order.grand_total) ||
-        paymentResult.created_at !== payment.created_at
-      ) {
-        throw new Error(
-          "The server returned an invalid payment resubmission confirmation.",
-        );
-      }
-
-      const [
-        refreshedOrderResult,
-        refreshedHistoryResult,
-        refreshedPayment,
-      ] = await Promise.all([
-        supabase
-          .from("orders")
-          .select(
-            `
-              id,
-              order_number,
-              current_status,
-              fulfillment_type,
-              grand_total,
-              created_at
-            `,
-          )
-          .eq("id", order.id)
-          .single<CustomerTrackingOrderRow>(),
-        supabase
-          .from("order_status_history")
-          .select(
-            `
-              status,
-              notes,
-              created_at
-            `,
-          )
-          .eq("order_id", order.id)
-          .order("created_at", { ascending: true }),
-        fetchCustomerTrackingPayment(order.id),
-      ]);
-
-      if (refreshedOrderResult.error) {
-        throw new Error(refreshedOrderResult.error.message);
-      }
-
-      if (refreshedHistoryResult.error) {
-        throw new Error(refreshedHistoryResult.error.message);
-      }
-
-      if (
-        !refreshedPayment ||
-        refreshedPayment.payment_id !== payment.payment_id ||
-        refreshedPayment.payment_status !== "pending" ||
-        refreshedPayment.gcash_reference_number !== normalizedReference ||
-        refreshedPayment.amount !== Number(order.grand_total)
-      ) {
-        throw new Error(
-          "The refreshed payment does not confirm the pending resubmission.",
-        );
-      }
-
-      setOrder(refreshedOrderResult.data);
-      setStatusHistory(
-        (refreshedHistoryResult.data ??
-          []) as CustomerTrackingHistoryRow[],
-      );
-      setPayment(refreshedPayment);
-      setResubmissionReference("");
-      setResubmissionProof(null);
-      setUploadedResubmission(null);
-      setResubmissionSuccess(
-        "Payment resubmitted and awaiting verification",
-      );
-
-      if (resubmissionProofInputRef.current) {
-        resubmissionProofInputRef.current.value = "";
-      }
-    } catch (error) {
-      console.error(
-        "Unable to resubmit customer payment:",
-        error,
-      );
-
-      setResubmissionError(
-        error instanceof Error
-          ? error.message
-          : "Unable to resubmit the payment.",
-      );
-    } finally {
-      setResubmittingPayment(false);
-    }
-  };
-
-  const historyByStatus = new Map(
-    statusHistory.map((history) => [
-      history.status,
-      history,
-    ]),
-  );
-
-  const isCancelled =
-    order?.current_status === "cancelled";
-
-  const isRejected =
-    order?.current_status === "rejected";
-
-  const isCompleted =
-    order?.current_status === "completed";
-
-  const isDelivered =
-  order?.current_status === "delivered";
-
-  const paymentNeedsResubmission =
-    order?.current_status ===
-      "waiting_payment_verification" &&
-    payment?.payment_status === "rejected";
-
-  const formattedPlacedDate =
-    order
-      ? new Date(
-          order.created_at,
-        ).toLocaleString(
-          "en-PH",
-          {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-            hour: "numeric",
-            minute: "2-digit",
-          },
-        )
-      : "";
-
-  const formattedOrderStatus = order
-    ? order.current_status
-        .split("_")
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(" ")
-    : "";
-
-  const currentTrackingStepIndex = order
-    ? ORDER_STEPS.findIndex(
-        (trackingStep) => trackingStep.status === order.current_status,
-      )
-    : -1;
-
-  const nextTrackingStep =
-    currentTrackingStepIndex >= 0 &&
-    currentTrackingStepIndex < ORDER_STEPS.length - 1
-      ? ORDER_STEPS[currentTrackingStepIndex + 1]
-      : null;
-
-  const paymentStatusLabel =
-    payment?.payment_status === "verified"
-      ? "Verified"
-      : payment?.payment_status === "rejected"
-        ? "Needs resubmission"
-        : payment?.payment_status === "pending"
-          ? "Awaiting verification"
-          : "Not available";
-
-  const nextStepLabel = paymentNeedsResubmission
-    ? "Resubmit your GCash payment for verification."
-    : isCancelled || isRejected
-      ? "This order has no further steps."
-      : isCompleted || isDelivered
-        ? "This order is complete."
-        : nextTrackingStep
-          ? `Next: ${nextTrackingStep.label}`
-          : "Watch this page for the next status update.";
-
-  return (
-    <div className="flex h-full flex-col overflow-hidden">
-      <CustNav
-        cart={cart}
-        onNav={onNav}
-        currentPage="tracking"
-      />
-
-      <div className="customer-storefront flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-4xl px-4 py-5 sm:px-6 sm:py-8">
-          <div className="mb-5 flex items-end justify-between gap-3 sm:mb-7">
-            <div>
-              <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-primary/75">Live order progress</p>
-              <h1 className="mt-1 font-['Fraunces'] text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-                Track your order
-              </h1>
-
-              <p className="mt-1 text-sm text-muted-foreground">
-                See the confirmed order, payment, and fulfillment status.
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => onNav("history")}
-              className="min-h-11 rounded-xl border border-border bg-card px-4 text-sm font-bold text-foreground shadow-sm hover:bg-muted"
-            >
-              All Orders
-            </button>
-          </div>
-
-          {loading && (
-            <div className="flex min-h-40 items-center justify-center rounded-2xl border border-border bg-card px-5 py-8">
-              <div className="flex flex-col items-center gap-3">
-                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-50 text-primary"><Loader2 className="h-5 w-5 animate-spin" /></span>
-
-                <p className="text-base font-bold text-foreground">
-                  Loading order…
-                </p>
-                <p className="text-sm text-muted-foreground">Checking the latest server status.</p>
-              </div>
-            </div>
-          )}
-
-          {!loading && errorMessage && (
-            <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-5">
-              <p className="text-base font-bold text-red-700">
-                Unable to load order
-              </p>
-
-              <p className="mt-1 text-sm leading-5 text-red-600">
-                {errorMessage}
-              </p>
-
-              <button
-                type="button"
-                onClick={() => setLoadAttempt((attempt) => attempt + 1)}
-                className="mt-4 min-h-11 rounded-xl border border-red-300 bg-white px-4 text-sm font-bold text-red-700 hover:bg-red-100"
-              >
-                Try Again
-              </button>
-            </div>
-          )}
-
-          {!loading &&
-            !errorMessage &&
-            !order && (
-              <div className="flex min-h-48 flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card/75 px-6 py-9 text-center">
-                <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-primary"><MapPin className="h-5 w-5" /></span>
-
-                <p className="text-base font-bold text-foreground">
-                  No order to track
-                </p>
-
-                <p className="mt-1 max-w-sm text-sm leading-5 text-muted-foreground">
-                  Place an order first or choose one
-                  from your order history.
-                </p>
-
-                <button
-                  type="button"
-                  onClick={() => onNav("history")}
-                  className="mt-4 min-h-11 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground hover:bg-amber-800"
-                >
-                  View Orders
-                </button>
-              </div>
-            )}
-
-          {!loading &&
-            !errorMessage &&
-            order && (
-              <article className="mb-5 overflow-hidden rounded-2xl border border-border bg-card shadow-[0_12px_36px_rgba(64,40,25,0.06)]">
-                {/* Header */}
-                <div className="grid gap-4 bg-[#211914] px-4 py-5 text-white sm:grid-cols-[minmax(0,1fr)_auto] sm:px-6">
-                  <div>
-                    <p className="mb-1 text-xs font-bold uppercase tracking-wide text-white/60">
-                      Order number
-                    </p>
-
-                    <p className="font-mono text-2xl font-black tracking-tight text-white sm:text-3xl">
-                      {order.order_number}
-                    </p>
-
-                    <p className="mt-1 text-sm text-white/60">
-                      Placed {formattedPlacedDate}
-                    </p>
-                  </div>
-
-                  <div className="sm:text-right">
-                    <p className="mb-1 text-xs font-bold uppercase tracking-wide text-amber-200/80">
-                      Server-confirmed total
-                    </p>
-
-                    <p className="text-2xl font-black tracking-tight text-amber-300">
-                      ₱
-                      {Number(
-                        order.grand_total,
-                      ).toLocaleString(
-                        "en-PH",
-                        {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        },
-                      )}
-                    </p>
-
-                    <p className="mt-1 text-sm capitalize text-white/60">
-                      {order.fulfillment_type.replace(
-                        /_/g,
-                        " ",
-                      )}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="p-4 sm:p-6">
-                  {resubmissionSuccess && (
-                    <div className="mb-6 flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
-                      <Check className="h-5 w-5 flex-shrink-0 text-emerald-600" />
-
-                      <p className="text-sm font-bold text-emerald-800">
-                        {resubmissionSuccess}
-                      </p>
-                    </div>
-                  )}
-
-                  {paymentNeedsResubmission && payment && (
-                    <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 sm:p-5">
-                      <div className="flex items-start gap-3">
-                        <X className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-600" />
-
-                        <div>
-                          <p className="text-sm font-extrabold text-red-800">
-                            Payment needs resubmission
-                          </p>
-
-                          <p className="mt-1 text-xs leading-5 text-red-700">
-                            Confirm your GCash reference and upload a new payment screenshot for this same order.
-                          </p>
-                        </div>
-                      </div>
-
-                      <dl className="mt-4 grid gap-2 rounded-lg border border-red-100 bg-white/70 p-3 text-xs">
-                        <div>
-                          <dt className="font-bold text-muted-foreground">
-                            Rejection reason
-                          </dt>
-                          <dd className="mt-0.5 font-semibold text-foreground">
-                            {payment.rejection_reason}
-                          </dd>
-                        </div>
-
-                        {payment.rejection_notes && (
-                          <div>
-                            <dt className="font-bold text-muted-foreground">
-                              Cashier notes
-                            </dt>
-                            <dd className="mt-0.5 whitespace-pre-wrap text-foreground">
-                              {payment.rejection_notes}
-                            </dd>
-                          </div>
-                        )}
-                      </dl>
-
-                      <div className="mt-4 grid gap-4">
-                      <label className="grid gap-1.5 text-xs font-bold text-foreground">
-                        GCash reference
-                        <input
-                          type="text"
-                          value={resubmissionReference}
-                          maxLength={100}
-                          disabled={resubmittingPayment}
-                          onChange={(event) => {
-                            setResubmissionReference(event.target.value);
-                            setResubmissionError(null);
-                            setResubmissionSuccess(null);
-                          }}
-                          placeholder="Enter the GCash reference number"
-                          className="min-h-11 rounded-xl border border-border bg-white px-3 text-sm font-medium text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:opacity-60"
-                        />
-                      </label>
-
-                        <div>
-                          <p className="mb-1.5 text-xs font-bold text-foreground">
-                            New payment proof
-                          </p>
-
-                          <input
-                            ref={resubmissionProofInputRef}
-                            type="file"
-                            accept="image/jpeg,image/png"
-                            disabled={resubmittingPayment}
-                            onChange={handleResubmissionProofChange}
-                            className="sr-only"
-                          />
-
-                          <button
-                            type="button"
-                            disabled={resubmittingPayment}
-                            onClick={() =>
-                              resubmissionProofInputRef.current?.click()
-                            }
-                            className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-dashed border-red-300 bg-white px-3 text-xs font-bold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
-                          >
-                            <Upload className="h-4 w-4" />
-                            {resubmissionProof
-                              ? resubmissionProof.name
-                              : "Choose JPG or PNG proof (max 5 MB)"}
-                          </button>
-
-                          {resubmissionProof && (
-                            <p className="mt-1 text-[11px] text-muted-foreground">
-                              {(resubmissionProof.size / 1024 / 1024).toFixed(2)} MB
-                            </p>
-                          )}
-
-                          {resubmissionProofError && (
-                            <p className="mt-1 text-xs font-semibold text-red-700">
-                              {resubmissionProofError}
-                            </p>
-                          )}
-                        </div>
-
-                        {resubmissionError && (
-                          <p className="rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-semibold text-red-700">
-                            {resubmissionError}
-                          </p>
-                        )}
-
-                        <button
-                          type="button"
-                          disabled={
-                            resubmittingPayment ||
-                            !resubmissionReference.trim() ||
-                            !resubmissionProof ||
-                            Boolean(resubmissionProofError)
-                          }
-                          onClick={() => void handlePaymentResubmission()}
-                          className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground hover:bg-amber-800 disabled:cursor-not-allowed disabled:opacity-60"
-                        >
-                          {resubmittingPayment && (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          )}
-                          {resubmittingPayment
-                            ? "Resubmitting…"
-                            : "Resubmit Payment"}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Current status */}
-                  <section aria-label="Order overview" className="mb-5 grid gap-3 sm:grid-cols-3">
-                    <div className={`rounded-xl border px-4 py-3 ${isCancelled || isRejected ? "border-red-200 bg-red-50" : isCompleted || isDelivered ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`}>
-                      <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Order status</p>
-                      <p className={`mt-1 text-base font-extrabold ${isCancelled || isRejected ? "text-red-800" : isCompleted || isDelivered ? "text-emerald-800" : "text-amber-900"}`}>
-                        {isCompleted ? "Completed" : formattedOrderStatus}
-                      </p>
-                    </div>
-                    <div className={`rounded-xl border px-4 py-3 ${payment?.payment_status === "rejected" ? "border-red-200 bg-red-50" : payment?.payment_status === "verified" ? "border-emerald-200 bg-emerald-50" : "border-border bg-background"}`}>
-                      <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Payment status</p>
-                      <p className={`mt-1 text-base font-extrabold ${payment?.payment_status === "rejected" ? "text-red-800" : payment?.payment_status === "verified" ? "text-emerald-800" : "text-foreground"}`}>{paymentStatusLabel}</p>
-                    </div>
-                    <div className="rounded-xl border border-border bg-background px-4 py-3">
-                      <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Fulfillment</p>
-                      <p className="mt-1 text-base font-extrabold capitalize text-foreground">{order.fulfillment_type.replace(/_/g, " ")}</p>
-                    </div>
-                  </section>
-
-                  <div className={`mb-6 flex items-start gap-3 rounded-xl border px-4 py-3 ${isCancelled || isRejected || paymentNeedsResubmission ? "border-red-200 bg-red-50" : isCompleted || isDelivered ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`}>
-                    {isCancelled || isRejected || paymentNeedsResubmission ? (
-                      <X className="mt-0.5 h-5 w-5 flex-none text-red-600" />
-                    ) : isCompleted || isDelivered ? (
-                      <Check className="mt-0.5 h-5 w-5 flex-none text-emerald-600" />
-                    ) : (
-                      <ChefHat className="mt-0.5 h-5 w-5 flex-none text-amber-700" />
-                    )}
-                    <div>
-                      <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">What happens next</p>
-                      <p className="mt-1 text-sm font-bold leading-5 text-foreground">{nextStepLabel}</p>
-                    </div>
-                  </div>
-
-                  {/* Timeline */}
-                  {!isCancelled &&
-                    !isRejected && (
-                      <section aria-labelledby="order-progress-heading" className="rounded-2xl border border-border bg-background/70 p-4 sm:p-5">
-                        <div className="mb-5">
-                          <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Status timeline</p>
-                          <h2 id="order-progress-heading" className="mt-1 text-lg font-extrabold text-foreground">Order progress</h2>
-                        </div>
-                        {ORDER_STEPS.map(
-                          (
-                            trackingStep,
-                            index,
-                          ) => {
-                            const history =
-                              historyByStatus.get(
-                                trackingStep.status,
-                              );
-
-                            const isCurrent =
-                              order.current_status ===
-                              trackingStep.status;
-
-                            const wasReached =
-                              Boolean(history);
-
-                            const completedStep =
-                              wasReached &&
-                              !isCurrent;
-
-                            const completedOrderStep =
-                              (isCompleted || isDelivered) &&
-                              trackingStep.status ===
-                                "delivered";
-
-                            return (
-                              <div
-                                key={
-                                  trackingStep.status
-                                }
-                                className="flex items-start gap-3 sm:gap-4"
-                              >
-                                <div className="flex flex-col items-center">
-                                  <div
-                                    className={[
-                                      "flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border-2 sm:h-8 sm:w-8",
-
-                                      completedStep ||
-                                      completedOrderStep
-                                        ? "border-green-500 bg-green-500"
-                                        : isCurrent
-                                          ? "border-primary bg-primary"
-                                          : "border-border bg-white",
-                                    ].join(" ")}
-                                  >
-                                    {completedStep ||
-                                    completedOrderStep ? (
-                                      <Check className="h-3.5 w-3.5 text-white" />
-                                    ) : isCurrent ? (
-                                      <Loader2 className="h-3.5 w-3.5 animate-spin text-primary-foreground" />
-                                    ) : null}
-                                  </div>
-
-                                  {index <
-                                    ORDER_STEPS.length -
-                                      1 && (
-                                    <div
-                                      className={`mt-1 h-7 w-0.5 ${
-                                        completedStep
-                                          ? "bg-green-400"
-                                          : "bg-border"
-                                      }`}
-                                    />
-                                  )}
-                                </div>
-
-                                <div className="min-w-0 pb-4">
-                                  <p
-                                  className={`text-sm font-semibold ${
-                                      wasReached ||
-                                      isCurrent
-                                        ? "text-foreground"
-                                        : "text-muted-foreground"
-                                    }`}
-                                  >
-                                    {
-                                      trackingStep.label
-                                    }
-                                  </p>
-
-                                  {history && (
-                                    <p className="mt-0.5 text-xs text-muted-foreground">
-                                      {new Date(
-                                        history.created_at,
-                                      ).toLocaleString(
-                                        "en-PH",
-                                        {
-                                          month:
-                                            "short",
-                                          day: "numeric",
-                                          hour:
-                                            "numeric",
-                                          minute:
-                                            "2-digit",
-                                        },
-                                      )}
-                                    </p>
-                                  )}
-
-                                {isCurrent && (
-                                  <p className="mt-0.5 text-xs font-semibold text-primary">
-                                    {completedOrderStep
-                                      ? "Completed"
-                                      : "In progress…"}
-                                  </p>
-                                )}
-                                </div>
-                              </div>
-                            );
-                          },
-                        )}
-                      </section>
-                    )}
-                </div>
-              </article>
-            )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ── Order History ─────────────────────────────────────────────────
-interface CustomerOrderHistoryItemRow {
-  order_id: string;
-  item_name: string | null;
-  quantity: number;
-  unit_price: number | string;
-  line_total: number | string;
-}
-
-interface CustomerOrderHistoryRow {
-  id: string;
-  order_number: string;
-  grand_total: number | string;
-  current_status: string;
-  created_at: string;
-  items: CustomerOrderHistoryItemRow[];
-}
-
-function formatCustomerOrderStatus(
-  status: string,
-) {
-  return status
-    .split("_")
-    .map(
-      (word) =>
-        word.charAt(0).toUpperCase() +
-        word.slice(1),
-    )
-    .join(" ");
-}
-
-function getCustomerOrderStatusPresentation(status: string) {
-  if (status === "completed" || status === "delivered") {
-    return {
-      badge: "border-stone-200 bg-stone-100 text-stone-700",
-      card: "border-stone-200 bg-stone-50/70",
-    };
-  }
-
-  if (status === "cancelled" || status === "rejected") {
-    return {
-      badge: "border-red-200 bg-red-50 text-red-700",
-      card: "border-red-200/80 bg-card",
-    };
-  }
-
-  if (
-    status === "waiting_payment_verification" ||
-    status === "waiting_for_rider"
-  ) {
-    return {
-      badge: "border-amber-200 bg-amber-50 text-amber-800",
-      card: "border-amber-200 bg-card",
-    };
-  }
-
-  return {
-    badge: "border-orange-200 bg-orange-50 text-orange-800",
-    card: "border-border bg-card",
-  };
-}
-
-// ── Order History ─────────────────────────────────────────────────
-function HistoryPage({
-  cart,
-  onNav,
-  onTrackOrder,
-}: {
-  cart: CartItem[];
-  onNav: (page: CustomerPage) => void;
-  onTrackOrder: (orderId: string) => void;
-}) {
-  const [orders, setOrders] =
-    useState<CustomerOrderHistoryRow[]>([]);
-
-  const [loading, setLoading] =
-    useState(true);
-
-  const [errorMessage, setErrorMessage] =
-    useState<string | null>(null);
-  const [loadAttempt, setLoadAttempt] = useState(0);
-
-  useEffect(() => {
-    let isMounted = true;
-
-async function loadCustomerOrders() {
-  setLoading(true);
-  setErrorMessage(null);
-
-  const {
-    data: orderData,
-    error: ordersError,
-  } = await supabase
-    .from("orders")
-    .select(
-      `
-        id,
-        order_number,
-        grand_total,
-        current_status,
-        created_at
-      `,
-    )
-    .order("created_at", {
-      ascending: false,
-    });
-
-  if (!isMounted) {
-    return;
-  }
-
-  if (ordersError) {
-    console.error(
-      "Unable to load customer orders:",
-      ordersError,
-    );
-
-    setErrorMessage(
-      ordersError.message,
-    );
-
-    setLoading(false);
-    return;
-  }
-
-  const orderRows =
-    (orderData ?? []) as Omit<
-      CustomerOrderHistoryRow,
-      "items"
-    >[];
-
-  if (orderRows.length === 0) {
-    setOrders([]);
-    setLoading(false);
-    return;
-  }
-
-  const orderIds = orderRows.map(
-    (order) => order.id,
-  );
-
-  const {
-    data: itemData,
-    error: itemsError,
-  } = await supabase
-    .from("order_items")
-    .select(
-      `
-        order_id,
-        item_name,
-        quantity,
-        unit_price,
-        line_total
-      `,
-    )
-    .in("order_id", orderIds)
-    .order("created_at", {
-      ascending: true,
-    });
-
-  if (!isMounted) {
-    return;
-  }
-
-  if (itemsError) {
-    console.error(
-      "Unable to load customer order items:",
-      itemsError,
-    );
-
-    setErrorMessage(
-      itemsError.message,
-    );
-
-    setLoading(false);
-    return;
-  }
-
-  const itemRows =
-    (itemData ??
-      []) as CustomerOrderHistoryItemRow[];
-
-  const itemsByOrder = new Map<
-    string,
-    CustomerOrderHistoryItemRow[]
-  >();
-
-  itemRows.forEach((item) => {
-    const currentItems =
-      itemsByOrder.get(item.order_id) ?? [];
-
-    currentItems.push(item);
-
-    itemsByOrder.set(
-      item.order_id,
-      currentItems,
-    );
-  });
-
-  const ordersWithItems:
-    CustomerOrderHistoryRow[] =
-      orderRows.map((order) => ({
-        ...order,
-        items:
-          itemsByOrder.get(order.id) ?? [],
-      }));
-
-  setOrders(ordersWithItems);
-  setLoading(false);
-}
-
-    void loadCustomerOrders();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [loadAttempt]);
-
-  return (
-    <div className="flex h-full flex-col overflow-hidden">
-      <CustNav
-        cart={cart}
-        onNav={onNav}
-        currentPage="history"
-      />
-
-      <div className="customer-storefront flex-1 overflow-y-auto">
-        <div className="mx-auto w-full max-w-4xl px-4 py-5 sm:px-6 sm:py-8">
-          <div className="mb-5 flex items-end justify-between gap-3 sm:mb-7">
-            <div>
-              <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-primary/75">Your orders</p>
-              <h1 className="mt-1 font-['Fraunces'] text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-                Order history
-              </h1>
-
-              <p className="mt-1.5 text-sm leading-5 text-muted-foreground">
-                Review current and completed orders in one place.
-              </p>
-            </div>
-
-            {!loading && !errorMessage && orders.length > 0 ? (
-              <span className="flex-none rounded-full border border-border bg-card px-3 py-1.5 text-xs font-bold text-muted-foreground shadow-sm">
-                {orders.length} {orders.length === 1 ? "order" : "orders"}
-              </span>
-            ) : null}
-          </div>
-
-          {loading && (
-            <div role="status" className="flex min-h-40 items-center justify-center rounded-2xl border border-border bg-card px-5 py-8">
-              <div className="flex flex-col items-center gap-3 text-center">
-                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-50 text-primary">
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                </span>
-                <div>
-                  <p className="text-base font-bold text-foreground">Loading your orders…</p>
-                  <p className="mt-1 text-sm text-muted-foreground">Getting the latest order history.</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {!loading && errorMessage && (
-            <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-5">
-              <p className="text-base font-bold text-red-700">Unable to load orders</p>
-              <p className="mt-1 max-w-xl text-sm leading-5 text-red-600">{errorMessage}</p>
-              <button
-                type="button"
-                onClick={() => setLoadAttempt((attempt) => attempt + 1)}
-                className="mt-4 min-h-11 rounded-xl border border-red-300 bg-white px-4 text-sm font-bold text-red-700 hover:bg-red-100"
-              >
-                Try Again
-              </button>
-            </div>
-          )}
-
-          {!loading && !errorMessage && orders.length === 0 && (
-            <div className="flex min-h-48 flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card/75 px-6 py-9 text-center">
-              <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-primary">
-                <ShoppingCart className="h-5 w-5" />
-              </span>
-              <h2 className="text-base font-extrabold text-foreground">No orders yet</h2>
-              <p className="mt-1 max-w-sm text-sm leading-5 text-muted-foreground">Orders you place will appear here with their current status.</p>
-              <button
-                type="button"
-                onClick={() => onNav("menu")}
-                className="mt-4 min-h-11 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground hover:bg-amber-800"
-              >
-                Browse the menu
-              </button>
-            </div>
-          )}
-
-          {!loading && !errorMessage && orders.length > 0 && (
-            <div className="grid gap-3 sm:gap-4">
-              {orders.map((order) => {
-                const formattedDate = new Date(order.created_at).toLocaleString(
-                  "en-PH",
-                  {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                    hour: "numeric",
-                    minute: "2-digit",
-                  },
-                );
-                const statusPresentation = getCustomerOrderStatusPresentation(
-                  order.current_status,
-                );
-                const visibleItems = order.items.slice(0, 3);
-                const remainingItems = order.items.slice(3);
-
-                return (
-                  <article
-                    key={order.id}
-                    className={`overflow-hidden rounded-2xl border shadow-[0_8px_24px_rgba(64,40,25,0.045)] ${statusPresentation.card}`}
-                  >
-                    <div className="grid gap-4 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start sm:p-5">
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="font-mono text-base font-black text-foreground">
-                            {order.order_number}
-                          </span>
-                          <span className={`rounded-full border px-2.5 py-1 text-xs font-extrabold ${statusPresentation.badge}`}>
-                            {formatCustomerOrderStatus(order.current_status)}
-                          </span>
-                        </div>
-                        <p className="mt-1.5 text-sm text-muted-foreground">{formattedDate}</p>
-                      </div>
-
-                      <div className="sm:text-right">
-                        <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Order total</p>
-                        <p className="mt-1 text-xl font-black tracking-tight text-foreground">
-                          ₱{Number(order.grand_total).toLocaleString("en-PH", {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="border-t border-border/80 bg-white/55 px-4 py-3.5 sm:px-5">
-                      <p className="mb-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">Items</p>
-                      {order.items.length > 0 ? (
-                        <div className="space-y-2">
-                          {visibleItems.map((item, index) => (
-                            <div key={`${item.order_id}-${index}`} className="flex items-start justify-between gap-3 text-sm">
-                              <span className="min-w-0 font-semibold text-foreground">
-                                <span className="mr-1 font-black text-primary">{item.quantity}×</span>
-                                {item.item_name ?? "Menu item"}
-                              </span>
-                              <span className="flex-none font-bold text-muted-foreground">
-                                ₱{Number(item.line_total).toLocaleString("en-PH", {
-                                  minimumFractionDigits: 2,
-                                  maximumFractionDigits: 2,
-                                })}
-                              </span>
-                            </div>
-                          ))}
-
-                          {remainingItems.length > 0 ? (
-                            <details className="group rounded-xl border border-border bg-background/70 px-3 py-2">
-                              <summary className="cursor-pointer text-sm font-bold text-primary marker:text-primary">
-                                Show {remainingItems.length} more {remainingItems.length === 1 ? "item" : "items"}
-                              </summary>
-                              <div className="mt-2 space-y-2 border-t border-border pt-2">
-                                {remainingItems.map((item, index) => (
-                                  <div key={`${item.order_id}-more-${index}`} className="flex items-start justify-between gap-3 text-sm">
-                                    <span className="min-w-0 font-semibold text-foreground"><span className="mr-1 font-black text-primary">{item.quantity}×</span>{item.item_name ?? "Menu item"}</span>
-                                    <span className="flex-none font-bold text-muted-foreground">₱{Number(item.line_total).toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            </details>
-                          ) : null}
-                        </div>
-                      ) : (
-                        <p className="text-sm text-muted-foreground">Item details are unavailable for this order.</p>
-                      )}
-                    </div>
-
-                    <div className="flex justify-end border-t border-border/80 px-4 py-3 sm:px-5">
-                      <button
-                        type="button"
-                        onClick={() => onTrackOrder(order.id)}
-                        className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-[#211914] px-4 text-sm font-extrabold text-white hover:bg-primary sm:w-auto"
-                      >
-                        Track Order
-                        <ChevronRight className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-interface CustomerProfileData {
-  id: string;
-  first_name: string | null;
-  last_name: string | null;
-  contact_number: string | null;
-  avatar_url: string | null;
-}
-
-interface CustomerAccountData {
-  fullName: string;
-  email: string;
-  phone: string;
-  avatarUrl: string | null;
-}
-
-// ── Profile ───────────────────────────────────────────────────────
-function ProfilePage({
-  
-  cart,
-  onNav,
-}: {
-  cart: CartItem[];
-  onNav: (page: CustomerPage) => void;
-}) {
-  const [account, setAccount] =
-    useState<CustomerAccountData | null>(null);
-
-  const [phoneInput, setPhoneInput] =
-    useState("");
-
-  const [loading, setLoading] =
-    useState(true);
-
-  const [saving, setSaving] =
-    useState(false);
-
-  const [errorMessage, setErrorMessage] =
-    useState<string | null>(null);
-  const [loadAttempt, setLoadAttempt] = useState(0);
-
-  const [saveError, setSaveError] =
-    useState<string | null>(null);
-
-  const [saveMessage, setSaveMessage] =
-    useState<string | null>(null);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    async function loadCurrentAccount() {
-      setLoading(true);
-      setErrorMessage(null);
-
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
-
-      if (!isMounted) {
-        return;
-      }
-
-      if (userError || !user) {
-        setErrorMessage(
-          userError?.message ??
-            "No authenticated account was found.",
-        );
-
-        setLoading(false);
-        return;
-      }
-
-      const {
-        data: profile,
-        error: profileError,
-      } = await supabase
-        .from("profiles")
-        .select(
-          `
-            id,
-            first_name,
-            last_name,
-            contact_number,
-            avatar_url
-          `,
-        )
-        .eq("id", user.id)
-        .single<CustomerProfileData>();
-
-      if (!isMounted) {
-        return;
-      }
-
-      if (profileError || !profile) {
-        setErrorMessage(
-          profileError?.message ??
-            "Your profile could not be loaded.",
-        );
-
-        setLoading(false);
-        return;
-      }
-
-      const profileName = [
-        profile.first_name,
-        profile.last_name,
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .trim();
-
-      const googleName =
-        typeof user.user_metadata?.full_name ===
-        "string"
-          ? user.user_metadata.full_name
-          : "";
-
-      const displayName =
-        profileName ||
-        googleName ||
-        user.email?.split("@")[0] ||
-        "Customer";
-
-      const googleAvatar =
-        typeof user.user_metadata?.avatar_url ===
-        "string"
-          ? user.user_metadata.avatar_url
-          : typeof user.user_metadata?.picture ===
-              "string"
-            ? user.user_metadata.picture
-            : null;
-
-      const savedPhone =
-        profile.contact_number ?? "";
-
-      setAccount({
-        fullName: displayName,
-        email: user.email ?? "",
-        phone: savedPhone,
-        avatarUrl:
-          profile.avatar_url ?? googleAvatar,
-      });
-
-      setPhoneInput(savedPhone);
-      setLoading(false);
-    }
-
-    void loadCurrentAccount();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [loadAttempt]);
-
-  const handleSavePhone = async () => {
-    if (saving) {
-      return;
-    }
-
-    const cleanPhone =
-      phoneInput.trim();
-
-    setSaveError(null);
-    setSaveMessage(null);
-
-    if (!cleanPhone) {
-      setSaveError(
-        "Please enter your contact number.",
-      );
-      return;
-    }
-
-    if (!/^09\d{9}$/.test(cleanPhone)) {
-      setSaveError(
-        "Enter an 11-digit Philippine mobile number starting with 09.",
-      );
-      return;
-    }
-
-    setSaving(true);
-
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      setSaveError(
-        userError?.message ??
-          "Unable to verify your account.",
-      );
-
-      setSaving(false);
-      return;
-    }
-
-    const { error: updateError } =
-      await supabase
-        .from("profiles")
-        .update({
-          contact_number: cleanPhone,
-        })
-        .eq("id", user.id);
-
-    if (updateError) {
-      console.error(
-        "Unable to update contact number:",
-        updateError.message,
-      );
-
-      setSaveError(
-        `Unable to save your contact number: ${updateError.message}`,
-      );
-
-      setSaving(false);
-      return;
-    }
-
-    setAccount((currentAccount) => {
-      if (!currentAccount) {
-        return currentAccount;
-      }
-
-      return {
-        ...currentAccount,
-        phone: cleanPhone,
-      };
-    });
-
-    setPhoneInput(cleanPhone);
-
-    setSaveMessage(
-      "Contact number saved successfully.",
-    );
-
-    setSaving(false);
-  };
-
-  const phoneChanged =
-    account !== null &&
-    phoneInput.trim() !== account.phone;
-
-  return (
-    <div className="flex h-full flex-col overflow-hidden">
-      <CustNav
-        cart={cart}
-        onNav={onNav}
-        currentPage="profile"
-      />
-
-      <div className="customer-storefront flex-1 overflow-y-auto">
-        <div className="mx-auto w-full max-w-4xl px-4 py-5 sm:px-6 sm:py-8">
-          <div className="mb-5 sm:mb-7">
-            <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-primary/75">Your account</p>
-            <h1 className="mt-1 font-['Fraunces'] text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-              Profile
-            </h1>
-
-            <p className="mt-1.5 text-sm leading-5 text-muted-foreground">
-              Review your account details and keep your delivery contact number current.
-            </p>
-          </div>
-
-          {loading && (
-            <div role="status" className="flex min-h-40 items-center justify-center rounded-2xl border border-border bg-card px-5 py-8">
-              <div className="flex flex-col items-center gap-3 text-center">
-                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-50 text-primary"><Loader2 className="h-5 w-5 animate-spin" /></span>
-                <div>
-                  <p className="text-base font-bold text-foreground">Loading your profile…</p>
-                  <p className="mt-1 text-sm text-muted-foreground">Getting your current account details.</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {!loading && errorMessage && (
-            <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-5">
-              <p className="text-base font-bold text-red-700">Unable to load profile</p>
-              <p className="mt-1 max-w-xl text-sm leading-5 text-red-600">{errorMessage}</p>
-              <button
-                type="button"
-                onClick={() => setLoadAttempt((attempt) => attempt + 1)}
-                className="mt-4 min-h-11 rounded-xl border border-red-300 bg-white px-4 text-sm font-bold text-red-700 hover:bg-red-100"
-              >
-                Try Again
-              </button>
-            </div>
-          )}
-
-          {!loading && account && (
-            <div className="grid gap-5 lg:grid-cols-[minmax(16rem,0.75fr)_minmax(0,1.25fr)] lg:items-start">
-              <aside className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_10px_30px_rgba(64,40,25,0.05)]">
-                <div className="bg-[#211914] p-5 text-white sm:p-6">
-                  <div className="flex items-center gap-4 lg:flex-col lg:items-start">
-                    <div className="flex h-16 w-16 flex-none items-center justify-center overflow-hidden rounded-2xl bg-white/10 ring-1 ring-white/15 sm:h-20 sm:w-20">
-                      {account.avatarUrl ? (
-                        <ImageWithFallback
-                          src={account.avatarUrl}
-                          alt={`${account.fullName} profile`}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <User className="h-8 w-8 text-amber-300" />
-                      )}
-                    </div>
-
-                    <div className="min-w-0">
-                      <p className="break-words font-['Fraunces'] text-2xl font-semibold leading-tight text-white">{account.fullName}</p>
-                      <p className="mt-1 break-all text-sm leading-5 text-white/60">{account.email || "Email unavailable"}</p>
-                    </div>
-                  </div>
-
-                  <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-300/10 px-3 py-1.5 text-xs font-bold text-emerald-200">
-                    <BadgeCheck className="h-4 w-4" /> Signed in
-                  </div>
-                </div>
-
-                <dl className="grid gap-4 p-5 text-sm sm:p-6">
-                  <div>
-                    <dt className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Customer name</dt>
-                    <dd className="mt-1 font-bold text-foreground">{account.fullName}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Email</dt>
-                    <dd className="mt-1 break-all font-bold text-foreground">{account.email || "Not available"}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Current contact</dt>
-                    <dd className="mt-1 font-bold text-foreground">{account.phone || "Not provided"}</dd>
-                  </div>
-                </dl>
-              </aside>
-
-              <section className="rounded-2xl border border-border bg-card p-5 shadow-[0_10px_30px_rgba(64,40,25,0.05)] sm:p-6">
-                <div className="mb-5 flex items-start gap-3 border-b border-border pb-4">
-                  <span className="flex h-11 w-11 flex-none items-center justify-center rounded-2xl bg-amber-50 text-primary"><Phone className="h-5 w-5" /></span>
-                  <div>
-                    <h2 className="text-xl font-extrabold text-foreground">Contact information</h2>
-                    <p className="mt-1 text-sm leading-5 text-muted-foreground">This number is used for delivery and order contact.</p>
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label htmlFor="profile-phone" className="text-sm font-bold text-foreground">Contact number</label>
-                  <div className="relative">
-                    <Phone className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <input
-                      id="profile-phone"
-                      type="tel"
-                      value={phoneInput}
-                      onChange={(event) => {
-                        const digits = event.target.value.replace(/\D/g, "").slice(0, 11);
-
-                        setPhoneInput(digits);
-                        setSaveError(null);
-                        setSaveMessage(null);
-                      }}
-                      placeholder="09XXXXXXXXX"
-                      inputMode="numeric"
-                      autoComplete="tel"
-                      maxLength={11}
-                      className="min-h-12 w-full rounded-xl border border-border bg-input-background pl-10 pr-3.5 text-base text-foreground outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-4 focus:ring-primary/10"
-                    />
-                  </div>
-                  <p className="text-xs leading-4 text-muted-foreground">Use an 11-digit Philippine mobile number starting with 09.</p>
-                </div>
-
-                {saveError && (
-                  <div role="alert" className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
-                    <p className="text-sm font-bold text-red-800">Unable to save contact number</p>
-                    <p className="mt-1 text-sm font-medium leading-5 text-red-700">{saveError}</p>
-                  </div>
-                )}
-
-                {saveMessage && (
-                  <div role="status" className="mt-4 flex items-start gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
-                    <Check className="mt-0.5 h-4 w-4 flex-none text-emerald-700" />
-                    <p className="text-sm font-bold leading-5 text-emerald-700">{saveMessage}</p>
-                  </div>
-                )}
-
-                <div className="mt-5 flex justify-end">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      void handleSavePhone();
-                    }}
-                    disabled={saving || !phoneChanged}
-                    className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-extrabold text-primary-foreground shadow-sm transition-colors hover:bg-amber-800 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
-                  >
-                    {saving ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Saving…
-                      </>
-                    ) : (
-                      "Save contact number"
-                    )}
-                  </button>
-                </div>
-              </section>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ── Root Customer App ─────────────────────────────────────────────
 export function CustomerApp() {
   const navigate = useNavigate();
-  const { session } = useAuth();
+  const location = useLocation();
+  const { session, loading: authLoading } = useAuth();
   const [databaseMenuItems, setDatabaseMenuItems] =
   useState<CustomerDatabaseMenuItem[]>([]);
 
@@ -4557,15 +38,20 @@ export function CustomerApp() {
 
   const [databaseMenuError, setDatabaseMenuError] =
   useState<string | null>(null);
+  const [choiceRefreshVersion, setChoiceRefreshVersion] = useState(0);
   const [availabilityRefreshing, setAvailabilityRefreshing] =
   useState(false);
   const [availabilityRefreshError, setAvailabilityRefreshError] =
   useState<string | null>(null);
+  const [modifierCartError, setModifierCartError] = useState<string | null>(null);
+  const [cartPriceNotice, setCartPriceNotice] = useState(false);
+  const [modifierCartValidationPending, setModifierCartValidationPending] = useState(true);
   const databaseMenuItemsRef =
   useRef<CustomerDatabaseMenuItem[]>([]);
   const availabilityRefreshInFlightRef =
   useRef<Promise<CustomerDatabaseMenuItem[]> | null>(null);
   const lastAvailabilityRefreshAtRef = useRef(0);
+  const menuRevisionRef = useRef(0);
   const [databaseMenuLoadAttempt, setDatabaseMenuLoadAttempt] =
   useState(0);
   const [selectedMenuCategory, setSelectedMenuCategory] =
@@ -4583,6 +69,14 @@ export function CustomerApp() {
         CUSTOMER_RESUME_PAGE_STORAGE_KEY,
       );
 
+      return "checkout";
+    }
+
+    // Keep a retryable checkout visible after a response is lost and the tab reloads.
+    if (
+      sessionStorage.getItem(CUSTOMER_ORDER_REQUEST_STORAGE_KEY) &&
+      sessionStorage.getItem(CUSTOMER_CART_STORAGE_KEY)
+    ) {
       return "checkout";
     }
 
@@ -4604,18 +98,105 @@ export function CustomerApp() {
         JSON.parse(savedCart) as CartItem[];
 
       return Array.isArray(parsedCart)
-        ? parsedCart
+        ? parsedCart.filter((item): item is CartItem =>
+            Boolean(item && typeof item.id === "string" &&
+              Number.isInteger(item.qty) && item.qty > 0 && item.qty <= 99 &&
+              typeof item.name === "string" &&
+              Number.isFinite(item.price) && item.price >= 0),
+          ).map((item) => {
+            const modifiers = Array.isArray(item.modifiers) ? item.modifiers.filter(
+              (option) => option && typeof option.id === "string" &&
+                typeof option.name === "string" && Number.isFinite(option.price),
+            ) : [];
+            const modifierIds = modifiers.map((option) => option.id).sort();
+            return { ...item, modifiers, modifierIds,
+              lineKey: customerLineKey(item.id, modifierIds, item.mealOption) };
+          })
         : [];
     } catch {
       return [];
     }
   },
 );
+  const cartRef = useRef(cart);
+  cartRef.current = cart;
+  useEffect(() => {
+    if (choiceRefreshVersion === 0) return;
+    let active = true;
+    setModifierCartValidationPending(true);
+    void Promise.all([loadCustomerDrinkChoiceRows(), loadCustomerFixedMealPrices()]).then(([rows, fixedPrices]) => {
+      if (!active) return;
+      const result = reconcileCustomerCart(cartRef.current, rows, fixedPrices);
+      if (result.cart.some((line, index) => customerUnitPrice(line) !== customerUnitPrice(cartRef.current[index]))) {
+        setCartPriceNotice(true);
+      }
+      setCart(result.cart);
+      setModifierCartError(result.error);
+      setModifierCartValidationPending(false);
+    }).catch((error) => {
+      if (active) {
+        setModifierCartError(customerErrorMessage(error, "options"));
+        setModifierCartValidationPending(false);
+      }
+    });
+    return () => { active = false; };
+  }, [choiceRefreshVersion]);
   const [detailItem, setDetailItem] =
   useState<CustomerDatabaseMenuItem | null>(
     null,
   );
   const [ trackingOrderId, setTrackingOrderId, ] = useState<string | null>(null);
+  const [navigationNotice, setNavigationNotice] = useState<string | null>(null);
+  const lastSearchRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (authLoading) return;
+    const pendingKey = "rrj_customer_tracking_return_v1";
+    if (isCustomerSignedIn && !location.search) {
+      const pending = sessionStorage.getItem(pendingKey);
+      if (pending) {
+        sessionStorage.removeItem(pendingKey);
+        const restored = parseCustomerViewSearch(pending);
+        if (!restored.invalid && restored.view === "tracking") {
+          navigate(`/customer${restored.canonical}`, { replace: true });
+          return;
+        }
+      }
+    }
+    const parsed = parseCustomerViewSearch(location.search);
+    if (parsed.invalid) {
+      setNavigationNotice("That Customer link is invalid. Choose an order from your history.");
+      navigate(`/customer${parsed.canonical}`, { replace: true });
+      return;
+    }
+    if (parsed.canonical && parsed.canonical !== location.search) {
+      navigate(`/customer${parsed.canonical}`, { replace: true });
+      return;
+    }
+    if (!parsed.view) {
+      if (lastSearchRef.current !== null && lastSearchRef.current !== location.search) {
+        setPage("home");
+        setTrackingOrderId(null);
+      }
+      lastSearchRef.current = location.search;
+      return;
+    }
+    lastSearchRef.current = location.search;
+    if (parsed.view === "checkout" && cart.length === 0 && !trackingOrderId) {
+      setPage("cart");
+      navigate(customerViewSearch("cart"), { replace: true });
+      return;
+    }
+    setPage(parsed.view);
+    if (parsed.view !== "checkout") {
+      setTrackingOrderId(parsed.view === "tracking" && isCustomerSignedIn ? parsed.orderId : null);
+    }
+  }, [authLoading, cart.length, isCustomerSignedIn, location.search, navigate, trackingOrderId]);
+  const navigateCustomerView = (view: CustomerUrlView, orderId?: string | null) => {
+    setNavigationNotice(null);
+    setPage(view);
+    setTrackingOrderId(view === "tracking" ? orderId ?? null : null);
+    navigate(`/customer${customerViewSearch(view, orderId)}`);
+  };
   const [lastAdded, setLastAdded]   = useState<string | null>(null);
   const toastTimer =
     useRef<ReturnType<typeof setTimeout> | null>(
@@ -4637,7 +218,7 @@ export function CustomerApp() {
           "Menu availability is still loading. Please try again.",
         );
 
-        setAvailabilityRefreshError(loadingError.message);
+        setAvailabilityRefreshError(customerErrorMessage(loadingError, "availability"));
         return Promise.reject(loadingError);
       }
 
@@ -4654,12 +235,14 @@ export function CustomerApp() {
       }
 
       const refreshRequest = (async () => {
+        const startingRevision = menuRevisionRef.current;
         setAvailabilityRefreshing(true);
         setAvailabilityRefreshError(null);
 
         try {
-          const availabilityByItemId =
-            await fetchCustomerEffectiveAvailability();
+          const [availabilityByItemId, fixedPrices] = await Promise.all([
+            fetchCustomerEffectiveAvailability(), loadCustomerFixedMealPrices(),
+          ]);
           const itemWithoutAvailability = currentItems.find(
             (item) => !availabilityByItemId.has(item.id),
           );
@@ -4672,13 +255,21 @@ export function CustomerApp() {
 
           const refreshedItems = currentItems.map((item) => ({
             ...item,
-            available:
-              availabilityByItemId.get(item.id) ?? false,
+            available: (availabilityByItemId.get(item.id) ?? false) ||
+              fixedPrices.get(item.id)?.withoutRiceAvailable === true,
+            price: fixedPrices.get(item.id)?.standard ?? item.price,
+            withoutRicePrice: fixedPrices.get(item.id)?.withoutRice,
+            withRiceAvailable: fixedPrices.get(item.id)?.withRiceAvailable,
+            withoutRiceAvailable: fixedPrices.get(item.id)?.withoutRiceAvailable,
           }));
 
+          if (!isCurrentCustomerMenuResponse(startingRevision, menuRevisionRef.current) || databaseMenuItemsRef.current !== currentItems) {
+            return databaseMenuItemsRef.current;
+          }
           databaseMenuItemsRef.current = refreshedItems;
           lastAvailabilityRefreshAtRef.current = Date.now();
           setDatabaseMenuItems(refreshedItems);
+          setChoiceRefreshVersion((version) => version + 1);
 
           return refreshedItems;
         } catch (caughtError) {
@@ -4689,8 +280,10 @@ export function CustomerApp() {
                   "Unable to refresh menu availability. Please try again.",
                 );
 
-          lastAvailabilityRefreshAtRef.current = 0;
-          setAvailabilityRefreshError(refreshError.message);
+          if (isCurrentCustomerMenuResponse(startingRevision, menuRevisionRef.current)) {
+            lastAvailabilityRefreshAtRef.current = 0;
+            setAvailabilityRefreshError(customerErrorMessage(refreshError, "availability"));
+          }
           throw refreshError;
         } finally {
           availabilityRefreshInFlightRef.current = null;
@@ -4740,6 +333,7 @@ export function CustomerApp() {
   let isMounted = true;
 
   async function loadDatabaseMenu() {
+    const startingRevision = ++menuRevisionRef.current;
     setDatabaseMenuLoading(true);
     setDatabaseMenuError(null);
     setAvailabilityRefreshError(null);
@@ -4748,6 +342,7 @@ export function CustomerApp() {
       { data: categories, error: categoriesError },
       { data: items, error: itemsError },
       { data: availability, error: availabilityError },
+      { data: fixedOptions, error: fixedOptionsError },
     ] = await Promise.all([
       supabase
         .from("menu_categories")
@@ -4773,9 +368,10 @@ export function CustomerApp() {
         .order("name"),
 
       supabase.rpc("get_menu_effective_availability"),
+      supabase.rpc("get_fixed_meal_options"),
     ]);
 
-    if (!isMounted) {
+    if (!isMounted || !isCurrentCustomerMenuResponse(startingRevision, menuRevisionRef.current)) {
       return;
     }
 
@@ -4785,9 +381,7 @@ export function CustomerApp() {
         categoriesError.message,
       );
 
-      setDatabaseMenuError(
-        categoriesError.message,
-      );
+      setDatabaseMenuError(customerErrorMessage(categoriesError, "menu"));
 
       setDatabaseMenuLoading(false);
       return;
@@ -4799,9 +393,7 @@ export function CustomerApp() {
         itemsError.message,
       );
 
-      setDatabaseMenuError(
-        itemsError.message,
-      );
+      setDatabaseMenuError(customerErrorMessage(itemsError, "menu"));
 
       setDatabaseMenuLoading(false);
       return;
@@ -4813,10 +405,14 @@ export function CustomerApp() {
         availabilityError.message,
       );
 
-      setDatabaseMenuError(
-        availabilityError.message,
-      );
+      setDatabaseMenuError(customerErrorMessage(availabilityError, "menu"));
 
+      setDatabaseMenuLoading(false);
+      return;
+    }
+
+    if (fixedOptionsError && fixedOptionsError.code !== "PGRST202") {
+      setDatabaseMenuError(customerErrorMessage(fixedOptionsError, "menu"));
       setDatabaseMenuLoading(false);
       return;
     }
@@ -4833,6 +429,24 @@ export function CustomerApp() {
     const availabilityRows =
       (availability ??
         []) as DatabaseMenuEffectiveAvailability[];
+    const fixedPriceByItem = new Map(
+      ((fixedOptions ?? []) as { menu_item_id: string; standard_price: number | string;
+        without_rice_price: number | string; with_rice_available: boolean; without_rice_available: boolean }[])
+        .map((entry) => [entry.menu_item_id, {
+          standard: Number(entry.standard_price), withoutRice: Number(entry.without_rice_price),
+          withRiceAvailable: entry.with_rice_available,
+          withoutRiceAvailable: entry.without_rice_available,
+        }]),
+    );
+    if ([...fixedPriceByItem.values()].some((price) =>
+      !Number.isFinite(price.standard) || !Number.isFinite(price.withoutRice) ||
+      price.withoutRice <= 0 || price.withoutRice >= price.standard ||
+      typeof price.withRiceAvailable !== "boolean" ||
+      typeof price.withoutRiceAvailable !== "boolean")) {
+      setDatabaseMenuError(customerErrorMessage(null, "menu"));
+      setDatabaseMenuLoading(false);
+      return;
+    }
 
     const categoryNameById = new Map(
       categoryRows.map((category) => [
@@ -4858,7 +472,7 @@ export function CustomerApp() {
         `Menu item ${itemWithoutAvailability.id} has no effective availability result.`;
 
       console.error(message);
-      setDatabaseMenuError(message);
+      setDatabaseMenuError(customerErrorMessage(null, "menu"));
       setDatabaseMenuLoading(false);
       return;
     }
@@ -4868,13 +482,17 @@ export function CustomerApp() {
         id: item.id,
         name: item.name,
         desc: item.description ?? "",
-        price: Number(item.price),
+        price: fixedPriceByItem.get(item.id)?.standard ?? Number(item.price),
+        withoutRicePrice: fixedPriceByItem.get(item.id)?.withoutRice,
         category:
           categoryNameById.get(
             item.category_id,
           ) ?? "Other",
         available:
-          effectiveAvailabilityByItemId.get(item.id) ?? false,
+          (effectiveAvailabilityByItemId.get(item.id) ?? false) ||
+          fixedPriceByItem.get(item.id)?.withoutRiceAvailable === true,
+        withRiceAvailable: fixedPriceByItem.get(item.id)?.withRiceAvailable,
+        withoutRiceAvailable: fixedPriceByItem.get(item.id)?.withoutRiceAvailable,
         imagePath: item.image_path,
       }));
 
@@ -4882,15 +500,17 @@ export function CustomerApp() {
     lastAvailabilityRefreshAtRef.current = Date.now();
     setAvailabilityRefreshError(null);
     setDatabaseMenuItems(mappedItems);
+    setChoiceRefreshVersion((version) => version + 1);
     setDatabaseMenuLoading(false);
 
-    console.log(
-      "Supabase customer menu:",
-      mappedItems,
-    );
   }
 
-  void loadDatabaseMenu();
+  void loadDatabaseMenu().catch((error) => {
+    if (!isMounted) return;
+    console.error("Unable to load customer menu:", error);
+    setDatabaseMenuError(customerErrorMessage(error, "menu"));
+    setDatabaseMenuLoading(false);
+  });
 
   return () => {
     isMounted = false;
@@ -4905,6 +525,10 @@ export function CustomerApp() {
     const menuItemsById = new Map(
       databaseMenuItems.map((item) => [item.id, item]),
     );
+    if (cartRef.current.some((line) => {
+      const fresh = menuItemsById.get(line.id);
+      return fresh && customerProductPricesChanged(line, fresh);
+    })) setCartPriceNotice(true);
 
     setCart((currentCart) => {
       let changed = false;
@@ -4912,29 +536,28 @@ export function CustomerApp() {
         const refreshedItem = menuItemsById.get(cartItem.id);
         const available = refreshedItem?.available ?? false;
 
-        if (cartItem.available === available) {
+        if (
+          cartItem.available === available &&
+          (!refreshedItem ||
+            (cartItem.price === refreshedItem.price &&
+              cartItem.name === refreshedItem.name &&
+              cartItem.desc === refreshedItem.desc &&
+              cartItem.category === refreshedItem.category &&
+              cartItem.imagePath === refreshedItem.imagePath &&
+              cartItem.withoutRicePrice === refreshedItem.withoutRicePrice &&
+              cartItem.withRiceAvailable === refreshedItem.withRiceAvailable &&
+              cartItem.withoutRiceAvailable === refreshedItem.withoutRiceAvailable))
+        ) {
           return cartItem;
         }
 
         changed = true;
-        return { ...cartItem, available };
+        return { ...cartItem, ...refreshedItem, available };
       });
 
       return changed ? refreshedCart : currentCart;
     });
 
-    setDetailItem((currentItem) => {
-      if (!currentItem) {
-        return currentItem;
-      }
-
-      const refreshedItem = menuItemsById.get(currentItem.id);
-      const available = refreshedItem?.available ?? false;
-
-      return currentItem.available === available
-        ? currentItem
-        : { ...currentItem, available };
-    });
   }, [databaseMenuItems, databaseMenuLoading]);
 
   useEffect(() => {
@@ -4951,15 +574,14 @@ export function CustomerApp() {
   const handleTrackOrder = (
   orderId: string,
 ) => {
-  setTrackingOrderId(orderId);
-  setPage("tracking");
+  if (isCustomerOrderId(orderId)) navigateCustomerView("tracking", orderId);
 };
-  const handleOrderPlaced = (
+  const handleOrderSubmitted = (
   orderId: string,
 ) => {
   setCart([]);
+  setCartPriceNotice(false);
   setTrackingOrderId(orderId);
-  setPage("tracking");
 };
 
   const handleNavigation = async (
@@ -4975,83 +597,127 @@ export function CustomerApp() {
       protectedPages.includes(nextPage) &&
       !isCustomerSignedIn
     ) {
+      if (nextPage === "tracking") {
+        sessionStorage.setItem("rrj_customer_tracking_return_v1", customerViewSearch("tracking"));
+      }
       navigate("/auth?portal=customer");
       return;
     }
 
     if (nextPage === "checkout") {
+      if (cart.length === 0) {
+        navigateCustomerView("cart");
+        return;
+      }
       try {
+        const [modifierRows, fixedPrices] = await Promise.all([
+          loadCustomerDrinkChoiceRows(), loadCustomerFixedMealPrices(),
+        ]);
+        const reconciled = reconcileCustomerCart(cart, modifierRows, fixedPrices);
+        setCart(reconciled.cart);
+        setModifierCartError(reconciled.error);
+        if (reconciled.error) return;
         const refreshedMenuItems =
           await refreshCustomerMenuAvailability();
         const refreshedAvailabilityByItemId = new Map(
-          refreshedMenuItems.map((item) => [
-            item.id,
-            item.available,
-          ]),
+          refreshedMenuItems.map((item) => [item.id, item]),
         );
         const hasUnavailableCartItem = cart.some(
-          (item) =>
-            refreshedAvailabilityByItemId.get(item.id) !== true,
+          (item) => {
+            const fresh = refreshedAvailabilityByItemId.get(item.id);
+            return !fresh?.available ||
+              (item.mealOption === "with_rice" && fresh.withRiceAvailable === false) ||
+              (item.mealOption === "without_rice" && fresh.withoutRiceAvailable === false);
+          },
         );
 
         if (hasUnavailableCartItem) {
+          setModifierCartError("One or more cart items are unavailable. Review your cart before checkout.");
           return;
         }
-      } catch {
+      } catch (error) {
+        setModifierCartError(customerErrorMessage(error, "options"));
         return;
       }
     }
-
-    if (nextPage === "tracking") {
-  setTrackingOrderId(null);
-  }
 
     if (nextPage === "menu" && page !== "menu-detail") {
       setSelectedMenuCategory("All");
     }
 
-    setPage(nextPage);
+    navigateCustomerView(nextPage === "menu-detail" ? "menu" : nextPage);
   };
   const handleBrowseCategory = (category: string) => {
     setSelectedMenuCategory(category);
-    setPage("menu");
+    navigateCustomerView("menu");
   };
   const retryDatabaseMenu = () => {
     setDatabaseMenuLoadAttempt((attempt) => attempt + 1);
   };
 
   const addToCart = (
-  item: CustomerDatabaseMenuItem,
-) => {
+    item: CustomerDatabaseMenuItem,
+    qty: number,
+    modifiers: CustomerDrinkChoiceOption[],
+    mealOption?: "with_rice" | "without_rice",
+  ) => {
+    const fresh = databaseMenuItemsRef.current.find((product) => product.id === item.id);
+    if (!fresh || !canAddCurrentCustomerProduct(item, fresh, mealOption)) {
+      setAvailabilityRefreshError("This item changed. Review its latest price and availability before adding it.");
+      return false;
+    }
+    if (cartRef.current.filter((line) => line.id === item.id).reduce((sum, line) => sum + line.qty, 0) + qty > 99) {
+      setAvailabilityRefreshError("You can add at most 99 of this item across its choices. Reduce the quantity and try again.");
+      return false;
+    }
+    setModifierCartError(null);
+    const modifierIds = modifiers.map((option) => option.id).sort();
+    const selectedMealOption = item.withoutRicePrice !== undefined ? mealOption ?? "with_rice" : undefined;
+    const lineKey = customerLineKey(item.id, modifierIds, selectedMealOption);
     setCart((prev) => {
-      const ex = prev.find((c) => c.id === item.id);
-      if (ex) return prev.map((c) => c.id === item.id ? { ...c, qty: c.qty + 1 } : c);
-      return [...prev, { ...item, qty: 1 }];
+      const total = prev.filter((line) => line.id === item.id).reduce((sum, line) => sum + line.qty, 0);
+      const adding = Math.min(qty, 99 - total);
+      if (adding <= 0) return prev;
+      const existing = prev.find((line) => line.lineKey === lineKey);
+      if (existing) return prev.map((line) => line.lineKey === lineKey
+        ? { ...line, qty: line.qty + adding } : line);
+      return [...prev, { ...fresh, qty: adding, modifiers, modifierIds, mealOption: selectedMealOption, lineKey }];
     });
     setLastAdded(item.name);
     if (toastTimer.current) clearTimeout(toastTimer.current);
     toastTimer.current = setTimeout(() => setLastAdded(null), 2200);
+    return true;
   };
 
 const setQty = (
-  id: string,
+  lineKey: string,
   qty: number,
 ) =>
   setCart((prev) =>
     qty <= 0
       ? prev.filter(
-          (cartItem) => cartItem.id !== id,
+          (cartItem) => cartItem.lineKey !== lineKey,
         )
       : prev.map((cartItem) =>
-          cartItem.id === id
+          cartItem.lineKey === lineKey
             ? {
                 ...cartItem,
-                qty,
+                qty: Math.min(qty, 99 - prev.filter((line) => line.id === cartItem.id && line.lineKey !== lineKey).reduce((sum, line) => sum + line.qty, 0)),
               }
             : cartItem,
         ),
   );
-  const viewDetail = (item: CustomerDatabaseMenuItem,) => { setDetailItem(item); setPage("menu-detail"); };
+  const viewDetail = (item: CustomerDatabaseMenuItem,) => {
+    setDetailItem(item);
+    setPage("menu-detail");
+  };
+  const chooseMenuItem = (item: CustomerDatabaseMenuItem) => {
+    if (item.category === "Beverages" || item.withoutRicePrice !== undefined) {
+      viewDetail(item);
+      return;
+    }
+    addToCart(item, 1, []);
+  };
 
 let pageContent: React.ReactNode;
 
@@ -5062,11 +728,12 @@ if (page === "home") {
     menuItems={databaseMenuItems}
     categories={databaseMenuCategories}
     menuLoading={databaseMenuLoading}
-    menuError={databaseMenuError ?? availabilityRefreshError}
+    menuError={databaseMenuError}
+    availabilityError={availabilityRefreshError}
     onNav={handleNavigation}
     onBrowseCategory={handleBrowseCategory}
     onRetryMenu={retryDatabaseMenu}
-    onAddToCart={addToCart}
+    onAddToCart={chooseMenuItem}
   />
   );
 } else if (page === "menu") {
@@ -5076,24 +743,31 @@ if (page === "home") {
     menuItems={databaseMenuItems}
     categories={databaseMenuCategories}
     menuLoading={databaseMenuLoading}
-    menuError={databaseMenuError ?? availabilityRefreshError}
+    menuError={databaseMenuError}
+    availabilityError={availabilityRefreshError}
+    checkoutError={modifierCartError ?? availabilityRefreshError}
+    availabilityRefreshing={availabilityRefreshing}
     selectedCategory={selectedMenuCategory}
     onNav={handleNavigation}
     onCategoryChange={setSelectedMenuCategory}
     onRetryMenu={retryDatabaseMenu}
-    onAddToCart={addToCart}
-    onViewDetail={viewDetail}
+    onAddToCart={chooseMenuItem}
   />
   );
 } else if (
   page === "menu-detail" &&
   detailItem
 ) {
+  const currentDetail = currentCustomerProduct(detailItem, databaseMenuItems);
   pageContent = (
     <MenuDetailPage
-      item={detailItem}
+      item={currentDetail.item}
+      removed={currentDetail.removed}
+      choiceRefreshVersion={choiceRefreshVersion}
+      refreshError={databaseMenuError ?? availabilityRefreshError}
       cart={cart}
       onNav={handleNavigation}
+      onRetryMenu={retryDatabaseMenu}
       onAddToCart={addToCart}
     />
   );
@@ -5101,39 +775,65 @@ if (page === "home") {
   pageContent = (
     <CartPage
       cart={cart}
+      priceNotice={cartPriceNotice}
+      onDismissPriceNotice={() => setCartPriceNotice(false)}
       availabilityRefreshing={availabilityRefreshing}
-      availabilityError={availabilityRefreshError}
+      availabilityError={modifierCartError ?? availabilityRefreshError}
       onNav={handleNavigation}
       onQtyChange={setQty}
-      onRemove={(id) =>
+      onRemove={(id) => {
+        setModifierCartError(null);
         setCart((items) =>
           items.filter(
-            (item) => item.id !== id,
+            (item) => item.lineKey !== id,
           ),
-        )
-      }
+        );
+      }}
     />
   );
 } else if (page === "checkout") {
   pageContent = (
   <CheckoutPage
     cart={cart}
+    cartValidationPending={modifierCartValidationPending}
+    cartValidationError={modifierCartError}
     onNav={handleNavigation}
-    onOrderPlaced={handleOrderPlaced}
+    onTrackOrder={handleTrackOrder}
+    onOrderSubmitted={handleOrderSubmitted}
   />
+  );
+} else if ((page === "tracking" || page === "history" || page === "profile") && !isCustomerSignedIn) {
+  pageContent = (
+    <div className="flex h-full flex-col overflow-hidden">
+      <CustNav cart={cart} onNav={handleNavigation} currentPage="tracking" />
+      <main className="customer-storefront flex flex-1 items-center justify-center overflow-y-auto px-4 py-8">
+        <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 text-center">
+          <h1 className="text-2xl font-semibold">Sign in to view your orders</h1>
+          <p className="mt-2 text-sm text-muted-foreground">Your account details are available only after sign in.</p>
+          <button type="button" className="mt-5 min-h-11 rounded-xl bg-primary px-5 font-bold text-primary-foreground"
+            onClick={() => {
+              const parsed = parseCustomerViewSearch(location.search);
+              if (!parsed.invalid && parsed.view === "tracking") sessionStorage.setItem("rrj_customer_tracking_return_v1", parsed.canonical);
+              navigate("/auth?portal=customer");
+            }}>Sign in</button>
+        </div>
+      </main>
+    </div>
   );
 } else if (page === "tracking") {
   pageContent = (
   <TrackingPage
-    cart={cart}
+    key={`${session?.id ?? "guest"}:${trackingOrderId ?? "latest"}`}
+    nav={<CustNav cart={cart} onNav={handleNavigation} currentPage="tracking" />}
     onNav={handleNavigation}
     orderId={trackingOrderId}
+    customerId={session!.id}
   />
   );
 } else if (page === "history") {
   pageContent = (
   <HistoryPage
-    cart={cart}
+    nav={<CustNav cart={cart} onNav={handleNavigation} currentPage="history" />}
     onNav={handleNavigation}
     onTrackOrder={handleTrackOrder}
   />
@@ -5141,7 +841,7 @@ if (page === "home") {
 } else if (page === "profile") {
   pageContent = (
     <ProfilePage
-      cart={cart}
+      nav={<CustNav cart={cart} onNav={handleNavigation} currentPage="profile" />}
       onNav={handleNavigation}
     />
   );
@@ -5152,11 +852,12 @@ if (page === "home") {
       menuItems={databaseMenuItems}
       categories={databaseMenuCategories}
       menuLoading={databaseMenuLoading}
-      menuError={databaseMenuError ?? availabilityRefreshError}
+       menuError={databaseMenuError}
+       availabilityError={availabilityRefreshError}
       onNav={handleNavigation}
       onBrowseCategory={handleBrowseCategory}
       onRetryMenu={retryDatabaseMenu}
-      onAddToCart={addToCart}
+      onAddToCart={chooseMenuItem}
     />
   );
 }
@@ -5172,6 +873,7 @@ if (page === "home") {
           transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
           className="h-full"
         >
+          {navigationNotice && <p role="status" className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-950">{navigationNotice}</p>}
           {pageContent}
         </motion.div>
       </AnimatePresence>
@@ -5184,7 +886,7 @@ if (page === "home") {
             exit={{ opacity: 0, y: 12, scale: 0.98 }}
             role="status"
             aria-live="polite"
-            className="pointer-events-none absolute bottom-5 left-1/2 z-50 flex w-[min(23rem,calc(100%-2rem))] -translate-x-1/2 items-center gap-3 rounded-2xl border border-white/10 bg-[#211914] px-4 py-3 text-white shadow-2xl shadow-black/30"
+            className="customer-added-toast pointer-events-none absolute bottom-5 left-1/2 z-50 flex w-[min(23rem,calc(100%-2rem))] -translate-x-1/2 items-center gap-3 rounded-2xl border border-white/10 bg-foreground px-4 py-3 text-white shadow-2xl shadow-black/30"
           >
             <span className="flex h-9 w-9 flex-none items-center justify-center rounded-xl bg-emerald-400/15 text-emerald-300"><Check className="h-4 w-4" /></span>
             <span className="min-w-0"><strong className="block truncate text-xs">{lastAdded}</strong><span className="text-[10px] text-white/55">Added to your order</span></span>

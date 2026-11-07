@@ -1,0 +1,573 @@
+%% RRJ'S FOOD-HOUSE - Overview / all public tables
+%% Source: hosted PostgreSQL pg_catalog, captured 2026-10-26T20:58:45.038881+00:00
+%% Field types are Mermaid-safe tokens. Exact PostgreSQL types, nullability and defaults are in hosted-public-catalog.json and column-dictionary.html.
+erDiagram
+  cashier_shifts {
+    uuid id PK
+    uuid cashier_id FK
+    character_varying_50 terminal
+    numeric_12_2 opening_cash
+    cashier_shift_status status
+    timestamp_with_time_zone started_at
+    timestamp_with_time_zone ended_at
+    numeric_12_2 actual_cash
+    numeric_12_2 expected_cash
+    numeric_12_2 variance
+    text variance_reason
+    text notes
+    uuid closed_by FK
+    uuid manager_approved_by FK
+    timestamp_with_time_zone manager_approved_at
+  }
+  cashier_transactions {
+    uuid id PK
+    character_varying_20 transaction_number UK
+    character_varying_20 receipt_number UK
+    uuid order_id FK,UK
+    uuid payment_id FK,UK
+    uuid shift_id FK
+    uuid cashier_id FK
+    cashier_transaction_status status
+    text void_reason
+    timestamp_with_time_zone voided_at
+    timestamp_with_time_zone created_at
+    uuid request_id UK
+  }
+  delivery_assignments {
+    uuid id PK
+    uuid order_id FK
+    uuid rider_id FK
+    assignment_method assignment_method
+    delivery_assignment_status status
+    timestamp_with_time_zone assigned_at
+    timestamp_with_time_zone responded_at
+    timestamp_with_time_zone accepted_at
+    timestamp_with_time_zone rejected_at
+    timestamp_with_time_zone picked_up_at
+    timestamp_with_time_zone out_for_delivery_at
+    timestamp_with_time_zone delivered_at
+    text rejection_reason
+    text proof_of_delivery_path
+    timestamp_with_time_zone created_at
+    timestamp_with_time_zone updated_at
+  }
+  drink_choices {
+    uuid menu_item_id PK,FK
+    text choice_kind
+    character_varying_50 option_id PK
+    character_varying_100 option_name
+    numeric_12_2 price_adjustment
+    integer sort_order
+    boolean is_active
+  }
+  inventory_audit_items {
+    uuid id PK
+    uuid audit_id FK,UK
+    uuid inventory_item_id FK,UK
+    uuid latest_movement_id FK
+    text item_name
+    text recorded_unit
+    numeric_12_3 book_quantity
+    numeric_12_3 ledger_quantity
+    text result
+    text finding_code
+    integer movement_count
+  }
+  inventory_audits {
+    uuid id PK
+    uuid request_id UK
+    uuid performed_by FK
+    timestamp_with_time_zone started_at
+    timestamp_with_time_zone completed_at
+    text status
+    bigint movement_rows_examined
+  }
+  inventory_batches {
+    uuid id PK
+    character_varying_100 batch_code UK
+    uuid inventory_item_id FK
+    text origin_type
+    uuid receiving_report_item_id FK
+    text supplier_lot_code
+    timestamp_with_time_zone received_at
+    date manufactured_on
+    date use_by_date
+    numeric_12_3 quantity_initial
+    numeric_12_3 quantity_on_hand
+    numeric_12_3 secondary_quantity_initial
+    numeric_12_3 secondary_quantity_on_hand
+    timestamp_with_time_zone created_at
+    uuid opening_balance_id FK
+    boolean received_at_is_estimated
+    text notes
+    numeric_12_3 quantity_positive_adjustments
+  }
+  inventory_items {
+    uuid id PK
+    character_varying_150 item_name UK
+    character_varying_20 unit
+    numeric_12_3 quantity_on_hand
+    numeric_12_3 reorder_level
+    character_varying_100 inventory_category
+    boolean is_active
+    timestamp_with_time_zone created_at
+    timestamp_with_time_zone updated_at
+    text item_kind
+    character_varying_20 secondary_unit
+    smallint quantity_scale
+    text rotation_policy
+    boolean expiry_required
+    smallint shelf_life_days
+    boolean batch_consumption_enabled
+  }
+  inventory_opening_balances {
+    uuid id PK
+    uuid request_id UK
+    uuid inventory_item_id FK,UK
+    uuid verified_by FK
+    timestamp_with_time_zone verified_at
+    numeric_12_3 quantity_total
+    integer batch_count
+    jsonb request_payload
+    text notes
+    timestamp_with_time_zone created_at
+  }
+  inventory_request_documents {
+    uuid id PK
+    text request_number UK
+    integer current_revision
+    text status
+    text priority
+    timestamp_with_time_zone needed_at
+    jsonb issue_input
+    uuid issued_by FK
+    timestamp_with_time_zone issued_at
+    timestamp_with_time_zone closed_at
+    uuid closed_by FK
+    text close_reason
+  }
+  inventory_request_events {
+    bigint id PK
+    uuid request_id FK
+    integer revision
+    text event_type
+    uuid actor_id FK
+    timestamp_with_time_zone recorded_at
+    jsonb details
+  }
+  inventory_request_lines {
+    uuid request_id PK,FK
+    uuid inventory_item_id PK,FK
+    text item_name
+    text requested_unit
+    integer quantity_scale
+    numeric_12_3 requested_quantity
+    jsonb recommendation
+    text override_reason
+  }
+  inventory_request_revisions {
+    uuid request_id PK,FK
+    integer revision PK
+    jsonb snapshot
+    uuid issued_by FK
+    timestamp_with_time_zone issued_at
+  }
+  inventory_transaction_batch_allocations {
+    uuid id PK
+    uuid inventory_transaction_id FK,UK
+    uuid inventory_batch_id FK,UK
+    numeric_12_3 quantity
+    timestamp_with_time_zone created_at
+  }
+  inventory_transactions {
+    uuid id PK,UK
+    uuid inventory_item_id FK,UK
+    uuid purchase_order_item_id FK
+    uuid order_id FK
+    uuid performed_by FK
+    inventory_transaction_type transaction_type
+    numeric_12_3 quantity_change
+    numeric_12_3 quantity_before
+    numeric_12_3 quantity_after
+    text reason
+    timestamp_with_time_zone created_at
+    uuid mutation_request_id
+    uuid inventory_batch_id FK
+    uuid opening_balance_id FK
+    numeric_12_3 batch_quantity_before
+    numeric_12_3 batch_quantity_after
+    text batch_mutation_notes
+    uuid reverses_issuance_id FK
+    uuid reverses_allocation_id FK
+  }
+  kds_terminals {
+    uuid id PK
+    text terminal_name
+    text secret_hash UK
+    boolean is_active
+    timestamp_with_time_zone created_at
+    timestamp_with_time_zone last_used_at
+  }
+  menu_categories {
+    uuid id PK
+    character_varying_100 name UK
+    text description
+    boolean is_active
+    timestamp_with_time_zone created_at
+    timestamp_with_time_zone updated_at
+  }
+  menu_ingredients {
+    uuid id PK
+    uuid menu_item_id FK,UK
+    uuid inventory_item_id FK,UK
+    numeric_12_3 quantity_required
+    timestamp_with_time_zone created_at
+    timestamp_with_time_zone fixed_meal_added_at
+  }
+  menu_items {
+    uuid id PK,FK
+    uuid category_id FK
+    character_varying_150 name
+    text description
+    numeric_10_2 price
+    text image_path
+    boolean is_available
+    boolean is_active
+    timestamp_with_time_zone created_at
+    timestamp_with_time_zone updated_at
+    character_varying_20 code UK
+    text aliases
+    numeric_10_2 without_rice_price
+    uuid without_rice_inventory_item_id FK
+  }
+  order_items {
+    uuid id PK
+    uuid order_id FK
+    uuid menu_item_id FK
+    integer quantity
+    numeric_10_2 unit_price
+    numeric_10_2 line_total
+    text special_instructions
+    timestamp_with_time_zone created_at
+    character_varying item_name
+    jsonb modifiers
+  }
+  order_status_history {
+    uuid id PK
+    uuid order_id FK
+    order_status status
+    uuid changed_by FK
+    text notes
+    timestamp_with_time_zone created_at
+  }
+  orders {
+    uuid id PK
+    character_varying_50 order_number UK
+    uuid customer_id FK
+    uuid processed_by FK
+    order_channel order_channel
+    fulfillment_type fulfillment_type
+    character_varying_150 customer_name
+    character_varying_20 customer_contact_number
+    text delivery_address
+    text landmark
+    text geolocation
+    order_status current_status
+    numeric_10_2 subtotal
+    numeric_10_2 delivery_fee
+    numeric_10_2 grand_total
+    text notes
+    timestamp_with_time_zone confirmed_at
+    timestamp_with_time_zone created_at
+    timestamp_with_time_zone completed_at
+    timestamp_with_time_zone cancelled_at
+    character_varying_20 table_number
+    character_varying_40 discount_type
+    character_varying_100 discount_reference
+    numeric_12_2 discount_amount
+    numeric_12_2 tax_amount
+    uuid customer_request_id
+  }
+  paid_order_cancellations {
+    uuid id PK
+    uuid order_id FK,UK
+    uuid payment_id FK,UK
+    uuid cashier_transaction_id FK,UK
+    order_status previous_status
+    text inventory_disposition
+    numeric_10_2 refund_amount
+    payment_method refund_method
+    text refund_reference
+    text reason
+    uuid processed_by FK
+    timestamp_with_time_zone processed_at
+  }
+  payments {
+    uuid id PK
+    uuid order_id FK,UK
+    payment_method payment_method
+    numeric_10_2 amount
+    character_varying_100 gcash_reference_number
+    text proof_image_path
+    payment_status status
+    uuid verified_by FK
+    timestamp_with_time_zone verified_at
+    text rejection_reason
+    timestamp_with_time_zone created_at
+    timestamp_with_time_zone updated_at
+    numeric_12_2 cash_received
+    text rejection_notes
+    uuid rejected_by FK
+    timestamp_with_time_zone rejected_at
+  }
+  production_replenishment_requests {
+    uuid id PK
+    uuid inventory_item_id FK
+    text requested_unit
+    numeric_12_3 requested_quantity
+    timestamp_with_time_zone needed_at
+    text priority
+    text note
+    text status
+    uuid requested_by FK
+    timestamp_with_time_zone requested_at
+    timestamp_with_time_zone ready_at
+    timestamp_with_time_zone closed_at
+    uuid fulfilled_report_id FK,UK
+  }
+  production_replenishment_status_events {
+    bigint id PK
+    uuid request_id FK
+    text previous_status
+    text next_status
+    uuid changed_by FK
+    timestamp_with_time_zone changed_at
+    uuid receiving_report_id FK
+  }
+  profiles {
+    uuid id PK,FK
+    character_varying_100 first_name
+    character_varying_100 last_name
+    character_varying_20 contact_number
+    user_role role
+    boolean is_active
+    timestamp_with_time_zone created_at
+    timestamp_with_time_zone updated_at
+    text avatar_url
+  }
+  purchase_order_items {
+    uuid id PK
+    uuid purchase_order_id FK,UK
+    uuid inventory_item_id FK,UK
+    numeric_12_3 quantity_ordered
+    numeric_12_3 quantity_received
+    numeric_12_2 unit_cost
+    numeric_12_2 total_cost
+    timestamp_with_time_zone received_at
+    date expiration_date
+    timestamp_with_time_zone created_at
+    timestamp_with_time_zone updated_at
+    numeric_12_3 secondary_quantity_ordered
+    numeric_12_3 secondary_quantity_received
+    numeric_12_3 quantity_cancelled
+    numeric_12_3 quantity_remaining
+  }
+  purchase_orders {
+    uuid id PK
+    character_varying_50 po_number UK
+    uuid supplier_id FK
+    uuid created_by FK
+    purchase_order_status status
+    timestamp_with_time_zone ordered_at
+    timestamp_with_time_zone received_at
+    numeric_12_2 total_amount
+    text notes
+    timestamp_with_time_zone created_at
+    timestamp_with_time_zone updated_at
+  }
+  receiving_report_items {
+    uuid id PK
+    uuid receiving_report_id FK,UK
+    uuid purchase_order_item_id FK,UK
+    numeric_12_3 quantity_delivered
+    numeric_12_3 quantity_accepted
+    numeric_12_3 quantity_rejected
+    numeric_12_3 secondary_quantity_delivered
+    numeric_12_3 secondary_quantity_accepted
+    numeric_12_3 secondary_quantity_rejected
+    text rejection_reason
+    text notes
+    timestamp_with_time_zone created_at
+    timestamp_with_time_zone updated_at
+    uuid inventory_item_id FK
+    text source_lot_code
+    date manufactured_on
+    date use_by_date
+  }
+  receiving_reports {
+    uuid id PK
+    character_varying_50 rr_number UK
+    uuid purchase_order_id FK
+    timestamp_with_time_zone received_at
+    uuid received_by FK
+    text status
+    text supplier_delivery_reference
+    text notes
+    timestamp_with_time_zone posted_at
+    uuid posted_by FK
+    timestamp_with_time_zone created_at
+    timestamp_with_time_zone updated_at
+    text source_type
+    text source_reference
+    uuid replenishment_request_id FK,UK
+    uuid inventory_request_id FK
+    integer inventory_request_revision
+    text inspected_by_name
+    text inspection_note
+    text emergency_reason
+    uuid emergency_authorized_by FK
+    timestamp_with_time_zone emergency_authorized_at
+    text emergency_inspected_by_name
+  }
+  rider_offer_push_outbox {
+    bigint id PK
+    uuid assignment_id FK,UK
+    uuid device_id FK,UK
+    text status
+    integer attempts
+    timestamp_with_time_zone next_attempt_at
+    timestamp_with_time_zone expires_at
+    timestamp_with_time_zone lease_until
+    text ticket_id
+    text sent_expo_push_token
+    timestamp_with_time_zone receipt_due_at
+    text last_error_code
+    timestamp_with_time_zone created_at
+    timestamp_with_time_zone updated_at
+  }
+  rider_push_devices {
+    uuid id PK
+    uuid rider_id FK
+    text expo_push_token
+    boolean enabled
+    timestamp_with_time_zone created_at
+    timestamp_with_time_zone updated_at
+  }
+  riders {
+    uuid id PK,FK
+    text valid_id_path
+    text or_cr_document_path
+    character_varying_100 driver_license_number
+    character_varying_100 plate_number
+    character_varying_100 motor_brand
+    character_varying_100 motor_model
+    text rider_photo_path
+    rider_approval_status approval_status
+    rider_availability_status availability_status
+    timestamp_with_time_zone last_assigned_at
+    timestamp_with_time_zone created_at
+    timestamp_with_time_zone updated_at
+  }
+  supplier_items {
+    uuid id PK
+    uuid supplier_id FK,UK
+    uuid inventory_item_id FK,UK
+    numeric_12_2 price_per_unit
+    boolean is_preferred
+    timestamp_with_time_zone created_at
+    timestamp_with_time_zone updated_at
+  }
+  suppliers {
+    uuid id PK
+    character_varying_150 name
+    character_varying_150 contact_person
+    character_varying_20 contact_number
+    character_varying_150 email
+    text address
+    boolean is_active
+    timestamp_with_time_zone created_at
+    timestamp_with_time_zone updated_at
+  }
+  auth_users {
+    uuid id PK
+  }
+  profiles ||--o{ cashier_shifts : "R001 cashier_shifts_cashier_id_fkey"
+  profiles o|--o{ cashier_shifts : "R002 cashier_shifts_closed_by_fkey"
+  profiles o|--o{ cashier_shifts : "R003 cashier_shifts_manager_approved_by_fkey"
+  profiles ||--o{ cashier_transactions : "R004 cashier_transactions_cashier_id_fkey"
+  orders ||--o| cashier_transactions : "R005 cashier_transactions_order_id_fkey"
+  payments ||--o| cashier_transactions : "R006 cashier_transactions_payment_id_fkey"
+  cashier_shifts ||--o{ cashier_transactions : "R007 cashier_transactions_shift_id_fkey"
+  orders ||--o{ delivery_assignments : "R008 delivery_assignments_order_id_fkey"
+  riders ||--o{ delivery_assignments : "R009 delivery_assignments_rider_id_fkey"
+  menu_items ||--o{ drink_choices : "R010 drink_choices_menu_item_id_fkey"
+  inventory_audits ||--o{ inventory_audit_items : "R011 inventory_audit_items_audit_id_fkey"
+  inventory_items ||--o{ inventory_audit_items : "R012 inventory_audit_items_inventory_item_id_fkey"
+  inventory_transactions o|--o{ inventory_audit_items : "R013 inventory_audit_movement_item_fk"
+  profiles ||--o{ inventory_audits : "R014 inventory_audits_performed_by_fkey"
+  inventory_items ||--o{ inventory_batches : "R015 inventory_batches_inventory_item_id_fkey"
+  inventory_opening_balances o|--o{ inventory_batches : "R016 inventory_batches_opening_balance_id_fkey"
+  receiving_report_items o|--o{ inventory_batches : "R017 inventory_batches_receiving_report_item_id_fkey"
+  inventory_items ||--o| inventory_opening_balances : "R018 inventory_opening_balances_inventory_item_id_fkey"
+  profiles ||--o{ inventory_opening_balances : "R019 inventory_opening_balances_verified_by_fkey"
+  profiles o|--o{ inventory_request_documents : "R020 inventory_request_documents_closed_by_fkey"
+  profiles ||--o{ inventory_request_documents : "R021 inventory_request_documents_issued_by_fkey"
+  profiles ||--o{ inventory_request_events : "R022 inventory_request_events_actor_id_fkey"
+  inventory_request_documents ||--o{ inventory_request_events : "R023 inventory_request_events_request_id_fkey"
+  inventory_items ||--o{ inventory_request_lines : "R024 inventory_request_lines_inventory_item_id_fkey"
+  inventory_request_documents ||--o{ inventory_request_lines : "R025 inventory_request_lines_request_id_fkey"
+  profiles ||--o{ inventory_request_revisions : "R026 inventory_request_revisions_issued_by_fkey"
+  inventory_request_documents ||--o{ inventory_request_revisions : "R027 inventory_request_revisions_request_id_fkey"
+  inventory_transactions ||--o{ inventory_transaction_batch_allocations : "R028 inventory_transaction_batch_alloc_inventory_transaction_id_fkey"
+  inventory_batches ||--o{ inventory_transaction_batch_allocations : "R029 inventory_transaction_batch_allocations_inventory_batch_id_fkey"
+  inventory_batches o|--o{ inventory_transactions : "R030 inventory_transactions_inventory_batch_id_fkey"
+  inventory_items ||--o{ inventory_transactions : "R031 inventory_transactions_inventory_item_id_fkey"
+  inventory_opening_balances o|--o{ inventory_transactions : "R032 inventory_transactions_opening_balance_id_fkey"
+  orders o|--o{ inventory_transactions : "R033 inventory_transactions_order_id_fkey"
+  profiles o|--o{ inventory_transactions : "R034 inventory_transactions_performed_by_fkey"
+  purchase_order_items o|--o{ inventory_transactions : "R035 inventory_transactions_purchase_order_item_id_fkey"
+  inventory_transaction_batch_allocations o|--o{ inventory_transactions : "R036 inventory_transactions_reverses_allocation_id_fkey"
+  inventory_transactions o|--o{ inventory_transactions : "R037 inventory_transactions_reverses_issuance_id_fkey"
+  inventory_items ||--o{ menu_ingredients : "R038 menu_ingredients_inventory_item_id_fkey"
+  menu_items ||--o{ menu_ingredients : "R039 menu_ingredients_menu_item_id_fkey"
+  menu_categories ||--o{ menu_items : "R040 menu_items_category_id_fkey"
+  menu_ingredients o|--o{ menu_items : "R041 menu_items_without_rice_inventory_fkey"
+  menu_items ||--o{ order_items : "R042 order_items_menu_item_id_fkey"
+  orders ||--o{ order_items : "R043 order_items_order_id_fkey"
+  profiles o|--o{ order_status_history : "R044 order_status_history_changed_by_fkey"
+  orders ||--o{ order_status_history : "R045 order_status_history_order_id_fkey"
+  profiles o|--o{ orders : "R046 orders_customer_id_fkey"
+  profiles o|--o{ orders : "R047 orders_processed_by_fkey"
+  cashier_transactions ||--o| paid_order_cancellations : "R048 paid_order_cancellations_cashier_transaction_id_fkey"
+  orders ||--o| paid_order_cancellations : "R049 paid_order_cancellations_order_id_fkey"
+  payments ||--o| paid_order_cancellations : "R050 paid_order_cancellations_payment_id_fkey"
+  profiles ||--o{ paid_order_cancellations : "R051 paid_order_cancellations_processed_by_fkey"
+  orders ||--o| payments : "R052 payments_order_id_fkey"
+  profiles o|--o{ payments : "R053 payments_rejected_by_fkey"
+  profiles o|--o{ payments : "R054 payments_verified_by_fkey"
+  receiving_reports o|--o| production_replenishment_requests : "R055 production_replenishment_requests_fulfilled_report_id_fkey"
+  inventory_items ||--o{ production_replenishment_requests : "R056 production_replenishment_requests_inventory_item_id_fkey"
+  profiles ||--o{ production_replenishment_requests : "R057 production_replenishment_requests_requested_by_fkey"
+  profiles ||--o{ production_replenishment_status_events : "R058 production_replenishment_status_events_changed_by_fkey"
+  receiving_reports o|--o{ production_replenishment_status_events : "R059 production_replenishment_status_events_receiving_report_id_fkey"
+  production_replenishment_requests ||--o{ production_replenishment_status_events : "R060 production_replenishment_status_events_request_id_fkey"
+  auth_users ||--o| profiles : "R061 profiles_id_fkey"
+  inventory_items ||--o{ purchase_order_items : "R062 purchase_order_items_inventory_item_id_fkey"
+  purchase_orders ||--o{ purchase_order_items : "R063 purchase_order_items_purchase_order_id_fkey"
+  profiles ||--o{ purchase_orders : "R064 purchase_orders_created_by_fkey"
+  suppliers ||--o{ purchase_orders : "R065 purchase_orders_supplier_id_fkey"
+  inventory_items o|--o{ receiving_report_items : "R066 receiving_report_items_inventory_item_id_fkey"
+  purchase_order_items o|--o{ receiving_report_items : "R067 receiving_report_items_purchase_order_item_id_fkey"
+  receiving_reports ||--o{ receiving_report_items : "R068 receiving_report_items_receiving_report_id_fkey"
+  profiles o|--o{ receiving_reports : "R069 receiving_reports_emergency_authorized_by_fkey"
+  inventory_request_documents o|--o{ receiving_reports : "R070 receiving_reports_inventory_request_id_fkey"
+  profiles o|--o{ receiving_reports : "R071 receiving_reports_posted_by_fkey"
+  purchase_orders o|--o{ receiving_reports : "R072 receiving_reports_purchase_order_id_fkey"
+  profiles ||--o{ receiving_reports : "R073 receiving_reports_received_by_fkey"
+  production_replenishment_requests o|--o| receiving_reports : "R074 receiving_reports_replenishment_request_id_fkey"
+  delivery_assignments ||--o{ rider_offer_push_outbox : "R075 rider_offer_push_outbox_assignment_id_fkey"
+  rider_push_devices ||--o{ rider_offer_push_outbox : "R076 rider_offer_push_outbox_device_id_fkey"
+  riders ||--o{ rider_push_devices : "R077 rider_push_devices_rider_id_fkey"
+  profiles ||--o| riders : "R078 riders_id_fkey"
+  inventory_items ||--o{ supplier_items : "R079 supplier_items_inventory_item_id_fkey"
+  suppliers ||--o{ supplier_items : "R080 supplier_items_supplier_id_fkey"

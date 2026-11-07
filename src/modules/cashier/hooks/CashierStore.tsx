@@ -27,11 +27,17 @@ import {
   type HydratedCashierSale,
 } from "../api/cashierSaleHydrationApi";
 import { fetchCashierOrders } from "../services/supabaseOrderService";
+import {
+  applyCashierAssignmentStatuses,
+  fetchCashierAssignmentStatuses,
+} from "../services/cashierAssignmentService";
 import { OPTIMISTIC_DELAY_MS } from "../constants";
 import { clearPOSDraft } from "../pos/posPersistence";
 import { calculateShiftTotals } from "../services/cashierService";
+import { reconcileCashierNotifications } from "../services/notificationService";
 import type { CashierState, Payment, ShiftTotals } from "../types";
-import { loadCashierState, saveCashierState } from "./cashierPersistence";
+import { loadCashierPreferences, loadCashierState, saveCashierState } from "./cashierPersistence";
+import { createInitialCashierState } from "../services/seed";
 import type {
   CashierCommit,
   CashierStoreValue,
@@ -45,7 +51,6 @@ const EMPTY_SHIFT_TOTALS: ShiftTotals = {
   refunds: 0,
   cashRefunds: 0,
   voids: 0,
-  discounts: 0,
   transactionCount: 0,
   ordersProcessed: 0,
   expectedCash: 0,
@@ -187,7 +192,19 @@ function mergeDatabaseRefresh(
     const hydratedOrder = databaseOrderId
       ? salesByDatabaseOrderId.get(databaseOrderId)?.order
       : undefined;
-    const authoritativeOrder = hydratedOrder ?? order;
+    const authoritativeOrder = hydratedOrder
+      ? {
+          ...hydratedOrder,
+          deliveryFee: hydratedOrder.deliveryFee ?? order.deliveryFee,
+          assignedRider: order.assignedRider,
+          riderStatus: order.riderStatus,
+          riderAssignmentKnown: order.riderAssignmentKnown,
+          riderAssignmentId: order.riderAssignmentId,
+          riderAssignmentStatus: order.riderAssignmentStatus,
+          riderAssignedAt: order.riderAssignedAt,
+          riderAssignmentUpdatedAt: order.riderAssignmentUpdatedAt,
+        }
+      : order;
     const onlinePayment = databaseOrderId
       ? onlinePaymentsByDatabaseOrderId.get(databaseOrderId)
       : undefined;
@@ -252,7 +269,7 @@ function mergeDatabaseRefresh(
   const databaseOrdersNeedingPayment = new Set(
     databaseOrders
       .filter((order) =>
-        ["Pending", "Unpaid"].includes(order.paymentStatus),
+        ["Pending", "Unpaid", "Unknown"].includes(order.paymentStatus),
       )
       .map((order) => order.id),
   );
@@ -317,6 +334,7 @@ export function CashierProvider({ children }: { children: ReactNode }) {
     useState(false);
   const [menuAvailabilityError, setMenuAvailabilityError] = useState("");
   const hydratedCashierIdRef = useRef<string | undefined>(undefined);
+  const lastOperationalRefreshAtRef = useRef(0);
   const stateRef = useRef(state);
   const menuAvailabilityRefreshRef = useRef<
     Promise<CashierState["menuItems"]> | undefined
@@ -330,6 +348,10 @@ export function CashierProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!session || session.role !== "cashier") {
+      if (stateRef.current.cashier.id) {
+        clearPOSDraft();
+        commit(createInitialCashierState());
+      }
       return;
     }
 
@@ -349,18 +371,13 @@ export function CashierProvider({ children }: { children: ReactNode }) {
     }
 
     commit({
-      ...current,
+      ...(cashierChanged ? createInitialCashierState() : current),
+      ...(cashierChanged ? loadCashierPreferences(session.id) : {}),
       cashier: {
         ...current.cashier,
         id: session.id,
         name: session.name,
       },
-      heldOrders: cashierChanged
-        ? []
-        : current.heldOrders,
-      notifications: cashierChanged
-        ? []
-        : current.notifications,
     });
   }, [commit, session]);
 
@@ -379,10 +396,15 @@ export function CashierProvider({ children }: { children: ReactNode }) {
     [commit],
   );
 
-  const actions = useCashierActions(stateRef, commit, commitOptimistically);
   const refreshDatabaseState = useCallback(() => {
     setDatabaseRefreshRequest((current) => current + 1);
   }, []);
+  const actions = useCashierActions(
+    stateRef,
+    commit,
+    commitOptimistically,
+    refreshDatabaseState,
+  );
 
   const refreshMenuAvailability = useCallback(
     (force = false): Promise<CashierState["menuItems"]> => {
@@ -448,7 +470,7 @@ export function CashierProvider({ children }: { children: ReactNode }) {
 
     if (!session || session.role !== "cashier") {
       hydratedCashierIdRef.current = undefined;
-      setIsHydrating(false);
+      setIsHydrating(true);
       setDatabaseLoading(false);
       setDatabaseError("");
       return;
@@ -491,7 +513,7 @@ export function CashierProvider({ children }: { children: ReactNode }) {
           return;
         }
 
-        commit({
+        commit(reconcileCashierNotifications({
           ...mergeDatabaseRefresh(
             stateRef.current,
             databaseOrders,
@@ -501,10 +523,12 @@ export function CashierProvider({ children }: { children: ReactNode }) {
             session.name,
           ),
           menuItems,
-        });
+        }));
         lastMenuAvailabilityRefreshAtRef.current = Date.now();
         setMenuAvailabilityError("");
         setDatabaseError("");
+        hydratedCashierIdRef.current = session.id;
+        setIsHydrating(false);
       } catch (error) {
         if (cancelled || refreshId !== latestRefreshId) return;
 
@@ -519,14 +543,13 @@ export function CashierProvider({ children }: { children: ReactNode }) {
       } finally {
         if (cancelled || refreshId !== latestRefreshId) return;
 
-        hydratedCashierIdRef.current = session.id;
         setDatabaseLoading(false);
-        setIsHydrating(false);
       }
     };
 
     void loadDatabaseState();
 
+    let subscribedOnce = false;
     const channel = supabase
       .channel("cashier-orders-live")
       .on(
@@ -563,6 +586,10 @@ export function CashierProvider({ children }: { children: ReactNode }) {
         },
       )
       .subscribe((status, error) => {
+        if (status === "SUBSCRIBED") {
+          if (subscribedOnce) void loadDatabaseState();
+          subscribedOnce = true;
+        }
         if (
           status === "CHANNEL_ERROR" ||
           status === "TIMED_OUT"
@@ -588,6 +615,66 @@ export function CashierProvider({ children }: { children: ReactNode }) {
   }, [authLoading, commit, databaseRefreshRequest, session]);
 
   useEffect(() => {
+    if (!session || session.role !== "cashier") return;
+    let active = true;
+    let inFlight = false;
+
+    const refreshAssignments = async () => {
+      if (inFlight || document.visibilityState !== "visible") return;
+      const pending = stateRef.current.orders.filter((order) =>
+        order.databaseId && order.type === "Delivery" &&
+        ["Waiting for Rider", "Rider Accepted", "Picked Up", "Out for Delivery"]
+          .includes(order.status),
+      );
+      if (!pending.length) return;
+      const requested = new Set(pending.map((order) => order.databaseId));
+      inFlight = true;
+      try {
+        let assignments = null;
+        try {
+          assignments = await fetchCashierAssignmentStatuses(pending);
+        } catch (error) {
+          console.error("Unable to refresh Cashier rider assignments:", error);
+        }
+        if (!active || stateRef.current.cashier.id !== session.id) return;
+        const current = stateRef.current;
+        const nextOrders = current.orders.map((order) => {
+          if (!requested.has(order.databaseId)) return order;
+          const latest = order.databaseId ? assignments?.get(order.databaseId) : undefined;
+          // An earlier poll must not erase a newly confirmed offer.
+          if (assignments && order.riderAssignmentId && !latest) return order;
+          if (order.riderAssignedAt && latest &&
+              new Date(latest.assigned_at).getTime() < new Date(order.riderAssignedAt).getTime()) {
+            return order;
+          }
+          if (latest && order.riderAssignmentId === latest.assignment_id &&
+              order.riderAssignmentUpdatedAt &&
+              new Date(latest.assignment_updated_at).getTime() <
+                new Date(order.riderAssignmentUpdatedAt).getTime()) {
+            return order;
+          }
+          return applyCashierAssignmentStatuses([order], assignments)[0];
+        });
+        if (nextOrders.some((order, index) =>
+          order.riderStatus !== current.orders[index].riderStatus ||
+          order.riderAssignmentId !== current.orders[index].riderAssignmentId ||
+          order.riderAssignmentStatus !== current.orders[index].riderAssignmentStatus ||
+          order.riderAssignmentKnown !== current.orders[index].riderAssignmentKnown)) {
+          commit(reconcileCashierNotifications({ ...current, orders: nextOrders }));
+        }
+      } finally {
+        inFlight = false;
+      }
+    };
+
+    const timer = window.setInterval(() => { void refreshAssignments(); }, 15_000);
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+    };
+  }, [commit, session]);
+
+  useEffect(() => {
     if (!session || session.role !== "cashier") {
       return;
     }
@@ -606,6 +693,10 @@ export function CashierProvider({ children }: { children: ReactNode }) {
       }
 
       lastFocusRefreshRequestAt = now;
+      if (now - lastOperationalRefreshAtRef.current >= 1_000) {
+        lastOperationalRefreshAtRef.current = now;
+        refreshDatabaseState();
+      }
       void refreshMenuAvailability(true).catch(() => {
         // The store exposes the refresh error without replacing cached data.
       });
@@ -618,6 +709,7 @@ export function CashierProvider({ children }: { children: ReactNode }) {
     };
 
     window.addEventListener("focus", refreshAfterFocus);
+    window.addEventListener("online", refreshAfterFocus);
     document.addEventListener(
       "visibilitychange",
       refreshAfterVisibilityChange,
@@ -625,12 +717,13 @@ export function CashierProvider({ children }: { children: ReactNode }) {
 
     return () => {
       window.removeEventListener("focus", refreshAfterFocus);
+      window.removeEventListener("online", refreshAfterFocus);
       document.removeEventListener(
         "visibilitychange",
         refreshAfterVisibilityChange,
       );
     };
-  }, [refreshMenuAvailability, session]);
+  }, [refreshDatabaseState, refreshMenuAvailability, session]);
 
   const activeShift = useMemo(
     () => state.shifts.find((entry) => entry.status === "Open"),

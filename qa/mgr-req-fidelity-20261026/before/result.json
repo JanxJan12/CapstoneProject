@@ -1,0 +1,31 @@
+{
+  "phase": "before",
+  "captures": [
+    "zero-1502.png",
+    "add-item-1502.png",
+    "positive-1502.png",
+    "zero-gap-1502.png",
+    "review-missing-1502.png",
+    "review-ready-1502.png",
+    "zero-1280.png",
+    "add-item-1280.png",
+    "positive-1280.png",
+    "zero-gap-1280.png",
+    "review-missing-1280.png",
+    "review-ready-1280.png",
+    "zero-820.png",
+    "add-item-820.png",
+    "positive-820.png",
+    "zero-gap-820.png",
+    "review-missing-820.png",
+    "review-ready-820.png",
+    "zero-390.png",
+    "add-item-390.png",
+    "positive-390.png",
+    "zero-gap-390.png",
+    "review-missing-390.png",
+    "review-ready-390.png"
+  ],
+  "browserExceptions": 0,
+  "networkWrites": 0
+}

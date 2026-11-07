@@ -1,13 +1,19 @@
-const gcashMerchantNumber =
-  import.meta.env.VITE_GCASH_MERCHANT_NUMBER?.trim() ?? "";
+const isDefenseDemo = import.meta.env.VITE_DEMO_MODE === "true";
 
-const gcashMerchantName =
-  import.meta.env.VITE_GCASH_MERCHANT_NAME?.trim() ?? "";
+const gcashMerchantNumber = isDefenseDemo
+  ? "NO REAL ACCOUNT"
+  : import.meta.env.VITE_GCASH_MERCHANT_NUMBER?.trim() ?? "";
+
+const gcashMerchantName = isDefenseDemo
+  ? "DEFENSE DEMO — DO NOT PAY"
+  : import.meta.env.VITE_GCASH_MERCHANT_NAME?.trim() ?? "";
 
 export const gcashMerchantConfig = {
+  isDemo: isDefenseDemo,
   number: gcashMerchantNumber,
   name: gcashMerchantName,
   isConfigured:
-    /^09\d{9}$/.test(gcashMerchantNumber) &&
-    gcashMerchantName.length > 0,
+    isDefenseDemo ||
+    (/^09\d{9}$/.test(gcashMerchantNumber) &&
+      gcashMerchantName.length > 0),
 } as const;

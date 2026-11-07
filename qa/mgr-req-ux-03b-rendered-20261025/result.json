@@ -1,0 +1,29 @@
+{
+  "result": "PASS",
+  "checks": [
+    {
+      "width": 1280,
+      "proposalRows": true,
+      "checkboxSelection": true,
+      "quantityValidation": true,
+      "noOverflow": true
+    },
+    {
+      "width": 820,
+      "proposalRows": true,
+      "checkboxSelection": true,
+      "quantityValidation": true,
+      "noOverflow": true
+    },
+    {
+      "width": 390,
+      "proposalRows": true,
+      "checkboxSelection": true,
+      "quantityValidation": true,
+      "noOverflow": true
+    }
+  ],
+  "browserExceptions": 0,
+  "externalRequests": 0,
+  "networkWrites": 0
+}

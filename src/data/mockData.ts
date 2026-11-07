@@ -84,7 +84,7 @@ export const riders: Rider[] = [
 
 // Procurement prototypes only. These records do not represent database truth.
 export const prototypeSuppliers: PrototypeSupplier[] = [
-  { id: 1, name: "Metro Market Supplier", contact: "09171234567", address: "123 Divisoria St., Manila", items: 12, pos: 5 },
+  { id: 1, name: "Metro Market Supplier", contact: "09171234567", address: "123 Divisoria St.", items: 12, pos: 5 },
   { id: 2, name: "Fresh Farm Distributors", contact: "09281234567", address: "456 Market Ave., Pasig", items: 8, pos: 3 },
   { id: 3, name: "Pantranco Goods Supply", contact: "09391234567", address: "789 Commercial Rd., QC", items: 15, pos: 7 },
 ];

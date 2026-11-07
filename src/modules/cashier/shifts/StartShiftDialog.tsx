@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import {
@@ -31,22 +32,43 @@ export function StartShiftDialog({
   onOpenChange: (open: boolean) => void;
   onConfirm: (openingCash: number, terminal: string) => Promise<void>;
 }) {
+  const submittingRef = useRef(false);
+  const wasOpenRef = useRef(false);
+  const [submitting, setSubmitting] = useState(false);
+  const busy = loading || submitting;
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<StartShiftForm>({
+  } = useForm<StartShiftForm, unknown, { openingCash: number; terminal: string }>({
     resolver: zodResolver(startShiftSchema),
-    defaultValues: { openingCash: 4000, terminal: defaultTerminal },
+    defaultValues: { openingCash: "", terminal: defaultTerminal },
   });
+  useEffect(() => {
+    if (open && !wasOpenRef.current) reset({ openingCash: "", terminal: defaultTerminal });
+    wasOpenRef.current = open;
+  }, [open, defaultTerminal, reset]);
+
+  const submit = handleSubmit(async ({ openingCash, terminal }) => {
+    if (submittingRef.current || busy) return;
+    submittingRef.current = true;
+    setSubmitting(true);
+    try {
+      await onConfirm(openingCash, terminal);
+    } finally {
+      submittingRef.current = false;
+      setSubmitting(false);
+    }
+  });
+
   return (
     <Dialog
       open={open}
       onOpenChange={(value) => {
-        if (!loading) {
+        if (!busy) {
           onOpenChange(value);
-          if (!value) reset({ openingCash: 4000, terminal: defaultTerminal });
+          if (!value) reset({ openingCash: "", terminal: defaultTerminal });
         }
       }}
     >
@@ -54,27 +76,31 @@ export function StartShiftDialog({
         <DialogHeader>
           <DialogTitle>Start cashier shift</DialogTitle>
           <DialogDescription>
-            Open a drawer for {cashierName}. The timestamp is recorded
-            automatically.
+            Count the cash already in the drawer for making change, then record
+            that opening amount for {cashierName}. The start time is recorded automatically.
           </DialogDescription>
         </DialogHeader>
         <form
-          onSubmit={handleSubmit(({ openingCash, terminal }) =>
-            onConfirm(openingCash, terminal),
-          )}
+          noValidate
+          onSubmit={submit}
           className="space-y-4"
         >
           <div>
-            <Label htmlFor="opening-cash">Opening cash amount</Label>
+            <Label htmlFor="opening-cash">Opening Cash (₱)</Label>
             <CashierInput
               id="opening-cash"
-              type="number"
-              min="0"
-              step="0.01"
+              type="text"
+              inputMode="decimal"
+              placeholder="Enter counted opening cash"
               autoFocus
+              aria-required="true"
               aria-invalid={Boolean(errors.openingCash)}
-              {...register("openingCash", { valueAsNumber: true })}
+              aria-describedby="opening-cash-help"
+              {...register("openingCash")}
             />
+            <p id="opening-cash-help" className="mt-1 text-xs text-muted-foreground">
+              Include the physical cash float already in this drawer. Enter ₱0 if it starts empty.
+            </p>
             <FieldError>{errors.openingCash?.message}</FieldError>
           </div>
           <div>
@@ -90,13 +116,13 @@ export function StartShiftDialog({
             <CashierButton
               type="button"
               variant="secondary"
-              disabled={loading}
+              disabled={busy}
               onClick={() => onOpenChange(false)}
             >
               Cancel
             </CashierButton>
-            <CashierButton type="submit" loading={loading}>
-              {loading ? "Starting shift..." : "Start shift"}
+            <CashierButton type="submit" loading={busy} disabled={busy}>
+              {busy ? "Starting shift..." : "Start shift"}
             </CashierButton>
           </DialogFooter>
         </form>

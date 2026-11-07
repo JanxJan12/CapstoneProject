@@ -44,6 +44,13 @@ export interface ManagerOrder {
   items: ManagerOrderItem[];
 }
 
+export interface ManagerOrderFinancials {
+  subtotal: number;
+  taxAmount: number;
+  deliveryFee: number;
+  grandTotal: number;
+}
+
 export interface ManagerDailySale {
   date: string;
   day: string;
@@ -454,6 +461,24 @@ export async function getManagerOrders(limit = 100): Promise<ManagerOrder[]> {
   }
 
   return data.map(mapManagerOrder);
+}
+
+export async function getManagerOrderFinancials(orderId: string): Promise<ManagerOrderFinancials> {
+  const { data, error } = await supabase
+    .from("orders")
+    .select("subtotal,tax_amount,delivery_fee,grand_total")
+    .eq("id", orderId)
+    .single();
+
+  if (error || !data) {
+    throw new Error("The stored order breakdown is unavailable.");
+  }
+  return {
+    subtotal: requireNonNegativeNumber(data.subtotal, "order subtotal"),
+    taxAmount: requireNonNegativeNumber(data.tax_amount, "order tax"),
+    deliveryFee: requireNonNegativeNumber(data.delivery_fee, "order delivery fee"),
+    grandTotal: requireNonNegativeNumber(data.grand_total, "stored order total"),
+  };
 }
 
 export async function getManagerDashboard(): Promise<ManagerDashboardData> {

@@ -1,0 +1,49 @@
+{
+  "runDateManila": "2026-10-16",
+  "overall": "BLOCKED",
+  "stack": "rrj_h09_order_flow_20261015",
+  "hostedSupabaseOperations": [],
+  "baseline": {
+    "authHealthHttp": 200,
+    "orderCountObserved": 29,
+    "priorSyntheticOrder": "ORD-000029",
+    "finalOrderCount": null,
+    "h10aRequestId": null,
+    "h10aOrderNumber": null,
+    "checkoutRequestsSent": 0
+  },
+  "interception": {
+    "planned": "Chrome DevTools Protocol Fetch response-stage pause after place_customer_order HTTP 200, independent SQL commit read, then Fetch.failRequest ConnectionClosed",
+    "executed": false,
+    "reason": "First attempt timed out at local status preflight; second fresh Chrome sign-in stayed at Signing in until Customer-route timeout"
+  },
+  "checks": {
+    "briefStackRecoveryAndBaselineSql": "PASS",
+    "authenticatedChromePostcommitResponseLoss": "BLOCKED",
+    "recoveryExplanationAfterRefresh": "BLOCKED",
+    "retryAndCheckOrderAfterRefresh": "BLOCKED",
+    "sameCustomerAndRequestIdentity": "BLOCKED",
+    "restoredDeliveryDetails": "BLOCKED",
+    "singleOrderAndPurchaseSnapshots": "BLOCKED",
+    "noDuplicatePaymentReceiptInventoryOrAssignment": "BLOCKED",
+    "crossCustomerAndUnrelatedRequestIsolation": "BLOCKED",
+    "appropriateRecoveryClearance": "BLOCKED",
+    "typecheck": "PASS",
+    "productionBuild": "PASS",
+    "qualityChecks11": "PASS",
+    "canonicalMigrationHashes52": "PASS",
+    "hostedAndRealPayment": "NOT TESTED"
+  },
+  "applicationIssue": "After refresh, delivery fields restored but the uncertainty explanation and Retry & Check Order label were lost because deliveryError was transient.",
+  "correction": "Persist responseUnknown only for network response errors in the customer and request-bound tab draft, then restore the existing explanation after refresh.",
+  "newScreenshots": [],
+  "priorScreenshot": "qa/h10-browser-20261015/postcommit-lost-response-error.png",
+  "environmentFailure": "Docker API intermittently hung or returned HTTP 500; a fresh Chrome Customer sign-in stayed at Signing in until timeout; normal Docker Desktop restart failed to stop processes with context deadline exceeded.",
+  "filesModified": [
+    "src/modules/customer/index.tsx",
+    ".tmp/h09-stack-20261015/h10a-recovery.mjs",
+    "qa/H10A-CHECKOUT-RECOVERY-ACCEPTANCE.md",
+    "qa/H10A-CHECKOUT-RECOVERY-ACCEPTANCE.json",
+    "qa/H10-WORKFLOW-UX-REGRESSION.md"
+  ]
+}

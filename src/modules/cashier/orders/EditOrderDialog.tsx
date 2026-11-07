@@ -53,9 +53,7 @@ export function EditOrderDialog({
     reset({
       customerName: order.customerName,
       contactNumber: order.contactNumber,
-      tableNumber: order.tableNumber ?? "",
       deliveryAddress: order.deliveryAddress ?? "",
-      orderInstructions: order.orderInstructions ?? "",
     });
   }, [order, reset]);
 
@@ -97,17 +95,6 @@ export function EditOrderDialog({
               <FieldError>{errors.contactNumber?.message}</FieldError>
             </div>
           </div>
-          {order.type === "Dine-in" && (
-            <div>
-              <Label htmlFor="edit-order-table">Table number</Label>
-              <CashierInput
-                id="edit-order-table"
-                aria-invalid={Boolean(errors.tableNumber)}
-                {...register("tableNumber")}
-              />
-              <FieldError>{errors.tableNumber?.message}</FieldError>
-            </div>
-          )}
           {order.type === "Delivery" && (
             <div>
               <Label htmlFor="edit-order-address">Delivery address</Label>
@@ -119,14 +106,6 @@ export function EditOrderDialog({
               <FieldError>{errors.deliveryAddress?.message}</FieldError>
             </div>
           )}
-          <div>
-            <Label htmlFor="edit-order-instructions">Order instructions</Label>
-            <CashierTextarea
-              id="edit-order-instructions"
-              {...register("orderInstructions")}
-            />
-            <FieldError>{errors.orderInstructions?.message}</FieldError>
-          </div>
           <DialogFooter className="border-t border-border/70 pt-4">
             <CashierButton
               variant="secondary"

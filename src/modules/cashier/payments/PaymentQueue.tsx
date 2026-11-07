@@ -1,18 +1,20 @@
 import { Clock3, CreditCard } from "lucide-react";
-import { formatElapsed, formatMoney } from "../constants";
+import { formatDateTime, formatElapsed, formatMoney } from "../constants";
 import type { Order, Payment } from "../types";
-import { StatusBadge, EmptyState } from "../components";
+import { EmptyState } from "../components";
 
 export function PaymentQueue({
   payments,
   orders,
   selectedId,
   onSelect,
+  disabled = false,
 }: {
   payments: Payment[];
   orders: Order[];
   selectedId?: string;
   onSelect: (paymentId: string) => void;
+  disabled?: boolean;
 }) {
   if (!payments.length)
     return (
@@ -20,7 +22,7 @@ export function PaymentQueue({
         compact
         icon={CreditCard}
         title="No pending payments"
-        description="New customer GCash submissions will appear here automatically."
+        description="New GCash submissions will appear here."
       />
     );
   return (
@@ -28,37 +30,36 @@ export function PaymentQueue({
       {payments.map((payment) => {
         const order = orders.find((entry) => entry.id === payment.orderId);
         if (!order) return null;
+        const elapsed = formatElapsed(payment.uploadedAt);
+        const submittedAtValid = Number.isFinite(new Date(payment.uploadedAt).getTime());
+        const submitted = elapsed === "Just now" || elapsed === "Time unavailable"
+          ? elapsed
+          : `${elapsed} ago`;
         return (
           <button
             key={payment.id}
             type="button"
+            disabled={disabled}
             aria-pressed={selectedId === payment.id}
             onClick={() => onSelect(payment.id)}
-            className={`group min-h-[104px] w-full p-3.5 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary ${selectedId === payment.id ? "border-l-4 border-l-primary bg-gradient-to-r from-amber-50 to-white shadow-[inset_0_0_0_1px_rgba(184,79,10,0.05)]" : "hover:bg-white hover:shadow-[inset_3px_0_0_rgba(184,79,10,0.18)]"}`}
+            className={`group min-h-[88px] w-full px-3 py-2.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary ${selectedId === payment.id ? "border-l-4 border-l-primary bg-amber-50" : "border-l-4 border-l-transparent hover:bg-white"}`}
           >
             <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="font-mono text-xs font-black text-primary">
+              <div className="min-w-0">
+                <p className="font-mono text-sm font-black text-primary">
                   {order.id}
                 </p>
-                <p className="mt-1 text-sm font-black text-foreground">
+                <p className="mt-1 truncate text-base font-black text-foreground" title={order.customerName}>
                   {order.customerName}
                 </p>
               </div>
-              <StatusBadge status={payment.status} />
-            </div>
-            <div className="mt-2.5 flex items-center justify-between gap-3 text-[11px]">
-              <span className="flex items-center gap-1.5 font-semibold text-foreground/65">
-                <CreditCard className="h-3.5 w-3.5" />
-                {payment.method}
-              </span>
-              <strong className="text-[15px] font-black text-foreground">
-                {formatMoney(order.total)}
+              <strong className="shrink-0 whitespace-nowrap text-base font-black text-foreground">
+                {formatMoney(payment.amount)}
               </strong>
             </div>
-            <p className="mt-1 flex items-center gap-1 text-[10px] font-semibold text-foreground/60">
-              <Clock3 className="h-3 w-3" />
-              Uploaded {formatElapsed(payment.uploadedAt)} ago
+            <p className="mt-1 flex items-center gap-1 text-[13px] font-semibold text-muted-foreground" title={submittedAtValid ? formatDateTime(payment.uploadedAt) : undefined}>
+              <Clock3 className="h-4 w-4" aria-hidden="true" />
+              Submitted {submitted}
             </p>
           </button>
         );

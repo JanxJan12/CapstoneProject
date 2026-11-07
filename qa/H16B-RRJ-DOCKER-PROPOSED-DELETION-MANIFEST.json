@@ -1,0 +1,4519 @@
+{
+  "schemaVersion": 1,
+  "assessment": "H16B STRICTLY READ-ONLY Docker deletion readiness",
+  "capturedAtManila": "2026-10-16 07:07:09",
+  "decision": "NO_DOCKER_MUTATION_APPROVED",
+  "execution": "DRY_RUN_ONLY",
+  "liveCounts": {
+    "containers": 99,
+    "running": 94,
+    "stopped": 5,
+    "projects": 16,
+    "volumes": 45,
+    "networks": 21
+  },
+  "historicalComparison": {
+    "h11iContainers": 99,
+    "h11iRunning": 94,
+    "countMatches": true,
+    "identityAssumption": false
+  },
+  "evidenceSources": [
+    "qa/H11C-FIXTURE-ELIGIBILITY-MATRIX.md",
+    "qa/H11I-IDLE-FIXTURE-PAUSE.md",
+    "qa/H11F-WINDOWS-RESTART-AND-RECOVERY.md",
+    "qa/H12-LOCAL-DOCKER-RESET-READINESS.md",
+    "qa/H16-LOCAL-ACCEPTANCE-PREFLIGHT.md",
+    "qa/DATABASE-DISASTER-RECOVERY-PHASE3.md",
+    "qa/DATABASE-MIGRATION-REPRODUCIBILITY-PHASE3.md"
+  ],
+  "gates": {
+    "archiveAndFullRestore": "NOT_VERIFIED",
+    "idleAndExternalDependencies": "NOT_VERIFIED",
+    "pauseApproval": false,
+    "containerDeletionApproval": false,
+    "volumeDeletionApproval": false,
+    "networkOrImageDeletionApproval": false
+  },
+  "projects": [
+    {
+      "project": "<unlabeled>",
+      "classification": "UNKNOWN_NOT_APPROVED",
+      "containerIds": [
+        "2bede0448e2929a1bdb8f040636e60bf73c30bb0bc074d2d54ab1f412738b2b4"
+      ],
+      "containerNames": [
+        "rrj_recovery_rehearsal_20261013"
+      ],
+      "count": 1,
+      "running": 0,
+      "networks": [
+        "none"
+      ],
+      "publishedPorts": [],
+      "mountedVolumes": [],
+      "containerRemovalProposed": false,
+      "containerRemovalApproved": false,
+      "containerRemovalReady": false,
+      "reason": "Current idle/use, complete independent recreation and evidence custody are not verified; no removal approved."
+    },
+    {
+      "project": "isolated-stack",
+      "classification": "UNRELATED_PROTECTED",
+      "containerIds": [
+        "3ceb1b48a1c209b11bec04a560e6b3899bffb3c8901b6a0d967f66816cf5a8a4",
+        "677b9f1c451b305975d87726d3c7f15ccbfdafd8625fcfec261630b7df4189e5",
+        "b56f15a408f84f6a9de2c314dd806247e9f00ba5f52335a7e9926de8beea8ae7",
+        "fa026b6aa72f871c3e0d15a0737c8047fb171a70abf54cdc946b9c6d44d0dae6",
+        "7ede4d92799ff358dc5d09fe371bba4266cc8500057dbb4059414de870829ca8",
+        "40c80e51042f7a2a1818e42935cdaa87d3c5e392e415b2eec49a7bb33bca1bfd"
+      ],
+      "containerNames": [
+        "supabase_auth_isolated-stack",
+        "supabase_db_isolated-stack",
+        "supabase_kong_isolated-stack",
+        "supabase_pg_meta_isolated-stack",
+        "supabase_rest_isolated-stack",
+        "supabase_storage_isolated-stack"
+      ],
+      "count": 6,
+      "running": 5,
+      "networks": [
+        "supabase_network_isolated-stack"
+      ],
+      "publishedPorts": [
+        "127.0.0.1:56322->5432/tcp",
+        "[::1]:56322->5432/tcp",
+        "127.0.0.1:56321->8000/tcp",
+        "[::1]:56321->8000/tcp"
+      ],
+      "mountedVolumes": [
+        "supabase_db_isolated-stack",
+        "supabase_storage_isolated-stack"
+      ],
+      "containerRemovalProposed": false,
+      "containerRemovalApproved": false,
+      "containerRemovalReady": false,
+      "reason": "Current idle/use, complete independent recreation and evidence custody are not verified; no removal approved."
+    },
+    {
+      "project": "my-local-todo-app",
+      "classification": "UNRELATED_PROTECTED",
+      "containerIds": [
+        "908d74874442575b58f0dca1f016917ac8f88f5b450e5f3cd7e789a721822577",
+        "7bb568ae07669685067a09b551f63e146d442d2976154952a66f2f55902a7687",
+        "3feef4aaa27045f7abc4c02ff7e07225cc0db317b72eace308d3038d0e6cfa9a",
+        "79eb80b0ca745fbdbcb525197b7ac0152e08ffac3e852dc0646eeb4b227d8959",
+        "18aa01159581456fe3d7db04af10308e54364a934480b0d6bf70a09d9a6fd29f",
+        "350c49e29d519eab347f617284894fae1fd5bbc211bcce474dde566481cad92c",
+        "2a751d274ef04fe1d04c2acd3cd3c8d8ba3dadeaeaab9a909402330fc534458b",
+        "0919896beee16eface8fcf32c1700768b030785153a43354c3e6f0aba5dbc00a",
+        "c236ff77977818616c46640f9ed0015725cd2378b60778edc6cb8454d88bb86c",
+        "5e7897f1092e41a4a0054431ae66ca1ce67e45b3b995a1e530136ed46dc2d4c3",
+        "9b9a34b6a50781dc4651c8c8718d425cbd2504eaf3e53545fbb86732ae540e93",
+        "bcf16098d8431578e39a2a4c61be696ea074675ffa748c2c0951a8acc58f93a2"
+      ],
+      "containerNames": [
+        "supabase_analytics_my-local-todo-app",
+        "supabase_auth_my-local-todo-app",
+        "supabase_db_my-local-todo-app",
+        "supabase_edge_runtime_my-local-todo-app",
+        "supabase_inbucket_my-local-todo-app",
+        "supabase_kong_my-local-todo-app",
+        "supabase_pg_meta_my-local-todo-app",
+        "supabase_realtime_my-local-todo-app",
+        "supabase_rest_my-local-todo-app",
+        "supabase_storage_my-local-todo-app",
+        "supabase_studio_my-local-todo-app",
+        "supabase_vector_my-local-todo-app"
+      ],
+      "count": 12,
+      "running": 11,
+      "networks": [
+        "supabase_network_my-local-todo-app"
+      ],
+      "publishedPorts": [
+        "127.0.0.1:54327->4000/tcp",
+        "[::1]:54327->4000/tcp",
+        "127.0.0.1:54322->5432/tcp",
+        "[::1]:54322->5432/tcp",
+        "127.0.0.1:54324->8025/tcp",
+        "[::1]:54324->8025/tcp",
+        "127.0.0.1:54321->8000/tcp",
+        "[::1]:54321->8000/tcp",
+        "127.0.0.1:54323->3000/tcp",
+        "[::1]:54323->3000/tcp"
+      ],
+      "mountedVolumes": [
+        "supabase_config_my-local-todo-app",
+        "supabase_db_my-local-todo-app",
+        "supabase_storage_my-local-todo-app"
+      ],
+      "containerRemovalProposed": false,
+      "containerRemovalApproved": false,
+      "containerRemovalReady": false,
+      "reason": "Current idle/use, complete independent recreation and evidence custody are not verified; no removal approved."
+    },
+    {
+      "project": "rrj_defense_demo_20261014",
+      "classification": "PROTECTED_KEEP",
+      "containerIds": [
+        "9b7c1cecb09c9430fd386d6f31a765cf5c1b3f41a15d5b054b21f0aeab580228",
+        "d1d080ef20d735c6beb262933b77a16ead5c46370874ebdcb8f0b92baf0b67fb",
+        "3c44fae58d3833f38ff7b0ecbc4cc61bd4f1d68eaeea3acf77c6b8db5f221ade",
+        "55938b9df480620cb3c2b9dd2f32a8cb06c95f0cb79d43995880fdef6d7a2f71",
+        "90c84db09a56b21e191f470345def2564e0f91e80d390b71652d723379025a29"
+      ],
+      "containerNames": [
+        "supabase_auth_rrj_defense_demo_20261014",
+        "supabase_db_rrj_defense_demo_20261014",
+        "supabase_kong_rrj_defense_demo_20261014",
+        "supabase_rest_rrj_defense_demo_20261014",
+        "supabase_storage_rrj_defense_demo_20261014"
+      ],
+      "count": 5,
+      "running": 5,
+      "networks": [
+        "supabase_network_rrj_defense_demo_20261014"
+      ],
+      "publishedPorts": [
+        "127.0.0.1:61322->5432/tcp",
+        "[::1]:61322->5432/tcp",
+        "127.0.0.1:61321->8000/tcp",
+        "[::1]:61321->8000/tcp"
+      ],
+      "mountedVolumes": [
+        "supabase_db_rrj_defense_demo_20261014",
+        "supabase_storage_rrj_defense_demo_20261014"
+      ],
+      "containerRemovalProposed": false,
+      "containerRemovalApproved": false,
+      "containerRemovalReady": false,
+      "reason": "Current idle/use, complete independent recreation and evidence custody are not verified; no removal approved."
+    },
+    {
+      "project": "rrj_defense_demo_20261014_r2",
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "containerIds": [
+        "e133aed5720f1885dadedd81e959d9a55cd2029e947855df5af2c20ed417081b",
+        "beec6b1192ca8cd3e31912215080974d5f5b67a04c45aa0c7baad1df85a833e0",
+        "56c80a5f8803e5c64e4defb5578b7dd223c2d23ad6d37231df8e5b1524245b3d",
+        "30d5bf2f23a16195c949fda8d2aa992159886f2f5179436caeb9a29117b7c0b4",
+        "fadb21325353648dc18ffbc23e6000da891347baf583cef13395ed3dae0a2c93"
+      ],
+      "containerNames": [
+        "supabase_auth_rrj_defense_demo_20261014_r2",
+        "supabase_db_rrj_defense_demo_20261014_r2",
+        "supabase_kong_rrj_defense_demo_20261014_r2",
+        "supabase_rest_rrj_defense_demo_20261014_r2",
+        "supabase_storage_rrj_defense_demo_20261014_r2"
+      ],
+      "count": 5,
+      "running": 5,
+      "networks": [
+        "supabase_network_rrj_defense_demo_20261014_r2"
+      ],
+      "publishedPorts": [
+        "127.0.0.1:62322->5432/tcp",
+        "[::1]:62322->5432/tcp",
+        "127.0.0.1:62321->8000/tcp",
+        "[::1]:62321->8000/tcp"
+      ],
+      "mountedVolumes": [
+        "supabase_db_rrj_defense_demo_20261014_r2",
+        "supabase_storage_rrj_defense_demo_20261014_r2"
+      ],
+      "containerRemovalProposed": true,
+      "containerRemovalApproved": false,
+      "containerRemovalReady": false,
+      "reason": "Current idle/use, complete independent recreation and evidence custody are not verified; no removal approved."
+    },
+    {
+      "project": "rrj_defense_demo_20261014_r3",
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "containerIds": [
+        "92bb64389b29fd51e1dceafa56d697981b95cfc31f5b978c49e1a2868989d81f",
+        "85e0d9d47432af916afad1ef7c5007bf69269bbdef96557f98a4b8deef23eda4",
+        "08696de9d4e4f926986720ab17b57f2f4d830d9bb7cd9e5ce51d3411e22ccc3f",
+        "a47c5ff84b749671da0e1a97038d4601e86960b11a326f53d3d93a918a271723",
+        "bdd4c001c23212df2ead6a8a8f29e0b93e3e70acb672ae621b9ee7dced2acdd4"
+      ],
+      "containerNames": [
+        "supabase_auth_rrj_defense_demo_20261014_r3",
+        "supabase_db_rrj_defense_demo_20261014_r3",
+        "supabase_kong_rrj_defense_demo_20261014_r3",
+        "supabase_rest_rrj_defense_demo_20261014_r3",
+        "supabase_storage_rrj_defense_demo_20261014_r3"
+      ],
+      "count": 5,
+      "running": 5,
+      "networks": [
+        "supabase_network_rrj_defense_demo_20261014_r3"
+      ],
+      "publishedPorts": [
+        "127.0.0.1:63322->5432/tcp",
+        "[::1]:63322->5432/tcp",
+        "127.0.0.1:63321->8000/tcp",
+        "[::1]:63321->8000/tcp"
+      ],
+      "mountedVolumes": [
+        "supabase_db_rrj_defense_demo_20261014_r3",
+        "supabase_storage_rrj_defense_demo_20261014_r3"
+      ],
+      "containerRemovalProposed": true,
+      "containerRemovalApproved": false,
+      "containerRemovalReady": false,
+      "reason": "Current idle/use, complete independent recreation and evidence custody are not verified; no removal approved."
+    },
+    {
+      "project": "rrj_h07_financial_20261014",
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "containerIds": [
+        "d8b130694c1d38022c051f1040e0c256c5d33d9cc8032491160109b3b90c6b17",
+        "db4249c0ec4c4819746ce18346dd0d6cb018dd1401e3c8813ce3f27fc3022c45",
+        "e8f7b6161dd3bea217d2b1e987ed6e3019d9953783a64862b161a011146b2e01",
+        "f8c4f6885aa9f59900fe87c6b673a33c6493dd39a39e3260f955231b0641177e",
+        "74b5ba6d38ca951380e39ab4ac97e94357470d4b4f4596c862d1f402b62a0af4"
+      ],
+      "containerNames": [
+        "supabase_auth_rrj_h07_financial_20261014",
+        "supabase_db_rrj_h07_financial_20261014",
+        "supabase_kong_rrj_h07_financial_20261014",
+        "supabase_rest_rrj_h07_financial_20261014",
+        "supabase_storage_rrj_h07_financial_20261014"
+      ],
+      "count": 5,
+      "running": 5,
+      "networks": [
+        "supabase_network_rrj_h07_financial_20261014"
+      ],
+      "publishedPorts": [
+        "127.0.0.1:57322->5432/tcp",
+        "[::1]:57322->5432/tcp",
+        "127.0.0.1:57321->8000/tcp",
+        "[::1]:57321->8000/tcp"
+      ],
+      "mountedVolumes": [
+        "supabase_db_rrj_h07_financial_20261014",
+        "supabase_storage_rrj_h07_financial_20261014"
+      ],
+      "containerRemovalProposed": true,
+      "containerRemovalApproved": false,
+      "containerRemovalReady": false,
+      "reason": "Current idle/use, complete independent recreation and evidence custody are not verified; no removal approved."
+    },
+    {
+      "project": "rrj_h08b_history_20261015",
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "containerIds": [
+        "e3685155639ea55062aa61ca8f3e466e06f8ad62d0af6490ad4f4047005dd018",
+        "c7716c7d279e3f5edcbf1d89369bf93c36eb1c90bcc86ac9bc16549f641e45b8",
+        "4e7af74404e16a6358d0a49432079a60e97e59eff696f7e4340dc05c380e7b1d",
+        "4f23e160669bfc2dd8180d75b8f4bf557941ce9cc1701219d653ed39f0e2f20c",
+        "1cc9c7088cba9e309d064ebfc8fd3d91bd1b9d05db5668ff84c542914651b07a"
+      ],
+      "containerNames": [
+        "supabase_auth_rrj_h08b_history_20261015",
+        "supabase_db_rrj_h08b_history_20261015",
+        "supabase_kong_rrj_h08b_history_20261015",
+        "supabase_rest_rrj_h08b_history_20261015",
+        "supabase_storage_rrj_h08b_history_20261015"
+      ],
+      "count": 5,
+      "running": 5,
+      "networks": [
+        "supabase_network_rrj_h08b_history_20261015"
+      ],
+      "publishedPorts": [
+        "127.0.0.1:58322->5432/tcp",
+        "[::1]:58322->5432/tcp",
+        "127.0.0.1:58321->8000/tcp",
+        "[::1]:58321->8000/tcp"
+      ],
+      "mountedVolumes": [
+        "supabase_config_rrj_h08b_history_20261015",
+        "supabase_db_rrj_h08b_history_20261015",
+        "supabase_storage_rrj_h08b_history_20261015"
+      ],
+      "containerRemovalProposed": true,
+      "containerRemovalApproved": false,
+      "containerRemovalReady": false,
+      "reason": "Current idle/use, complete independent recreation and evidence custody are not verified; no removal approved."
+    },
+    {
+      "project": "rrj_h08c_history_20261015",
+      "classification": "PROTECTED_KEEP",
+      "containerIds": [
+        "2d9de3b44279023f721b8bcc8922c1b06de9e500bfec6eb5f5bd670489716c77",
+        "862664844b4225a4a303600edcd2de3c17ef4e47ee8ef7658f275a1494938583",
+        "774017228b5eb194a40e198adb1a82b391207d37d1ace121c6790971a0c65fe1",
+        "bb74cd6759411e6a53fd4be1c48f6169eff35865765236d5a2b66a8a17b4a0f4",
+        "0ad2bab7e2ebb2ac447b5f96d8e596673d2beecd2b66efdcafae30c6c5238440",
+        "d3bd5187fb2a32e0d5d2cb0cb77cabed4cbe819c563283335364ba35fe80b2ef",
+        "36204297b02b2f1d50de3533e4162fdc24e0235954f4fc24f8875f683a3e4ed3",
+        "ff427135d2df120ce29acc4ab5675dc8c0731907a91d51905ca457ae048580a8",
+        "feebac47f5fad4d9e9cc60da49974e1d084958e7793dd5d735198f82696dde9a",
+        "3cde5a00ddf70ab3e90cf4554e995b0115e6d104d28f37b71e67b45174b0f22f",
+        "d99279ea81a3036d7a712fd649a370339487d4a29c14d4b0d4532f748314e8cc",
+        "ab7d705432f56e268728d01065f84fe9b181c453f7c5f7ff5a48ea353c1948a8"
+      ],
+      "containerNames": [
+        "supabase_analytics_rrj_h08c_history_20261015",
+        "supabase_auth_rrj_h08c_history_20261015",
+        "supabase_db_rrj_h08c_history_20261015",
+        "supabase_edge_runtime_rrj_h08c_history_20261015",
+        "supabase_inbucket_rrj_h08c_history_20261015",
+        "supabase_kong_rrj_h08c_history_20261015",
+        "supabase_pg_meta_rrj_h08c_history_20261015",
+        "supabase_realtime_rrj_h08c_history_20261015",
+        "supabase_rest_rrj_h08c_history_20261015",
+        "supabase_storage_rrj_h08c_history_20261015",
+        "supabase_studio_rrj_h08c_history_20261015",
+        "supabase_vector_rrj_h08c_history_20261015"
+      ],
+      "count": 12,
+      "running": 11,
+      "networks": [
+        "supabase_network_rrj_h08c_history_20261015"
+      ],
+      "publishedPorts": [
+        "127.0.0.1:59327->4000/tcp",
+        "[::1]:59327->4000/tcp",
+        "127.0.0.1:59322->5432/tcp",
+        "[::1]:59322->5432/tcp",
+        "127.0.0.1:59324->8025/tcp",
+        "[::1]:59324->8025/tcp",
+        "127.0.0.1:59321->8000/tcp",
+        "[::1]:59321->8000/tcp",
+        "127.0.0.1:59323->3000/tcp",
+        "[::1]:59323->3000/tcp"
+      ],
+      "mountedVolumes": [
+        "supabase_config_rrj_h08c_history_20261015",
+        "supabase_db_rrj_h08c_history_20261015",
+        "supabase_storage_rrj_h08c_history_20261015"
+      ],
+      "containerRemovalProposed": false,
+      "containerRemovalApproved": false,
+      "containerRemovalReady": false,
+      "reason": "Current idle/use, complete independent recreation and evidence custody are not verified; no removal approved."
+    },
+    {
+      "project": "rrj_h09_order_flow_20261015",
+      "classification": "PROTECTED_KEEP",
+      "containerIds": [
+        "fc196286ff911268cb69827b855d4b017dfbcf05f3ad8604deeb07586424cb06",
+        "cac20bb296b32f4e16028e264030689135d5c63e4a395da9455d77c9b1d11867",
+        "c2b5180e936b180075cb35a52c2ed9e0bd8954437ea0e00120745573c518fbfc",
+        "39d166c2f6ce11fba383fbced74fcefca6f2389eff695e345c3643c6cd0484e1",
+        "93d1d9e5a74d55049586991a551a2db5b98cb555f48bddb528d51702c7752da5",
+        "4319d2dc68626155d3cbe533fa64f963d37e0c87e9415ceac1b7aadd193ba82a"
+      ],
+      "containerNames": [
+        "supabase_auth_rrj_h09_order_flow_20261015",
+        "supabase_db_rrj_h09_order_flow_20261015",
+        "supabase_inbucket_rrj_h09_order_flow_20261015",
+        "supabase_kong_rrj_h09_order_flow_20261015",
+        "supabase_rest_rrj_h09_order_flow_20261015",
+        "supabase_storage_rrj_h09_order_flow_20261015"
+      ],
+      "count": 6,
+      "running": 6,
+      "networks": [
+        "supabase_network_rrj_h09_order_flow_20261015"
+      ],
+      "publishedPorts": [
+        "127.0.0.1:48322->5432/tcp",
+        "[::1]:48322->5432/tcp",
+        "127.0.0.1:48324->8025/tcp",
+        "[::1]:48324->8025/tcp",
+        "127.0.0.1:48321->8000/tcp",
+        "[::1]:48321->8000/tcp"
+      ],
+      "mountedVolumes": [
+        "supabase_db_rrj_h09_order_flow_20261015",
+        "supabase_storage_rrj_h09_order_flow_20261015"
+      ],
+      "containerRemovalProposed": false,
+      "containerRemovalApproved": false,
+      "containerRemovalReady": false,
+      "reason": "Current idle/use, complete independent recreation and evidence custody are not verified; no removal approved."
+    },
+    {
+      "project": "rrj_manager_lifecycle_20261014",
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "containerIds": [
+        "caca8252418a42261e360969151cb1a324b7557676ac0a5beb9fac0591c5e4bf",
+        "8d75e1ef2533f727c21e995151131520fce81f15abdb4256f0078c4ebac04086",
+        "7088583f5d03bdec2f2221bdc2aeca0643b983132a160f3b97b64b99d4eb9ef8",
+        "dcdd656c805d1e506bfbd830729d0f7aaecb7813665b4e676c5009e8f42d186f",
+        "b7f9e3a021fe2e5f6acdb33b7de6fe3681b958774a6ecbaf9d714f7aecf43332"
+      ],
+      "containerNames": [
+        "supabase_auth_rrj_manager_lifecycle_20261014",
+        "supabase_db_rrj_manager_lifecycle_20261014",
+        "supabase_kong_rrj_manager_lifecycle_20261014",
+        "supabase_rest_rrj_manager_lifecycle_20261014",
+        "supabase_storage_rrj_manager_lifecycle_20261014"
+      ],
+      "count": 5,
+      "running": 5,
+      "networks": [
+        "supabase_network_rrj_manager_lifecycle_20261014"
+      ],
+      "publishedPorts": [
+        "127.0.0.1:52322->5432/tcp",
+        "[::1]:52322->5432/tcp",
+        "127.0.0.1:52321->8000/tcp",
+        "[::1]:52321->8000/tcp"
+      ],
+      "mountedVolumes": [
+        "supabase_db_rrj_manager_lifecycle_20261014",
+        "supabase_storage_rrj_manager_lifecycle_20261014"
+      ],
+      "containerRemovalProposed": true,
+      "containerRemovalApproved": false,
+      "containerRemovalReady": false,
+      "reason": "Current idle/use, complete independent recreation and evidence custody are not verified; no removal approved."
+    },
+    {
+      "project": "rrj_phase3_prefix_20261014_a1",
+      "classification": "PROTECTED_KEEP",
+      "containerIds": [
+        "de14fe3d9d5100214997a8d5400fdc0db45ee18598c78881768d1f02b71034e6",
+        "8d9ccc55fd6b068088f764303e95cf1e5e12ee543ef21ef86d69a44f70092a90",
+        "0129b244cbaa7cf05ded9fe10513229dc98721a65a060f2d4beb2ee5c0254f15",
+        "04cf7973e393fe55b4088c68dc2d63b2027762355fdb7209eb9619e9da386ffd",
+        "ae137e6fa5830b68e3caed406b8d9d4dfd6f7f22e878b9c5480e7506e9dd5a69"
+      ],
+      "containerNames": [
+        "supabase_auth_rrj_phase3_prefix_20261014_a1",
+        "supabase_db_rrj_phase3_prefix_20261014_a1",
+        "supabase_kong_rrj_phase3_prefix_20261014_a1",
+        "supabase_rest_rrj_phase3_prefix_20261014_a1",
+        "supabase_storage_rrj_phase3_prefix_20261014_a1"
+      ],
+      "count": 5,
+      "running": 5,
+      "networks": [
+        "supabase_network_rrj_phase3_prefix_20261014_a1"
+      ],
+      "publishedPorts": [
+        "127.0.0.1:63222->5432/tcp",
+        "[::1]:63222->5432/tcp",
+        "127.0.0.1:63221->8000/tcp",
+        "[::1]:63221->8000/tcp"
+      ],
+      "mountedVolumes": [
+        "supabase_db_rrj_phase3_prefix_20261014_a1",
+        "supabase_storage_rrj_phase3_prefix_20261014_a1"
+      ],
+      "containerRemovalProposed": false,
+      "containerRemovalApproved": false,
+      "containerRemovalReady": false,
+      "reason": "Current idle/use, complete independent recreation and evidence custody are not verified; no removal approved."
+    },
+    {
+      "project": "rrj_phase8_sim",
+      "classification": "UNKNOWN_NOT_APPROVED",
+      "containerIds": [
+        "bf3087423191404143235d3ed36f128eb367d8e8430011a5f7325d581670f372",
+        "05248ee14735eabf5c5b21969b354559c65f0e3997519448bf68dfdcd3506dd2",
+        "f4dc2b6115617976e3f2c715e08248d086c97e7fa5e2c1017d31361ed03e4689",
+        "21337dc139d76d07c7290f3ac039cbdf094946ee353596c92930cff013c3d56c",
+        "69e08c98aa8e2e188100d0af72830ac601cdf22cdba818fe36e1f8e6677805e7",
+        "fd2fcefdfbc8d04c6b16fff9cbe80ad1f0c6fb758d0b32e6c51a7dbfe1c1d6ef",
+        "e8027b107be7a4aeb71e9cca20f9029fc18fe32916ab8265f03647fdf6e07ae3",
+        "240232e06d4b03c7b924053153fb064af8f7111b63e568972ae58c2b48875ce6",
+        "33b54d736e830c69ae8fedc5d7147c842c8e2803ae6533ff5f90bfee3c48a4b3",
+        "ba0909dcc96a7c9bc80eb305efe34e60bccf4402fc2f1c46236c068947ef9108",
+        "7b74a27c4f03a274e3e03d9cef44300d5afb188c1243e5d900d9f92dd3ccb592",
+        "2877b8ab0d4d597d7b553c02163dbc585e8680c5d9b4a81d56f636faf6cabe0f"
+      ],
+      "containerNames": [
+        "supabase_analytics_rrj_phase8_sim",
+        "supabase_auth_rrj_phase8_sim",
+        "supabase_db_rrj_phase8_sim",
+        "supabase_edge_runtime_rrj_phase8_sim",
+        "supabase_inbucket_rrj_phase8_sim",
+        "supabase_kong_rrj_phase8_sim",
+        "supabase_pg_meta_rrj_phase8_sim",
+        "supabase_realtime_rrj_phase8_sim",
+        "supabase_rest_rrj_phase8_sim",
+        "supabase_storage_rrj_phase8_sim",
+        "supabase_studio_rrj_phase8_sim",
+        "supabase_vector_rrj_phase8_sim"
+      ],
+      "count": 12,
+      "running": 11,
+      "networks": [
+        "rrj_phase8_loopback"
+      ],
+      "publishedPorts": [
+        "127.0.0.1:55327->4000/tcp",
+        "[::1]:55327->4000/tcp",
+        "127.0.0.1:55322->5432/tcp",
+        "[::1]:55322->5432/tcp",
+        "127.0.0.1:55324->8025/tcp",
+        "[::1]:55324->8025/tcp",
+        "127.0.0.1:55321->8000/tcp",
+        "[::1]:55321->8000/tcp",
+        "127.0.0.1:55323->3000/tcp",
+        "[::1]:55323->3000/tcp"
+      ],
+      "mountedVolumes": [
+        "supabase_config_rrj_phase8_sim",
+        "supabase_db_rrj_phase8_sim",
+        "supabase_storage_rrj_phase8_sim"
+      ],
+      "containerRemovalProposed": false,
+      "containerRemovalApproved": false,
+      "containerRemovalReady": false,
+      "reason": "Current idle/use, complete independent recreation and evidence custody are not verified; no removal approved."
+    },
+    {
+      "project": "rrj_rc_synthetic_replay_20261013",
+      "classification": "UNKNOWN_NOT_APPROVED",
+      "containerIds": [
+        "85c59c5ec0b591baaa880e3fac3ae567aa8b3603f19fd40ee7b805856e5547c7",
+        "9410f82c405e1615d031474d863bdc3508936813e3e8a16acb172c3d2c6ae87f",
+        "e77021711b8d633ec7ab3cbd61fffa97b0eadfd1d5571a00a5a72def7a4d3f4d",
+        "aee7e23073896b189d31cf77519a4549e27ab1f4724c9afa1665a41b25eae2a2",
+        "5a15b115b197fc3f9c567aff6873e3928c48043c55a03d9fb4b3dcb8376c4f18"
+      ],
+      "containerNames": [
+        "supabase_auth_rrj_rc_synthetic_replay_20261013",
+        "supabase_db_rrj_rc_synthetic_replay_20261013",
+        "supabase_kong_rrj_rc_synthetic_replay_20261013",
+        "supabase_rest_rrj_rc_synthetic_replay_20261013",
+        "supabase_storage_rrj_rc_synthetic_replay_20261013"
+      ],
+      "count": 5,
+      "running": 5,
+      "networks": [
+        "supabase_network_rrj_rc_synthetic_replay_20261013"
+      ],
+      "publishedPorts": [
+        "127.0.0.1:60322->5432/tcp",
+        "[::1]:60322->5432/tcp",
+        "127.0.0.1:60321->8000/tcp",
+        "[::1]:60321->8000/tcp"
+      ],
+      "mountedVolumes": [
+        "supabase_config_rrj_rc_synthetic_replay_20261013",
+        "supabase_db_rrj_rc_synthetic_replay_20261013",
+        "supabase_storage_rrj_rc_synthetic_replay_20261013"
+      ],
+      "containerRemovalProposed": false,
+      "containerRemovalApproved": false,
+      "containerRemovalReady": false,
+      "reason": "Current idle/use, complete independent recreation and evidence custody are not verified; no removal approved."
+    },
+    {
+      "project": "rrj_recovery_20261014_source",
+      "classification": "PROTECTED_KEEP",
+      "containerIds": [
+        "d6f577841ff16df59dc0fbb3764dfb670cbff39a0135b56863172b0e36bf1e0a",
+        "a14b2a34891f3919131af0ab61ce555034a4a3ba2e3c9d5175c26486491d4596",
+        "f20027554943db139af0e5984441d5152909d0f5777badf7e0146ac3eac89591",
+        "431599f0a1244b79a8d00f793590bc8c2d7769883ed8f3613c33f187c640d1c3",
+        "014c63910b8800def9d3426e627058e5c625716f8a5664ad0eb470422fcc8aff"
+      ],
+      "containerNames": [
+        "supabase_auth_rrj_recovery_20261014_source",
+        "supabase_db_rrj_recovery_20261014_source",
+        "supabase_kong_rrj_recovery_20261014_source",
+        "supabase_rest_rrj_recovery_20261014_source",
+        "supabase_storage_rrj_recovery_20261014_source"
+      ],
+      "count": 5,
+      "running": 5,
+      "networks": [
+        "supabase_network_rrj_recovery_20261014_source"
+      ],
+      "publishedPorts": [
+        "127.0.0.1:65322->5432/tcp",
+        "[::1]:65322->5432/tcp",
+        "127.0.0.1:65321->8000/tcp",
+        "[::1]:65321->8000/tcp"
+      ],
+      "mountedVolumes": [
+        "supabase_db_rrj_recovery_20261014_source",
+        "supabase_storage_rrj_recovery_20261014_source"
+      ],
+      "containerRemovalProposed": false,
+      "containerRemovalApproved": false,
+      "containerRemovalReady": false,
+      "reason": "Current idle/use, complete independent recreation and evidence custody are not verified; no removal approved."
+    },
+    {
+      "project": "rrj_recovery_20261014_target",
+      "classification": "PROTECTED_KEEP",
+      "containerIds": [
+        "e36a0276a003a7d8d57e0d105759b62f6ee605e6a5deaf005f34a3713c28b9f2",
+        "0fc45950b40b0779cc98c24d4c3e46d0cb59a292c5a4e2d455e0b59b267143e4",
+        "35ebaaa1137c9a9f84932c9afefa90791df5e4a7b1ce0c881225d46bb82052c2",
+        "43ff56c70e58861067d6660887b927d3508bdb8041c437e42e7b3c670bb82890",
+        "7d7cc4e2e2983bdf86c34cba038dd849b92a96eb42e0b30bf41a763dde9cef2b"
+      ],
+      "containerNames": [
+        "supabase_auth_rrj_recovery_20261014_target",
+        "supabase_db_rrj_recovery_20261014_target",
+        "supabase_kong_rrj_recovery_20261014_target",
+        "supabase_rest_rrj_recovery_20261014_target",
+        "supabase_storage_rrj_recovery_20261014_target"
+      ],
+      "count": 5,
+      "running": 5,
+      "networks": [
+        "supabase_network_rrj_recovery_20261014_target"
+      ],
+      "publishedPorts": [
+        "127.0.0.1:64322->5432/tcp",
+        "[::1]:64322->5432/tcp",
+        "127.0.0.1:64321->8000/tcp",
+        "[::1]:64321->8000/tcp"
+      ],
+      "mountedVolumes": [
+        "supabase_db_rrj_recovery_20261014_target",
+        "supabase_storage_rrj_recovery_20261014_target"
+      ],
+      "containerRemovalProposed": false,
+      "containerRemovalApproved": false,
+      "containerRemovalReady": false,
+      "reason": "Current idle/use, complete independent recreation and evidence custody are not verified; no removal approved."
+    }
+  ],
+  "containers": [
+    {
+      "id": "2bede0448e2929a1bdb8f040636e60bf73c30bb0bc074d2d54ab1f412738b2b4",
+      "name": "rrj_recovery_rehearsal_20261013",
+      "project": null,
+      "classification": "UNKNOWN_NOT_APPROVED",
+      "composeProjectLabel": null,
+      "supabaseProjectLabel": null,
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "rrj_recovery_rehearsal_20261013",
+      "imageReference": "public.ecr.aws/supabase/postgres:17.6.1.147",
+      "imageDigestVerified": false,
+      "state": "exited",
+      "health": "unhealthy",
+      "restartPolicy": "no",
+      "publishedPorts": [],
+      "exposedPorts": [],
+      "networks": [
+        "none"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "3ceb1b48a1c209b11bec04a560e6b3899bffb3c8901b6a0d967f66816cf5a8a4",
+      "name": "supabase_auth_isolated-stack",
+      "project": "isolated-stack",
+      "classification": "UNRELATED_PROTECTED",
+      "composeProjectLabel": "isolated-stack",
+      "supabaseProjectLabel": "isolated-stack",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "auth",
+      "imageReference": "public.ecr.aws/supabase/gotrue:v2.197.0",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "9999/tcp"
+      ],
+      "networks": [
+        "supabase_network_isolated-stack"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "677b9f1c451b305975d87726d3c7f15ccbfdafd8625fcfec261630b7df4189e5",
+      "name": "supabase_db_isolated-stack",
+      "project": "isolated-stack",
+      "classification": "UNRELATED_PROTECTED",
+      "composeProjectLabel": "isolated-stack",
+      "supabaseProjectLabel": "isolated-stack",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "db",
+      "imageReference": "public.ecr.aws/supabase/postgres:17.11.0.004",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [
+        "127.0.0.1:56322->5432/tcp",
+        "[::1]:56322->5432/tcp"
+      ],
+      "exposedPorts": [
+        "5432/tcp"
+      ],
+      "networks": [
+        "supabase_network_isolated-stack"
+      ],
+      "mounts": [
+        {
+          "type": "volume",
+          "name": "supabase_db_isolated-stack",
+          "destination": "/var/lib/postgresql/data",
+          "volumeMountpoint": "/var/lib/docker/volumes/supabase_db_isolated-stack/_data"
+        }
+      ],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "b56f15a408f84f6a9de2c314dd806247e9f00ba5f52335a7e9926de8beea8ae7",
+      "name": "supabase_kong_isolated-stack",
+      "project": "isolated-stack",
+      "classification": "UNRELATED_PROTECTED",
+      "composeProjectLabel": "isolated-stack",
+      "supabaseProjectLabel": "isolated-stack",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "kong",
+      "imageReference": "public.ecr.aws/supabase/kong:2.8.1",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [
+        "127.0.0.1:56321->8000/tcp",
+        "[::1]:56321->8000/tcp"
+      ],
+      "exposedPorts": [
+        "8000/tcp"
+      ],
+      "networks": [
+        "supabase_network_isolated-stack"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "fa026b6aa72f871c3e0d15a0737c8047fb171a70abf54cdc946b9c6d44d0dae6",
+      "name": "supabase_pg_meta_isolated-stack",
+      "project": "isolated-stack",
+      "classification": "UNRELATED_PROTECTED",
+      "composeProjectLabel": "isolated-stack",
+      "supabaseProjectLabel": "isolated-stack",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "pg_meta",
+      "imageReference": "public.ecr.aws/supabase/postgres-meta:v0.100.0",
+      "imageDigestVerified": false,
+      "state": "exited",
+      "health": "unhealthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [],
+      "exposedPorts": [],
+      "networks": [
+        "supabase_network_isolated-stack"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "7ede4d92799ff358dc5d09fe371bba4266cc8500057dbb4059414de870829ca8",
+      "name": "supabase_rest_isolated-stack",
+      "project": "isolated-stack",
+      "classification": "UNRELATED_PROTECTED",
+      "composeProjectLabel": "isolated-stack",
+      "supabaseProjectLabel": "isolated-stack",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "rest",
+      "imageReference": "public.ecr.aws/supabase/postgrest:v16.4",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": null,
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "3000/tcp"
+      ],
+      "networks": [
+        "supabase_network_isolated-stack"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "40c80e51042f7a2a1818e42935cdaa87d3c5e392e415b2eec49a7bb33bca1bfd",
+      "name": "supabase_storage_isolated-stack",
+      "project": "isolated-stack",
+      "classification": "UNRELATED_PROTECTED",
+      "composeProjectLabel": "isolated-stack",
+      "supabaseProjectLabel": "isolated-stack",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "storage",
+      "imageReference": "public.ecr.aws/supabase/storage-api:v1.79.36",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "5000/tcp"
+      ],
+      "networks": [
+        "supabase_network_isolated-stack"
+      ],
+      "mounts": [
+        {
+          "type": "volume",
+          "name": "supabase_storage_isolated-stack",
+          "destination": "/mnt",
+          "volumeMountpoint": "/var/lib/docker/volumes/supabase_storage_isolated-stack/_data"
+        }
+      ],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "908d74874442575b58f0dca1f016917ac8f88f5b450e5f3cd7e789a721822577",
+      "name": "supabase_analytics_my-local-todo-app",
+      "project": "my-local-todo-app",
+      "classification": "UNRELATED_PROTECTED",
+      "composeProjectLabel": "my-local-todo-app",
+      "supabaseProjectLabel": "my-local-todo-app",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "analytics",
+      "imageReference": "public.ecr.aws/supabase/logflare:1.14.2",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "always",
+      "publishedPorts": [
+        "127.0.0.1:54327->4000/tcp",
+        "[::1]:54327->4000/tcp"
+      ],
+      "exposedPorts": [
+        "4000/tcp"
+      ],
+      "networks": [
+        "supabase_network_my-local-todo-app"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "7bb568ae07669685067a09b551f63e146d442d2976154952a66f2f55902a7687",
+      "name": "supabase_auth_my-local-todo-app",
+      "project": "my-local-todo-app",
+      "classification": "UNRELATED_PROTECTED",
+      "composeProjectLabel": "my-local-todo-app",
+      "supabaseProjectLabel": "my-local-todo-app",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "auth",
+      "imageReference": "public.ecr.aws/supabase/gotrue:v2.177.0",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "always",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "9999/tcp"
+      ],
+      "networks": [
+        "supabase_network_my-local-todo-app"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "3feef4aaa27045f7abc4c02ff7e07225cc0db317b72eace308d3038d0e6cfa9a",
+      "name": "supabase_db_my-local-todo-app",
+      "project": "my-local-todo-app",
+      "classification": "UNRELATED_PROTECTED",
+      "composeProjectLabel": "my-local-todo-app",
+      "supabaseProjectLabel": "my-local-todo-app",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "db",
+      "imageReference": "public.ecr.aws/supabase/postgres:17.4.1.068",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "always",
+      "publishedPorts": [
+        "127.0.0.1:54322->5432/tcp",
+        "[::1]:54322->5432/tcp"
+      ],
+      "exposedPorts": [
+        "5432/tcp"
+      ],
+      "networks": [
+        "supabase_network_my-local-todo-app"
+      ],
+      "mounts": [
+        {
+          "type": "volume",
+          "name": "supabase_config_my-local-todo-app",
+          "destination": "/etc/postgresql-custom",
+          "volumeMountpoint": "/var/lib/docker/volumes/supabase_config_my-local-todo-app/_data"
+        },
+        {
+          "type": "volume",
+          "name": "supabase_db_my-local-todo-app",
+          "destination": "/var/lib/postgresql/data",
+          "volumeMountpoint": "/var/lib/docker/volumes/supabase_db_my-local-todo-app/_data"
+        }
+      ],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "79eb80b0ca745fbdbcb525197b7ac0152e08ffac3e852dc0646eeb4b227d8959",
+      "name": "supabase_edge_runtime_my-local-todo-app",
+      "project": "my-local-todo-app",
+      "classification": "UNRELATED_PROTECTED",
+      "composeProjectLabel": "my-local-todo-app",
+      "supabaseProjectLabel": "my-local-todo-app",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "edge_runtime",
+      "imageReference": "public.ecr.aws/supabase/edge-runtime:v1.68.3",
+      "imageDigestVerified": false,
+      "state": "exited",
+      "health": null,
+      "restartPolicy": "no",
+      "publishedPorts": [],
+      "exposedPorts": [],
+      "networks": [
+        "supabase_network_my-local-todo-app"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "18aa01159581456fe3d7db04af10308e54364a934480b0d6bf70a09d9a6fd29f",
+      "name": "supabase_inbucket_my-local-todo-app",
+      "project": "my-local-todo-app",
+      "classification": "UNRELATED_PROTECTED",
+      "composeProjectLabel": "my-local-todo-app",
+      "supabaseProjectLabel": "my-local-todo-app",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "inbucket",
+      "imageReference": "public.ecr.aws/supabase/mailpit:v1.22.3",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "always",
+      "publishedPorts": [
+        "127.0.0.1:54324->8025/tcp",
+        "[::1]:54324->8025/tcp"
+      ],
+      "exposedPorts": [
+        "8025/tcp"
+      ],
+      "networks": [
+        "supabase_network_my-local-todo-app"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "350c49e29d519eab347f617284894fae1fd5bbc211bcce474dde566481cad92c",
+      "name": "supabase_kong_my-local-todo-app",
+      "project": "my-local-todo-app",
+      "classification": "UNRELATED_PROTECTED",
+      "composeProjectLabel": "my-local-todo-app",
+      "supabaseProjectLabel": "my-local-todo-app",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "kong",
+      "imageReference": "public.ecr.aws/supabase/kong:2.8.1",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "always",
+      "publishedPorts": [
+        "127.0.0.1:54321->8000/tcp",
+        "[::1]:54321->8000/tcp"
+      ],
+      "exposedPorts": [
+        "8000/tcp"
+      ],
+      "networks": [
+        "supabase_network_my-local-todo-app"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "2a751d274ef04fe1d04c2acd3cd3c8d8ba3dadeaeaab9a909402330fc534458b",
+      "name": "supabase_pg_meta_my-local-todo-app",
+      "project": "my-local-todo-app",
+      "classification": "UNRELATED_PROTECTED",
+      "composeProjectLabel": "my-local-todo-app",
+      "supabaseProjectLabel": "my-local-todo-app",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "pg_meta",
+      "imageReference": "public.ecr.aws/supabase/postgres-meta:v0.91.4",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "always",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "8080/tcp"
+      ],
+      "networks": [
+        "supabase_network_my-local-todo-app"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "0919896beee16eface8fcf32c1700768b030785153a43354c3e6f0aba5dbc00a",
+      "name": "supabase_realtime_my-local-todo-app",
+      "project": "my-local-todo-app",
+      "classification": "UNRELATED_PROTECTED",
+      "composeProjectLabel": "my-local-todo-app",
+      "supabaseProjectLabel": "my-local-todo-app",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "realtime",
+      "imageReference": "public.ecr.aws/supabase/realtime:v2.41.11",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "always",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "4000/tcp"
+      ],
+      "networks": [
+        "supabase_network_my-local-todo-app"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "c236ff77977818616c46640f9ed0015725cd2378b60778edc6cb8454d88bb86c",
+      "name": "supabase_rest_my-local-todo-app",
+      "project": "my-local-todo-app",
+      "classification": "UNRELATED_PROTECTED",
+      "composeProjectLabel": "my-local-todo-app",
+      "supabaseProjectLabel": "my-local-todo-app",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "rest",
+      "imageReference": "public.ecr.aws/supabase/postgrest:v12.2.12",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": null,
+      "restartPolicy": "always",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "3000/tcp"
+      ],
+      "networks": [
+        "supabase_network_my-local-todo-app"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "5e7897f1092e41a4a0054431ae66ca1ce67e45b3b995a1e530136ed46dc2d4c3",
+      "name": "supabase_storage_my-local-todo-app",
+      "project": "my-local-todo-app",
+      "classification": "UNRELATED_PROTECTED",
+      "composeProjectLabel": "my-local-todo-app",
+      "supabaseProjectLabel": "my-local-todo-app",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "storage",
+      "imageReference": "public.ecr.aws/supabase/storage-api:v1.26.0",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "always",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "5000/tcp"
+      ],
+      "networks": [
+        "supabase_network_my-local-todo-app"
+      ],
+      "mounts": [
+        {
+          "type": "volume",
+          "name": "supabase_storage_my-local-todo-app",
+          "destination": "/mnt",
+          "volumeMountpoint": "/var/lib/docker/volumes/supabase_storage_my-local-todo-app/_data"
+        }
+      ],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "9b9a34b6a50781dc4651c8c8718d425cbd2504eaf3e53545fbb86732ae540e93",
+      "name": "supabase_studio_my-local-todo-app",
+      "project": "my-local-todo-app",
+      "classification": "UNRELATED_PROTECTED",
+      "composeProjectLabel": "my-local-todo-app",
+      "supabaseProjectLabel": "my-local-todo-app",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "studio",
+      "imageReference": "public.ecr.aws/supabase/studio:2025.07.28-sha-578b707",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "always",
+      "publishedPorts": [
+        "127.0.0.1:54323->3000/tcp",
+        "[::1]:54323->3000/tcp"
+      ],
+      "exposedPorts": [
+        "3000/tcp"
+      ],
+      "networks": [
+        "supabase_network_my-local-todo-app"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "bcf16098d8431578e39a2a4c61be696ea074675ffa748c2c0951a8acc58f93a2",
+      "name": "supabase_vector_my-local-todo-app",
+      "project": "my-local-todo-app",
+      "classification": "UNRELATED_PROTECTED",
+      "composeProjectLabel": "my-local-todo-app",
+      "supabaseProjectLabel": "my-local-todo-app",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "vector",
+      "imageReference": "public.ecr.aws/supabase/vector:0.28.1-alpine",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "always",
+      "publishedPorts": [],
+      "exposedPorts": [],
+      "networks": [
+        "supabase_network_my-local-todo-app"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "9b7c1cecb09c9430fd386d6f31a765cf5c1b3f41a15d5b054b21f0aeab580228",
+      "name": "supabase_auth_rrj_defense_demo_20261014",
+      "project": "rrj_defense_demo_20261014",
+      "classification": "PROTECTED_KEEP",
+      "composeProjectLabel": "rrj_defense_demo_20261014",
+      "supabaseProjectLabel": "rrj_defense_demo_20261014",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "auth",
+      "imageReference": "public.ecr.aws/supabase/gotrue:v2.197.0",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "9999/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_defense_demo_20261014"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "d1d080ef20d735c6beb262933b77a16ead5c46370874ebdcb8f0b92baf0b67fb",
+      "name": "supabase_db_rrj_defense_demo_20261014",
+      "project": "rrj_defense_demo_20261014",
+      "classification": "PROTECTED_KEEP",
+      "composeProjectLabel": "rrj_defense_demo_20261014",
+      "supabaseProjectLabel": "rrj_defense_demo_20261014",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "db",
+      "imageReference": "public.ecr.aws/supabase/postgres:17.11.0.004",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [
+        "127.0.0.1:61322->5432/tcp",
+        "[::1]:61322->5432/tcp"
+      ],
+      "exposedPorts": [
+        "5432/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_defense_demo_20261014"
+      ],
+      "mounts": [
+        {
+          "type": "volume",
+          "name": "supabase_db_rrj_defense_demo_20261014",
+          "destination": "/var/lib/postgresql/data",
+          "volumeMountpoint": "/var/lib/docker/volumes/supabase_db_rrj_defense_demo_20261014/_data"
+        }
+      ],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "3c44fae58d3833f38ff7b0ecbc4cc61bd4f1d68eaeea3acf77c6b8db5f221ade",
+      "name": "supabase_kong_rrj_defense_demo_20261014",
+      "project": "rrj_defense_demo_20261014",
+      "classification": "PROTECTED_KEEP",
+      "composeProjectLabel": "rrj_defense_demo_20261014",
+      "supabaseProjectLabel": "rrj_defense_demo_20261014",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "kong",
+      "imageReference": "public.ecr.aws/supabase/kong:2.8.1",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [
+        "127.0.0.1:61321->8000/tcp",
+        "[::1]:61321->8000/tcp"
+      ],
+      "exposedPorts": [
+        "8000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_defense_demo_20261014"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "55938b9df480620cb3c2b9dd2f32a8cb06c95f0cb79d43995880fdef6d7a2f71",
+      "name": "supabase_rest_rrj_defense_demo_20261014",
+      "project": "rrj_defense_demo_20261014",
+      "classification": "PROTECTED_KEEP",
+      "composeProjectLabel": "rrj_defense_demo_20261014",
+      "supabaseProjectLabel": "rrj_defense_demo_20261014",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "rest",
+      "imageReference": "public.ecr.aws/supabase/postgrest:v16.4",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": null,
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "3000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_defense_demo_20261014"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "90c84db09a56b21e191f470345def2564e0f91e80d390b71652d723379025a29",
+      "name": "supabase_storage_rrj_defense_demo_20261014",
+      "project": "rrj_defense_demo_20261014",
+      "classification": "PROTECTED_KEEP",
+      "composeProjectLabel": "rrj_defense_demo_20261014",
+      "supabaseProjectLabel": "rrj_defense_demo_20261014",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "storage",
+      "imageReference": "public.ecr.aws/supabase/storage-api:v1.79.36",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "5000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_defense_demo_20261014"
+      ],
+      "mounts": [
+        {
+          "type": "volume",
+          "name": "supabase_storage_rrj_defense_demo_20261014",
+          "destination": "/mnt",
+          "volumeMountpoint": "/var/lib/docker/volumes/supabase_storage_rrj_defense_demo_20261014/_data"
+        }
+      ],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "e133aed5720f1885dadedd81e959d9a55cd2029e947855df5af2c20ed417081b",
+      "name": "supabase_auth_rrj_defense_demo_20261014_r2",
+      "project": "rrj_defense_demo_20261014_r2",
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "composeProjectLabel": "rrj_defense_demo_20261014_r2",
+      "supabaseProjectLabel": "rrj_defense_demo_20261014_r2",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "auth",
+      "imageReference": "public.ecr.aws/supabase/gotrue:v2.197.0",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "9999/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_defense_demo_20261014_r2"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "beec6b1192ca8cd3e31912215080974d5f5b67a04c45aa0c7baad1df85a833e0",
+      "name": "supabase_db_rrj_defense_demo_20261014_r2",
+      "project": "rrj_defense_demo_20261014_r2",
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "composeProjectLabel": "rrj_defense_demo_20261014_r2",
+      "supabaseProjectLabel": "rrj_defense_demo_20261014_r2",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "db",
+      "imageReference": "public.ecr.aws/supabase/postgres:17.11.0.004",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [
+        "127.0.0.1:62322->5432/tcp",
+        "[::1]:62322->5432/tcp"
+      ],
+      "exposedPorts": [
+        "5432/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_defense_demo_20261014_r2"
+      ],
+      "mounts": [
+        {
+          "type": "volume",
+          "name": "supabase_db_rrj_defense_demo_20261014_r2",
+          "destination": "/var/lib/postgresql/data",
+          "volumeMountpoint": "/var/lib/docker/volumes/supabase_db_rrj_defense_demo_20261014_r2/_data"
+        }
+      ],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "56c80a5f8803e5c64e4defb5578b7dd223c2d23ad6d37231df8e5b1524245b3d",
+      "name": "supabase_kong_rrj_defense_demo_20261014_r2",
+      "project": "rrj_defense_demo_20261014_r2",
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "composeProjectLabel": "rrj_defense_demo_20261014_r2",
+      "supabaseProjectLabel": "rrj_defense_demo_20261014_r2",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "kong",
+      "imageReference": "public.ecr.aws/supabase/kong:2.8.1",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [
+        "127.0.0.1:62321->8000/tcp",
+        "[::1]:62321->8000/tcp"
+      ],
+      "exposedPorts": [
+        "8000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_defense_demo_20261014_r2"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "30d5bf2f23a16195c949fda8d2aa992159886f2f5179436caeb9a29117b7c0b4",
+      "name": "supabase_rest_rrj_defense_demo_20261014_r2",
+      "project": "rrj_defense_demo_20261014_r2",
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "composeProjectLabel": "rrj_defense_demo_20261014_r2",
+      "supabaseProjectLabel": "rrj_defense_demo_20261014_r2",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "rest",
+      "imageReference": "public.ecr.aws/supabase/postgrest:v16.4",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": null,
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "3000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_defense_demo_20261014_r2"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "fadb21325353648dc18ffbc23e6000da891347baf583cef13395ed3dae0a2c93",
+      "name": "supabase_storage_rrj_defense_demo_20261014_r2",
+      "project": "rrj_defense_demo_20261014_r2",
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "composeProjectLabel": "rrj_defense_demo_20261014_r2",
+      "supabaseProjectLabel": "rrj_defense_demo_20261014_r2",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "storage",
+      "imageReference": "public.ecr.aws/supabase/storage-api:v1.79.36",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "5000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_defense_demo_20261014_r2"
+      ],
+      "mounts": [
+        {
+          "type": "volume",
+          "name": "supabase_storage_rrj_defense_demo_20261014_r2",
+          "destination": "/mnt",
+          "volumeMountpoint": "/var/lib/docker/volumes/supabase_storage_rrj_defense_demo_20261014_r2/_data"
+        }
+      ],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "92bb64389b29fd51e1dceafa56d697981b95cfc31f5b978c49e1a2868989d81f",
+      "name": "supabase_auth_rrj_defense_demo_20261014_r3",
+      "project": "rrj_defense_demo_20261014_r3",
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "composeProjectLabel": "rrj_defense_demo_20261014_r3",
+      "supabaseProjectLabel": "rrj_defense_demo_20261014_r3",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "auth",
+      "imageReference": "public.ecr.aws/supabase/gotrue:v2.197.0",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "9999/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_defense_demo_20261014_r3"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "85e0d9d47432af916afad1ef7c5007bf69269bbdef96557f98a4b8deef23eda4",
+      "name": "supabase_db_rrj_defense_demo_20261014_r3",
+      "project": "rrj_defense_demo_20261014_r3",
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "composeProjectLabel": "rrj_defense_demo_20261014_r3",
+      "supabaseProjectLabel": "rrj_defense_demo_20261014_r3",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "db",
+      "imageReference": "public.ecr.aws/supabase/postgres:17.11.0.004",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [
+        "127.0.0.1:63322->5432/tcp",
+        "[::1]:63322->5432/tcp"
+      ],
+      "exposedPorts": [
+        "5432/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_defense_demo_20261014_r3"
+      ],
+      "mounts": [
+        {
+          "type": "volume",
+          "name": "supabase_db_rrj_defense_demo_20261014_r3",
+          "destination": "/var/lib/postgresql/data",
+          "volumeMountpoint": "/var/lib/docker/volumes/supabase_db_rrj_defense_demo_20261014_r3/_data"
+        }
+      ],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "08696de9d4e4f926986720ab17b57f2f4d830d9bb7cd9e5ce51d3411e22ccc3f",
+      "name": "supabase_kong_rrj_defense_demo_20261014_r3",
+      "project": "rrj_defense_demo_20261014_r3",
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "composeProjectLabel": "rrj_defense_demo_20261014_r3",
+      "supabaseProjectLabel": "rrj_defense_demo_20261014_r3",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "kong",
+      "imageReference": "public.ecr.aws/supabase/kong:2.8.1",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [
+        "127.0.0.1:63321->8000/tcp",
+        "[::1]:63321->8000/tcp"
+      ],
+      "exposedPorts": [
+        "8000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_defense_demo_20261014_r3"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "a47c5ff84b749671da0e1a97038d4601e86960b11a326f53d3d93a918a271723",
+      "name": "supabase_rest_rrj_defense_demo_20261014_r3",
+      "project": "rrj_defense_demo_20261014_r3",
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "composeProjectLabel": "rrj_defense_demo_20261014_r3",
+      "supabaseProjectLabel": "rrj_defense_demo_20261014_r3",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "rest",
+      "imageReference": "public.ecr.aws/supabase/postgrest:v16.4",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": null,
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "3000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_defense_demo_20261014_r3"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "bdd4c001c23212df2ead6a8a8f29e0b93e3e70acb672ae621b9ee7dced2acdd4",
+      "name": "supabase_storage_rrj_defense_demo_20261014_r3",
+      "project": "rrj_defense_demo_20261014_r3",
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "composeProjectLabel": "rrj_defense_demo_20261014_r3",
+      "supabaseProjectLabel": "rrj_defense_demo_20261014_r3",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "storage",
+      "imageReference": "public.ecr.aws/supabase/storage-api:v1.79.36",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "5000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_defense_demo_20261014_r3"
+      ],
+      "mounts": [
+        {
+          "type": "volume",
+          "name": "supabase_storage_rrj_defense_demo_20261014_r3",
+          "destination": "/mnt",
+          "volumeMountpoint": "/var/lib/docker/volumes/supabase_storage_rrj_defense_demo_20261014_r3/_data"
+        }
+      ],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "d8b130694c1d38022c051f1040e0c256c5d33d9cc8032491160109b3b90c6b17",
+      "name": "supabase_auth_rrj_h07_financial_20261014",
+      "project": "rrj_h07_financial_20261014",
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "composeProjectLabel": "rrj_h07_financial_20261014",
+      "supabaseProjectLabel": "rrj_h07_financial_20261014",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "auth",
+      "imageReference": "public.ecr.aws/supabase/gotrue:v2.197.0",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "9999/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_h07_financial_20261014"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "db4249c0ec4c4819746ce18346dd0d6cb018dd1401e3c8813ce3f27fc3022c45",
+      "name": "supabase_db_rrj_h07_financial_20261014",
+      "project": "rrj_h07_financial_20261014",
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "composeProjectLabel": "rrj_h07_financial_20261014",
+      "supabaseProjectLabel": "rrj_h07_financial_20261014",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "db",
+      "imageReference": "public.ecr.aws/supabase/postgres:17.11.0.004",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [
+        "127.0.0.1:57322->5432/tcp",
+        "[::1]:57322->5432/tcp"
+      ],
+      "exposedPorts": [
+        "5432/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_h07_financial_20261014"
+      ],
+      "mounts": [
+        {
+          "type": "volume",
+          "name": "supabase_db_rrj_h07_financial_20261014",
+          "destination": "/var/lib/postgresql/data",
+          "volumeMountpoint": "/var/lib/docker/volumes/supabase_db_rrj_h07_financial_20261014/_data"
+        }
+      ],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "e8f7b6161dd3bea217d2b1e987ed6e3019d9953783a64862b161a011146b2e01",
+      "name": "supabase_kong_rrj_h07_financial_20261014",
+      "project": "rrj_h07_financial_20261014",
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "composeProjectLabel": "rrj_h07_financial_20261014",
+      "supabaseProjectLabel": "rrj_h07_financial_20261014",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "kong",
+      "imageReference": "public.ecr.aws/supabase/kong:2.8.1",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [
+        "127.0.0.1:57321->8000/tcp",
+        "[::1]:57321->8000/tcp"
+      ],
+      "exposedPorts": [
+        "8000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_h07_financial_20261014"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "f8c4f6885aa9f59900fe87c6b673a33c6493dd39a39e3260f955231b0641177e",
+      "name": "supabase_rest_rrj_h07_financial_20261014",
+      "project": "rrj_h07_financial_20261014",
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "composeProjectLabel": "rrj_h07_financial_20261014",
+      "supabaseProjectLabel": "rrj_h07_financial_20261014",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "rest",
+      "imageReference": "public.ecr.aws/supabase/postgrest:v16.4",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": null,
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "3000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_h07_financial_20261014"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "74b5ba6d38ca951380e39ab4ac97e94357470d4b4f4596c862d1f402b62a0af4",
+      "name": "supabase_storage_rrj_h07_financial_20261014",
+      "project": "rrj_h07_financial_20261014",
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "composeProjectLabel": "rrj_h07_financial_20261014",
+      "supabaseProjectLabel": "rrj_h07_financial_20261014",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "storage",
+      "imageReference": "public.ecr.aws/supabase/storage-api:v1.79.36",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "5000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_h07_financial_20261014"
+      ],
+      "mounts": [
+        {
+          "type": "volume",
+          "name": "supabase_storage_rrj_h07_financial_20261014",
+          "destination": "/mnt",
+          "volumeMountpoint": "/var/lib/docker/volumes/supabase_storage_rrj_h07_financial_20261014/_data"
+        }
+      ],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "e3685155639ea55062aa61ca8f3e466e06f8ad62d0af6490ad4f4047005dd018",
+      "name": "supabase_auth_rrj_h08b_history_20261015",
+      "project": "rrj_h08b_history_20261015",
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "composeProjectLabel": "rrj_h08b_history_20261015",
+      "supabaseProjectLabel": "rrj_h08b_history_20261015",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "auth",
+      "imageReference": "public.ecr.aws/supabase/gotrue:v2.177.0",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "always",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "9999/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_h08b_history_20261015"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "c7716c7d279e3f5edcbf1d89369bf93c36eb1c90bcc86ac9bc16549f641e45b8",
+      "name": "supabase_db_rrj_h08b_history_20261015",
+      "project": "rrj_h08b_history_20261015",
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "composeProjectLabel": "rrj_h08b_history_20261015",
+      "supabaseProjectLabel": "rrj_h08b_history_20261015",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "db",
+      "imageReference": "public.ecr.aws/supabase/postgres:17.4.1.068",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "always",
+      "publishedPorts": [
+        "127.0.0.1:58322->5432/tcp",
+        "[::1]:58322->5432/tcp"
+      ],
+      "exposedPorts": [
+        "5432/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_h08b_history_20261015"
+      ],
+      "mounts": [
+        {
+          "type": "volume",
+          "name": "supabase_config_rrj_h08b_history_20261015",
+          "destination": "/etc/postgresql-custom",
+          "volumeMountpoint": "/var/lib/docker/volumes/supabase_config_rrj_h08b_history_20261015/_data"
+        },
+        {
+          "type": "volume",
+          "name": "supabase_db_rrj_h08b_history_20261015",
+          "destination": "/var/lib/postgresql/data",
+          "volumeMountpoint": "/var/lib/docker/volumes/supabase_db_rrj_h08b_history_20261015/_data"
+        }
+      ],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "4e7af74404e16a6358d0a49432079a60e97e59eff696f7e4340dc05c380e7b1d",
+      "name": "supabase_kong_rrj_h08b_history_20261015",
+      "project": "rrj_h08b_history_20261015",
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "composeProjectLabel": "rrj_h08b_history_20261015",
+      "supabaseProjectLabel": "rrj_h08b_history_20261015",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "kong",
+      "imageReference": "public.ecr.aws/supabase/kong:2.8.1",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "always",
+      "publishedPorts": [
+        "127.0.0.1:58321->8000/tcp",
+        "[::1]:58321->8000/tcp"
+      ],
+      "exposedPorts": [
+        "8000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_h08b_history_20261015"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "4f23e160669bfc2dd8180d75b8f4bf557941ce9cc1701219d653ed39f0e2f20c",
+      "name": "supabase_rest_rrj_h08b_history_20261015",
+      "project": "rrj_h08b_history_20261015",
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "composeProjectLabel": "rrj_h08b_history_20261015",
+      "supabaseProjectLabel": "rrj_h08b_history_20261015",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "rest",
+      "imageReference": "public.ecr.aws/supabase/postgrest:v12.2.12",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": null,
+      "restartPolicy": "always",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "3000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_h08b_history_20261015"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "1cc9c7088cba9e309d064ebfc8fd3d91bd1b9d05db5668ff84c542914651b07a",
+      "name": "supabase_storage_rrj_h08b_history_20261015",
+      "project": "rrj_h08b_history_20261015",
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "composeProjectLabel": "rrj_h08b_history_20261015",
+      "supabaseProjectLabel": "rrj_h08b_history_20261015",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "storage",
+      "imageReference": "public.ecr.aws/supabase/storage-api:v1.26.0",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "always",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "5000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_h08b_history_20261015"
+      ],
+      "mounts": [
+        {
+          "type": "volume",
+          "name": "supabase_storage_rrj_h08b_history_20261015",
+          "destination": "/mnt",
+          "volumeMountpoint": "/var/lib/docker/volumes/supabase_storage_rrj_h08b_history_20261015/_data"
+        }
+      ],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "2d9de3b44279023f721b8bcc8922c1b06de9e500bfec6eb5f5bd670489716c77",
+      "name": "supabase_analytics_rrj_h08c_history_20261015",
+      "project": "rrj_h08c_history_20261015",
+      "classification": "PROTECTED_KEEP",
+      "composeProjectLabel": "rrj_h08c_history_20261015",
+      "supabaseProjectLabel": "rrj_h08c_history_20261015",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "analytics",
+      "imageReference": "public.ecr.aws/supabase/logflare:1.14.2",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "always",
+      "publishedPorts": [
+        "127.0.0.1:59327->4000/tcp",
+        "[::1]:59327->4000/tcp"
+      ],
+      "exposedPorts": [
+        "4000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_h08c_history_20261015"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "862664844b4225a4a303600edcd2de3c17ef4e47ee8ef7658f275a1494938583",
+      "name": "supabase_auth_rrj_h08c_history_20261015",
+      "project": "rrj_h08c_history_20261015",
+      "classification": "PROTECTED_KEEP",
+      "composeProjectLabel": "rrj_h08c_history_20261015",
+      "supabaseProjectLabel": "rrj_h08c_history_20261015",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "auth",
+      "imageReference": "public.ecr.aws/supabase/gotrue:v2.177.0",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "always",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "9999/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_h08c_history_20261015"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "774017228b5eb194a40e198adb1a82b391207d37d1ace121c6790971a0c65fe1",
+      "name": "supabase_db_rrj_h08c_history_20261015",
+      "project": "rrj_h08c_history_20261015",
+      "classification": "PROTECTED_KEEP",
+      "composeProjectLabel": "rrj_h08c_history_20261015",
+      "supabaseProjectLabel": "rrj_h08c_history_20261015",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "db",
+      "imageReference": "public.ecr.aws/supabase/postgres:17.4.1.068",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "always",
+      "publishedPorts": [
+        "127.0.0.1:59322->5432/tcp",
+        "[::1]:59322->5432/tcp"
+      ],
+      "exposedPorts": [
+        "5432/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_h08c_history_20261015"
+      ],
+      "mounts": [
+        {
+          "type": "volume",
+          "name": "supabase_config_rrj_h08c_history_20261015",
+          "destination": "/etc/postgresql-custom",
+          "volumeMountpoint": "/var/lib/docker/volumes/supabase_config_rrj_h08c_history_20261015/_data"
+        },
+        {
+          "type": "volume",
+          "name": "supabase_db_rrj_h08c_history_20261015",
+          "destination": "/var/lib/postgresql/data",
+          "volumeMountpoint": "/var/lib/docker/volumes/supabase_db_rrj_h08c_history_20261015/_data"
+        }
+      ],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "bb74cd6759411e6a53fd4be1c48f6169eff35865765236d5a2b66a8a17b4a0f4",
+      "name": "supabase_edge_runtime_rrj_h08c_history_20261015",
+      "project": "rrj_h08c_history_20261015",
+      "classification": "PROTECTED_KEEP",
+      "composeProjectLabel": "rrj_h08c_history_20261015",
+      "supabaseProjectLabel": "rrj_h08c_history_20261015",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "edge_runtime",
+      "imageReference": "public.ecr.aws/supabase/edge-runtime:v1.68.3",
+      "imageDigestVerified": false,
+      "state": "exited",
+      "health": null,
+      "restartPolicy": "no",
+      "publishedPorts": [],
+      "exposedPorts": [],
+      "networks": [
+        "supabase_network_rrj_h08c_history_20261015"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "0ad2bab7e2ebb2ac447b5f96d8e596673d2beecd2b66efdcafae30c6c5238440",
+      "name": "supabase_inbucket_rrj_h08c_history_20261015",
+      "project": "rrj_h08c_history_20261015",
+      "classification": "PROTECTED_KEEP",
+      "composeProjectLabel": "rrj_h08c_history_20261015",
+      "supabaseProjectLabel": "rrj_h08c_history_20261015",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "inbucket",
+      "imageReference": "public.ecr.aws/supabase/mailpit:v1.22.3",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "always",
+      "publishedPorts": [
+        "127.0.0.1:59324->8025/tcp",
+        "[::1]:59324->8025/tcp"
+      ],
+      "exposedPorts": [
+        "8025/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_h08c_history_20261015"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "d3bd5187fb2a32e0d5d2cb0cb77cabed4cbe819c563283335364ba35fe80b2ef",
+      "name": "supabase_kong_rrj_h08c_history_20261015",
+      "project": "rrj_h08c_history_20261015",
+      "classification": "PROTECTED_KEEP",
+      "composeProjectLabel": "rrj_h08c_history_20261015",
+      "supabaseProjectLabel": "rrj_h08c_history_20261015",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "kong",
+      "imageReference": "public.ecr.aws/supabase/kong:2.8.1",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "always",
+      "publishedPorts": [
+        "127.0.0.1:59321->8000/tcp",
+        "[::1]:59321->8000/tcp"
+      ],
+      "exposedPorts": [
+        "8000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_h08c_history_20261015"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "36204297b02b2f1d50de3533e4162fdc24e0235954f4fc24f8875f683a3e4ed3",
+      "name": "supabase_pg_meta_rrj_h08c_history_20261015",
+      "project": "rrj_h08c_history_20261015",
+      "classification": "PROTECTED_KEEP",
+      "composeProjectLabel": "rrj_h08c_history_20261015",
+      "supabaseProjectLabel": "rrj_h08c_history_20261015",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "pg_meta",
+      "imageReference": "public.ecr.aws/supabase/postgres-meta:v0.91.4",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "always",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "8080/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_h08c_history_20261015"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "ff427135d2df120ce29acc4ab5675dc8c0731907a91d51905ca457ae048580a8",
+      "name": "supabase_realtime_rrj_h08c_history_20261015",
+      "project": "rrj_h08c_history_20261015",
+      "classification": "PROTECTED_KEEP",
+      "composeProjectLabel": "rrj_h08c_history_20261015",
+      "supabaseProjectLabel": "rrj_h08c_history_20261015",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "realtime",
+      "imageReference": "public.ecr.aws/supabase/realtime:v2.41.11",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "always",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "4000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_h08c_history_20261015"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "feebac47f5fad4d9e9cc60da49974e1d084958e7793dd5d735198f82696dde9a",
+      "name": "supabase_rest_rrj_h08c_history_20261015",
+      "project": "rrj_h08c_history_20261015",
+      "classification": "PROTECTED_KEEP",
+      "composeProjectLabel": "rrj_h08c_history_20261015",
+      "supabaseProjectLabel": "rrj_h08c_history_20261015",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "rest",
+      "imageReference": "public.ecr.aws/supabase/postgrest:v12.2.12",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": null,
+      "restartPolicy": "always",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "3000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_h08c_history_20261015"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "3cde5a00ddf70ab3e90cf4554e995b0115e6d104d28f37b71e67b45174b0f22f",
+      "name": "supabase_storage_rrj_h08c_history_20261015",
+      "project": "rrj_h08c_history_20261015",
+      "classification": "PROTECTED_KEEP",
+      "composeProjectLabel": "rrj_h08c_history_20261015",
+      "supabaseProjectLabel": "rrj_h08c_history_20261015",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "storage",
+      "imageReference": "public.ecr.aws/supabase/storage-api:v1.26.0",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "always",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "5000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_h08c_history_20261015"
+      ],
+      "mounts": [
+        {
+          "type": "volume",
+          "name": "supabase_storage_rrj_h08c_history_20261015",
+          "destination": "/mnt",
+          "volumeMountpoint": "/var/lib/docker/volumes/supabase_storage_rrj_h08c_history_20261015/_data"
+        }
+      ],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "d99279ea81a3036d7a712fd649a370339487d4a29c14d4b0d4532f748314e8cc",
+      "name": "supabase_studio_rrj_h08c_history_20261015",
+      "project": "rrj_h08c_history_20261015",
+      "classification": "PROTECTED_KEEP",
+      "composeProjectLabel": "rrj_h08c_history_20261015",
+      "supabaseProjectLabel": "rrj_h08c_history_20261015",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "studio",
+      "imageReference": "public.ecr.aws/supabase/studio:2025.07.28-sha-578b707",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "always",
+      "publishedPorts": [
+        "127.0.0.1:59323->3000/tcp",
+        "[::1]:59323->3000/tcp"
+      ],
+      "exposedPorts": [
+        "3000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_h08c_history_20261015"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "ab7d705432f56e268728d01065f84fe9b181c453f7c5f7ff5a48ea353c1948a8",
+      "name": "supabase_vector_rrj_h08c_history_20261015",
+      "project": "rrj_h08c_history_20261015",
+      "classification": "PROTECTED_KEEP",
+      "composeProjectLabel": "rrj_h08c_history_20261015",
+      "supabaseProjectLabel": "rrj_h08c_history_20261015",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "vector",
+      "imageReference": "public.ecr.aws/supabase/vector:0.28.1-alpine",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "always",
+      "publishedPorts": [],
+      "exposedPorts": [],
+      "networks": [
+        "supabase_network_rrj_h08c_history_20261015"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "fc196286ff911268cb69827b855d4b017dfbcf05f3ad8604deeb07586424cb06",
+      "name": "supabase_auth_rrj_h09_order_flow_20261015",
+      "project": "rrj_h09_order_flow_20261015",
+      "classification": "PROTECTED_KEEP",
+      "composeProjectLabel": "rrj_h09_order_flow_20261015",
+      "supabaseProjectLabel": "rrj_h09_order_flow_20261015",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "auth",
+      "imageReference": "public.ecr.aws/supabase/gotrue:v2.197.0",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "9999/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_h09_order_flow_20261015"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "cac20bb296b32f4e16028e264030689135d5c63e4a395da9455d77c9b1d11867",
+      "name": "supabase_db_rrj_h09_order_flow_20261015",
+      "project": "rrj_h09_order_flow_20261015",
+      "classification": "PROTECTED_KEEP",
+      "composeProjectLabel": "rrj_h09_order_flow_20261015",
+      "supabaseProjectLabel": "rrj_h09_order_flow_20261015",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "db",
+      "imageReference": "public.ecr.aws/supabase/postgres:17.11.0.004",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [
+        "127.0.0.1:48322->5432/tcp",
+        "[::1]:48322->5432/tcp"
+      ],
+      "exposedPorts": [
+        "5432/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_h09_order_flow_20261015"
+      ],
+      "mounts": [
+        {
+          "type": "volume",
+          "name": "supabase_db_rrj_h09_order_flow_20261015",
+          "destination": "/var/lib/postgresql/data",
+          "volumeMountpoint": "/var/lib/docker/volumes/supabase_db_rrj_h09_order_flow_20261015/_data"
+        }
+      ],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "c2b5180e936b180075cb35a52c2ed9e0bd8954437ea0e00120745573c518fbfc",
+      "name": "supabase_inbucket_rrj_h09_order_flow_20261015",
+      "project": "rrj_h09_order_flow_20261015",
+      "classification": "PROTECTED_KEEP",
+      "composeProjectLabel": "rrj_h09_order_flow_20261015",
+      "supabaseProjectLabel": "rrj_h09_order_flow_20261015",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "inbucket",
+      "imageReference": "public.ecr.aws/supabase/mailpit:v1.31.3",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [
+        "127.0.0.1:48324->8025/tcp",
+        "[::1]:48324->8025/tcp"
+      ],
+      "exposedPorts": [
+        "8025/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_h09_order_flow_20261015"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "39d166c2f6ce11fba383fbced74fcefca6f2389eff695e345c3643c6cd0484e1",
+      "name": "supabase_kong_rrj_h09_order_flow_20261015",
+      "project": "rrj_h09_order_flow_20261015",
+      "classification": "PROTECTED_KEEP",
+      "composeProjectLabel": "rrj_h09_order_flow_20261015",
+      "supabaseProjectLabel": "rrj_h09_order_flow_20261015",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "kong",
+      "imageReference": "public.ecr.aws/supabase/kong:2.8.1",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [
+        "127.0.0.1:48321->8000/tcp",
+        "[::1]:48321->8000/tcp"
+      ],
+      "exposedPorts": [
+        "8000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_h09_order_flow_20261015"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "93d1d9e5a74d55049586991a551a2db5b98cb555f48bddb528d51702c7752da5",
+      "name": "supabase_rest_rrj_h09_order_flow_20261015",
+      "project": "rrj_h09_order_flow_20261015",
+      "classification": "PROTECTED_KEEP",
+      "composeProjectLabel": "rrj_h09_order_flow_20261015",
+      "supabaseProjectLabel": "rrj_h09_order_flow_20261015",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "rest",
+      "imageReference": "public.ecr.aws/supabase/postgrest:v16.4",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": null,
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "3000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_h09_order_flow_20261015"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "4319d2dc68626155d3cbe533fa64f963d37e0c87e9415ceac1b7aadd193ba82a",
+      "name": "supabase_storage_rrj_h09_order_flow_20261015",
+      "project": "rrj_h09_order_flow_20261015",
+      "classification": "PROTECTED_KEEP",
+      "composeProjectLabel": "rrj_h09_order_flow_20261015",
+      "supabaseProjectLabel": "rrj_h09_order_flow_20261015",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "storage",
+      "imageReference": "public.ecr.aws/supabase/storage-api:v1.79.36",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "5000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_h09_order_flow_20261015"
+      ],
+      "mounts": [
+        {
+          "type": "volume",
+          "name": "supabase_storage_rrj_h09_order_flow_20261015",
+          "destination": "/mnt",
+          "volumeMountpoint": "/var/lib/docker/volumes/supabase_storage_rrj_h09_order_flow_20261015/_data"
+        }
+      ],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "caca8252418a42261e360969151cb1a324b7557676ac0a5beb9fac0591c5e4bf",
+      "name": "supabase_auth_rrj_manager_lifecycle_20261014",
+      "project": "rrj_manager_lifecycle_20261014",
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "composeProjectLabel": "rrj_manager_lifecycle_20261014",
+      "supabaseProjectLabel": "rrj_manager_lifecycle_20261014",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "auth",
+      "imageReference": "public.ecr.aws/supabase/gotrue:v2.197.0",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "9999/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_manager_lifecycle_20261014"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "8d75e1ef2533f727c21e995151131520fce81f15abdb4256f0078c4ebac04086",
+      "name": "supabase_db_rrj_manager_lifecycle_20261014",
+      "project": "rrj_manager_lifecycle_20261014",
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "composeProjectLabel": "rrj_manager_lifecycle_20261014",
+      "supabaseProjectLabel": "rrj_manager_lifecycle_20261014",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "db",
+      "imageReference": "public.ecr.aws/supabase/postgres:17.11.0.004",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [
+        "127.0.0.1:52322->5432/tcp",
+        "[::1]:52322->5432/tcp"
+      ],
+      "exposedPorts": [
+        "5432/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_manager_lifecycle_20261014"
+      ],
+      "mounts": [
+        {
+          "type": "volume",
+          "name": "supabase_db_rrj_manager_lifecycle_20261014",
+          "destination": "/var/lib/postgresql/data",
+          "volumeMountpoint": "/var/lib/docker/volumes/supabase_db_rrj_manager_lifecycle_20261014/_data"
+        }
+      ],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "7088583f5d03bdec2f2221bdc2aeca0643b983132a160f3b97b64b99d4eb9ef8",
+      "name": "supabase_kong_rrj_manager_lifecycle_20261014",
+      "project": "rrj_manager_lifecycle_20261014",
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "composeProjectLabel": "rrj_manager_lifecycle_20261014",
+      "supabaseProjectLabel": "rrj_manager_lifecycle_20261014",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "kong",
+      "imageReference": "public.ecr.aws/supabase/kong:2.8.1",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [
+        "127.0.0.1:52321->8000/tcp",
+        "[::1]:52321->8000/tcp"
+      ],
+      "exposedPorts": [
+        "8000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_manager_lifecycle_20261014"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "dcdd656c805d1e506bfbd830729d0f7aaecb7813665b4e676c5009e8f42d186f",
+      "name": "supabase_rest_rrj_manager_lifecycle_20261014",
+      "project": "rrj_manager_lifecycle_20261014",
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "composeProjectLabel": "rrj_manager_lifecycle_20261014",
+      "supabaseProjectLabel": "rrj_manager_lifecycle_20261014",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "rest",
+      "imageReference": "public.ecr.aws/supabase/postgrest:v16.4",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": null,
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "3000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_manager_lifecycle_20261014"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "b7f9e3a021fe2e5f6acdb33b7de6fe3681b958774a6ecbaf9d714f7aecf43332",
+      "name": "supabase_storage_rrj_manager_lifecycle_20261014",
+      "project": "rrj_manager_lifecycle_20261014",
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "composeProjectLabel": "rrj_manager_lifecycle_20261014",
+      "supabaseProjectLabel": "rrj_manager_lifecycle_20261014",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "storage",
+      "imageReference": "public.ecr.aws/supabase/storage-api:v1.79.36",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "5000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_manager_lifecycle_20261014"
+      ],
+      "mounts": [
+        {
+          "type": "volume",
+          "name": "supabase_storage_rrj_manager_lifecycle_20261014",
+          "destination": "/mnt",
+          "volumeMountpoint": "/var/lib/docker/volumes/supabase_storage_rrj_manager_lifecycle_20261014/_data"
+        }
+      ],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "de14fe3d9d5100214997a8d5400fdc0db45ee18598c78881768d1f02b71034e6",
+      "name": "supabase_auth_rrj_phase3_prefix_20261014_a1",
+      "project": "rrj_phase3_prefix_20261014_a1",
+      "classification": "PROTECTED_KEEP",
+      "composeProjectLabel": "rrj_phase3_prefix_20261014_a1",
+      "supabaseProjectLabel": "rrj_phase3_prefix_20261014_a1",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "auth",
+      "imageReference": "public.ecr.aws/supabase/gotrue:v2.197.0",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "9999/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_phase3_prefix_20261014_a1"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "8d9ccc55fd6b068088f764303e95cf1e5e12ee543ef21ef86d69a44f70092a90",
+      "name": "supabase_db_rrj_phase3_prefix_20261014_a1",
+      "project": "rrj_phase3_prefix_20261014_a1",
+      "classification": "PROTECTED_KEEP",
+      "composeProjectLabel": "rrj_phase3_prefix_20261014_a1",
+      "supabaseProjectLabel": "rrj_phase3_prefix_20261014_a1",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "db",
+      "imageReference": "public.ecr.aws/supabase/postgres:17.11.0.004",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [
+        "127.0.0.1:63222->5432/tcp",
+        "[::1]:63222->5432/tcp"
+      ],
+      "exposedPorts": [
+        "5432/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_phase3_prefix_20261014_a1"
+      ],
+      "mounts": [
+        {
+          "type": "volume",
+          "name": "supabase_db_rrj_phase3_prefix_20261014_a1",
+          "destination": "/var/lib/postgresql/data",
+          "volumeMountpoint": "/var/lib/docker/volumes/supabase_db_rrj_phase3_prefix_20261014_a1/_data"
+        }
+      ],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "0129b244cbaa7cf05ded9fe10513229dc98721a65a060f2d4beb2ee5c0254f15",
+      "name": "supabase_kong_rrj_phase3_prefix_20261014_a1",
+      "project": "rrj_phase3_prefix_20261014_a1",
+      "classification": "PROTECTED_KEEP",
+      "composeProjectLabel": "rrj_phase3_prefix_20261014_a1",
+      "supabaseProjectLabel": "rrj_phase3_prefix_20261014_a1",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "kong",
+      "imageReference": "public.ecr.aws/supabase/kong:2.8.1",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [
+        "127.0.0.1:63221->8000/tcp",
+        "[::1]:63221->8000/tcp"
+      ],
+      "exposedPorts": [
+        "8000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_phase3_prefix_20261014_a1"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "04cf7973e393fe55b4088c68dc2d63b2027762355fdb7209eb9619e9da386ffd",
+      "name": "supabase_rest_rrj_phase3_prefix_20261014_a1",
+      "project": "rrj_phase3_prefix_20261014_a1",
+      "classification": "PROTECTED_KEEP",
+      "composeProjectLabel": "rrj_phase3_prefix_20261014_a1",
+      "supabaseProjectLabel": "rrj_phase3_prefix_20261014_a1",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "rest",
+      "imageReference": "public.ecr.aws/supabase/postgrest:v16.4",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": null,
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "3000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_phase3_prefix_20261014_a1"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "ae137e6fa5830b68e3caed406b8d9d4dfd6f7f22e878b9c5480e7506e9dd5a69",
+      "name": "supabase_storage_rrj_phase3_prefix_20261014_a1",
+      "project": "rrj_phase3_prefix_20261014_a1",
+      "classification": "PROTECTED_KEEP",
+      "composeProjectLabel": "rrj_phase3_prefix_20261014_a1",
+      "supabaseProjectLabel": "rrj_phase3_prefix_20261014_a1",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "storage",
+      "imageReference": "public.ecr.aws/supabase/storage-api:v1.79.36",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "5000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_phase3_prefix_20261014_a1"
+      ],
+      "mounts": [
+        {
+          "type": "volume",
+          "name": "supabase_storage_rrj_phase3_prefix_20261014_a1",
+          "destination": "/mnt",
+          "volumeMountpoint": "/var/lib/docker/volumes/supabase_storage_rrj_phase3_prefix_20261014_a1/_data"
+        }
+      ],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "bf3087423191404143235d3ed36f128eb367d8e8430011a5f7325d581670f372",
+      "name": "supabase_analytics_rrj_phase8_sim",
+      "project": "rrj_phase8_sim",
+      "classification": "UNKNOWN_NOT_APPROVED",
+      "composeProjectLabel": "rrj_phase8_sim",
+      "supabaseProjectLabel": "rrj_phase8_sim",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "analytics",
+      "imageReference": "public.ecr.aws/supabase/logflare:1.14.2",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "always",
+      "publishedPorts": [
+        "127.0.0.1:55327->4000/tcp",
+        "[::1]:55327->4000/tcp"
+      ],
+      "exposedPorts": [
+        "4000/tcp"
+      ],
+      "networks": [
+        "rrj_phase8_loopback"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "05248ee14735eabf5c5b21969b354559c65f0e3997519448bf68dfdcd3506dd2",
+      "name": "supabase_auth_rrj_phase8_sim",
+      "project": "rrj_phase8_sim",
+      "classification": "UNKNOWN_NOT_APPROVED",
+      "composeProjectLabel": "rrj_phase8_sim",
+      "supabaseProjectLabel": "rrj_phase8_sim",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "auth",
+      "imageReference": "public.ecr.aws/supabase/gotrue:v2.177.0",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "always",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "9999/tcp"
+      ],
+      "networks": [
+        "rrj_phase8_loopback"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "f4dc2b6115617976e3f2c715e08248d086c97e7fa5e2c1017d31361ed03e4689",
+      "name": "supabase_db_rrj_phase8_sim",
+      "project": "rrj_phase8_sim",
+      "classification": "UNKNOWN_NOT_APPROVED",
+      "composeProjectLabel": "rrj_phase8_sim",
+      "supabaseProjectLabel": "rrj_phase8_sim",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "db",
+      "imageReference": "public.ecr.aws/supabase/postgres:17.4.1.068",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "always",
+      "publishedPorts": [
+        "127.0.0.1:55322->5432/tcp",
+        "[::1]:55322->5432/tcp"
+      ],
+      "exposedPorts": [
+        "5432/tcp"
+      ],
+      "networks": [
+        "rrj_phase8_loopback"
+      ],
+      "mounts": [
+        {
+          "type": "volume",
+          "name": "supabase_config_rrj_phase8_sim",
+          "destination": "/etc/postgresql-custom",
+          "volumeMountpoint": "/var/lib/docker/volumes/supabase_config_rrj_phase8_sim/_data"
+        },
+        {
+          "type": "volume",
+          "name": "supabase_db_rrj_phase8_sim",
+          "destination": "/var/lib/postgresql/data",
+          "volumeMountpoint": "/var/lib/docker/volumes/supabase_db_rrj_phase8_sim/_data"
+        }
+      ],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "21337dc139d76d07c7290f3ac039cbdf094946ee353596c92930cff013c3d56c",
+      "name": "supabase_edge_runtime_rrj_phase8_sim",
+      "project": "rrj_phase8_sim",
+      "classification": "UNKNOWN_NOT_APPROVED",
+      "composeProjectLabel": "rrj_phase8_sim",
+      "supabaseProjectLabel": "rrj_phase8_sim",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "edge_runtime",
+      "imageReference": "public.ecr.aws/supabase/edge-runtime:v1.68.3",
+      "imageDigestVerified": false,
+      "state": "exited",
+      "health": null,
+      "restartPolicy": "no",
+      "publishedPorts": [],
+      "exposedPorts": [],
+      "networks": [
+        "rrj_phase8_loopback"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "69e08c98aa8e2e188100d0af72830ac601cdf22cdba818fe36e1f8e6677805e7",
+      "name": "supabase_inbucket_rrj_phase8_sim",
+      "project": "rrj_phase8_sim",
+      "classification": "UNKNOWN_NOT_APPROVED",
+      "composeProjectLabel": "rrj_phase8_sim",
+      "supabaseProjectLabel": "rrj_phase8_sim",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "inbucket",
+      "imageReference": "public.ecr.aws/supabase/mailpit:v1.22.3",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "always",
+      "publishedPorts": [
+        "127.0.0.1:55324->8025/tcp",
+        "[::1]:55324->8025/tcp"
+      ],
+      "exposedPorts": [
+        "8025/tcp"
+      ],
+      "networks": [
+        "rrj_phase8_loopback"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "fd2fcefdfbc8d04c6b16fff9cbe80ad1f0c6fb758d0b32e6c51a7dbfe1c1d6ef",
+      "name": "supabase_kong_rrj_phase8_sim",
+      "project": "rrj_phase8_sim",
+      "classification": "UNKNOWN_NOT_APPROVED",
+      "composeProjectLabel": "rrj_phase8_sim",
+      "supabaseProjectLabel": "rrj_phase8_sim",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "kong",
+      "imageReference": "public.ecr.aws/supabase/kong:2.8.1",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "always",
+      "publishedPorts": [
+        "127.0.0.1:55321->8000/tcp",
+        "[::1]:55321->8000/tcp"
+      ],
+      "exposedPorts": [
+        "8000/tcp"
+      ],
+      "networks": [
+        "rrj_phase8_loopback"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "e8027b107be7a4aeb71e9cca20f9029fc18fe32916ab8265f03647fdf6e07ae3",
+      "name": "supabase_pg_meta_rrj_phase8_sim",
+      "project": "rrj_phase8_sim",
+      "classification": "UNKNOWN_NOT_APPROVED",
+      "composeProjectLabel": "rrj_phase8_sim",
+      "supabaseProjectLabel": "rrj_phase8_sim",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "pg_meta",
+      "imageReference": "public.ecr.aws/supabase/postgres-meta:v0.91.4",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "always",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "8080/tcp"
+      ],
+      "networks": [
+        "rrj_phase8_loopback"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "240232e06d4b03c7b924053153fb064af8f7111b63e568972ae58c2b48875ce6",
+      "name": "supabase_realtime_rrj_phase8_sim",
+      "project": "rrj_phase8_sim",
+      "classification": "UNKNOWN_NOT_APPROVED",
+      "composeProjectLabel": "rrj_phase8_sim",
+      "supabaseProjectLabel": "rrj_phase8_sim",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "realtime",
+      "imageReference": "public.ecr.aws/supabase/realtime:v2.41.11",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "always",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "4000/tcp"
+      ],
+      "networks": [
+        "rrj_phase8_loopback"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "33b54d736e830c69ae8fedc5d7147c842c8e2803ae6533ff5f90bfee3c48a4b3",
+      "name": "supabase_rest_rrj_phase8_sim",
+      "project": "rrj_phase8_sim",
+      "classification": "UNKNOWN_NOT_APPROVED",
+      "composeProjectLabel": "rrj_phase8_sim",
+      "supabaseProjectLabel": "rrj_phase8_sim",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "rest",
+      "imageReference": "public.ecr.aws/supabase/postgrest:v12.2.12",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": null,
+      "restartPolicy": "always",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "3000/tcp"
+      ],
+      "networks": [
+        "rrj_phase8_loopback"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "ba0909dcc96a7c9bc80eb305efe34e60bccf4402fc2f1c46236c068947ef9108",
+      "name": "supabase_storage_rrj_phase8_sim",
+      "project": "rrj_phase8_sim",
+      "classification": "UNKNOWN_NOT_APPROVED",
+      "composeProjectLabel": "rrj_phase8_sim",
+      "supabaseProjectLabel": "rrj_phase8_sim",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "storage",
+      "imageReference": "public.ecr.aws/supabase/storage-api:v1.26.0",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "always",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "5000/tcp"
+      ],
+      "networks": [
+        "rrj_phase8_loopback"
+      ],
+      "mounts": [
+        {
+          "type": "volume",
+          "name": "supabase_storage_rrj_phase8_sim",
+          "destination": "/mnt",
+          "volumeMountpoint": "/var/lib/docker/volumes/supabase_storage_rrj_phase8_sim/_data"
+        }
+      ],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "7b74a27c4f03a274e3e03d9cef44300d5afb188c1243e5d900d9f92dd3ccb592",
+      "name": "supabase_studio_rrj_phase8_sim",
+      "project": "rrj_phase8_sim",
+      "classification": "UNKNOWN_NOT_APPROVED",
+      "composeProjectLabel": "rrj_phase8_sim",
+      "supabaseProjectLabel": "rrj_phase8_sim",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "studio",
+      "imageReference": "public.ecr.aws/supabase/studio:2025.07.28-sha-578b707",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "always",
+      "publishedPorts": [
+        "127.0.0.1:55323->3000/tcp",
+        "[::1]:55323->3000/tcp"
+      ],
+      "exposedPorts": [
+        "3000/tcp"
+      ],
+      "networks": [
+        "rrj_phase8_loopback"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "2877b8ab0d4d597d7b553c02163dbc585e8680c5d9b4a81d56f636faf6cabe0f",
+      "name": "supabase_vector_rrj_phase8_sim",
+      "project": "rrj_phase8_sim",
+      "classification": "UNKNOWN_NOT_APPROVED",
+      "composeProjectLabel": "rrj_phase8_sim",
+      "supabaseProjectLabel": "rrj_phase8_sim",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "vector",
+      "imageReference": "public.ecr.aws/supabase/vector:0.28.1-alpine",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "always",
+      "publishedPorts": [],
+      "exposedPorts": [],
+      "networks": [
+        "rrj_phase8_loopback"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "85c59c5ec0b591baaa880e3fac3ae567aa8b3603f19fd40ee7b805856e5547c7",
+      "name": "supabase_auth_rrj_rc_synthetic_replay_20261013",
+      "project": "rrj_rc_synthetic_replay_20261013",
+      "classification": "UNKNOWN_NOT_APPROVED",
+      "composeProjectLabel": "rrj_rc_synthetic_replay_20261013",
+      "supabaseProjectLabel": "rrj_rc_synthetic_replay_20261013",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "auth",
+      "imageReference": "public.ecr.aws/supabase/gotrue:v2.177.0",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "always",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "9999/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_rc_synthetic_replay_20261013"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "9410f82c405e1615d031474d863bdc3508936813e3e8a16acb172c3d2c6ae87f",
+      "name": "supabase_db_rrj_rc_synthetic_replay_20261013",
+      "project": "rrj_rc_synthetic_replay_20261013",
+      "classification": "UNKNOWN_NOT_APPROVED",
+      "composeProjectLabel": "rrj_rc_synthetic_replay_20261013",
+      "supabaseProjectLabel": "rrj_rc_synthetic_replay_20261013",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "db",
+      "imageReference": "public.ecr.aws/supabase/postgres:17.4.1.068",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "always",
+      "publishedPorts": [
+        "127.0.0.1:60322->5432/tcp",
+        "[::1]:60322->5432/tcp"
+      ],
+      "exposedPorts": [
+        "5432/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_rc_synthetic_replay_20261013"
+      ],
+      "mounts": [
+        {
+          "type": "volume",
+          "name": "supabase_config_rrj_rc_synthetic_replay_20261013",
+          "destination": "/etc/postgresql-custom",
+          "volumeMountpoint": "/var/lib/docker/volumes/supabase_config_rrj_rc_synthetic_replay_20261013/_data"
+        },
+        {
+          "type": "volume",
+          "name": "supabase_db_rrj_rc_synthetic_replay_20261013",
+          "destination": "/var/lib/postgresql/data",
+          "volumeMountpoint": "/var/lib/docker/volumes/supabase_db_rrj_rc_synthetic_replay_20261013/_data"
+        }
+      ],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "e77021711b8d633ec7ab3cbd61fffa97b0eadfd1d5571a00a5a72def7a4d3f4d",
+      "name": "supabase_kong_rrj_rc_synthetic_replay_20261013",
+      "project": "rrj_rc_synthetic_replay_20261013",
+      "classification": "UNKNOWN_NOT_APPROVED",
+      "composeProjectLabel": "rrj_rc_synthetic_replay_20261013",
+      "supabaseProjectLabel": "rrj_rc_synthetic_replay_20261013",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "kong",
+      "imageReference": "public.ecr.aws/supabase/kong:2.8.1",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "always",
+      "publishedPorts": [
+        "127.0.0.1:60321->8000/tcp",
+        "[::1]:60321->8000/tcp"
+      ],
+      "exposedPorts": [
+        "8000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_rc_synthetic_replay_20261013"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "aee7e23073896b189d31cf77519a4549e27ab1f4724c9afa1665a41b25eae2a2",
+      "name": "supabase_rest_rrj_rc_synthetic_replay_20261013",
+      "project": "rrj_rc_synthetic_replay_20261013",
+      "classification": "UNKNOWN_NOT_APPROVED",
+      "composeProjectLabel": "rrj_rc_synthetic_replay_20261013",
+      "supabaseProjectLabel": "rrj_rc_synthetic_replay_20261013",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "rest",
+      "imageReference": "public.ecr.aws/supabase/postgrest:v12.2.12",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": null,
+      "restartPolicy": "always",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "3000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_rc_synthetic_replay_20261013"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "5a15b115b197fc3f9c567aff6873e3928c48043c55a03d9fb4b3dcb8376c4f18",
+      "name": "supabase_storage_rrj_rc_synthetic_replay_20261013",
+      "project": "rrj_rc_synthetic_replay_20261013",
+      "classification": "UNKNOWN_NOT_APPROVED",
+      "composeProjectLabel": "rrj_rc_synthetic_replay_20261013",
+      "supabaseProjectLabel": "rrj_rc_synthetic_replay_20261013",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "storage",
+      "imageReference": "public.ecr.aws/supabase/storage-api:v1.26.0",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "always",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "5000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_rc_synthetic_replay_20261013"
+      ],
+      "mounts": [
+        {
+          "type": "volume",
+          "name": "supabase_storage_rrj_rc_synthetic_replay_20261013",
+          "destination": "/mnt",
+          "volumeMountpoint": "/var/lib/docker/volumes/supabase_storage_rrj_rc_synthetic_replay_20261013/_data"
+        }
+      ],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "d6f577841ff16df59dc0fbb3764dfb670cbff39a0135b56863172b0e36bf1e0a",
+      "name": "supabase_auth_rrj_recovery_20261014_source",
+      "project": "rrj_recovery_20261014_source",
+      "classification": "PROTECTED_KEEP",
+      "composeProjectLabel": "rrj_recovery_20261014_source",
+      "supabaseProjectLabel": "rrj_recovery_20261014_source",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "auth",
+      "imageReference": "public.ecr.aws/supabase/gotrue:v2.197.0",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "9999/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_recovery_20261014_source"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "a14b2a34891f3919131af0ab61ce555034a4a3ba2e3c9d5175c26486491d4596",
+      "name": "supabase_db_rrj_recovery_20261014_source",
+      "project": "rrj_recovery_20261014_source",
+      "classification": "PROTECTED_KEEP",
+      "composeProjectLabel": "rrj_recovery_20261014_source",
+      "supabaseProjectLabel": "rrj_recovery_20261014_source",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "db",
+      "imageReference": "public.ecr.aws/supabase/postgres:17.11.0.004",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [
+        "127.0.0.1:65322->5432/tcp",
+        "[::1]:65322->5432/tcp"
+      ],
+      "exposedPorts": [
+        "5432/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_recovery_20261014_source"
+      ],
+      "mounts": [
+        {
+          "type": "volume",
+          "name": "supabase_db_rrj_recovery_20261014_source",
+          "destination": "/var/lib/postgresql/data",
+          "volumeMountpoint": "/var/lib/docker/volumes/supabase_db_rrj_recovery_20261014_source/_data"
+        }
+      ],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "f20027554943db139af0e5984441d5152909d0f5777badf7e0146ac3eac89591",
+      "name": "supabase_kong_rrj_recovery_20261014_source",
+      "project": "rrj_recovery_20261014_source",
+      "classification": "PROTECTED_KEEP",
+      "composeProjectLabel": "rrj_recovery_20261014_source",
+      "supabaseProjectLabel": "rrj_recovery_20261014_source",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "kong",
+      "imageReference": "public.ecr.aws/supabase/kong:2.8.1",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [
+        "127.0.0.1:65321->8000/tcp",
+        "[::1]:65321->8000/tcp"
+      ],
+      "exposedPorts": [
+        "8000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_recovery_20261014_source"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "431599f0a1244b79a8d00f793590bc8c2d7769883ed8f3613c33f187c640d1c3",
+      "name": "supabase_rest_rrj_recovery_20261014_source",
+      "project": "rrj_recovery_20261014_source",
+      "classification": "PROTECTED_KEEP",
+      "composeProjectLabel": "rrj_recovery_20261014_source",
+      "supabaseProjectLabel": "rrj_recovery_20261014_source",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "rest",
+      "imageReference": "public.ecr.aws/supabase/postgrest:v16.4",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": null,
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "3000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_recovery_20261014_source"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "014c63910b8800def9d3426e627058e5c625716f8a5664ad0eb470422fcc8aff",
+      "name": "supabase_storage_rrj_recovery_20261014_source",
+      "project": "rrj_recovery_20261014_source",
+      "classification": "PROTECTED_KEEP",
+      "composeProjectLabel": "rrj_recovery_20261014_source",
+      "supabaseProjectLabel": "rrj_recovery_20261014_source",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "storage",
+      "imageReference": "public.ecr.aws/supabase/storage-api:v1.79.36",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "5000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_recovery_20261014_source"
+      ],
+      "mounts": [
+        {
+          "type": "volume",
+          "name": "supabase_storage_rrj_recovery_20261014_source",
+          "destination": "/mnt",
+          "volumeMountpoint": "/var/lib/docker/volumes/supabase_storage_rrj_recovery_20261014_source/_data"
+        }
+      ],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "e36a0276a003a7d8d57e0d105759b62f6ee605e6a5deaf005f34a3713c28b9f2",
+      "name": "supabase_auth_rrj_recovery_20261014_target",
+      "project": "rrj_recovery_20261014_target",
+      "classification": "PROTECTED_KEEP",
+      "composeProjectLabel": "rrj_recovery_20261014_target",
+      "supabaseProjectLabel": "rrj_recovery_20261014_target",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "auth",
+      "imageReference": "public.ecr.aws/supabase/gotrue:v2.197.0",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "9999/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_recovery_20261014_target"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "0fc45950b40b0779cc98c24d4c3e46d0cb59a292c5a4e2d455e0b59b267143e4",
+      "name": "supabase_db_rrj_recovery_20261014_target",
+      "project": "rrj_recovery_20261014_target",
+      "classification": "PROTECTED_KEEP",
+      "composeProjectLabel": "rrj_recovery_20261014_target",
+      "supabaseProjectLabel": "rrj_recovery_20261014_target",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "db",
+      "imageReference": "public.ecr.aws/supabase/postgres:17.11.0.004",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [
+        "127.0.0.1:64322->5432/tcp",
+        "[::1]:64322->5432/tcp"
+      ],
+      "exposedPorts": [
+        "5432/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_recovery_20261014_target"
+      ],
+      "mounts": [
+        {
+          "type": "volume",
+          "name": "supabase_db_rrj_recovery_20261014_target",
+          "destination": "/var/lib/postgresql/data",
+          "volumeMountpoint": "/var/lib/docker/volumes/supabase_db_rrj_recovery_20261014_target/_data"
+        }
+      ],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "35ebaaa1137c9a9f84932c9afefa90791df5e4a7b1ce0c881225d46bb82052c2",
+      "name": "supabase_kong_rrj_recovery_20261014_target",
+      "project": "rrj_recovery_20261014_target",
+      "classification": "PROTECTED_KEEP",
+      "composeProjectLabel": "rrj_recovery_20261014_target",
+      "supabaseProjectLabel": "rrj_recovery_20261014_target",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "kong",
+      "imageReference": "public.ecr.aws/supabase/kong:2.8.1",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [
+        "127.0.0.1:64321->8000/tcp",
+        "[::1]:64321->8000/tcp"
+      ],
+      "exposedPorts": [
+        "8000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_recovery_20261014_target"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "43ff56c70e58861067d6660887b927d3508bdb8041c437e42e7b3c670bb82890",
+      "name": "supabase_rest_rrj_recovery_20261014_target",
+      "project": "rrj_recovery_20261014_target",
+      "classification": "PROTECTED_KEEP",
+      "composeProjectLabel": "rrj_recovery_20261014_target",
+      "supabaseProjectLabel": "rrj_recovery_20261014_target",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "rest",
+      "imageReference": "public.ecr.aws/supabase/postgrest:v16.4",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": null,
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "3000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_recovery_20261014_target"
+      ],
+      "mounts": [],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    },
+    {
+      "id": "7d7cc4e2e2983bdf86c34cba038dd849b92a96eb42e0b30bf41a763dde9cef2b",
+      "name": "supabase_storage_rrj_recovery_20261014_target",
+      "project": "rrj_recovery_20261014_target",
+      "classification": "PROTECTED_KEEP",
+      "composeProjectLabel": "rrj_recovery_20261014_target",
+      "supabaseProjectLabel": "rrj_recovery_20261014_target",
+      "composeServiceLabel": null,
+      "serviceRoleInferredFromName": "storage",
+      "imageReference": "public.ecr.aws/supabase/storage-api:v1.79.36",
+      "imageDigestVerified": false,
+      "state": "running",
+      "health": "healthy",
+      "restartPolicy": "unless-stopped",
+      "publishedPorts": [],
+      "exposedPorts": [
+        "5000/tcp"
+      ],
+      "networks": [
+        "supabase_network_rrj_recovery_20261014_target"
+      ],
+      "mounts": [
+        {
+          "type": "volume",
+          "name": "supabase_storage_rrj_recovery_20261014_target",
+          "destination": "/mnt",
+          "volumeMountpoint": "/var/lib/docker/volumes/supabase_storage_rrj_recovery_20261014_target/_data"
+        }
+      ],
+      "declaredLinks": [],
+      "declaredComposeDependsOn": null
+    }
+  ],
+  "volumes": [
+    {
+      "name": "4f99a9a0e08682e54ca477e031ef2ec14b59500fe42bd751b2cfd5a73cce0229",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/4f99a9a0e08682e54ca477e031ef2ec14b59500fe42bd751b2cfd5a73cce0229/_data",
+      "composeProjectLabel": null,
+      "supabaseProjectLabel": null,
+      "mountedBy": [],
+      "classification": "UNKNOWN_NOT_APPROVED",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "edd8e87e99efc4ca1ea81583d4c0de52eb2bb601e37922518768eb92c119c929",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/edd8e87e99efc4ca1ea81583d4c0de52eb2bb601e37922518768eb92c119c929/_data",
+      "composeProjectLabel": null,
+      "supabaseProjectLabel": null,
+      "mountedBy": [],
+      "classification": "UNKNOWN_NOT_APPROVED",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_config_codex_phase7a_local",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_config_codex_phase7a_local/_data",
+      "composeProjectLabel": "codex_phase7a_local",
+      "supabaseProjectLabel": "codex_phase7a_local",
+      "mountedBy": [],
+      "classification": "UNKNOWN_NOT_APPROVED",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_config_my-local-todo-app",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_config_my-local-todo-app/_data",
+      "composeProjectLabel": "my-local-todo-app",
+      "supabaseProjectLabel": "my-local-todo-app",
+      "mountedBy": [
+        {
+          "containerId": "3feef4aaa27045f7abc4c02ff7e07225cc0db317b72eace308d3038d0e6cfa9a",
+          "destination": "/etc/postgresql-custom"
+        }
+      ],
+      "classification": "UNRELATED_PROTECTED",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_config_rrj_cutover_6b7a_qa",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_config_rrj_cutover_6b7a_qa/_data",
+      "composeProjectLabel": "rrj_cutover_6b7a_qa",
+      "supabaseProjectLabel": "rrj_cutover_6b7a_qa",
+      "mountedBy": [],
+      "classification": "UNKNOWN_NOT_APPROVED",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_config_rrj_h08b_history_20261015",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_config_rrj_h08b_history_20261015/_data",
+      "composeProjectLabel": "rrj_h08b_history_20261015",
+      "supabaseProjectLabel": "rrj_h08b_history_20261015",
+      "mountedBy": [
+        {
+          "containerId": "c7716c7d279e3f5edcbf1d89369bf93c36eb1c90bcc86ac9bc16549f641e45b8",
+          "destination": "/etc/postgresql-custom"
+        }
+      ],
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_config_rrj_h08c_history_20261015",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_config_rrj_h08c_history_20261015/_data",
+      "composeProjectLabel": "rrj_h08c_history_20261015",
+      "supabaseProjectLabel": "rrj_h08c_history_20261015",
+      "mountedBy": [
+        {
+          "containerId": "774017228b5eb194a40e198adb1a82b391207d37d1ace121c6790971a0c65fe1",
+          "destination": "/etc/postgresql-custom"
+        }
+      ],
+      "classification": "PROTECTED_KEEP",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_config_rrj_phase8_sim",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_config_rrj_phase8_sim/_data",
+      "composeProjectLabel": "rrj_phase8_sim",
+      "supabaseProjectLabel": "rrj_phase8_sim",
+      "mountedBy": [
+        {
+          "containerId": "f4dc2b6115617976e3f2c715e08248d086c97e7fa5e2c1017d31361ed03e4689",
+          "destination": "/etc/postgresql-custom"
+        }
+      ],
+      "classification": "UNKNOWN_NOT_APPROVED",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_config_RRJ_RC_Repro_20261013_1",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_config_RRJ_RC_Repro_20261013_1/_data",
+      "composeProjectLabel": "RRJ_RC_Repro_20261013_1",
+      "supabaseProjectLabel": "RRJ_RC_Repro_20261013_1",
+      "mountedBy": [],
+      "classification": "UNKNOWN_NOT_APPROVED",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_config_rrj_rc_synthetic_replay_20261013",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_config_rrj_rc_synthetic_replay_20261013/_data",
+      "composeProjectLabel": "rrj_rc_synthetic_replay_20261013",
+      "supabaseProjectLabel": "rrj_rc_synthetic_replay_20261013",
+      "mountedBy": [
+        {
+          "containerId": "9410f82c405e1615d031474d863bdc3508936813e3e8a16acb172c3d2c6ae87f",
+          "destination": "/etc/postgresql-custom"
+        }
+      ],
+      "classification": "UNKNOWN_NOT_APPROVED",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_db_codex_phase7a_local",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_db_codex_phase7a_local/_data",
+      "composeProjectLabel": "codex_phase7a_local",
+      "supabaseProjectLabel": "codex_phase7a_local",
+      "mountedBy": [],
+      "classification": "UNKNOWN_NOT_APPROVED",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_db_isolated-stack",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_db_isolated-stack/_data",
+      "composeProjectLabel": "isolated-stack",
+      "supabaseProjectLabel": "isolated-stack",
+      "mountedBy": [
+        {
+          "containerId": "677b9f1c451b305975d87726d3c7f15ccbfdafd8625fcfec261630b7df4189e5",
+          "destination": "/var/lib/postgresql/data"
+        }
+      ],
+      "classification": "UNRELATED_PROTECTED",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_db_my-local-todo-app",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_db_my-local-todo-app/_data",
+      "composeProjectLabel": "my-local-todo-app",
+      "supabaseProjectLabel": "my-local-todo-app",
+      "mountedBy": [
+        {
+          "containerId": "3feef4aaa27045f7abc4c02ff7e07225cc0db317b72eace308d3038d0e6cfa9a",
+          "destination": "/var/lib/postgresql/data"
+        }
+      ],
+      "classification": "UNRELATED_PROTECTED",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_db_rrj_cutover_6b7a_qa",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_db_rrj_cutover_6b7a_qa/_data",
+      "composeProjectLabel": "rrj_cutover_6b7a_qa",
+      "supabaseProjectLabel": "rrj_cutover_6b7a_qa",
+      "mountedBy": [],
+      "classification": "UNKNOWN_NOT_APPROVED",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_db_rrj_defense_demo_20261014",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_db_rrj_defense_demo_20261014/_data",
+      "composeProjectLabel": "rrj_defense_demo_20261014",
+      "supabaseProjectLabel": "rrj_defense_demo_20261014",
+      "mountedBy": [
+        {
+          "containerId": "d1d080ef20d735c6beb262933b77a16ead5c46370874ebdcb8f0b92baf0b67fb",
+          "destination": "/var/lib/postgresql/data"
+        }
+      ],
+      "classification": "PROTECTED_KEEP",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_db_rrj_defense_demo_20261014_r2",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_db_rrj_defense_demo_20261014_r2/_data",
+      "composeProjectLabel": "rrj_defense_demo_20261014_r2",
+      "supabaseProjectLabel": "rrj_defense_demo_20261014_r2",
+      "mountedBy": [
+        {
+          "containerId": "beec6b1192ca8cd3e31912215080974d5f5b67a04c45aa0c7baad1df85a833e0",
+          "destination": "/var/lib/postgresql/data"
+        }
+      ],
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_db_rrj_defense_demo_20261014_r3",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_db_rrj_defense_demo_20261014_r3/_data",
+      "composeProjectLabel": "rrj_defense_demo_20261014_r3",
+      "supabaseProjectLabel": "rrj_defense_demo_20261014_r3",
+      "mountedBy": [
+        {
+          "containerId": "85e0d9d47432af916afad1ef7c5007bf69269bbdef96557f98a4b8deef23eda4",
+          "destination": "/var/lib/postgresql/data"
+        }
+      ],
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_db_rrj_h07_financial_20261014",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_db_rrj_h07_financial_20261014/_data",
+      "composeProjectLabel": "rrj_h07_financial_20261014",
+      "supabaseProjectLabel": "rrj_h07_financial_20261014",
+      "mountedBy": [
+        {
+          "containerId": "db4249c0ec4c4819746ce18346dd0d6cb018dd1401e3c8813ce3f27fc3022c45",
+          "destination": "/var/lib/postgresql/data"
+        }
+      ],
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_db_rrj_h08b_history_20261015",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_db_rrj_h08b_history_20261015/_data",
+      "composeProjectLabel": "rrj_h08b_history_20261015",
+      "supabaseProjectLabel": "rrj_h08b_history_20261015",
+      "mountedBy": [
+        {
+          "containerId": "c7716c7d279e3f5edcbf1d89369bf93c36eb1c90bcc86ac9bc16549f641e45b8",
+          "destination": "/var/lib/postgresql/data"
+        }
+      ],
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_db_rrj_h08c_history_20261015",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_db_rrj_h08c_history_20261015/_data",
+      "composeProjectLabel": "rrj_h08c_history_20261015",
+      "supabaseProjectLabel": "rrj_h08c_history_20261015",
+      "mountedBy": [
+        {
+          "containerId": "774017228b5eb194a40e198adb1a82b391207d37d1ace121c6790971a0c65fe1",
+          "destination": "/var/lib/postgresql/data"
+        }
+      ],
+      "classification": "PROTECTED_KEEP",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_db_rrj_h09_order_flow_20261015",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_db_rrj_h09_order_flow_20261015/_data",
+      "composeProjectLabel": "rrj_h09_order_flow_20261015",
+      "supabaseProjectLabel": "rrj_h09_order_flow_20261015",
+      "mountedBy": [
+        {
+          "containerId": "cac20bb296b32f4e16028e264030689135d5c63e4a395da9455d77c9b1d11867",
+          "destination": "/var/lib/postgresql/data"
+        }
+      ],
+      "classification": "PROTECTED_KEEP",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_db_rrj_manager_lifecycle_20261014",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_db_rrj_manager_lifecycle_20261014/_data",
+      "composeProjectLabel": "rrj_manager_lifecycle_20261014",
+      "supabaseProjectLabel": "rrj_manager_lifecycle_20261014",
+      "mountedBy": [
+        {
+          "containerId": "8d75e1ef2533f727c21e995151131520fce81f15abdb4256f0078c4ebac04086",
+          "destination": "/var/lib/postgresql/data"
+        }
+      ],
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_db_rrj_phase3_prefix_20261014_a1",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_db_rrj_phase3_prefix_20261014_a1/_data",
+      "composeProjectLabel": "rrj_phase3_prefix_20261014_a1",
+      "supabaseProjectLabel": "rrj_phase3_prefix_20261014_a1",
+      "mountedBy": [
+        {
+          "containerId": "8d9ccc55fd6b068088f764303e95cf1e5e12ee543ef21ef86d69a44f70092a90",
+          "destination": "/var/lib/postgresql/data"
+        }
+      ],
+      "classification": "PROTECTED_KEEP",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_db_rrj_phase8_sim",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_db_rrj_phase8_sim/_data",
+      "composeProjectLabel": "rrj_phase8_sim",
+      "supabaseProjectLabel": "rrj_phase8_sim",
+      "mountedBy": [
+        {
+          "containerId": "f4dc2b6115617976e3f2c715e08248d086c97e7fa5e2c1017d31361ed03e4689",
+          "destination": "/var/lib/postgresql/data"
+        }
+      ],
+      "classification": "UNKNOWN_NOT_APPROVED",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_db_RRJ_RC_Repro_20261013_1",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_db_RRJ_RC_Repro_20261013_1/_data",
+      "composeProjectLabel": "RRJ_RC_Repro_20261013_1",
+      "supabaseProjectLabel": "RRJ_RC_Repro_20261013_1",
+      "mountedBy": [],
+      "classification": "UNKNOWN_NOT_APPROVED",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_db_rrj_rc_synthetic_replay_20261013",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_db_rrj_rc_synthetic_replay_20261013/_data",
+      "composeProjectLabel": "rrj_rc_synthetic_replay_20261013",
+      "supabaseProjectLabel": "rrj_rc_synthetic_replay_20261013",
+      "mountedBy": [
+        {
+          "containerId": "9410f82c405e1615d031474d863bdc3508936813e3e8a16acb172c3d2c6ae87f",
+          "destination": "/var/lib/postgresql/data"
+        }
+      ],
+      "classification": "UNKNOWN_NOT_APPROVED",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_db_rrj_recovery_20261014_source",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_db_rrj_recovery_20261014_source/_data",
+      "composeProjectLabel": "rrj_recovery_20261014_source",
+      "supabaseProjectLabel": "rrj_recovery_20261014_source",
+      "mountedBy": [
+        {
+          "containerId": "a14b2a34891f3919131af0ab61ce555034a4a3ba2e3c9d5175c26486491d4596",
+          "destination": "/var/lib/postgresql/data"
+        }
+      ],
+      "classification": "PROTECTED_KEEP",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_db_rrj_recovery_20261014_target",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_db_rrj_recovery_20261014_target/_data",
+      "composeProjectLabel": "rrj_recovery_20261014_target",
+      "supabaseProjectLabel": "rrj_recovery_20261014_target",
+      "mountedBy": [
+        {
+          "containerId": "0fc45950b40b0779cc98c24d4c3e46d0cb59a292c5a4e2d455e0b59b267143e4",
+          "destination": "/var/lib/postgresql/data"
+        }
+      ],
+      "classification": "PROTECTED_KEEP",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_edge_runtime_Capstone_Project",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_edge_runtime_Capstone_Project/_data",
+      "composeProjectLabel": null,
+      "supabaseProjectLabel": null,
+      "mountedBy": [],
+      "classification": "UNKNOWN_NOT_APPROVED",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_storage_isolated-stack",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_storage_isolated-stack/_data",
+      "composeProjectLabel": "isolated-stack",
+      "supabaseProjectLabel": "isolated-stack",
+      "mountedBy": [
+        {
+          "containerId": "40c80e51042f7a2a1818e42935cdaa87d3c5e392e415b2eec49a7bb33bca1bfd",
+          "destination": "/mnt"
+        }
+      ],
+      "classification": "UNRELATED_PROTECTED",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_storage_my-local-todo-app",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_storage_my-local-todo-app/_data",
+      "composeProjectLabel": "my-local-todo-app",
+      "supabaseProjectLabel": "my-local-todo-app",
+      "mountedBy": [
+        {
+          "containerId": "5e7897f1092e41a4a0054431ae66ca1ce67e45b3b995a1e530136ed46dc2d4c3",
+          "destination": "/mnt"
+        }
+      ],
+      "classification": "UNRELATED_PROTECTED",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_storage_rrj_defense_demo_20261014",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_storage_rrj_defense_demo_20261014/_data",
+      "composeProjectLabel": "rrj_defense_demo_20261014",
+      "supabaseProjectLabel": "rrj_defense_demo_20261014",
+      "mountedBy": [
+        {
+          "containerId": "90c84db09a56b21e191f470345def2564e0f91e80d390b71652d723379025a29",
+          "destination": "/mnt"
+        }
+      ],
+      "classification": "PROTECTED_KEEP",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_storage_rrj_defense_demo_20261014_r2",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_storage_rrj_defense_demo_20261014_r2/_data",
+      "composeProjectLabel": "rrj_defense_demo_20261014_r2",
+      "supabaseProjectLabel": "rrj_defense_demo_20261014_r2",
+      "mountedBy": [
+        {
+          "containerId": "fadb21325353648dc18ffbc23e6000da891347baf583cef13395ed3dae0a2c93",
+          "destination": "/mnt"
+        }
+      ],
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_storage_rrj_defense_demo_20261014_r3",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_storage_rrj_defense_demo_20261014_r3/_data",
+      "composeProjectLabel": "rrj_defense_demo_20261014_r3",
+      "supabaseProjectLabel": "rrj_defense_demo_20261014_r3",
+      "mountedBy": [
+        {
+          "containerId": "bdd4c001c23212df2ead6a8a8f29e0b93e3e70acb672ae621b9ee7dced2acdd4",
+          "destination": "/mnt"
+        }
+      ],
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_storage_rrj_h07_financial_20261014",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_storage_rrj_h07_financial_20261014/_data",
+      "composeProjectLabel": "rrj_h07_financial_20261014",
+      "supabaseProjectLabel": "rrj_h07_financial_20261014",
+      "mountedBy": [
+        {
+          "containerId": "74b5ba6d38ca951380e39ab4ac97e94357470d4b4f4596c862d1f402b62a0af4",
+          "destination": "/mnt"
+        }
+      ],
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_storage_rrj_h08b_history_20261015",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_storage_rrj_h08b_history_20261015/_data",
+      "composeProjectLabel": "rrj_h08b_history_20261015",
+      "supabaseProjectLabel": "rrj_h08b_history_20261015",
+      "mountedBy": [
+        {
+          "containerId": "1cc9c7088cba9e309d064ebfc8fd3d91bd1b9d05db5668ff84c542914651b07a",
+          "destination": "/mnt"
+        }
+      ],
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_storage_rrj_h08c_history_20261015",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_storage_rrj_h08c_history_20261015/_data",
+      "composeProjectLabel": "rrj_h08c_history_20261015",
+      "supabaseProjectLabel": "rrj_h08c_history_20261015",
+      "mountedBy": [
+        {
+          "containerId": "3cde5a00ddf70ab3e90cf4554e995b0115e6d104d28f37b71e67b45174b0f22f",
+          "destination": "/mnt"
+        }
+      ],
+      "classification": "PROTECTED_KEEP",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_storage_rrj_h09_order_flow_20261015",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_storage_rrj_h09_order_flow_20261015/_data",
+      "composeProjectLabel": "rrj_h09_order_flow_20261015",
+      "supabaseProjectLabel": "rrj_h09_order_flow_20261015",
+      "mountedBy": [
+        {
+          "containerId": "4319d2dc68626155d3cbe533fa64f963d37e0c87e9415ceac1b7aadd193ba82a",
+          "destination": "/mnt"
+        }
+      ],
+      "classification": "PROTECTED_KEEP",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_storage_rrj_manager_lifecycle_20261014",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_storage_rrj_manager_lifecycle_20261014/_data",
+      "composeProjectLabel": "rrj_manager_lifecycle_20261014",
+      "supabaseProjectLabel": "rrj_manager_lifecycle_20261014",
+      "mountedBy": [
+        {
+          "containerId": "b7f9e3a021fe2e5f6acdb33b7de6fe3681b958774a6ecbaf9d714f7aecf43332",
+          "destination": "/mnt"
+        }
+      ],
+      "classification": "RRJ_DISPOSABLE_CANDIDATE",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_storage_rrj_phase3_prefix_20261014_a1",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_storage_rrj_phase3_prefix_20261014_a1/_data",
+      "composeProjectLabel": "rrj_phase3_prefix_20261014_a1",
+      "supabaseProjectLabel": "rrj_phase3_prefix_20261014_a1",
+      "mountedBy": [
+        {
+          "containerId": "ae137e6fa5830b68e3caed406b8d9d4dfd6f7f22e878b9c5480e7506e9dd5a69",
+          "destination": "/mnt"
+        }
+      ],
+      "classification": "PROTECTED_KEEP",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_storage_rrj_phase8_sim",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_storage_rrj_phase8_sim/_data",
+      "composeProjectLabel": "rrj_phase8_sim",
+      "supabaseProjectLabel": "rrj_phase8_sim",
+      "mountedBy": [
+        {
+          "containerId": "ba0909dcc96a7c9bc80eb305efe34e60bccf4402fc2f1c46236c068947ef9108",
+          "destination": "/mnt"
+        }
+      ],
+      "classification": "UNKNOWN_NOT_APPROVED",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_storage_RRJ_RC_Repro_20261013_1",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_storage_RRJ_RC_Repro_20261013_1/_data",
+      "composeProjectLabel": "RRJ_RC_Repro_20261013_1",
+      "supabaseProjectLabel": "RRJ_RC_Repro_20261013_1",
+      "mountedBy": [],
+      "classification": "UNKNOWN_NOT_APPROVED",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_storage_rrj_rc_synthetic_replay_20261013",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_storage_rrj_rc_synthetic_replay_20261013/_data",
+      "composeProjectLabel": "rrj_rc_synthetic_replay_20261013",
+      "supabaseProjectLabel": "rrj_rc_synthetic_replay_20261013",
+      "mountedBy": [
+        {
+          "containerId": "5a15b115b197fc3f9c567aff6873e3928c48043c55a03d9fb4b3dcb8376c4f18",
+          "destination": "/mnt"
+        }
+      ],
+      "classification": "UNKNOWN_NOT_APPROVED",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_storage_rrj_recovery_20261014_source",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_storage_rrj_recovery_20261014_source/_data",
+      "composeProjectLabel": "rrj_recovery_20261014_source",
+      "supabaseProjectLabel": "rrj_recovery_20261014_source",
+      "mountedBy": [
+        {
+          "containerId": "014c63910b8800def9d3426e627058e5c625716f8a5664ad0eb470422fcc8aff",
+          "destination": "/mnt"
+        }
+      ],
+      "classification": "PROTECTED_KEEP",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    },
+    {
+      "name": "supabase_storage_rrj_recovery_20261014_target",
+      "driver": "local",
+      "mountpoint": "/var/lib/docker/volumes/supabase_storage_rrj_recovery_20261014_target/_data",
+      "composeProjectLabel": "rrj_recovery_20261014_target",
+      "supabaseProjectLabel": "rrj_recovery_20261014_target",
+      "mountedBy": [
+        {
+          "containerId": "7d7cc4e2e2983bdf86c34cba038dd849b92a96eb42e0b30bf41a763dde9cef2b",
+          "destination": "/mnt"
+        }
+      ],
+      "classification": "PROTECTED_KEEP",
+      "preservation": "NOT_VERIFIED",
+      "volumeRemovalProposed": false,
+      "volumeRemovalApproved": false
+    }
+  ],
+  "networks": [
+    {
+      "id": "0f42fc63fd155172ee9fd6915c80539f89193ca231cc1f2b11bec166e28155aa",
+      "name": "bridge",
+      "driver": "bridge",
+      "projectLabel": null,
+      "attachedContainerIds": [],
+      "removalProposed": false
+    },
+    {
+      "id": "ac41fb99fd7e56636edef8602055faf4a79c87b4a9e9511db272b4b36a6bdb4f",
+      "name": "host",
+      "driver": "host",
+      "projectLabel": null,
+      "attachedContainerIds": [],
+      "removalProposed": false
+    },
+    {
+      "id": "8dfbb7a2522b4c875da5e6b2dc6f5be0a5d12fb4332ebb352143bbad4765e844",
+      "name": "none",
+      "driver": "null",
+      "projectLabel": null,
+      "attachedContainerIds": [
+        "2bede0448e2929a1bdb8f040636e60bf73c30bb0bc074d2d54ab1f412738b2b4"
+      ],
+      "removalProposed": false
+    },
+    {
+      "id": "7ad7f93956585b543a8744d4ae395f0b210aa90ed44a4bc04fa06aa8a30b487e",
+      "name": "rrj_phase8_loopback",
+      "driver": "bridge",
+      "projectLabel": null,
+      "attachedContainerIds": [
+        "bf3087423191404143235d3ed36f128eb367d8e8430011a5f7325d581670f372",
+        "05248ee14735eabf5c5b21969b354559c65f0e3997519448bf68dfdcd3506dd2",
+        "f4dc2b6115617976e3f2c715e08248d086c97e7fa5e2c1017d31361ed03e4689",
+        "21337dc139d76d07c7290f3ac039cbdf094946ee353596c92930cff013c3d56c",
+        "69e08c98aa8e2e188100d0af72830ac601cdf22cdba818fe36e1f8e6677805e7",
+        "fd2fcefdfbc8d04c6b16fff9cbe80ad1f0c6fb758d0b32e6c51a7dbfe1c1d6ef",
+        "e8027b107be7a4aeb71e9cca20f9029fc18fe32916ab8265f03647fdf6e07ae3",
+        "240232e06d4b03c7b924053153fb064af8f7111b63e568972ae58c2b48875ce6",
+        "33b54d736e830c69ae8fedc5d7147c842c8e2803ae6533ff5f90bfee3c48a4b3",
+        "ba0909dcc96a7c9bc80eb305efe34e60bccf4402fc2f1c46236c068947ef9108",
+        "7b74a27c4f03a274e3e03d9cef44300d5afb188c1243e5d900d9f92dd3ccb592",
+        "2877b8ab0d4d597d7b553c02163dbc585e8680c5d9b4a81d56f636faf6cabe0f"
+      ],
+      "removalProposed": false
+    },
+    {
+      "id": "6ca838cbf0a816c8578c763502def843ac4af8b14d40ecacf200acdc37d92bbb",
+      "name": "rrj_phase8e_rc3_bootstrap_loopback",
+      "driver": "bridge",
+      "projectLabel": null,
+      "attachedContainerIds": [],
+      "removalProposed": false
+    },
+    {
+      "id": "30630e8cf43374f42d31240b05f1067a8a1dc666844fea00762de33234421f23",
+      "name": "rrj_phase8e_rc3_replay_loopback",
+      "driver": "bridge",
+      "projectLabel": null,
+      "attachedContainerIds": [],
+      "removalProposed": false
+    },
+    {
+      "id": "39891adaa2df6fe844955dd2d6281a0b0490aa474b8e4fd6b800cb9585ab4736",
+      "name": "rrj_phase8e_rc4_replay_loopback",
+      "driver": "bridge",
+      "projectLabel": null,
+      "attachedContainerIds": [],
+      "removalProposed": false
+    },
+    {
+      "id": "59694d969b37f7d04e45d82575ff2877d96fbe5c905cb38e043a9b62247f25bc",
+      "name": "supabase_network_isolated-stack",
+      "driver": "bridge",
+      "projectLabel": "isolated-stack",
+      "attachedContainerIds": [
+        "3ceb1b48a1c209b11bec04a560e6b3899bffb3c8901b6a0d967f66816cf5a8a4",
+        "677b9f1c451b305975d87726d3c7f15ccbfdafd8625fcfec261630b7df4189e5",
+        "b56f15a408f84f6a9de2c314dd806247e9f00ba5f52335a7e9926de8beea8ae7",
+        "fa026b6aa72f871c3e0d15a0737c8047fb171a70abf54cdc946b9c6d44d0dae6",
+        "7ede4d92799ff358dc5d09fe371bba4266cc8500057dbb4059414de870829ca8",
+        "40c80e51042f7a2a1818e42935cdaa87d3c5e392e415b2eec49a7bb33bca1bfd"
+      ],
+      "removalProposed": false
+    },
+    {
+      "id": "06a8e205c69e646f51da071c3d240b32d1f83119a440e9aed467b5f942c36021",
+      "name": "supabase_network_my-local-todo-app",
+      "driver": "bridge",
+      "projectLabel": "my-local-todo-app",
+      "attachedContainerIds": [
+        "908d74874442575b58f0dca1f016917ac8f88f5b450e5f3cd7e789a721822577",
+        "7bb568ae07669685067a09b551f63e146d442d2976154952a66f2f55902a7687",
+        "3feef4aaa27045f7abc4c02ff7e07225cc0db317b72eace308d3038d0e6cfa9a",
+        "79eb80b0ca745fbdbcb525197b7ac0152e08ffac3e852dc0646eeb4b227d8959",
+        "18aa01159581456fe3d7db04af10308e54364a934480b0d6bf70a09d9a6fd29f",
+        "350c49e29d519eab347f617284894fae1fd5bbc211bcce474dde566481cad92c",
+        "2a751d274ef04fe1d04c2acd3cd3c8d8ba3dadeaeaab9a909402330fc534458b",
+        "0919896beee16eface8fcf32c1700768b030785153a43354c3e6f0aba5dbc00a",
+        "c236ff77977818616c46640f9ed0015725cd2378b60778edc6cb8454d88bb86c",
+        "5e7897f1092e41a4a0054431ae66ca1ce67e45b3b995a1e530136ed46dc2d4c3",
+        "9b9a34b6a50781dc4651c8c8718d425cbd2504eaf3e53545fbb86732ae540e93",
+        "bcf16098d8431578e39a2a4c61be696ea074675ffa748c2c0951a8acc58f93a2"
+      ],
+      "removalProposed": false
+    },
+    {
+      "id": "fe0f27780404a2d766035ddccd921e83bb507256a8d33b91d2dcc1a5e6dd1245",
+      "name": "supabase_network_rrj_defense_demo_20261014",
+      "driver": "bridge",
+      "projectLabel": "rrj_defense_demo_20261014",
+      "attachedContainerIds": [
+        "9b7c1cecb09c9430fd386d6f31a765cf5c1b3f41a15d5b054b21f0aeab580228",
+        "d1d080ef20d735c6beb262933b77a16ead5c46370874ebdcb8f0b92baf0b67fb",
+        "3c44fae58d3833f38ff7b0ecbc4cc61bd4f1d68eaeea3acf77c6b8db5f221ade",
+        "55938b9df480620cb3c2b9dd2f32a8cb06c95f0cb79d43995880fdef6d7a2f71",
+        "90c84db09a56b21e191f470345def2564e0f91e80d390b71652d723379025a29"
+      ],
+      "removalProposed": false
+    },
+    {
+      "id": "4c071d493e8d2b05cae76cff648388fdbdc32075435b4e5311d196c5d13a6ea8",
+      "name": "supabase_network_rrj_defense_demo_20261014_r2",
+      "driver": "bridge",
+      "projectLabel": "rrj_defense_demo_20261014_r2",
+      "attachedContainerIds": [
+        "e133aed5720f1885dadedd81e959d9a55cd2029e947855df5af2c20ed417081b",
+        "beec6b1192ca8cd3e31912215080974d5f5b67a04c45aa0c7baad1df85a833e0",
+        "56c80a5f8803e5c64e4defb5578b7dd223c2d23ad6d37231df8e5b1524245b3d",
+        "30d5bf2f23a16195c949fda8d2aa992159886f2f5179436caeb9a29117b7c0b4",
+        "fadb21325353648dc18ffbc23e6000da891347baf583cef13395ed3dae0a2c93"
+      ],
+      "removalProposed": false
+    },
+    {
+      "id": "d4cb9d2e6d3d2f81ac298deb14dc4488b1a754f9c2491e05981db31aa6cc50a4",
+      "name": "supabase_network_rrj_defense_demo_20261014_r3",
+      "driver": "bridge",
+      "projectLabel": "rrj_defense_demo_20261014_r3",
+      "attachedContainerIds": [
+        "92bb64389b29fd51e1dceafa56d697981b95cfc31f5b978c49e1a2868989d81f",
+        "85e0d9d47432af916afad1ef7c5007bf69269bbdef96557f98a4b8deef23eda4",
+        "08696de9d4e4f926986720ab17b57f2f4d830d9bb7cd9e5ce51d3411e22ccc3f",
+        "a47c5ff84b749671da0e1a97038d4601e86960b11a326f53d3d93a918a271723",
+        "bdd4c001c23212df2ead6a8a8f29e0b93e3e70acb672ae621b9ee7dced2acdd4"
+      ],
+      "removalProposed": false
+    },
+    {
+      "id": "9badd787b7984582e86c8549ab8a537f37b1470d3e5471aa0a90463c62be5a55",
+      "name": "supabase_network_rrj_h07_financial_20261014",
+      "driver": "bridge",
+      "projectLabel": "rrj_h07_financial_20261014",
+      "attachedContainerIds": [
+        "d8b130694c1d38022c051f1040e0c256c5d33d9cc8032491160109b3b90c6b17",
+        "db4249c0ec4c4819746ce18346dd0d6cb018dd1401e3c8813ce3f27fc3022c45",
+        "e8f7b6161dd3bea217d2b1e987ed6e3019d9953783a64862b161a011146b2e01",
+        "f8c4f6885aa9f59900fe87c6b673a33c6493dd39a39e3260f955231b0641177e",
+        "74b5ba6d38ca951380e39ab4ac97e94357470d4b4f4596c862d1f402b62a0af4"
+      ],
+      "removalProposed": false
+    },
+    {
+      "id": "ca5d959e844868bcdb26bed349536b54f6d773214c7583cddc03e85a9f47f96a",
+      "name": "supabase_network_rrj_h08b_history_20261015",
+      "driver": "bridge",
+      "projectLabel": "rrj_h08b_history_20261015",
+      "attachedContainerIds": [
+        "e3685155639ea55062aa61ca8f3e466e06f8ad62d0af6490ad4f4047005dd018",
+        "c7716c7d279e3f5edcbf1d89369bf93c36eb1c90bcc86ac9bc16549f641e45b8",
+        "4e7af74404e16a6358d0a49432079a60e97e59eff696f7e4340dc05c380e7b1d",
+        "4f23e160669bfc2dd8180d75b8f4bf557941ce9cc1701219d653ed39f0e2f20c",
+        "1cc9c7088cba9e309d064ebfc8fd3d91bd1b9d05db5668ff84c542914651b07a"
+      ],
+      "removalProposed": false
+    },
+    {
+      "id": "242a644a80f4bffaeb54c4514f69c1af0f1379078de4ab538d9a2f70f7935705",
+      "name": "supabase_network_rrj_h08c_history_20261015",
+      "driver": "bridge",
+      "projectLabel": "rrj_h08c_history_20261015",
+      "attachedContainerIds": [
+        "2d9de3b44279023f721b8bcc8922c1b06de9e500bfec6eb5f5bd670489716c77",
+        "862664844b4225a4a303600edcd2de3c17ef4e47ee8ef7658f275a1494938583",
+        "774017228b5eb194a40e198adb1a82b391207d37d1ace121c6790971a0c65fe1",
+        "bb74cd6759411e6a53fd4be1c48f6169eff35865765236d5a2b66a8a17b4a0f4",
+        "0ad2bab7e2ebb2ac447b5f96d8e596673d2beecd2b66efdcafae30c6c5238440",
+        "d3bd5187fb2a32e0d5d2cb0cb77cabed4cbe819c563283335364ba35fe80b2ef",
+        "36204297b02b2f1d50de3533e4162fdc24e0235954f4fc24f8875f683a3e4ed3",
+        "ff427135d2df120ce29acc4ab5675dc8c0731907a91d51905ca457ae048580a8",
+        "feebac47f5fad4d9e9cc60da49974e1d084958e7793dd5d735198f82696dde9a",
+        "3cde5a00ddf70ab3e90cf4554e995b0115e6d104d28f37b71e67b45174b0f22f",
+        "d99279ea81a3036d7a712fd649a370339487d4a29c14d4b0d4532f748314e8cc",
+        "ab7d705432f56e268728d01065f84fe9b181c453f7c5f7ff5a48ea353c1948a8"
+      ],
+      "removalProposed": false
+    },
+    {
+      "id": "c7bdaa92391bf35978ebb9e2f16b83471e7382247ef20d1c093db71ebee7efe7",
+      "name": "supabase_network_rrj_h09_order_flow_20261015",
+      "driver": "bridge",
+      "projectLabel": "rrj_h09_order_flow_20261015",
+      "attachedContainerIds": [
+        "fc196286ff911268cb69827b855d4b017dfbcf05f3ad8604deeb07586424cb06",
+        "cac20bb296b32f4e16028e264030689135d5c63e4a395da9455d77c9b1d11867",
+        "c2b5180e936b180075cb35a52c2ed9e0bd8954437ea0e00120745573c518fbfc",
+        "39d166c2f6ce11fba383fbced74fcefca6f2389eff695e345c3643c6cd0484e1",
+        "93d1d9e5a74d55049586991a551a2db5b98cb555f48bddb528d51702c7752da5",
+        "4319d2dc68626155d3cbe533fa64f963d37e0c87e9415ceac1b7aadd193ba82a"
+      ],
+      "removalProposed": false
+    },
+    {
+      "id": "b5b02d94e884d326ed17d8d104751ae41e66a5941cd8969293dd0d798e0c6aba",
+      "name": "supabase_network_rrj_manager_lifecycle_20261014",
+      "driver": "bridge",
+      "projectLabel": "rrj_manager_lifecycle_20261014",
+      "attachedContainerIds": [
+        "caca8252418a42261e360969151cb1a324b7557676ac0a5beb9fac0591c5e4bf",
+        "8d75e1ef2533f727c21e995151131520fce81f15abdb4256f0078c4ebac04086",
+        "7088583f5d03bdec2f2221bdc2aeca0643b983132a160f3b97b64b99d4eb9ef8",
+        "dcdd656c805d1e506bfbd830729d0f7aaecb7813665b4e676c5009e8f42d186f",
+        "b7f9e3a021fe2e5f6acdb33b7de6fe3681b958774a6ecbaf9d714f7aecf43332"
+      ],
+      "removalProposed": false
+    },
+    {
+      "id": "d885fcb92aa81dc02a2c8a28fcda01c06e4ff127fa2bdd4c2952cd2422b8ce56",
+      "name": "supabase_network_rrj_phase3_prefix_20261014_a1",
+      "driver": "bridge",
+      "projectLabel": "rrj_phase3_prefix_20261014_a1",
+      "attachedContainerIds": [
+        "de14fe3d9d5100214997a8d5400fdc0db45ee18598c78881768d1f02b71034e6",
+        "8d9ccc55fd6b068088f764303e95cf1e5e12ee543ef21ef86d69a44f70092a90",
+        "0129b244cbaa7cf05ded9fe10513229dc98721a65a060f2d4beb2ee5c0254f15",
+        "04cf7973e393fe55b4088c68dc2d63b2027762355fdb7209eb9619e9da386ffd",
+        "ae137e6fa5830b68e3caed406b8d9d4dfd6f7f22e878b9c5480e7506e9dd5a69"
+      ],
+      "removalProposed": false
+    },
+    {
+      "id": "6f8b54cfa7e1adebc464d00c9460e7bc3ef668270a375329c56f9f1ca3093363",
+      "name": "supabase_network_rrj_rc_synthetic_replay_20261013",
+      "driver": "bridge",
+      "projectLabel": "rrj_rc_synthetic_replay_20261013",
+      "attachedContainerIds": [
+        "85c59c5ec0b591baaa880e3fac3ae567aa8b3603f19fd40ee7b805856e5547c7",
+        "9410f82c405e1615d031474d863bdc3508936813e3e8a16acb172c3d2c6ae87f",
+        "e77021711b8d633ec7ab3cbd61fffa97b0eadfd1d5571a00a5a72def7a4d3f4d",
+        "aee7e23073896b189d31cf77519a4549e27ab1f4724c9afa1665a41b25eae2a2",
+        "5a15b115b197fc3f9c567aff6873e3928c48043c55a03d9fb4b3dcb8376c4f18"
+      ],
+      "removalProposed": false
+    },
+    {
+      "id": "ec19e1060c50a68889f2f6717f43e2932f2317b7136bb566616eb2b2075b6d26",
+      "name": "supabase_network_rrj_recovery_20261014_source",
+      "driver": "bridge",
+      "projectLabel": "rrj_recovery_20261014_source",
+      "attachedContainerIds": [
+        "d6f577841ff16df59dc0fbb3764dfb670cbff39a0135b56863172b0e36bf1e0a",
+        "a14b2a34891f3919131af0ab61ce555034a4a3ba2e3c9d5175c26486491d4596",
+        "f20027554943db139af0e5984441d5152909d0f5777badf7e0146ac3eac89591",
+        "431599f0a1244b79a8d00f793590bc8c2d7769883ed8f3613c33f187c640d1c3",
+        "014c63910b8800def9d3426e627058e5c625716f8a5664ad0eb470422fcc8aff"
+      ],
+      "removalProposed": false
+    },
+    {
+      "id": "e3dd411aba1febfd0d503982f6305b758391864375c99d16d4b77f024bbb9efd",
+      "name": "supabase_network_rrj_recovery_20261014_target",
+      "driver": "bridge",
+      "projectLabel": "rrj_recovery_20261014_target",
+      "attachedContainerIds": [
+        "e36a0276a003a7d8d57e0d105759b62f6ee605e6a5deaf005f34a3713c28b9f2",
+        "0fc45950b40b0779cc98c24d4c3e46d0cb59a292c5a4e2d455e0b59b267143e4",
+        "35ebaaa1137c9a9f84932c9afefa90791df5e4a7b1ce0c881225d46bb82052c2",
+        "43ff56c70e58861067d6660887b927d3508bdb8041c437e42e7b3c670bb82890",
+        "7d7cc4e2e2983bdf86c34cba038dd849b92a96eb42e0b30bf41a763dde9cef2b"
+      ],
+      "removalProposed": false
+    }
+  ],
+  "proposedVolumeDeletionNames": [],
+  "proposedNetworkDeletionNames": [],
+  "proposedImageDeletionReferences": [],
+  "executed": {
+    "dockerMutations": [],
+    "sqlWrites": [],
+    "hostedCalls": [],
+    "sourceChanges": []
+  }
+}

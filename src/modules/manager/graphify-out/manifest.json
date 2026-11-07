@@ -1,0 +1,362 @@
+{
+  "api/drinkChoicesApi.ts": {
+    "mtime": 1792595751.1861153,
+    "seen": 1793767997.6391943,
+    "ast_hash": "ca8839fb8c2475003c6e657a405a47a2",
+    "semantic_hash": ""
+  },
+  "api/managerApi.ts": {
+    "mtime": 1793475725.9963503,
+    "seen": 1793767997.639201,
+    "ast_hash": "9c5b26b2e36530183d289de641fae632",
+    "semantic_hash": ""
+  },
+  "api/managerPhase2Api.ts": {
+    "mtime": 1792408348.5660813,
+    "seen": 1793767997.639204,
+    "ast_hash": "fc88d96811969e8715b1c64d22e77c36",
+    "semantic_hash": ""
+  },
+  "api/mealOptionsApi.ts": {
+    "mtime": 1792573141.1514719,
+    "seen": 1793767997.639206,
+    "ast_hash": "bcf9addef84d0d0806a7531540a1c035",
+    "semantic_hash": ""
+  },
+  "api/paidOrderCancellationApi.ts": {
+    "mtime": 1791360992.3871894,
+    "seen": 1793767997.6392074,
+    "ast_hash": "78bc5a35af4b6f020aac9f40574bc046",
+    "semantic_hash": ""
+  },
+  "components/ManagerStatusBadge.tsx": {
+    "mtime": 1789033138.9090495,
+    "seen": 1793767997.6392088,
+    "ast_hash": "0a3a9d5ab74ea7f34a31e5e5915e7a18",
+    "semantic_hash": ""
+  },
+  "customers/CustomersPage.tsx": {
+    "mtime": 1792333325.9382977,
+    "seen": 1793767997.63921,
+    "ast_hash": "8a8760a89b21e080d133681c31053871",
+    "semantic_hash": ""
+  },
+  "dashboard/ManagerDashboard.tsx": {
+    "mtime": 1793097132.6603687,
+    "seen": 1793767997.639211,
+    "ast_hash": "75587e0b33f28c2277a4e48a01db7c47",
+    "semantic_hash": ""
+  },
+  "dashboard/usableStockAttention.ts": {
+    "mtime": 1792687925.9646308,
+    "seen": 1793767997.6392126,
+    "ast_hash": "2afb2beda16ed3939871ae290b3d46c4",
+    "semantic_hash": ""
+  },
+  "index.tsx": {
+    "mtime": 1793124297.0684822,
+    "seen": 1793767997.6392138,
+    "ast_hash": "1cb969104e43c6232b62fa76984d4315",
+    "semantic_hash": ""
+  },
+  "inventory/AdjustmentPage.tsx": {
+    "mtime": 1792392020.728997,
+    "seen": 1793767997.6392148,
+    "ast_hash": "00cd5cde95ab1c4672e807f63f37748f",
+    "semantic_hash": ""
+  },
+  "inventory/AwaitingProductionDelivery.tsx": {
+    "mtime": 1793097132.661367,
+    "seen": 1793767997.6392162,
+    "ast_hash": "3d5b07e9f4d8b414278fef64fe2aa147",
+    "semantic_hash": ""
+  },
+  "inventory/InvTransactionsPage.tsx": {
+    "mtime": 1793097132.6623738,
+    "seen": 1793767997.6392174,
+    "ast_hash": "810c2b6803b20fcf0994c6d344d6b3d8",
+    "semantic_hash": ""
+  },
+  "inventory/InventoryAuditPage.tsx": {
+    "mtime": 1792406577.2261765,
+    "seen": 1793767997.6392186,
+    "ast_hash": "327154362047454f731a4fd2aaa211b2",
+    "semantic_hash": ""
+  },
+  "inventory/InventoryBatchList.tsx": {
+    "mtime": 1792293140.8811884,
+    "seen": 1793767997.63922,
+    "ast_hash": "006ca57238bd4683081e87f8cb40e8d8",
+    "semantic_hash": ""
+  },
+  "inventory/InventoryBatchSelect.tsx": {
+    "mtime": 1791174283.3803887,
+    "seen": 1793767997.639221,
+    "ast_hash": "68e2a244e43f399d45d1385f04cc53d4",
+    "semantic_hash": ""
+  },
+  "inventory/InventoryItemDetail.tsx": {
+    "mtime": 1793020326.427922,
+    "seen": 1793767997.6392224,
+    "ast_hash": "bfa025ac1c1f544f61997a669e3cb800",
+    "semantic_hash": ""
+  },
+  "inventory/InventoryItemSelect.tsx": {
+    "mtime": 1792391994.3241572,
+    "seen": 1793767997.6392238,
+    "ast_hash": "93ac7df0f3f8e41d659e23303e96479e",
+    "semantic_hash": ""
+  },
+  "inventory/InventoryMutationSummary.tsx": {
+    "mtime": 1791174283.3588452,
+    "seen": 1793767997.639225,
+    "ast_hash": "6b683af13c7d8d13df638373de470765",
+    "semantic_hash": ""
+  },
+  "inventory/InventoryPage.tsx": {
+    "mtime": 1793097132.661367,
+    "seen": 1793767997.6392262,
+    "ast_hash": "f3008518e037a70fb44a98dc87920be4",
+    "semantic_hash": ""
+  },
+  "inventory/InventoryQuantityInput.tsx": {
+    "mtime": 1791174195.913476,
+    "seen": 1793767997.6392274,
+    "ast_hash": "a0534bd3d1bcba43706e6046ded73b63",
+    "semantic_hash": ""
+  },
+  "inventory/InventoryReconciliationPanel.tsx": {
+    "mtime": 1793097132.6623738,
+    "seen": 1793767997.6392283,
+    "ast_hash": "fa9938a8e21bce4338740689791eab28",
+    "semantic_hash": ""
+  },
+  "inventory/InventoryWorkspaceNav.tsx": {
+    "mtime": 1791720322.9245245,
+    "seen": 1793767997.63923,
+    "ast_hash": "b4247a86b4de355184ce5ad041e4cd96",
+    "semantic_hash": ""
+  },
+  "inventory/ManagerRequestsPage.tsx": {
+    "mtime": 1793097132.663365,
+    "seen": 1793767997.639231,
+    "ast_hash": "948a40c9378c24a379df0deff3ab6d33",
+    "semantic_hash": ""
+  },
+  "inventory/ReceivingAccordion.tsx": {
+    "mtime": 1792835809.438199,
+    "seen": 1793767997.6392322,
+    "ast_hash": "07f0d90a2affba24bd93dd93fbf985eb",
+    "semantic_hash": ""
+  },
+  "inventory/ReceivingDocumentList.tsx": {
+    "mtime": 1792752625.7085567,
+    "seen": 1793767997.639234,
+    "ast_hash": "2a38780ad175693e8790a029b2f0d8bd",
+    "semantic_hash": ""
+  },
+  "inventory/ReplenishmentPage.tsx": {
+    "mtime": 1793020345.4369526,
+    "seen": 1793767997.639235,
+    "ast_hash": "19f5f5a19ef5e31dbc4032d18a8a3f88",
+    "semantic_hash": ""
+  },
+  "inventory/StockMovementList.tsx": {
+    "mtime": 1792788408.5576575,
+    "seen": 1793767997.6392365,
+    "ast_hash": "4ef8f4c601bc302ee3aee5c4fcb78385",
+    "semantic_hash": ""
+  },
+  "inventory/StockPresentation.tsx": {
+    "mtime": 1791190505.2640638,
+    "seen": 1793767997.6392376,
+    "ast_hash": "5ede7c3dbc38570cb7690876f0a55579",
+    "semantic_hash": ""
+  },
+  "inventory/StockReceivingPage.tsx": {
+    "mtime": 1793476133.0256357,
+    "seen": 1793767997.6392388,
+    "ast_hash": "8ffdc6cf582f15eea0b8fbef933b1449",
+    "semantic_hash": ""
+  },
+  "inventory/UnifiedReceivingDocuments.tsx": {
+    "mtime": 1793471602.8345456,
+    "seen": 1793767997.63924,
+    "ast_hash": "739e4312fc458ad96297732d83aa71e3",
+    "semantic_hash": ""
+  },
+  "inventory/WasteSpoilagePage.tsx": {
+    "mtime": 1792392071.6142504,
+    "seen": 1793767997.6392412,
+    "ast_hash": "fa39a88bda1f071553884b9314d55c6c",
+    "semantic_hash": ""
+  },
+  "inventory/batchDecision.ts": {
+    "mtime": 1792124792.6976392,
+    "seen": 1793767997.6392424,
+    "ast_hash": "52e9afdd09de8f51ef0d53587b536d09",
+    "semantic_hash": ""
+  },
+  "inventory/inspectorLabel.ts": {
+    "mtime": 1792788909.3222313,
+    "seen": 1793767997.6392436,
+    "ast_hash": "3d4ef529a0d75f854fd169e121c3a14f",
+    "semantic_hash": ""
+  },
+  "inventory/inventoryApi.ts": {
+    "mtime": 1791190505.695052,
+    "seen": 1793767997.6392446,
+    "ast_hash": "315e5abc1549d96c684ec99b7bc0b605",
+    "semantic_hash": ""
+  },
+  "inventory/inventoryAuditApi.ts": {
+    "mtime": 1792404411.0140057,
+    "seen": 1793767997.6392457,
+    "ast_hash": "fa89703e02d6d9a957f947754c87eee4",
+    "semantic_hash": ""
+  },
+  "inventory/inventoryMutationUi.ts": {
+    "mtime": 1791174195.910477,
+    "seen": 1793767997.639247,
+    "ast_hash": "91066d733ed95f7bf41535c2a4f00ce5",
+    "semantic_hash": ""
+  },
+  "inventory/inventoryOverview.ts": {
+    "mtime": 1793016422.9951146,
+    "seen": 1793767997.6392481,
+    "ast_hash": "87db09f88ebfe52c6e9d82e8e41df4f0",
+    "semantic_hash": ""
+  },
+  "inventory/inventoryReconciliation.ts": {
+    "mtime": 1789975318.8498607,
+    "seen": 1793767997.6392493,
+    "ast_hash": "59213d473338a8252ccbc0fa60e2027d",
+    "semantic_hash": ""
+  },
+  "inventory/inventoryRequestApi.ts": {
+    "mtime": 1793016422.9981244,
+    "seen": 1793767997.6392505,
+    "ast_hash": "410d5973b0f78fb6a05ddf05533b00eb",
+    "semantic_hash": ""
+  },
+  "inventory/movementPage.ts": {
+    "mtime": 1792104396.4444022,
+    "seen": 1793767997.6392515,
+    "ast_hash": "47d6e7951f1bacf8328407b71a0dc3b6",
+    "semantic_hash": ""
+  },
+  "inventory/receivingApi.ts": {
+    "mtime": 1793476124.8471496,
+    "seen": 1793767997.6392524,
+    "ast_hash": "a278f4bcf39fc99bf5546ce1d948938c",
+    "semantic_hash": ""
+  },
+  "inventory/replenishmentApi.ts": {
+    "mtime": 1793021019.6036818,
+    "seen": 1793767997.6392539,
+    "ast_hash": "c31830a59a12c4e728ee90bfff6f92c1",
+    "semantic_hash": ""
+  },
+  "inventory/requestDocument.ts": {
+    "mtime": 1793097132.6643648,
+    "seen": 1793767997.6392553,
+    "ast_hash": "a518088e460c784c60d00a67e840c25f",
+    "semantic_hash": ""
+  },
+  "inventory/requestProposal.ts": {
+    "mtime": 1793016422.996117,
+    "seen": 1793767997.6392565,
+    "ast_hash": "71fd715cef515f4aad6b13e7a37522d4",
+    "semantic_hash": ""
+  },
+  "inventory/requestQuantity.ts": {
+    "mtime": 1792967522.3452249,
+    "seen": 1793767997.6392577,
+    "ast_hash": "1c8df670dacd1deb4d70a75ea6d37b3a",
+    "semantic_hash": ""
+  },
+  "inventory/requestWorkflow.ts": {
+    "mtime": 1792701703.2426531,
+    "seen": 1793767997.6392586,
+    "ast_hash": "d4fe8ad91ee64596c3e4c37b2ba421c3",
+    "semantic_hash": ""
+  },
+  "inventory/unifiedReceivingModel.ts": {
+    "mtime": 1792781485.5679219,
+    "seen": 1793767997.6392598,
+    "ast_hash": "1e5b7bc516ac5db4aad40f79415f03a2",
+    "semantic_hash": ""
+  },
+  "menu/MenuManagementPage.tsx": {
+    "mtime": 1792699509.9751828,
+    "seen": 1793767997.639261,
+    "ast_hash": "eb655964fa20e7eac7a1beb03de7769c",
+    "semantic_hash": ""
+  },
+  "menu/mealEligibility.ts": {
+    "mtime": 1792699509.9726782,
+    "seen": 1793767997.6392622,
+    "ast_hash": "5857bdf5c2cb6062baa3dd9de28f4d11",
+    "semantic_hash": ""
+  },
+  "notifications/useManagerNotifications.ts": {
+    "mtime": 1793124264.8616295,
+    "seen": 1793767997.6392634,
+    "ast_hash": "c93e7455e35e70d8118118402a02e4e0",
+    "semantic_hash": ""
+  },
+  "orders/OrdersPage.tsx": {
+    "mtime": 1793511249.4302933,
+    "seen": 1793767997.6392648,
+    "ast_hash": "61267832287464d3d39fc7078e13fae9",
+    "semantic_hash": ""
+  },
+  "orders/PaidOrderCancellationPanel.tsx": {
+    "mtime": 1792336397.6521113,
+    "seen": 1793767997.639266,
+    "ast_hash": "b64d5eb974585877955fdca5b62d2a30",
+    "semantic_hash": ""
+  },
+  "purchase-orders/PurchaseOrdersPage.tsx": {
+    "mtime": 1789978753.3760347,
+    "seen": 1793767997.639267,
+    "ast_hash": "a9354084002860b1815d736f6a5885fb",
+    "semantic_hash": ""
+  },
+  "reports/ReportsPage.tsx": {
+    "mtime": 1793097132.6581073,
+    "seen": 1793767997.6392684,
+    "ast_hash": "42ebc20ca63a7795b234069aeb65cf0f",
+    "semantic_hash": ""
+  },
+  "riders/RestoreRiderDialog.tsx": {
+    "mtime": 1792337503.2236013,
+    "seen": 1793767997.6392694,
+    "ast_hash": "df3382e14fe12c3399410770f8c61878",
+    "semantic_hash": ""
+  },
+  "riders/RiderApplicationDialog.tsx": {
+    "mtime": 1792408620.7016747,
+    "seen": 1793767997.6392703,
+    "ast_hash": "bbd5d29f0dc52fc44647ea5db9ed246d",
+    "semantic_hash": ""
+  },
+  "riders/RidersPage.tsx": {
+    "mtime": 1793097132.6571047,
+    "seen": 1793767997.6392717,
+    "ast_hash": "10a901be90e19eb53069febc4516df0d",
+    "semantic_hash": ""
+  },
+  "riders/SuspendRiderDialog.tsx": {
+    "mtime": 1792337532.3319955,
+    "seen": 1793767997.6392732,
+    "ast_hash": "9b47294fe1a8773e79cf2c601629745e",
+    "semantic_hash": ""
+  },
+  "settings/SettingsPage.tsx": {
+    "mtime": 1792333949.4847612,
+    "seen": 1793767997.6392744,
+    "ast_hash": "41b293b1e8be6b9242ad58fd8988976c",
+    "semantic_hash": ""
+  }
+}

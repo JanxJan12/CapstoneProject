@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  AlertTriangle,
   CheckCircle2,
   ChefHat,
   Clock3,
@@ -12,16 +11,15 @@ import { toast } from "sonner";
 import { CashierButton, ErrorBanner } from "../../cashier/components";
 
 import {
-  DEFAULT_DELAY_THRESHOLD_MINUTES,
   formatElapsed,
   formatMoney,
-  minutesSince,
 } from "../../cashier/constants";
 
 import {
   advanceKdsOrder,
   fetchKdsQueue,
   loadKdsSession,
+  KdsTerminalError,
   type KdsFulfillmentType,
   type KdsOrderStatus,
   type KdsQueueTicket,
@@ -29,7 +27,7 @@ import {
 
 const COLUMNS: KdsOrderStatus[] = ["confirmed", "preparing", "ready"];
 
-export function KitchenQueue() {
+export function KitchenQueue({ onAccessLost }: { onAccessLost: () => void }) {
   const [tickets, setTickets] = useState<KdsQueueTicket[]>([]);
 
   const [loadingQueue, setLoadingQueue] = useState(true);
@@ -37,17 +35,23 @@ export function KitchenQueue() {
   const [loadingId, setLoadingId] = useState<string>();
 
   const [error, setError] = useState("");
+  const refreshInFlight = useRef(false);
+  const loadVersion = useRef(0);
+  const advanceInFlight = useRef(new Set<string>());
 
-  const loadQueue = useCallback(async () => {
+  const loadQueue = useCallback(async (force = false): Promise<boolean> => {
+    if (refreshInFlight.current && !force) return false;
+    const version = ++loadVersion.current;
+    refreshInFlight.current = true;
+    setLoadingQueue(true);
     const credential = loadKdsSession();
 
     if (!credential) {
-      setError(
-        "Kitchen terminal session is missing. Deactivate and activate the terminal again.",
-      );
-
+      setTickets([]);
       setLoadingQueue(false);
-      return;
+      refreshInFlight.current = false;
+      onAccessLost();
+      return false;
     }
 
     setError("");
@@ -55,17 +59,25 @@ export function KitchenQueue() {
     try {
       const queue = await fetchKdsQueue(credential);
 
-      setTickets(queue);
+      if (version === loadVersion.current) setTickets(queue);
+      return version === loadVersion.current;
     } catch (caught) {
-      setError(
-        caught instanceof Error
-          ? caught.message
-          : "Unable to load the kitchen queue.",
-      );
+      if (version === loadVersion.current) {
+        setTickets([]);
+        if (caught instanceof KdsTerminalError && caught.kind === "credential") {
+          onAccessLost();
+        } else {
+          setError(caught instanceof KdsTerminalError ? caught.message : "The kitchen queue is unavailable. Check the connection and try again.");
+        }
+      }
+      return false;
     } finally {
-      setLoadingQueue(false);
+      if (version === loadVersion.current) {
+        setLoadingQueue(false);
+        refreshInFlight.current = false;
+      }
     }
-  }, []);
+  }, [onAccessLost]);
 
   useEffect(() => {
     void loadQueue();
@@ -80,33 +92,24 @@ export function KitchenQueue() {
   }, [loadQueue]);
 
   const advance = async (ticket: KdsQueueTicket) => {
+    if (advanceInFlight.current.has(ticket.databaseId)) return;
     const credential = loadKdsSession();
 
     if (!credential) {
-      setError(
-        "Kitchen terminal session is missing. Deactivate and activate the terminal again.",
-      );
+      setTickets([]);
+      onAccessLost();
       return;
     }
 
+    advanceInFlight.current.add(ticket.databaseId);
     setLoadingId(ticket.databaseId);
     setError("");
 
     try {
       const result = await advanceKdsOrder(credential, ticket.databaseId, ticket.status );
 
-      const nextStatus =
-        result.currentStatus === "preparing" ? "Preparing" : "Ready";
-
-      toast.success(
-        `${ticket.orderNumber} marked ${nextStatus.toLowerCase()}`,
-        {
-          description:
-            result.currentStatus === "ready"
-              ? "The order is ready for the next handoff."
-              : "Kitchen preparation has started.",
-        },
-      );
+      const nextStatus = result.currentStatus === "preparing" ? "preparing"
+        : result.currentStatus === "waiting_for_rider" ? "ready and offered to a rider" : "ready";
 
       /*
        * Reload from PostgreSQL after the mutation.
@@ -114,14 +117,33 @@ export function KitchenQueue() {
        * We do not manually move the card in React because
        * PostgreSQL remains the source of truth.
        */
-      await loadQueue();
+      const refreshed = await loadQueue(true);
+      if (refreshed) {
+        toast.success(`${ticket.orderNumber} ${ticket.status === "ready" ? "checked" : `marked ${nextStatus}`}`, {
+          description: result.currentStatus === "waiting_for_rider"
+            ? "The order was offered to an eligible rider. Pickup still requires the rider's confirmation."
+            : result.currentStatus === "ready" && ticket.fulfillmentType === "delivery" && ticket.orderChannel === "online"
+              ? "No eligible rider is available. The order remains in Ready; retry the offer here when a rider is available."
+              : result.currentStatus === "ready"
+                ? "The order is ready for the next handoff."
+                : "Kitchen preparation has started.",
+        });
+      } else {
+        setError("The order update was accepted, but the current queue could not be loaded. Refresh before taking another action.");
+      }
     } catch (caught) {
-      setError(
-        caught instanceof Error
-          ? caught.message
-          : "Unable to update the kitchen ticket.",
-      );
+      setTickets([]);
+      if (caught instanceof KdsTerminalError && caught.kind === "credential") {
+        onAccessLost();
+      } else if (caught instanceof KdsTerminalError && caught.kind === "conflict") {
+        const refreshed = await loadQueue(true);
+        if (refreshed) setError(caught.message);
+      } else {
+        const refreshed = await loadQueue(true);
+        if (refreshed) setError("The order update could not be confirmed. Review its current status before trying again.");
+      }
     } finally {
+      advanceInFlight.current.delete(ticket.databaseId);
       setLoadingId(undefined);
     }
   };
@@ -191,7 +213,7 @@ export function KitchenQueue() {
         />
       ) : null}
 
-      <div className="kitchen-board grid items-start gap-4">
+      <div className="kitchen-board grid items-start gap-4" aria-busy={loadingQueue}>
         {COLUMNS.map((status) => {
           const columnTickets = tickets
             .filter((ticket) => ticket.status === status)
@@ -295,9 +317,6 @@ function KitchenTicket({
   loading: boolean;
   onAdvance: () => void;
 }) {
-  const delayed =
-    minutesSince(ticket.createdAt) > DEFAULT_DELAY_THRESHOLD_MINUTES;
-
   const ready = ticket.status === "ready";
 
   const status = formatKitchenStatus(ticket.status);
@@ -305,13 +324,7 @@ function KitchenTicket({
   return (
     <article
       aria-label={`${ticket.orderNumber}, ${status}`}
-      className={`kitchen-ticket rounded-xl border bg-white p-4 ${
-        ready && delayed
-          ? "border-red-100 bg-red-50/20"
-          : delayed
-            ? "border-red-300"
-            : "border-border"
-      }`}
+      className="kitchen-ticket rounded-xl border border-border bg-white p-4"
     >
       <div className="kitchen-ticket-heading flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
@@ -320,39 +333,22 @@ function KitchenTicket({
           </h3>
 
           <p className="mt-1 text-sm font-semibold text-muted-foreground">
-            {formatFulfillmentType(ticket.fulfillmentType)}
+            {ticket.orderChannel === "walk_in" ? "Walk-in" : "Online"} · {formatFulfillmentType(ticket.fulfillmentType)}
           </p>
         </div>
 
         <div
-          className={`kitchen-timer rounded-lg ${
-            ready ? "px-2.5 py-1.5" : "px-3 py-2"
-          } ${
-            ready
-              ? delayed
-                ? "bg-red-50/50 text-slate-600"
-                : "bg-slate-50 text-slate-600"
-              : delayed
-                ? "bg-red-50 text-red-800"
-                : "bg-slate-100 text-slate-700"
-          }`}
+          className={`kitchen-timer rounded-lg bg-slate-100 text-slate-700 ${ready ? "px-2.5 py-1.5" : "px-3 py-2"}`}
         >
           <p
             className={`flex items-center gap-2 tabular-nums ${
               ready ? "text-sm font-semibold" : "text-xl font-bold"
             }`}
           >
-            {delayed ? (
-              <AlertTriangle
-                className={`${ready ? "h-4 w-4" : "h-5 w-5"} shrink-0`}
-                aria-hidden="true"
-              />
-            ) : (
-              <Clock3
-                className={`${ready ? "h-4 w-4" : "h-5 w-5"} shrink-0`}
-                aria-hidden="true"
-              />
-            )}
+            <Clock3
+              className={`${ready ? "h-4 w-4" : "h-5 w-5"} shrink-0`}
+              aria-hidden="true"
+            />
             {formatElapsed(ticket.createdAt)}
           </p>
           <p
@@ -360,7 +356,7 @@ function KitchenTicket({
               ready ? "font-medium text-slate-500" : "font-semibold"
             }`}
           >
-            {delayed ? "Delayed · since ordered" : "Since ordered"}
+            Since ordered
           </p>
         </div>
       </div>
@@ -383,6 +379,14 @@ function KitchenTicket({
                 {item.name}
               </span>
 
+              {item.modifiers.length > 0 ? (
+                <ul className="mt-1 space-y-0.5 text-sm text-foreground" aria-label={`Selected options for ${item.name}`}>
+                  {item.modifiers.map((modifier) => (
+                    <li key={modifier.id}>+ {modifier.name}{modifier.price > 0 ? ` (${formatMoney(modifier.price)})` : ""}</li>
+                  ))}
+                </ul>
+              ) : null}
+
               {item.specialInstructions ? (
                 <p className="mt-1 rounded-md bg-amber-50 px-2 py-1 text-sm font-semibold text-amber-900">
                   {item.specialInstructions}
@@ -396,12 +400,6 @@ function KitchenTicket({
           </li>
         ))}
       </ul>
-
-      {ticket.notes ? (
-        <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-900">
-          Order instructions: {ticket.notes}
-        </p>
-      ) : null}
 
       <div className="mt-4">
         {ticket.status !== "ready" ? (
@@ -424,6 +422,16 @@ function KitchenTicket({
 
             {ticket.status === "confirmed" ? "Start Preparing" : "Mark Ready"}
           </CashierButton>
+        ) : ticket.fulfillmentType === "delivery" && ticket.orderChannel === "online" ? (
+          <div className="space-y-2">
+            <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-3 text-sm font-semibold text-amber-900">
+              Preparation finished · no rider offer yet. Keep this ticket visible until an offer succeeds.
+            </p>
+            <CashierButton className="min-h-12 w-full" loading={loading} disabled={loading}
+              loadingLabel="Checking riders…" onClick={onAdvance}>
+              Retry rider offer
+            </CashierButton>
+          </div>
         ) : (
           <p className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-100 px-3 py-3 text-base font-bold text-emerald-900">
             <CheckCircle2 className="h-5 w-5 shrink-0" aria-hidden="true" />

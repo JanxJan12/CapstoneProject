@@ -1,0 +1,2012 @@
+{
+  "schemaVersion": 1,
+  "assessment": "H-12 local Docker reset readiness",
+  "dateManila": "2026-10-16",
+  "result": "READ_ONLY_ASSESSMENT_LIVE_DOCKER_BLOCKED",
+  "currentChecks": {
+    "dockerInfo": {
+      "verified": false,
+      "result": "ETIMEDOUT on bounded H-12 retry"
+    },
+    "dockerPsAndInspect": {
+      "verified": false,
+      "result": "ETIMEDOUT on bounded H-12 inventory call"
+    },
+    "dockerVolumes": {
+      "verified": false,
+      "result": "NOT_TESTED after Docker info timeout"
+    },
+    "migrationSqlFiles": {
+      "verified": true,
+      "count": 52,
+      "originalHistoricalCount": 51,
+      "additiveH08cCount": 1
+    },
+    "activeH11ProfileJournal": {
+      "verified": true,
+      "present": false
+    },
+    "hostedAccess": false
+  },
+  "lastVerifiedDockerSnapshot": {
+    "source": "qa/H11I-IDLE-FIXTURE-PAUSE.md",
+    "timeManila": "2026-10-16 02:40-02:41",
+    "containers": 99,
+    "running": 94,
+    "stopped": 5,
+    "warning": "Historical as of H-12; not a current live snapshot"
+  },
+  "lastVerifiedVolumeSnapshot": {
+    "source": "qa/H11F-WINDOWS-RESTART-AND-RECOVERY.json",
+    "timeManila": "2026-10-16 02:07-02:08",
+    "dockerVolumesListed": 45,
+    "protectedDbAndStorageMountsExist": true,
+    "warning": "Historical; exact current volume names and hashes not verified"
+  },
+  "inventoryBasis": {
+    "projectAndServiceSource": "qa/H11C-SANITIZED-INVENTORY.json",
+    "classificationSource": "qa/H11C-FIXTURE-ELIGIBILITY-MATRIX.md",
+    "labels": "Historical Compose/Supabase project labels; not freshly rechecked",
+    "volumeNames": "Not present in H11C sanitized inventory and not available from H12 Docker"
+  },
+  "stacks": [
+    {
+      "project": "<unlabeled>",
+      "ownership": "unverified",
+      "category": "protected_unknown",
+      "purpose": "Stopped rehearsal container without ownership labels",
+      "disposition": "exclude_from_rrj_cleanup",
+      "historical": {
+        "source": "qa/H11C-SANITIZED-INVENTORY.json",
+        "running": 0,
+        "total": 1,
+        "services": [
+          {
+            "name": "rrj_recovery_rehearsal_20261013",
+            "idPrefix": "2bede0448e29",
+            "composeProjectLabel": null,
+            "supabaseProjectLabel": null,
+            "running": false,
+            "health": "unhealthy",
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "none"
+            ]
+          }
+        ]
+      },
+      "current": {
+        "verified": false,
+        "running": null,
+        "total": null,
+        "exactIds": null,
+        "volumeNames": null,
+        "activeUsersOrJobs": null
+      }
+    },
+    {
+      "project": "isolated-stack",
+      "ownership": "separate_or_ownership_unconfirmed",
+      "category": "protected_separate_rehearsal",
+      "purpose": "Earlier local backup/restore rehearsal",
+      "disposition": "exclude_from_rrj_cleanup",
+      "historical": {
+        "source": "qa/H11C-SANITIZED-INVENTORY.json",
+        "running": 5,
+        "total": 6,
+        "services": [
+          {
+            "name": "supabase_pg_meta_isolated-stack",
+            "idPrefix": "fa026b6aa72f",
+            "composeProjectLabel": "isolated-stack",
+            "supabaseProjectLabel": "isolated-stack",
+            "running": false,
+            "health": "unhealthy",
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "supabase_network_isolated-stack"
+            ]
+          },
+          {
+            "name": "supabase_storage_isolated-stack",
+            "idPrefix": "40c80e51042f",
+            "composeProjectLabel": "isolated-stack",
+            "supabaseProjectLabel": "isolated-stack",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [
+              {
+                "type": "volume",
+                "destination": "/mnt"
+              }
+            ],
+            "networks": [
+              "supabase_network_isolated-stack"
+            ]
+          },
+          {
+            "name": "supabase_rest_isolated-stack",
+            "idPrefix": "7ede4d92799f",
+            "composeProjectLabel": "isolated-stack",
+            "supabaseProjectLabel": "isolated-stack",
+            "running": true,
+            "health": null,
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "supabase_network_isolated-stack"
+            ]
+          },
+          {
+            "name": "supabase_auth_isolated-stack",
+            "idPrefix": "3ceb1b48a1c2",
+            "composeProjectLabel": "isolated-stack",
+            "supabaseProjectLabel": "isolated-stack",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "supabase_network_isolated-stack"
+            ]
+          },
+          {
+            "name": "supabase_kong_isolated-stack",
+            "idPrefix": "b56f15a408f8",
+            "composeProjectLabel": "isolated-stack",
+            "supabaseProjectLabel": "isolated-stack",
+            "running": true,
+            "health": "healthy",
+            "ports": [
+              "::1:56321",
+              "127.0.0.1:56321"
+            ],
+            "mounts": [],
+            "networks": [
+              "supabase_network_isolated-stack"
+            ]
+          },
+          {
+            "name": "supabase_db_isolated-stack",
+            "idPrefix": "677b9f1c451b",
+            "composeProjectLabel": "isolated-stack",
+            "supabaseProjectLabel": "isolated-stack",
+            "running": true,
+            "health": "healthy",
+            "ports": [
+              "127.0.0.1:56322",
+              "::1:56322"
+            ],
+            "mounts": [
+              {
+                "type": "volume",
+                "destination": "/var/lib/postgresql/data"
+              }
+            ],
+            "networks": [
+              "supabase_network_isolated-stack"
+            ]
+          }
+        ]
+      },
+      "current": {
+        "verified": false,
+        "running": null,
+        "total": null,
+        "exactIds": null,
+        "volumeNames": null,
+        "activeUsersOrJobs": null
+      }
+    },
+    {
+      "project": "my-local-todo-app",
+      "ownership": "unrelated",
+      "category": "protected_unrelated_app",
+      "purpose": "Personal todo app",
+      "disposition": "exclude_from_rrj_cleanup",
+      "historical": {
+        "source": "qa/H11C-SANITIZED-INVENTORY.json",
+        "running": 11,
+        "total": 12,
+        "services": [
+          {
+            "name": "supabase_studio_my-local-todo-app",
+            "idPrefix": "9b9a34b6a507",
+            "composeProjectLabel": "my-local-todo-app",
+            "supabaseProjectLabel": "my-local-todo-app",
+            "running": true,
+            "health": "healthy",
+            "ports": [
+              "127.0.0.1:54323",
+              "::1:54323"
+            ],
+            "mounts": [],
+            "networks": [
+              "supabase_network_my-local-todo-app"
+            ]
+          },
+          {
+            "name": "supabase_pg_meta_my-local-todo-app",
+            "idPrefix": "2a751d274ef0",
+            "composeProjectLabel": "my-local-todo-app",
+            "supabaseProjectLabel": "my-local-todo-app",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "supabase_network_my-local-todo-app"
+            ]
+          },
+          {
+            "name": "supabase_edge_runtime_my-local-todo-app",
+            "idPrefix": "79eb80b0ca74",
+            "composeProjectLabel": "my-local-todo-app",
+            "supabaseProjectLabel": "my-local-todo-app",
+            "running": false,
+            "health": null,
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "supabase_network_my-local-todo-app"
+            ]
+          },
+          {
+            "name": "supabase_storage_my-local-todo-app",
+            "idPrefix": "5e7897f1092e",
+            "composeProjectLabel": "my-local-todo-app",
+            "supabaseProjectLabel": "my-local-todo-app",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [
+              {
+                "type": "volume",
+                "destination": "/mnt"
+              }
+            ],
+            "networks": [
+              "supabase_network_my-local-todo-app"
+            ]
+          },
+          {
+            "name": "supabase_rest_my-local-todo-app",
+            "idPrefix": "c236ff779778",
+            "composeProjectLabel": "my-local-todo-app",
+            "supabaseProjectLabel": "my-local-todo-app",
+            "running": true,
+            "health": null,
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "supabase_network_my-local-todo-app"
+            ]
+          },
+          {
+            "name": "supabase_realtime_my-local-todo-app",
+            "idPrefix": "0919896beee1",
+            "composeProjectLabel": "my-local-todo-app",
+            "supabaseProjectLabel": "my-local-todo-app",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "supabase_network_my-local-todo-app"
+            ]
+          },
+          {
+            "name": "supabase_inbucket_my-local-todo-app",
+            "idPrefix": "18aa01159581",
+            "composeProjectLabel": "my-local-todo-app",
+            "supabaseProjectLabel": "my-local-todo-app",
+            "running": true,
+            "health": "healthy",
+            "ports": [
+              "::1:54324",
+              "127.0.0.1:54324"
+            ],
+            "mounts": [],
+            "networks": [
+              "supabase_network_my-local-todo-app"
+            ]
+          },
+          {
+            "name": "supabase_auth_my-local-todo-app",
+            "idPrefix": "7bb568ae0766",
+            "composeProjectLabel": "my-local-todo-app",
+            "supabaseProjectLabel": "my-local-todo-app",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "supabase_network_my-local-todo-app"
+            ]
+          },
+          {
+            "name": "supabase_kong_my-local-todo-app",
+            "idPrefix": "350c49e29d51",
+            "composeProjectLabel": "my-local-todo-app",
+            "supabaseProjectLabel": "my-local-todo-app",
+            "running": true,
+            "health": "healthy",
+            "ports": [
+              "127.0.0.1:54321",
+              "::1:54321"
+            ],
+            "mounts": [],
+            "networks": [
+              "supabase_network_my-local-todo-app"
+            ]
+          },
+          {
+            "name": "supabase_vector_my-local-todo-app",
+            "idPrefix": "bcf16098d843",
+            "composeProjectLabel": "my-local-todo-app",
+            "supabaseProjectLabel": "my-local-todo-app",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "supabase_network_my-local-todo-app"
+            ]
+          },
+          {
+            "name": "supabase_analytics_my-local-todo-app",
+            "idPrefix": "908d74874442",
+            "composeProjectLabel": "my-local-todo-app",
+            "supabaseProjectLabel": "my-local-todo-app",
+            "running": true,
+            "health": "healthy",
+            "ports": [
+              "::1:54327",
+              "127.0.0.1:54327"
+            ],
+            "mounts": [],
+            "networks": [
+              "supabase_network_my-local-todo-app"
+            ]
+          },
+          {
+            "name": "supabase_db_my-local-todo-app",
+            "idPrefix": "3feef4aaa270",
+            "composeProjectLabel": "my-local-todo-app",
+            "supabaseProjectLabel": "my-local-todo-app",
+            "running": true,
+            "health": "healthy",
+            "ports": [
+              "127.0.0.1:54322",
+              "::1:54322"
+            ],
+            "mounts": [
+              {
+                "type": "volume",
+                "destination": "/etc/postgresql-custom"
+              },
+              {
+                "type": "volume",
+                "destination": "/var/lib/postgresql/data"
+              }
+            ],
+            "networks": [
+              "supabase_network_my-local-todo-app"
+            ]
+          }
+        ]
+      },
+      "current": {
+        "verified": false,
+        "running": null,
+        "total": null,
+        "exactIds": null,
+        "volumeNames": null,
+        "activeUsersOrJobs": null
+      }
+    },
+    {
+      "project": "rrj_defense_demo_20261014",
+      "ownership": "rrj",
+      "category": "protected_canonical_demo",
+      "purpose": "Capstone defense demonstration",
+      "disposition": "preserve",
+      "historical": {
+        "source": "qa/H11C-SANITIZED-INVENTORY.json",
+        "running": 5,
+        "total": 5,
+        "services": [
+          {
+            "name": "supabase_storage_rrj_defense_demo_20261014",
+            "idPrefix": "90c84db09a56",
+            "composeProjectLabel": "rrj_defense_demo_20261014",
+            "supabaseProjectLabel": "rrj_defense_demo_20261014",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [
+              {
+                "type": "volume",
+                "destination": "/mnt"
+              }
+            ],
+            "networks": [
+              "supabase_network_rrj_defense_demo_20261014"
+            ]
+          },
+          {
+            "name": "supabase_rest_rrj_defense_demo_20261014",
+            "idPrefix": "55938b9df480",
+            "composeProjectLabel": "rrj_defense_demo_20261014",
+            "supabaseProjectLabel": "rrj_defense_demo_20261014",
+            "running": true,
+            "health": null,
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_defense_demo_20261014"
+            ]
+          },
+          {
+            "name": "supabase_auth_rrj_defense_demo_20261014",
+            "idPrefix": "9b7c1cecb09c",
+            "composeProjectLabel": "rrj_defense_demo_20261014",
+            "supabaseProjectLabel": "rrj_defense_demo_20261014",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_defense_demo_20261014"
+            ]
+          },
+          {
+            "name": "supabase_kong_rrj_defense_demo_20261014",
+            "idPrefix": "3c44fae58d38",
+            "composeProjectLabel": "rrj_defense_demo_20261014",
+            "supabaseProjectLabel": "rrj_defense_demo_20261014",
+            "running": true,
+            "health": "healthy",
+            "ports": [
+              "127.0.0.1:61321",
+              "::1:61321"
+            ],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_defense_demo_20261014"
+            ]
+          },
+          {
+            "name": "supabase_db_rrj_defense_demo_20261014",
+            "idPrefix": "d1d080ef20d7",
+            "composeProjectLabel": "rrj_defense_demo_20261014",
+            "supabaseProjectLabel": "rrj_defense_demo_20261014",
+            "running": true,
+            "health": "healthy",
+            "ports": [
+              "::1:61322",
+              "127.0.0.1:61322"
+            ],
+            "mounts": [
+              {
+                "type": "volume",
+                "destination": "/var/lib/postgresql/data"
+              }
+            ],
+            "networks": [
+              "supabase_network_rrj_defense_demo_20261014"
+            ]
+          }
+        ]
+      },
+      "current": {
+        "verified": false,
+        "running": null,
+        "total": null,
+        "exactIds": null,
+        "volumeNames": null,
+        "activeUsersOrJobs": null
+      }
+    },
+    {
+      "project": "rrj_defense_demo_20261014_r2",
+      "ownership": "rrj",
+      "category": "historical_fixture_review",
+      "purpose": "Demo variant r2",
+      "disposition": "conditional_archive_candidate",
+      "historical": {
+        "source": "qa/H11C-SANITIZED-INVENTORY.json",
+        "running": 5,
+        "total": 5,
+        "services": [
+          {
+            "name": "supabase_storage_rrj_defense_demo_20261014_r2",
+            "idPrefix": "fadb21325353",
+            "composeProjectLabel": "rrj_defense_demo_20261014_r2",
+            "supabaseProjectLabel": "rrj_defense_demo_20261014_r2",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [
+              {
+                "type": "volume",
+                "destination": "/mnt"
+              }
+            ],
+            "networks": [
+              "supabase_network_rrj_defense_demo_20261014_r2"
+            ]
+          },
+          {
+            "name": "supabase_rest_rrj_defense_demo_20261014_r2",
+            "idPrefix": "30d5bf2f23a1",
+            "composeProjectLabel": "rrj_defense_demo_20261014_r2",
+            "supabaseProjectLabel": "rrj_defense_demo_20261014_r2",
+            "running": true,
+            "health": null,
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_defense_demo_20261014_r2"
+            ]
+          },
+          {
+            "name": "supabase_auth_rrj_defense_demo_20261014_r2",
+            "idPrefix": "e133aed5720f",
+            "composeProjectLabel": "rrj_defense_demo_20261014_r2",
+            "supabaseProjectLabel": "rrj_defense_demo_20261014_r2",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_defense_demo_20261014_r2"
+            ]
+          },
+          {
+            "name": "supabase_kong_rrj_defense_demo_20261014_r2",
+            "idPrefix": "56c80a5f8803",
+            "composeProjectLabel": "rrj_defense_demo_20261014_r2",
+            "supabaseProjectLabel": "rrj_defense_demo_20261014_r2",
+            "running": true,
+            "health": "healthy",
+            "ports": [
+              "::1:62321",
+              "127.0.0.1:62321"
+            ],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_defense_demo_20261014_r2"
+            ]
+          },
+          {
+            "name": "supabase_db_rrj_defense_demo_20261014_r2",
+            "idPrefix": "beec6b1192ca",
+            "composeProjectLabel": "rrj_defense_demo_20261014_r2",
+            "supabaseProjectLabel": "rrj_defense_demo_20261014_r2",
+            "running": true,
+            "health": "healthy",
+            "ports": [
+              "127.0.0.1:62322",
+              "::1:62322"
+            ],
+            "mounts": [
+              {
+                "type": "volume",
+                "destination": "/var/lib/postgresql/data"
+              }
+            ],
+            "networks": [
+              "supabase_network_rrj_defense_demo_20261014_r2"
+            ]
+          }
+        ]
+      },
+      "current": {
+        "verified": false,
+        "running": null,
+        "total": null,
+        "exactIds": null,
+        "volumeNames": null,
+        "activeUsersOrJobs": null
+      }
+    },
+    {
+      "project": "rrj_defense_demo_20261014_r3",
+      "ownership": "rrj",
+      "category": "historical_fixture_review",
+      "purpose": "Demo variant r3",
+      "disposition": "conditional_archive_candidate",
+      "historical": {
+        "source": "qa/H11C-SANITIZED-INVENTORY.json",
+        "running": 5,
+        "total": 5,
+        "services": [
+          {
+            "name": "supabase_storage_rrj_defense_demo_20261014_r3",
+            "idPrefix": "bdd4c001c232",
+            "composeProjectLabel": "rrj_defense_demo_20261014_r3",
+            "supabaseProjectLabel": "rrj_defense_demo_20261014_r3",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [
+              {
+                "type": "volume",
+                "destination": "/mnt"
+              }
+            ],
+            "networks": [
+              "supabase_network_rrj_defense_demo_20261014_r3"
+            ]
+          },
+          {
+            "name": "supabase_rest_rrj_defense_demo_20261014_r3",
+            "idPrefix": "a47c5ff84b74",
+            "composeProjectLabel": "rrj_defense_demo_20261014_r3",
+            "supabaseProjectLabel": "rrj_defense_demo_20261014_r3",
+            "running": true,
+            "health": null,
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_defense_demo_20261014_r3"
+            ]
+          },
+          {
+            "name": "supabase_auth_rrj_defense_demo_20261014_r3",
+            "idPrefix": "92bb64389b29",
+            "composeProjectLabel": "rrj_defense_demo_20261014_r3",
+            "supabaseProjectLabel": "rrj_defense_demo_20261014_r3",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_defense_demo_20261014_r3"
+            ]
+          },
+          {
+            "name": "supabase_kong_rrj_defense_demo_20261014_r3",
+            "idPrefix": "08696de9d4e4",
+            "composeProjectLabel": "rrj_defense_demo_20261014_r3",
+            "supabaseProjectLabel": "rrj_defense_demo_20261014_r3",
+            "running": true,
+            "health": "healthy",
+            "ports": [
+              "127.0.0.1:63321",
+              "::1:63321"
+            ],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_defense_demo_20261014_r3"
+            ]
+          },
+          {
+            "name": "supabase_db_rrj_defense_demo_20261014_r3",
+            "idPrefix": "85e0d9d47432",
+            "composeProjectLabel": "rrj_defense_demo_20261014_r3",
+            "supabaseProjectLabel": "rrj_defense_demo_20261014_r3",
+            "running": true,
+            "health": "healthy",
+            "ports": [
+              "::1:63322",
+              "127.0.0.1:63322"
+            ],
+            "mounts": [
+              {
+                "type": "volume",
+                "destination": "/var/lib/postgresql/data"
+              }
+            ],
+            "networks": [
+              "supabase_network_rrj_defense_demo_20261014_r3"
+            ]
+          }
+        ]
+      },
+      "current": {
+        "verified": false,
+        "running": null,
+        "total": null,
+        "exactIds": null,
+        "volumeNames": null,
+        "activeUsersOrJobs": null
+      }
+    },
+    {
+      "project": "rrj_h07_financial_20261014",
+      "ownership": "rrj",
+      "category": "historical_fixture_review",
+      "purpose": "H07 financial regression",
+      "disposition": "conditional_archive_candidate",
+      "historical": {
+        "source": "qa/H11C-SANITIZED-INVENTORY.json",
+        "running": 5,
+        "total": 5,
+        "services": [
+          {
+            "name": "supabase_storage_rrj_h07_financial_20261014",
+            "idPrefix": "74b5ba6d38ca",
+            "composeProjectLabel": "rrj_h07_financial_20261014",
+            "supabaseProjectLabel": "rrj_h07_financial_20261014",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [
+              {
+                "type": "volume",
+                "destination": "/mnt"
+              }
+            ],
+            "networks": [
+              "supabase_network_rrj_h07_financial_20261014"
+            ]
+          },
+          {
+            "name": "supabase_rest_rrj_h07_financial_20261014",
+            "idPrefix": "f8c4f6885aa9",
+            "composeProjectLabel": "rrj_h07_financial_20261014",
+            "supabaseProjectLabel": "rrj_h07_financial_20261014",
+            "running": true,
+            "health": null,
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_h07_financial_20261014"
+            ]
+          },
+          {
+            "name": "supabase_auth_rrj_h07_financial_20261014",
+            "idPrefix": "d8b130694c1d",
+            "composeProjectLabel": "rrj_h07_financial_20261014",
+            "supabaseProjectLabel": "rrj_h07_financial_20261014",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_h07_financial_20261014"
+            ]
+          },
+          {
+            "name": "supabase_kong_rrj_h07_financial_20261014",
+            "idPrefix": "e8f7b6161dd3",
+            "composeProjectLabel": "rrj_h07_financial_20261014",
+            "supabaseProjectLabel": "rrj_h07_financial_20261014",
+            "running": true,
+            "health": "healthy",
+            "ports": [
+              "127.0.0.1:57321",
+              "::1:57321"
+            ],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_h07_financial_20261014"
+            ]
+          },
+          {
+            "name": "supabase_db_rrj_h07_financial_20261014",
+            "idPrefix": "db4249c0ec4c",
+            "composeProjectLabel": "rrj_h07_financial_20261014",
+            "supabaseProjectLabel": "rrj_h07_financial_20261014",
+            "running": true,
+            "health": "healthy",
+            "ports": [
+              "127.0.0.1:57322",
+              "::1:57322"
+            ],
+            "mounts": [
+              {
+                "type": "volume",
+                "destination": "/var/lib/postgresql/data"
+              }
+            ],
+            "networks": [
+              "supabase_network_rrj_h07_financial_20261014"
+            ]
+          }
+        ]
+      },
+      "current": {
+        "verified": false,
+        "running": null,
+        "total": null,
+        "exactIds": null,
+        "volumeNames": null,
+        "activeUsersOrJobs": null
+      }
+    },
+    {
+      "project": "rrj_h08b_history_20261015",
+      "ownership": "rrj",
+      "category": "historical_fixture_review",
+      "purpose": "H08B history regression",
+      "disposition": "conditional_archive_candidate",
+      "historical": {
+        "source": "qa/H11C-SANITIZED-INVENTORY.json",
+        "running": 5,
+        "total": 5,
+        "services": [
+          {
+            "name": "supabase_storage_rrj_h08b_history_20261015",
+            "idPrefix": "1cc9c7088cba",
+            "composeProjectLabel": "rrj_h08b_history_20261015",
+            "supabaseProjectLabel": "rrj_h08b_history_20261015",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [
+              {
+                "type": "volume",
+                "destination": "/mnt"
+              }
+            ],
+            "networks": [
+              "supabase_network_rrj_h08b_history_20261015"
+            ]
+          },
+          {
+            "name": "supabase_rest_rrj_h08b_history_20261015",
+            "idPrefix": "4f23e160669b",
+            "composeProjectLabel": "rrj_h08b_history_20261015",
+            "supabaseProjectLabel": "rrj_h08b_history_20261015",
+            "running": true,
+            "health": null,
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_h08b_history_20261015"
+            ]
+          },
+          {
+            "name": "supabase_auth_rrj_h08b_history_20261015",
+            "idPrefix": "e3685155639e",
+            "composeProjectLabel": "rrj_h08b_history_20261015",
+            "supabaseProjectLabel": "rrj_h08b_history_20261015",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_h08b_history_20261015"
+            ]
+          },
+          {
+            "name": "supabase_kong_rrj_h08b_history_20261015",
+            "idPrefix": "4e7af74404e1",
+            "composeProjectLabel": "rrj_h08b_history_20261015",
+            "supabaseProjectLabel": "rrj_h08b_history_20261015",
+            "running": true,
+            "health": "healthy",
+            "ports": [
+              "::1:58321",
+              "127.0.0.1:58321"
+            ],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_h08b_history_20261015"
+            ]
+          },
+          {
+            "name": "supabase_db_rrj_h08b_history_20261015",
+            "idPrefix": "c7716c7d279e",
+            "composeProjectLabel": "rrj_h08b_history_20261015",
+            "supabaseProjectLabel": "rrj_h08b_history_20261015",
+            "running": true,
+            "health": "healthy",
+            "ports": [
+              "::1:58322",
+              "127.0.0.1:58322"
+            ],
+            "mounts": [
+              {
+                "type": "volume",
+                "destination": "/etc/postgresql-custom"
+              },
+              {
+                "type": "volume",
+                "destination": "/var/lib/postgresql/data"
+              }
+            ],
+            "networks": [
+              "supabase_network_rrj_h08b_history_20261015"
+            ]
+          }
+        ]
+      },
+      "current": {
+        "verified": false,
+        "running": null,
+        "total": null,
+        "exactIds": null,
+        "volumeNames": null,
+        "activeUsersOrJobs": null
+      }
+    },
+    {
+      "project": "rrj_h08c_history_20261015",
+      "ownership": "rrj",
+      "category": "specialist_review",
+      "purpose": "H08C history with Studio/log/vector/analytics dependencies",
+      "disposition": "conditional_archive_candidate_after_specialist_review",
+      "historical": {
+        "source": "qa/H11C-SANITIZED-INVENTORY.json",
+        "running": 11,
+        "total": 12,
+        "services": [
+          {
+            "name": "supabase_studio_rrj_h08c_history_20261015",
+            "idPrefix": "d99279ea81a3",
+            "composeProjectLabel": "rrj_h08c_history_20261015",
+            "supabaseProjectLabel": "rrj_h08c_history_20261015",
+            "running": true,
+            "health": "healthy",
+            "ports": [
+              "127.0.0.1:59323",
+              "::1:59323"
+            ],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_h08c_history_20261015"
+            ]
+          },
+          {
+            "name": "supabase_pg_meta_rrj_h08c_history_20261015",
+            "idPrefix": "36204297b02b",
+            "composeProjectLabel": "rrj_h08c_history_20261015",
+            "supabaseProjectLabel": "rrj_h08c_history_20261015",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_h08c_history_20261015"
+            ]
+          },
+          {
+            "name": "supabase_edge_runtime_rrj_h08c_history_20261015",
+            "idPrefix": "bb74cd675941",
+            "composeProjectLabel": "rrj_h08c_history_20261015",
+            "supabaseProjectLabel": "rrj_h08c_history_20261015",
+            "running": false,
+            "health": null,
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_h08c_history_20261015"
+            ]
+          },
+          {
+            "name": "supabase_storage_rrj_h08c_history_20261015",
+            "idPrefix": "3cde5a00ddf7",
+            "composeProjectLabel": "rrj_h08c_history_20261015",
+            "supabaseProjectLabel": "rrj_h08c_history_20261015",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [
+              {
+                "type": "volume",
+                "destination": "/mnt"
+              }
+            ],
+            "networks": [
+              "supabase_network_rrj_h08c_history_20261015"
+            ]
+          },
+          {
+            "name": "supabase_rest_rrj_h08c_history_20261015",
+            "idPrefix": "feebac47f5fa",
+            "composeProjectLabel": "rrj_h08c_history_20261015",
+            "supabaseProjectLabel": "rrj_h08c_history_20261015",
+            "running": true,
+            "health": null,
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_h08c_history_20261015"
+            ]
+          },
+          {
+            "name": "supabase_realtime_rrj_h08c_history_20261015",
+            "idPrefix": "ff427135d2df",
+            "composeProjectLabel": "rrj_h08c_history_20261015",
+            "supabaseProjectLabel": "rrj_h08c_history_20261015",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_h08c_history_20261015"
+            ]
+          },
+          {
+            "name": "supabase_inbucket_rrj_h08c_history_20261015",
+            "idPrefix": "0ad2bab7e2eb",
+            "composeProjectLabel": "rrj_h08c_history_20261015",
+            "supabaseProjectLabel": "rrj_h08c_history_20261015",
+            "running": true,
+            "health": "healthy",
+            "ports": [
+              "::1:59324",
+              "127.0.0.1:59324"
+            ],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_h08c_history_20261015"
+            ]
+          },
+          {
+            "name": "supabase_auth_rrj_h08c_history_20261015",
+            "idPrefix": "862664844b42",
+            "composeProjectLabel": "rrj_h08c_history_20261015",
+            "supabaseProjectLabel": "rrj_h08c_history_20261015",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_h08c_history_20261015"
+            ]
+          },
+          {
+            "name": "supabase_kong_rrj_h08c_history_20261015",
+            "idPrefix": "d3bd5187fb2a",
+            "composeProjectLabel": "rrj_h08c_history_20261015",
+            "supabaseProjectLabel": "rrj_h08c_history_20261015",
+            "running": true,
+            "health": "healthy",
+            "ports": [
+              "::1:59321",
+              "127.0.0.1:59321"
+            ],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_h08c_history_20261015"
+            ]
+          },
+          {
+            "name": "supabase_vector_rrj_h08c_history_20261015",
+            "idPrefix": "ab7d705432f5",
+            "composeProjectLabel": "rrj_h08c_history_20261015",
+            "supabaseProjectLabel": "rrj_h08c_history_20261015",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_h08c_history_20261015"
+            ]
+          },
+          {
+            "name": "supabase_analytics_rrj_h08c_history_20261015",
+            "idPrefix": "2d9de3b44279",
+            "composeProjectLabel": "rrj_h08c_history_20261015",
+            "supabaseProjectLabel": "rrj_h08c_history_20261015",
+            "running": true,
+            "health": "healthy",
+            "ports": [
+              "127.0.0.1:59327",
+              "::1:59327"
+            ],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_h08c_history_20261015"
+            ]
+          },
+          {
+            "name": "supabase_db_rrj_h08c_history_20261015",
+            "idPrefix": "774017228b5e",
+            "composeProjectLabel": "rrj_h08c_history_20261015",
+            "supabaseProjectLabel": "rrj_h08c_history_20261015",
+            "running": true,
+            "health": "healthy",
+            "ports": [
+              "::1:59322",
+              "127.0.0.1:59322"
+            ],
+            "mounts": [
+              {
+                "type": "volume",
+                "destination": "/etc/postgresql-custom"
+              },
+              {
+                "type": "volume",
+                "destination": "/var/lib/postgresql/data"
+              }
+            ],
+            "networks": [
+              "supabase_network_rrj_h08c_history_20261015"
+            ]
+          }
+        ]
+      },
+      "current": {
+        "verified": false,
+        "running": null,
+        "total": null,
+        "exactIds": null,
+        "volumeNames": null,
+        "activeUsersOrJobs": null
+      }
+    },
+    {
+      "project": "rrj_h09_order_flow_20261015",
+      "ownership": "rrj",
+      "category": "protected_primary_development",
+      "purpose": "H09/H10 local QA and suggested reusable development backend",
+      "disposition": "preserve",
+      "historical": {
+        "source": "qa/H11C-SANITIZED-INVENTORY.json",
+        "running": 6,
+        "total": 6,
+        "services": [
+          {
+            "name": "supabase_storage_rrj_h09_order_flow_20261015",
+            "idPrefix": "4319d2dc6862",
+            "composeProjectLabel": "rrj_h09_order_flow_20261015",
+            "supabaseProjectLabel": "rrj_h09_order_flow_20261015",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [
+              {
+                "type": "volume",
+                "destination": "/mnt"
+              }
+            ],
+            "networks": [
+              "supabase_network_rrj_h09_order_flow_20261015"
+            ]
+          },
+          {
+            "name": "supabase_rest_rrj_h09_order_flow_20261015",
+            "idPrefix": "93d1d9e5a74d",
+            "composeProjectLabel": "rrj_h09_order_flow_20261015",
+            "supabaseProjectLabel": "rrj_h09_order_flow_20261015",
+            "running": true,
+            "health": null,
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_h09_order_flow_20261015"
+            ]
+          },
+          {
+            "name": "supabase_inbucket_rrj_h09_order_flow_20261015",
+            "idPrefix": "c2b5180e936b",
+            "composeProjectLabel": "rrj_h09_order_flow_20261015",
+            "supabaseProjectLabel": "rrj_h09_order_flow_20261015",
+            "running": true,
+            "health": "healthy",
+            "ports": [
+              "::1:48324",
+              "127.0.0.1:48324"
+            ],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_h09_order_flow_20261015"
+            ]
+          },
+          {
+            "name": "supabase_auth_rrj_h09_order_flow_20261015",
+            "idPrefix": "fc196286ff91",
+            "composeProjectLabel": "rrj_h09_order_flow_20261015",
+            "supabaseProjectLabel": "rrj_h09_order_flow_20261015",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_h09_order_flow_20261015"
+            ]
+          },
+          {
+            "name": "supabase_kong_rrj_h09_order_flow_20261015",
+            "idPrefix": "39d166c2f6ce",
+            "composeProjectLabel": "rrj_h09_order_flow_20261015",
+            "supabaseProjectLabel": "rrj_h09_order_flow_20261015",
+            "running": true,
+            "health": "healthy",
+            "ports": [
+              "127.0.0.1:48321",
+              "::1:48321"
+            ],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_h09_order_flow_20261015"
+            ]
+          },
+          {
+            "name": "supabase_db_rrj_h09_order_flow_20261015",
+            "idPrefix": "cac20bb296b3",
+            "composeProjectLabel": "rrj_h09_order_flow_20261015",
+            "supabaseProjectLabel": "rrj_h09_order_flow_20261015",
+            "running": true,
+            "health": "healthy",
+            "ports": [
+              "::1:48322",
+              "127.0.0.1:48322"
+            ],
+            "mounts": [
+              {
+                "type": "volume",
+                "destination": "/var/lib/postgresql/data"
+              }
+            ],
+            "networks": [
+              "supabase_network_rrj_h09_order_flow_20261015"
+            ]
+          }
+        ]
+      },
+      "current": {
+        "verified": false,
+        "running": null,
+        "total": null,
+        "exactIds": null,
+        "volumeNames": null,
+        "activeUsersOrJobs": null
+      }
+    },
+    {
+      "project": "rrj_manager_lifecycle_20261014",
+      "ownership": "rrj",
+      "category": "historical_fixture_review",
+      "purpose": "Manager request/Receiving lifecycle",
+      "disposition": "conditional_archive_candidate",
+      "historical": {
+        "source": "qa/H11C-SANITIZED-INVENTORY.json",
+        "running": 5,
+        "total": 5,
+        "services": [
+          {
+            "name": "supabase_storage_rrj_manager_lifecycle_20261014",
+            "idPrefix": "b7f9e3a021fe",
+            "composeProjectLabel": "rrj_manager_lifecycle_20261014",
+            "supabaseProjectLabel": "rrj_manager_lifecycle_20261014",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [
+              {
+                "type": "volume",
+                "destination": "/mnt"
+              }
+            ],
+            "networks": [
+              "supabase_network_rrj_manager_lifecycle_20261014"
+            ]
+          },
+          {
+            "name": "supabase_rest_rrj_manager_lifecycle_20261014",
+            "idPrefix": "dcdd656c805d",
+            "composeProjectLabel": "rrj_manager_lifecycle_20261014",
+            "supabaseProjectLabel": "rrj_manager_lifecycle_20261014",
+            "running": true,
+            "health": null,
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_manager_lifecycle_20261014"
+            ]
+          },
+          {
+            "name": "supabase_auth_rrj_manager_lifecycle_20261014",
+            "idPrefix": "caca8252418a",
+            "composeProjectLabel": "rrj_manager_lifecycle_20261014",
+            "supabaseProjectLabel": "rrj_manager_lifecycle_20261014",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_manager_lifecycle_20261014"
+            ]
+          },
+          {
+            "name": "supabase_kong_rrj_manager_lifecycle_20261014",
+            "idPrefix": "7088583f5d03",
+            "composeProjectLabel": "rrj_manager_lifecycle_20261014",
+            "supabaseProjectLabel": "rrj_manager_lifecycle_20261014",
+            "running": true,
+            "health": "healthy",
+            "ports": [
+              "127.0.0.1:52321",
+              "::1:52321"
+            ],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_manager_lifecycle_20261014"
+            ]
+          },
+          {
+            "name": "supabase_db_rrj_manager_lifecycle_20261014",
+            "idPrefix": "8d75e1ef2533",
+            "composeProjectLabel": "rrj_manager_lifecycle_20261014",
+            "supabaseProjectLabel": "rrj_manager_lifecycle_20261014",
+            "running": true,
+            "health": "healthy",
+            "ports": [
+              "::1:52322",
+              "127.0.0.1:52322"
+            ],
+            "mounts": [
+              {
+                "type": "volume",
+                "destination": "/var/lib/postgresql/data"
+              }
+            ],
+            "networks": [
+              "supabase_network_rrj_manager_lifecycle_20261014"
+            ]
+          }
+        ]
+      },
+      "current": {
+        "verified": false,
+        "running": null,
+        "total": null,
+        "exactIds": null,
+        "volumeNames": null,
+        "activeUsersOrJobs": null
+      }
+    },
+    {
+      "project": "rrj_phase3_prefix_20261014_a1",
+      "ownership": "rrj",
+      "category": "historical_fixture_review",
+      "purpose": "First 12 migration prefix replay",
+      "disposition": "conditional_archive_candidate_preserve_replay_evidence",
+      "historical": {
+        "source": "qa/H11C-SANITIZED-INVENTORY.json",
+        "running": 5,
+        "total": 5,
+        "services": [
+          {
+            "name": "supabase_storage_rrj_phase3_prefix_20261014_a1",
+            "idPrefix": "ae137e6fa583",
+            "composeProjectLabel": "rrj_phase3_prefix_20261014_a1",
+            "supabaseProjectLabel": "rrj_phase3_prefix_20261014_a1",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [
+              {
+                "type": "volume",
+                "destination": "/mnt"
+              }
+            ],
+            "networks": [
+              "supabase_network_rrj_phase3_prefix_20261014_a1"
+            ]
+          },
+          {
+            "name": "supabase_rest_rrj_phase3_prefix_20261014_a1",
+            "idPrefix": "04cf7973e393",
+            "composeProjectLabel": "rrj_phase3_prefix_20261014_a1",
+            "supabaseProjectLabel": "rrj_phase3_prefix_20261014_a1",
+            "running": true,
+            "health": null,
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_phase3_prefix_20261014_a1"
+            ]
+          },
+          {
+            "name": "supabase_auth_rrj_phase3_prefix_20261014_a1",
+            "idPrefix": "de14fe3d9d51",
+            "composeProjectLabel": "rrj_phase3_prefix_20261014_a1",
+            "supabaseProjectLabel": "rrj_phase3_prefix_20261014_a1",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_phase3_prefix_20261014_a1"
+            ]
+          },
+          {
+            "name": "supabase_kong_rrj_phase3_prefix_20261014_a1",
+            "idPrefix": "0129b244cbaa",
+            "composeProjectLabel": "rrj_phase3_prefix_20261014_a1",
+            "supabaseProjectLabel": "rrj_phase3_prefix_20261014_a1",
+            "running": true,
+            "health": "healthy",
+            "ports": [
+              "127.0.0.1:63221",
+              "::1:63221"
+            ],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_phase3_prefix_20261014_a1"
+            ]
+          },
+          {
+            "name": "supabase_db_rrj_phase3_prefix_20261014_a1",
+            "idPrefix": "8d9ccc55fd6b",
+            "composeProjectLabel": "rrj_phase3_prefix_20261014_a1",
+            "supabaseProjectLabel": "rrj_phase3_prefix_20261014_a1",
+            "running": true,
+            "health": "healthy",
+            "ports": [
+              "127.0.0.1:63222",
+              "::1:63222"
+            ],
+            "mounts": [
+              {
+                "type": "volume",
+                "destination": "/var/lib/postgresql/data"
+              }
+            ],
+            "networks": [
+              "supabase_network_rrj_phase3_prefix_20261014_a1"
+            ]
+          }
+        ]
+      },
+      "current": {
+        "verified": false,
+        "running": null,
+        "total": null,
+        "exactIds": null,
+        "volumeNames": null,
+        "activeUsersOrJobs": null
+      }
+    },
+    {
+      "project": "rrj_phase8_sim",
+      "ownership": "rrj",
+      "category": "specialist_review",
+      "purpose": "Phase 8 release simulation",
+      "disposition": "conditional_archive_candidate_after_specialist_review",
+      "historical": {
+        "source": "qa/H11C-SANITIZED-INVENTORY.json",
+        "running": 11,
+        "total": 12,
+        "services": [
+          {
+            "name": "supabase_studio_rrj_phase8_sim",
+            "idPrefix": "7b74a27c4f03",
+            "composeProjectLabel": "rrj_phase8_sim",
+            "supabaseProjectLabel": "rrj_phase8_sim",
+            "running": true,
+            "health": "healthy",
+            "ports": [
+              "127.0.0.1:55323",
+              "::1:55323"
+            ],
+            "mounts": [],
+            "networks": [
+              "rrj_phase8_loopback"
+            ]
+          },
+          {
+            "name": "supabase_pg_meta_rrj_phase8_sim",
+            "idPrefix": "e8027b107be7",
+            "composeProjectLabel": "rrj_phase8_sim",
+            "supabaseProjectLabel": "rrj_phase8_sim",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "rrj_phase8_loopback"
+            ]
+          },
+          {
+            "name": "supabase_edge_runtime_rrj_phase8_sim",
+            "idPrefix": "21337dc139d7",
+            "composeProjectLabel": "rrj_phase8_sim",
+            "supabaseProjectLabel": "rrj_phase8_sim",
+            "running": false,
+            "health": null,
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "rrj_phase8_loopback"
+            ]
+          },
+          {
+            "name": "supabase_storage_rrj_phase8_sim",
+            "idPrefix": "ba0909dcc96a",
+            "composeProjectLabel": "rrj_phase8_sim",
+            "supabaseProjectLabel": "rrj_phase8_sim",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [
+              {
+                "type": "volume",
+                "destination": "/mnt"
+              }
+            ],
+            "networks": [
+              "rrj_phase8_loopback"
+            ]
+          },
+          {
+            "name": "supabase_rest_rrj_phase8_sim",
+            "idPrefix": "33b54d736e83",
+            "composeProjectLabel": "rrj_phase8_sim",
+            "supabaseProjectLabel": "rrj_phase8_sim",
+            "running": true,
+            "health": null,
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "rrj_phase8_loopback"
+            ]
+          },
+          {
+            "name": "supabase_realtime_rrj_phase8_sim",
+            "idPrefix": "240232e06d4b",
+            "composeProjectLabel": "rrj_phase8_sim",
+            "supabaseProjectLabel": "rrj_phase8_sim",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "rrj_phase8_loopback"
+            ]
+          },
+          {
+            "name": "supabase_inbucket_rrj_phase8_sim",
+            "idPrefix": "69e08c98aa8e",
+            "composeProjectLabel": "rrj_phase8_sim",
+            "supabaseProjectLabel": "rrj_phase8_sim",
+            "running": true,
+            "health": "healthy",
+            "ports": [
+              "::1:55324",
+              "127.0.0.1:55324"
+            ],
+            "mounts": [],
+            "networks": [
+              "rrj_phase8_loopback"
+            ]
+          },
+          {
+            "name": "supabase_auth_rrj_phase8_sim",
+            "idPrefix": "05248ee14735",
+            "composeProjectLabel": "rrj_phase8_sim",
+            "supabaseProjectLabel": "rrj_phase8_sim",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "rrj_phase8_loopback"
+            ]
+          },
+          {
+            "name": "supabase_kong_rrj_phase8_sim",
+            "idPrefix": "fd2fcefdfbc8",
+            "composeProjectLabel": "rrj_phase8_sim",
+            "supabaseProjectLabel": "rrj_phase8_sim",
+            "running": true,
+            "health": "healthy",
+            "ports": [
+              "::1:55321",
+              "127.0.0.1:55321"
+            ],
+            "mounts": [],
+            "networks": [
+              "rrj_phase8_loopback"
+            ]
+          },
+          {
+            "name": "supabase_vector_rrj_phase8_sim",
+            "idPrefix": "2877b8ab0d4d",
+            "composeProjectLabel": "rrj_phase8_sim",
+            "supabaseProjectLabel": "rrj_phase8_sim",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "rrj_phase8_loopback"
+            ]
+          },
+          {
+            "name": "supabase_analytics_rrj_phase8_sim",
+            "idPrefix": "bf3087423191",
+            "composeProjectLabel": "rrj_phase8_sim",
+            "supabaseProjectLabel": "rrj_phase8_sim",
+            "running": true,
+            "health": "healthy",
+            "ports": [
+              "::1:55327",
+              "127.0.0.1:55327"
+            ],
+            "mounts": [],
+            "networks": [
+              "rrj_phase8_loopback"
+            ]
+          },
+          {
+            "name": "supabase_db_rrj_phase8_sim",
+            "idPrefix": "f4dc2b611561",
+            "composeProjectLabel": "rrj_phase8_sim",
+            "supabaseProjectLabel": "rrj_phase8_sim",
+            "running": true,
+            "health": "healthy",
+            "ports": [
+              "127.0.0.1:55322",
+              "::1:55322"
+            ],
+            "mounts": [
+              {
+                "type": "volume",
+                "destination": "/etc/postgresql-custom"
+              },
+              {
+                "type": "volume",
+                "destination": "/var/lib/postgresql/data"
+              }
+            ],
+            "networks": [
+              "rrj_phase8_loopback"
+            ]
+          }
+        ]
+      },
+      "current": {
+        "verified": false,
+        "running": null,
+        "total": null,
+        "exactIds": null,
+        "volumeNames": null,
+        "activeUsersOrJobs": null
+      }
+    },
+    {
+      "project": "rrj_rc_synthetic_replay_20261013",
+      "ownership": "rrj",
+      "category": "specialist_review",
+      "purpose": "Release candidate synthetic replay; prior 60321/60322 binding issue",
+      "disposition": "conditional_archive_candidate_after_specialist_review",
+      "historical": {
+        "source": "qa/H11C-SANITIZED-INVENTORY.json",
+        "running": 5,
+        "total": 5,
+        "services": [
+          {
+            "name": "supabase_storage_rrj_rc_synthetic_replay_20261013",
+            "idPrefix": "5a15b115b197",
+            "composeProjectLabel": "rrj_rc_synthetic_replay_20261013",
+            "supabaseProjectLabel": "rrj_rc_synthetic_replay_20261013",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [
+              {
+                "type": "volume",
+                "destination": "/mnt"
+              }
+            ],
+            "networks": [
+              "supabase_network_rrj_rc_synthetic_replay_20261013"
+            ]
+          },
+          {
+            "name": "supabase_rest_rrj_rc_synthetic_replay_20261013",
+            "idPrefix": "aee7e2307389",
+            "composeProjectLabel": "rrj_rc_synthetic_replay_20261013",
+            "supabaseProjectLabel": "rrj_rc_synthetic_replay_20261013",
+            "running": true,
+            "health": null,
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_rc_synthetic_replay_20261013"
+            ]
+          },
+          {
+            "name": "supabase_auth_rrj_rc_synthetic_replay_20261013",
+            "idPrefix": "85c59c5ec0b5",
+            "composeProjectLabel": "rrj_rc_synthetic_replay_20261013",
+            "supabaseProjectLabel": "rrj_rc_synthetic_replay_20261013",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_rc_synthetic_replay_20261013"
+            ]
+          },
+          {
+            "name": "supabase_kong_rrj_rc_synthetic_replay_20261013",
+            "idPrefix": "e77021711b8d",
+            "composeProjectLabel": "rrj_rc_synthetic_replay_20261013",
+            "supabaseProjectLabel": "rrj_rc_synthetic_replay_20261013",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_rc_synthetic_replay_20261013"
+            ]
+          },
+          {
+            "name": "supabase_db_rrj_rc_synthetic_replay_20261013",
+            "idPrefix": "9410f82c405e",
+            "composeProjectLabel": "rrj_rc_synthetic_replay_20261013",
+            "supabaseProjectLabel": "rrj_rc_synthetic_replay_20261013",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [
+              {
+                "type": "volume",
+                "destination": "/etc/postgresql-custom"
+              },
+              {
+                "type": "volume",
+                "destination": "/var/lib/postgresql/data"
+              }
+            ],
+            "networks": [
+              "supabase_network_rrj_rc_synthetic_replay_20261013"
+            ]
+          }
+        ]
+      },
+      "current": {
+        "verified": false,
+        "running": null,
+        "total": null,
+        "exactIds": null,
+        "volumeNames": null,
+        "activeUsersOrJobs": null
+      }
+    },
+    {
+      "project": "rrj_recovery_20261014_source",
+      "ownership": "rrj",
+      "category": "protected_recovery_evidence",
+      "purpose": "Synthetic recovery source",
+      "disposition": "preserve_pending_recovery_custody",
+      "historical": {
+        "source": "qa/H11C-SANITIZED-INVENTORY.json",
+        "running": 5,
+        "total": 5,
+        "services": [
+          {
+            "name": "supabase_storage_rrj_recovery_20261014_source",
+            "idPrefix": "014c63910b88",
+            "composeProjectLabel": "rrj_recovery_20261014_source",
+            "supabaseProjectLabel": "rrj_recovery_20261014_source",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [
+              {
+                "type": "volume",
+                "destination": "/mnt"
+              }
+            ],
+            "networks": [
+              "supabase_network_rrj_recovery_20261014_source"
+            ]
+          },
+          {
+            "name": "supabase_rest_rrj_recovery_20261014_source",
+            "idPrefix": "431599f0a124",
+            "composeProjectLabel": "rrj_recovery_20261014_source",
+            "supabaseProjectLabel": "rrj_recovery_20261014_source",
+            "running": true,
+            "health": null,
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_recovery_20261014_source"
+            ]
+          },
+          {
+            "name": "supabase_auth_rrj_recovery_20261014_source",
+            "idPrefix": "d6f577841ff1",
+            "composeProjectLabel": "rrj_recovery_20261014_source",
+            "supabaseProjectLabel": "rrj_recovery_20261014_source",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_recovery_20261014_source"
+            ]
+          },
+          {
+            "name": "supabase_kong_rrj_recovery_20261014_source",
+            "idPrefix": "f20027554943",
+            "composeProjectLabel": "rrj_recovery_20261014_source",
+            "supabaseProjectLabel": "rrj_recovery_20261014_source",
+            "running": true,
+            "health": "healthy",
+            "ports": [
+              "::1:65321",
+              "127.0.0.1:65321"
+            ],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_recovery_20261014_source"
+            ]
+          },
+          {
+            "name": "supabase_db_rrj_recovery_20261014_source",
+            "idPrefix": "a14b2a34891f",
+            "composeProjectLabel": "rrj_recovery_20261014_source",
+            "supabaseProjectLabel": "rrj_recovery_20261014_source",
+            "running": true,
+            "health": "healthy",
+            "ports": [
+              "::1:65322",
+              "127.0.0.1:65322"
+            ],
+            "mounts": [
+              {
+                "type": "volume",
+                "destination": "/var/lib/postgresql/data"
+              }
+            ],
+            "networks": [
+              "supabase_network_rrj_recovery_20261014_source"
+            ]
+          }
+        ]
+      },
+      "current": {
+        "verified": false,
+        "running": null,
+        "total": null,
+        "exactIds": null,
+        "volumeNames": null,
+        "activeUsersOrJobs": null
+      }
+    },
+    {
+      "project": "rrj_recovery_20261014_target",
+      "ownership": "rrj",
+      "category": "protected_recovery_evidence",
+      "purpose": "Synthetic recovery target",
+      "disposition": "preserve_pending_recovery_custody",
+      "historical": {
+        "source": "qa/H11C-SANITIZED-INVENTORY.json",
+        "running": 5,
+        "total": 5,
+        "services": [
+          {
+            "name": "supabase_storage_rrj_recovery_20261014_target",
+            "idPrefix": "7d7cc4e2e298",
+            "composeProjectLabel": "rrj_recovery_20261014_target",
+            "supabaseProjectLabel": "rrj_recovery_20261014_target",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [
+              {
+                "type": "volume",
+                "destination": "/mnt"
+              }
+            ],
+            "networks": [
+              "supabase_network_rrj_recovery_20261014_target"
+            ]
+          },
+          {
+            "name": "supabase_rest_rrj_recovery_20261014_target",
+            "idPrefix": "43ff56c70e58",
+            "composeProjectLabel": "rrj_recovery_20261014_target",
+            "supabaseProjectLabel": "rrj_recovery_20261014_target",
+            "running": true,
+            "health": null,
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_recovery_20261014_target"
+            ]
+          },
+          {
+            "name": "supabase_auth_rrj_recovery_20261014_target",
+            "idPrefix": "e36a0276a003",
+            "composeProjectLabel": "rrj_recovery_20261014_target",
+            "supabaseProjectLabel": "rrj_recovery_20261014_target",
+            "running": true,
+            "health": "healthy",
+            "ports": [],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_recovery_20261014_target"
+            ]
+          },
+          {
+            "name": "supabase_kong_rrj_recovery_20261014_target",
+            "idPrefix": "35ebaaa1137c",
+            "composeProjectLabel": "rrj_recovery_20261014_target",
+            "supabaseProjectLabel": "rrj_recovery_20261014_target",
+            "running": true,
+            "health": "healthy",
+            "ports": [
+              "::1:64321",
+              "127.0.0.1:64321"
+            ],
+            "mounts": [],
+            "networks": [
+              "supabase_network_rrj_recovery_20261014_target"
+            ]
+          },
+          {
+            "name": "supabase_db_rrj_recovery_20261014_target",
+            "idPrefix": "0fc45950b40b",
+            "composeProjectLabel": "rrj_recovery_20261014_target",
+            "supabaseProjectLabel": "rrj_recovery_20261014_target",
+            "running": true,
+            "health": "healthy",
+            "ports": [
+              "::1:64322",
+              "127.0.0.1:64322"
+            ],
+            "mounts": [
+              {
+                "type": "volume",
+                "destination": "/var/lib/postgresql/data"
+              }
+            ],
+            "networks": [
+              "supabase_network_rrj_recovery_20261014_target"
+            ]
+          }
+        ]
+      },
+      "current": {
+        "verified": false,
+        "running": null,
+        "total": null,
+        "exactIds": null,
+        "volumeNames": null,
+        "activeUsersOrJobs": null
+      }
+    }
+  ],
+  "historicalOtherEnvironments": [
+    {
+      "name": "rrj_phase3_replay_20261014_a1",
+      "source": "qa/DATABASE-MIGRATION-REPRODUCIBILITY-PHASE3.md",
+      "status": "Created and stopped in earlier replay; absent from H11C 99-container inventory; current existence unknown"
+    },
+    {
+      "name": "RRJ-Migration-Replay-20261014-51",
+      "source": "qa/MIGRATION-REPRODUCIBILITY-RESOLUTION-20261014.md",
+      "status": "Disposable replay failed at Phase 2A; current Docker existence unknown"
+    }
+  ],
+  "cleanupNow": {
+    "eligibleStacks": [],
+    "stoppedContainers": [],
+    "deletedContainers": [],
+    "deletedVolumes": [],
+    "reason": "Live engine unavailable; no current idle, backup, independent restore, or per-resource approval evidence"
+  },
+  "gates": {
+    "reversibleStop": "Separate owner approval after current identity, idleness, dependencies, headroom and restore journal are verified",
+    "containerDeletion": "Separate approval after stopped-state restore rehearsal, evidence retention, exact live IDs and rollback plan",
+    "volumeDeletion": "Separate irreversible approval after complete per-stack backup, independent encrypted off-device copy, verified extraction and isolated restore with DB/Auth/Storage private bytes and hashes"
+  },
+  "recommendedProfiles": {
+    "primaryDevelopment": "rrj_h09_order_flow_20261015",
+    "protectedDemonstration": "rrj_defense_demo_20261014",
+    "recommendationOnly": true
+  },
+  "preservation": {
+    "all52MigrationFiles": true,
+    "dirtyWorktree": true,
+    "hostedProjectUnchanged": true,
+    "allDockerResourcesUnchanged": true
+  }
+}

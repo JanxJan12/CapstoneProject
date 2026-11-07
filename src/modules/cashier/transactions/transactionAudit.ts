@@ -5,6 +5,7 @@ export interface TransactionAuditEntry {
   label: string;
   timestamp: string;
   actor: string;
+  actorId?: string;
   source: "Transaction" | "Order" | "Payment";
 }
 
@@ -13,19 +14,30 @@ export function buildTransactionAudit(
   order: Order | undefined,
   payment: Payment | undefined,
 ) {
+  const accountId = (value: string) => /^(?:Account )?([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i.exec(value.trim())?.[1];
+  const recordedOrderActor = (value: string) => {
+    const id = accountId(value);
+    return id ? { actor: "Recorded account", actorId: id } : { actor: value || "Actor unavailable" };
+  };
+  const recordedSubmitter = (value?: string) => {
+    if (!value?.trim()) return { actor: "Payment submitter unavailable" };
+    const id = accountId(value);
+    return id ? { actor: "Recorded submitter account", actorId: id } : { actor: value.trim() };
+  };
   const entries: TransactionAuditEntry[] = [
     {
       id: `transaction-${transaction.id}`,
       label: `Transaction recorded as ${transaction.status.toLowerCase()}`,
       timestamp: transaction.createdAt,
-      actor: transaction.cashierName,
+      actor: "Recording Cashier account",
+      actorId: transaction.cashierId,
       source: "Transaction",
     },
     ...(order?.timeline.map((event): TransactionAuditEntry => ({
       id: `order-${event.id}`,
       label: event.label,
       timestamp: event.timestamp,
-      actor: event.actor,
+      ...recordedOrderActor(event.actor),
       source: "Order",
     })) ?? []),
   ];
@@ -34,7 +46,7 @@ export function buildTransactionAudit(
       id: `payment-uploaded-${payment.id}`,
       label: `${payment.method} payment record created`,
       timestamp: payment.uploadedAt,
-      actor: payment.uploadedBy ?? transaction.customerName,
+      ...recordedSubmitter(payment.uploadedBy),
       source: "Payment",
     });
     if (payment.verifiedAt) {
@@ -42,7 +54,8 @@ export function buildTransactionAudit(
         id: `payment-verified-${payment.id}`,
         label: "Payment verified",
         timestamp: payment.verifiedAt,
-        actor: transaction.cashierName,
+        actor: payment.verifiedBy ? "Recorded verifier account" : "Verifier unavailable",
+        actorId: payment.verifiedBy,
         source: "Payment",
       });
     }
@@ -51,7 +64,8 @@ export function buildTransactionAudit(
         id: `payment-rejected-${payment.id}`,
         label: `Payment rejected: ${payment.rejectionReason ?? "Reason not recorded"}`,
         timestamp: payment.rejectedAt,
-        actor: transaction.cashierName,
+        actor: payment.rejectedBy ? "Recorded reviewer account" : "Reviewer unavailable",
+        actorId: payment.rejectedBy,
         source: "Payment",
       });
     }

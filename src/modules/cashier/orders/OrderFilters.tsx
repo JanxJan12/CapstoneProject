@@ -1,13 +1,12 @@
 import { useState } from "react";
 import {
   ChevronDown,
-  RefreshCw,
   Search,
   SlidersHorizontal,
+  X,
 } from "lucide-react";
 import { ORDER_STATUSES } from "../constants";
-import type { OrderStatus, OrderType } from "../types";
-import type { BaseOrderSort } from "./orderOperations";
+import type { OrderStatus, OrderType, PaymentStatus } from "../types";
 import {
   CashierButton,
   CashierInput,
@@ -18,57 +17,65 @@ import {
 
 export interface OrderFilterValue {
   search: string;
-  quick:
-    | "All"
-    | "Delayed"
-    | "Needs Payment"
-    | "Kitchen Active"
-    | "Needs Rider"
-    | "Ready";
   type: "All" | OrderType;
   status: "All" | OrderStatus;
+  payment: "All" | PaymentStatus;
   from: string;
   to: string;
-  sort: BaseOrderSort;
 }
 
-const QUICK_FILTERS: OrderFilterValue["quick"][] = [
-  "All",
-  "Delayed",
-  "Needs Payment",
-  "Kitchen Active",
-  "Needs Rider",
-  "Ready",
-];
 
 export function OrderFilters({
   value,
   searchRef,
-  refreshing,
   onChange,
-  onRefresh,
 }: {
   value: OrderFilterValue;
   searchRef: React.RefObject<HTMLInputElement | null>;
-  refreshing: boolean;
   onChange: (value: OrderFilterValue) => void;
-  onRefresh: () => void;
 }) {
   const [moreFiltersOpen, setMoreFiltersOpen] = useState(false);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const set = <K extends keyof OrderFilterValue>(
     key: K,
     next: OrderFilterValue[K],
   ) => onChange({ ...value, [key]: next });
+
   const secondaryFilterCount = [
-    value.quick !== "All",
+    value.payment !== "All",
     Boolean(value.from),
     Boolean(value.to),
-    value.sort !== "operations",
   ].filter(Boolean).length;
 
+  const hasActiveFilters =
+    value.type !== "All" ||
+    value.status !== "All" ||
+    value.payment !== "All" ||
+    Boolean(value.from) ||
+    Boolean(value.to);
+
+
+  const activeFilterCount = [
+    value.type !== "All",
+    value.status !== "All",
+    value.payment !== "All",
+    Boolean(value.from),
+    Boolean(value.to),
+  ].filter(Boolean).length;
+
+  const clearFilters = () =>
+    onChange({
+      ...value,
+      type: "All",
+      status: "All",
+      payment: "All",
+      from: "",
+      to: "",
+    });
+
   return (
-    <SearchToolbar label="Order filters">
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(300px,1.5fr)_minmax(150px,0.7fr)_minmax(180px,0.85fr)_auto_auto] xl:items-end">
+    <SearchToolbar label="Order filters" className="p-3.5">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(280px,1.5fr)_minmax(130px,0.65fr)_minmax(160px,0.8fr)_auto] xl:items-end">
         <div className="sm:col-span-2 xl:col-span-1">
           <Label htmlFor="order-search">Search</Label>
           <div className="relative">
@@ -84,6 +91,23 @@ export function OrderFilters({
             />
           </div>
         </div>
+        <div className="flex items-end gap-2 xl:hidden">
+          <CashierButton
+            variant="secondary"
+            className="flex-1"
+            aria-expanded={mobileFiltersOpen}
+            aria-controls="order-mobile-filters"
+            onClick={() => setMobileFiltersOpen((open) => !open)}
+          >
+            <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
+            Filters{activeFilterCount ? ` (${activeFilterCount})` : ""}
+            <ChevronDown className={`h-4 w-4 transition-transform ${mobileFiltersOpen ? "rotate-180" : ""}`} aria-hidden="true" />
+          </CashierButton>
+          {hasActiveFilters ? (
+            <CashierButton variant="ghost" onClick={clearFilters}>Clear</CashierButton>
+          ) : null}
+        </div>
+        <div id="order-mobile-filters" className={`${mobileFiltersOpen ? "grid" : "hidden"} gap-3 sm:col-span-2 sm:grid-cols-2 xl:contents`}>
         <div>
           <Label htmlFor="order-type">Order type</Label>
           <CashierSelect
@@ -135,86 +159,132 @@ export function OrderFilters({
             />
           </CashierButton>
         </div>
-        <div className="flex items-end">
-          <CashierButton
-            variant="secondary"
-            className="w-full"
-            loading={refreshing}
-            onClick={onRefresh}
-          >
-            <RefreshCw className="h-4 w-4" />
-            Refresh
-          </CashierButton>
         </div>
       </div>
+
+      {hasActiveFilters ? (
+        <div
+          className={`${mobileFiltersOpen ? "flex" : "hidden"} mt-3 flex-wrap items-center gap-2 border-t border-border/70 pt-3 xl:flex`}
+          aria-label="Active order filters"
+        >
+          <span className="mr-0.5 text-[9px] font-black uppercase tracking-widest text-muted-foreground">
+            Active
+          </span>
+          {value.type !== "All" ? (
+            <FilterChip label={value.type} onClear={() => set("type", "All")} />
+          ) : null}
+          {value.status !== "All" ? (
+            <FilterChip
+              label={value.status}
+              onClear={() => set("status", "All")}
+            />
+          ) : null}
+          {value.payment !== "All" ? (
+            <FilterChip label={`Payment: ${value.payment}`} onClear={() => set("payment", "All")} />
+          ) : null}
+
+          {value.from ? (
+            <FilterChip
+              label={`From ${value.from}`}
+              onClear={() => set("from", "")}
+            />
+          ) : null}
+          {value.to ? (
+            <FilterChip
+              label={`To ${value.to}`}
+              onClear={() => set("to", "")}
+            />
+          ) : null}
+
+          <button
+            type="button"
+            onClick={clearFilters}
+            className="cashier-action hidden min-h-8 rounded-lg px-2.5 text-[10px] font-black text-primary hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary xl:inline-flex"
+          >
+            Clear filters
+          </button>
+        </div>
+      ) : null} 
 
       {moreFiltersOpen ? (
         <div
           id="order-secondary-filters"
-          className="mt-4 border-t border-border/80 pt-4"
+          className={`${
+            mobileFiltersOpen ? "" : "hidden xl:block"
+          } mt-4 border-t border-border/80 pt-4`}
         >
-          <div
-            className="flex flex-wrap items-center gap-2"
-            aria-label="Quick filters"
-          >
-            <span className="mr-1 text-[9px] font-black uppercase tracking-widest text-foreground/60">
-              Quick filter
-            </span>
-            {QUICK_FILTERS.map((filter) => (
-              <button
-                key={filter}
-                type="button"
-                aria-pressed={value.quick === filter}
-                onClick={() => set("quick", filter)}
-                className={`min-h-9 rounded-full border px-3 text-[10px] font-black transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
-                  value.quick === filter
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border bg-white text-foreground/65 hover:border-primary/30 hover:text-primary"
-                }`}
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div>
+              <Label htmlFor="order-payment-status">
+                Payment status
+              </Label>
+              <CashierSelect
+                id="order-payment-status"
+                value={value.payment}
+                onChange={(event) =>
+                  set(
+                    "payment",
+                    event.target.value as OrderFilterValue["payment"]
+                  )
+                }
               >
-                {filter}
-              </button>
-            ))}
-          </div>
+                <option>All</option>
+                <option>Unpaid</option>
+                <option value="Unknown">
+                  Payment status unavailable
+                </option>
+                <option>Pending</option>
+                <option>Verified</option>
+                <option>Rejected</option>
+              </CashierSelect>
+            </div>
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <div>
               <Label htmlFor="order-from">From</Label>
               <CashierInput
                 id="order-from"
                 type="date"
                 value={value.from}
-                onChange={(event) => set("from", event.target.value)}
+                onChange={(event) =>
+                  set("from", event.target.value)
+                }
               />
             </div>
+
             <div>
               <Label htmlFor="order-to">To</Label>
               <CashierInput
                 id="order-to"
                 type="date"
                 value={value.to}
-                onChange={(event) => set("to", event.target.value)}
-              />
-            </div>
-            <div className="sm:col-span-2 lg:col-span-1">
-              <Label htmlFor="order-sort">Base sort</Label>
-              <CashierSelect
-                id="order-sort"
-                value={value.sort}
                 onChange={(event) =>
-                  set("sort", event.target.value as OrderFilterValue["sort"])
+                  set("to", event.target.value)
                 }
-              >
-                <option value="operations">Operations priority</option>
-                <option value="newest">Newest</option>
-                <option value="oldest">Oldest</option>
-                <option value="total-high">Total: high</option>
-                <option value="total-low">Total: low</option>
-              </CashierSelect>
+              />
             </div>
           </div>
         </div>
       ) : null}
     </SearchToolbar>
+  );
+}
+
+function FilterChip({
+  label,
+  onClear,
+}: {
+  label: string;
+  onClear: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={`Remove ${label} filter`}
+      onClick={onClear}
+      className="cashier-action inline-flex min-h-8 items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-2.5 text-[10px] font-black text-primary hover:border-primary/35 hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+    >
+      {label}
+      <X className="h-3 w-3" aria-hidden="true" />
+    </button>
   );
 }

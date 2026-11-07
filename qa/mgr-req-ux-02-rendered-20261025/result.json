@@ -1,0 +1,48 @@
+{
+  "checks": [
+    {
+      "width": 1280,
+      "defaultSelection": true,
+      "compactRows": true,
+      "splitSelection": true,
+      "multiReceipt": true,
+      "receiptNavigation": true,
+      "partialAndFull": true,
+      "documentExpansion": true,
+      "searchStatusDestination": true,
+      "auditAndRevision": true,
+      "authoringAvailable": true,
+      "noOverflow": true
+    },
+    {
+      "width": 820,
+      "defaultSelection": true,
+      "compactRows": true,
+      "splitSelection": true,
+      "multiReceipt": true,
+      "receiptNavigation": true,
+      "partialAndFull": true,
+      "documentExpansion": true,
+      "searchStatusDestination": true,
+      "auditAndRevision": true,
+      "authoringAvailable": true,
+      "noOverflow": true
+    },
+    {
+      "width": 390,
+      "defaultSelection": true,
+      "compactRows": true,
+      "splitSelection": true,
+      "multiReceipt": true,
+      "receiptNavigation": true,
+      "partialAndFull": true,
+      "documentExpansion": true,
+      "searchStatusDestination": true,
+      "auditAndRevision": true,
+      "authoringAvailable": true,
+      "noOverflow": true
+    }
+  ],
+  "browserExceptions": [],
+  "networkWrites": 0
+}

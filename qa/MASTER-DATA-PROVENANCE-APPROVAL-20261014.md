@@ -1,0 +1,17 @@
+# Historical master-data provenance and approval gate — 2026-10-14
+
+**Status: BLOCKED.** The current canonical 51-file chain fails at `20260904000000_inventory_phase_2a_recipe_deduction.sql` because its 18 recipe mappings refer to 10 menu and 12 inventory UUIDs absent before that migration. `supabase/seed.sql` is absent. A later independent blocker is two unqualified `cashier_shift_status` return fields in `20260914000000_harden_numeric_inputs.sql`. Neither historical file was edited.
+
+`node scripts/recovery/validate-provenance.mjs` exits 1 and reports the exact referenced IDs and Phase 2A SHA-256 `f06983ed7e9ba60f48654f8df97f177ff8802a0c74297300b851b0226180a5d0`. This is the expected current result, not a test failure to hide. The existing `scripts/check-clean-migration-prerequisites.mjs` independently exits 1.
+
+## Approval manifest contract
+
+The data owner must provide a private `schemaVersion: 1`, `environment: "historical-bootstrap"` JSON manifest. It must contain `phase2aSha256`, three relative `files` entries (`kind: "category"`, `"menu"`, and `"inventory"`, each with `path` and `sha256`), and `approval` containing `approved: true`, owner, approval date, source description, `categorySourceDescription`, recipe tuple SHA-256, and an opening-stock decision of `approved-zero` or `approved-physical-record`. Each referenced JSON baseline must contain identified rows for **all exact** Phase 2A UUIDs and each required menu category parent; inventory must include exactly one approved `Chicken`/`kg` identity. The validator checks path confinement, file digests, duplicate IDs, required IDs, category parent references, recipe mapping digest, and approval fields. It returns `REVIEW_REQUIRED`, never `PASS`, because a machine cannot establish business authority or full field-level correctness.
+
+Keep the actual data and manifest outside the repository and its synced project mirror. The owner must verify source system, capture date, identities, units, recipe quantities, item status, effective dates, physical opening balance evidence, and any privacy restrictions. Zero stock requires an explicit owner decision; a synthetic quantity from earlier diagnostics is not evidence. The owner and engineering reviewer must sign the exact hashes and SQL insertion plan.
+
+## Pre-Phase-2A bootstrap design
+
+After approval, generate a **new deployment-specific bootstrap migration before Phase 2A** from the verified baseline. Review its explicit, deterministic inserts and constraints against a fresh empty stack. Preserve the 51 historical migration bodies and the hosted 46-version ledger. The bootstrap must not be applied to hosted merely to reconcile history; its use is for a newly created environment and requires a recorded migration version and SQL hash. Handle the later enum signature blocker with an approved compatibility plan that records exact variant hashes and effects; do not silently rewrite an already-applied file. A later additive migration cannot repair an earlier statement that fails during replay.
+
+The implementation gate is: approved manifest → human review → bootstrap SQL review → new named unlinked empty stack → chronological replay → ledger/hash comparison → full local acceptance. No source baseline is currently authorized, so no bootstrap SQL or historical rows were generated or inserted. Foreign keys remain enabled; migration history was not repaired by hand.

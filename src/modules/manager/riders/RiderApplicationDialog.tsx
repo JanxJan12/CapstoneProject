@@ -5,10 +5,7 @@ import {
   ShieldCheck,
   UserRound,
 } from "lucide-react";
-import {
-  useEffect,
-  useState,
-} from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Button } from "../../../components/common/Button";
 import {
@@ -31,6 +28,7 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onApproved: () => void;
+  onOutcomeUnknown: () => void;
 }
 
 export function RiderApplicationDialog({
@@ -38,18 +36,18 @@ export function RiderApplicationDialog({
   open,
   onOpenChange,
   onApproved,
+  onOutcomeUnknown,
 }: Props) {
   const [application, setApplication] =
     useState<ManagerRiderApplication | null>(null);
 
-  const [loading, setLoading] =
-    useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const [approving, setApproving] =
-    useState(false);
+  const [approving, setApproving] = useState(false);
 
-  const [error, setError] =
-    useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
+  const mutationPending = useRef(false);
 
   useEffect(() => {
     if (!open || !riderId) {
@@ -66,18 +64,15 @@ export function RiderApplicationDialog({
       setApplication(null);
 
       try {
-        const result =
-          await getManagerRiderApplication(riderId);
+        const result = await getManagerRiderApplication(riderId);
 
         if (!cancelled) {
           setApplication(result);
         }
-      } catch (loadError) {
+      } catch {
         if (!cancelled) {
           setError(
-            loadError instanceof Error
-              ? loadError.message
-              : "Unable to load rider application.",
+            "The rider application could not be loaded. Close this review and refresh the directory before trying again.",
           );
         }
       } finally {
@@ -92,38 +87,39 @@ export function RiderApplicationDialog({
     return () => {
       cancelled = true;
     };
-  }, [
-    open,
-    riderId,
-  ]);
+  }, [open, riderId, reloadKey]);
 
   const handleApprove = async () => {
     if (
       !application ||
-      approving ||
-      application.approvalStatus !== "pending"
+      mutationPending.current ||
+      application.approvalStatus !== "pending" ||
+      !application.validIdUrl ||
+      !application.orCrDocumentUrl ||
+      !application.riderPhotoUrl
     ) {
       return;
     }
 
+    mutationPending.current = true;
     setApproving(true);
     setError(null);
 
     try {
-      await setManagerRiderApprovalStatus(
+      const result = await setManagerRiderApprovalStatus(
         application.id,
         "approved",
       );
+      if (result.riderId !== application.id || result.profileRole !== "rider") {
+        throw new Error("Unexpected approval result");
+      }
 
       onApproved();
       onOpenChange(false);
-    } catch (approvalError) {
-      setError(
-        approvalError instanceof Error
-          ? approvalError.message
-          : "Unable to approve rider.",
-      );
+    } catch {
+      onOutcomeUnknown();
     } finally {
+      mutationPending.current = false;
       setApproving(false);
     }
   };
@@ -138,21 +134,20 @@ export function RiderApplicationDialog({
       }}
     >
       <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-hidden p-0 sm:max-w-2xl">
-        <DialogHeader className="shrink-0 border-b border-border px-6 py-5 pr-12">
-          <DialogTitle>
-            Rider application review
-          </DialogTitle>
+        <DialogHeader className="shrink-0 border-b border-border px-4 py-4 pr-12 sm:px-6">
+          <DialogTitle>Rider application</DialogTitle>
 
           <DialogDescription>
-            Review the rider&apos;s submitted identity,
-            license, motorcycle information, and supporting
-            documents before approval.
+            Review submitted identity, vehicle details, and private documents.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6">
           {loading ? (
-            <div className="flex min-h-56 flex-col items-center justify-center text-center">
+            <div
+              role="status"
+              className="flex min-h-56 flex-col items-center justify-center text-center"
+            >
               <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-primary/20 border-t-primary" />
 
               <p className="mt-3 text-sm font-semibold text-foreground">
@@ -161,17 +156,23 @@ export function RiderApplicationDialog({
             </div>
           ) : error && !application ? (
             <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3">
-              <p className="text-sm font-semibold text-red-800">
+              <p role="alert" className="text-sm font-semibold text-red-800">
                 {error}
               </p>
+              <Button
+                variant="secondary"
+                size="sm"
+                className="mt-2 min-h-11"
+                onClick={() => setReloadKey((value) => value + 1)}
+              >
+                Retry application
+              </Button>
             </div>
           ) : application ? (
             <div className="space-y-5">
               {error ? (
                 <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3">
-                  <p className="text-sm font-semibold text-red-800">
-                    {error}
-                  </p>
+                  <p className="text-sm font-semibold text-red-800">{error}</p>
                 </div>
               ) : null}
 
@@ -182,19 +183,29 @@ export function RiderApplicationDialog({
                   </div>
 
                   <div className="min-w-0">
-                    <p className="text-base font-bold text-foreground">
+                    <p className="break-words text-base font-bold text-foreground">
                       {application.name}
                     </p>
-
-                    <p className="mt-0.5 text-xs text-muted-foreground">
+                    <p className="mt-0.5 break-all text-xs text-muted-foreground">
                       {application.contactNumber ??
                         "Contact number not recorded"}
                     </p>
 
-                    <p className="mt-2 text-[10px] font-bold uppercase tracking-wide text-amber-700">
+                    <p className="mt-2 text-xs font-semibold text-foreground">
+                      Approval:{" "}
                       {application.approvalStatus === "pending"
-                        ? "Pending approval"
-                        : application.approvalStatus}
+                        ? "Pending"
+                        : application.approvalStatus[0].toUpperCase() +
+                          application.approvalStatus.slice(1)}
+                      {" · "}Availability:{" "}
+                      {application.availabilityStatus.replaceAll("_", " ")}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Rider record created{" "}
+                      {new Intl.DateTimeFormat("en-PH", {
+                        dateStyle: "medium",
+                        timeZone: "Asia/Manila",
+                      }).format(new Date(application.createdAt))}
                     </p>
                   </div>
                 </div>
@@ -208,34 +219,22 @@ export function RiderApplicationDialog({
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <DetailCard
                     label="Driver license"
-                    value={
-                      application.driverLicenseNumber ??
-                      "Not recorded"
-                    }
+                    value={application.driverLicenseNumber ?? "Not recorded"}
                   />
 
                   <DetailCard
                     label="Plate number"
-                    value={
-                      application.plateNumber ??
-                      "Not recorded"
-                    }
+                    value={application.plateNumber ?? "Not recorded"}
                   />
 
                   <DetailCard
                     label="Motorcycle brand"
-                    value={
-                      application.motorBrand ??
-                      "Not recorded"
-                    }
+                    value={application.motorBrand ?? "Not recorded"}
                   />
 
                   <DetailCard
                     label="Motorcycle model"
-                    value={
-                      application.motorModel ??
-                      "Not recorded"
-                    }
+                    value={application.motorModel ?? "Not recorded"}
                   />
                 </div>
               </section>
@@ -248,28 +247,48 @@ export function RiderApplicationDialog({
                 <div className="space-y-2">
                   <DocumentLink
                     label="Valid ID"
+                    path={application.validIdPath}
                     url={application.validIdUrl}
                     icon={IdCard}
                   />
 
                   <DocumentLink
                     label="Motorcycle OR/CR"
+                    path={application.orCrDocumentPath}
                     url={application.orCrDocumentUrl}
                     icon={FileText}
                   />
 
                   <DocumentLink
                     label="Rider photo"
+                    path={application.riderPhotoPath}
                     url={application.riderPhotoUrl}
                     icon={UserRound}
                   />
                 </div>
 
-                <p className="mt-2 text-[10px] leading-relaxed text-muted-foreground">
-                  Documents open through temporary private
-                  links and are not publicly accessible.
-                </p>
+                {[
+                  application.validIdPath && !application.validIdUrl,
+                  application.orCrDocumentPath && !application.orCrDocumentUrl,
+                  application.riderPhotoPath && !application.riderPhotoUrl,
+                ].some(Boolean) ? (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="mt-2 min-h-11"
+                    onClick={() => setReloadKey((value) => value + 1)}
+                  >
+                    Retry documents
+                  </Button>
+                ) : null}
               </section>
+
+              <details className="text-xs text-muted-foreground">
+                <summary className="min-h-11 cursor-pointer text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                  Record details
+                </summary>
+                <p className="break-all pb-2">Rider ID: {application.id}</p>
+              </details>
 
               {application.approvalStatus === "pending" ? (
                 <div className="rounded-xl border border-green-200 bg-green-50 p-4">
@@ -282,10 +301,9 @@ export function RiderApplicationDialog({
                       </p>
 
                       <p className="mt-1 text-xs leading-relaxed text-green-800">
-                        Approving this application changes the
-                        applicant&apos;s account role to Rider.
-                        Their availability starts as Offline until
-                        they choose to become available.
+                        Approving this application changes the applicant&apos;s
+                        account role to Rider. Their availability starts as
+                        Offline until they choose to become available.
                       </p>
                     </div>
                   </div>
@@ -295,7 +313,7 @@ export function RiderApplicationDialog({
           ) : null}
         </div>
 
-        <DialogFooter className="shrink-0 border-t border-border bg-background px-6 py-4">
+        <DialogFooter className="shrink-0 border-t border-border bg-background px-4 py-3 sm:px-6">
           <Button
             variant="secondary"
             onClick={() => onOpenChange(false)}
@@ -307,14 +325,17 @@ export function RiderApplicationDialog({
           {application?.approvalStatus === "pending" ? (
             <Button
               loading={approving}
+              disabled={
+                !application.validIdUrl ||
+                !application.orCrDocumentUrl ||
+                !application.riderPhotoUrl
+              }
               onClick={() => {
                 void handleApprove();
               }}
             >
               <ShieldCheck className="h-4 w-4" />
-              {approving
-                ? "Approving…"
-                : "Approve rider"}
+              {approving ? "Approving…" : "Approve rider"}
             </Button>
           ) : null}
         </DialogFooter>
@@ -323,13 +344,7 @@ export function RiderApplicationDialog({
   );
 }
 
-function DetailCard({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
+function DetailCard({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-xl border border-border bg-background p-3">
       <p className="text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
@@ -345,44 +360,61 @@ function DetailCard({
 
 function DocumentLink({
   label,
+  path,
   url,
   icon: Icon,
 }: {
   label: string;
+  path: string | null;
   url: string | null;
   icon: React.ElementType;
 }) {
+  const [previewFailed, setPreviewFailed] = useState(false);
+  const canPreview = Boolean(url && path && /\.(?:jpe?g|png)$/i.test(path));
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-border bg-background p-3">
-      <div className="flex h-9 w-9 flex-none items-center justify-center rounded-lg bg-primary/10 text-primary">
-        <Icon className="h-4 w-4" />
+    <div className="rounded-xl border border-border bg-background p-3">
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex h-9 w-9 flex-none items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <Icon className="h-4 w-4" aria-hidden="true" />
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-bold text-foreground">{label}</p>
+
+          <p className="text-xs text-muted-foreground">
+            {path
+              ? url
+                ? "Private document"
+                : "Access unavailable"
+              : "Not submitted"}
+          </p>
+        </div>
+
+        {url ? (
+          <a
+            href={url}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 text-xs font-bold text-primary transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          >
+            Open document
+            <ExternalLink className="h-3.5 w-3.5" />
+          </a>
+        ) : null}
       </div>
-
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-bold text-foreground">
-          {label}
+      {canPreview && !previewFailed ? (
+        <img
+          src={url ?? undefined}
+          alt={`${label} preview for the selected rider`}
+          className="mt-3 max-h-48 w-full rounded-lg border border-border bg-muted/20 object-contain"
+          onError={() => setPreviewFailed(true)}
+        />
+      ) : null}
+      {canPreview && previewFailed ? (
+        <p className="mt-2 text-xs text-muted-foreground">
+          Preview unavailable. Try opening the document or retry access.
         </p>
-
-        <p className="text-[10px] text-muted-foreground">
-          Private rider document
-        </p>
-      </div>
-
-      {url ? (
-        <a
-          href={url}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-border px-3 text-xs font-bold text-primary transition hover:bg-muted"
-        >
-          Open
-          <ExternalLink className="h-3.5 w-3.5" />
-        </a>
-      ) : (
-        <span className="text-[10px] font-semibold text-muted-foreground">
-          Missing
-        </span>
-      )}
+      ) : null}
     </div>
   );
 }

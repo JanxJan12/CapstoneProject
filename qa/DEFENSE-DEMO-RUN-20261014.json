@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "customerOrder": "ORD-000001",
+  "walkInOrder": "ORD-000003",
+  "riderRejectedOrder": "ORD-000002",
+  "rejectedOrder": "ORD-000004",
+  "checks": [
+    "New modified Customer order, private synthetic proof, role denial, Cashier verification, authoritative snapshot",
+    "KDS v2 modifier price/channel, invalid secret, preparing/ready, duplicate denial",
+    "Rider assigned-order RLS, private proof upload, delivered same Customer order",
+    "Fresh modified order Rider offer rejection, customer role denial, duplicate denial",
+    "New modified walk-in sale, KDS channel/option/instruction, receipt and server price reconciliation",
+    "Cashier GCash rejection and customer role denial on new local order",
+    "Shift close reconciled cash drawer and separate verified GCash sales with zero variance"
+  ],
+  "boundary": "Isolated unlinked local Supabase only; no hosted, real GCash, or physical device actions."
+}

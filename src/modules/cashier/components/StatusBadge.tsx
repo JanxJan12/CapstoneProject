@@ -63,6 +63,10 @@ const STATUS_PRESENTATION: Record<CashierStatus, StatusPresentation> = {
     className: "border-red-200 bg-red-50 text-red-800",
     icon: XCircle,
   },
+  Unknown: {
+    className: "border-slate-200 bg-slate-50 text-slate-700",
+    icon: AlertCircle,
+  },
   Unpaid: {
     className: "border-amber-200 bg-amber-50 text-amber-800",
     icon: AlertCircle,
@@ -105,21 +109,23 @@ export interface StatusBadgeProps {
   status: CashierStatus;
   delayed?: boolean;
   className?: string;
+  unknownLabel?: string;
 }
 
 export function StatusBadge({
   status,
   delayed = false,
   className,
+  unknownLabel = "Payment unlinked",
 }: StatusBadgeProps) {
   const presentation = STATUS_PRESENTATION[status];
   const Icon = delayed ? AlertCircle : presentation.icon;
-  const label = delayed ? "Delayed" : status;
+  const label = delayed ? "Delayed" : status === "Unknown" ? unknownLabel : status;
 
   return (
     <span
       key={`${status}-${delayed ? "delayed" : "current"}`}
-      aria-label={delayed ? `Delayed ${status}` : status}
+      aria-label={delayed ? `Delayed ${status}` : label}
       className={cn(
         "cashier-status-badge inline-flex min-h-6 items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.08em] shadow-[0_1px_2px_rgba(36,26,19,0.03)]",
         delayed

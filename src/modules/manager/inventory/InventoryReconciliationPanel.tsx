@@ -1,240 +1,270 @@
-import { AlertTriangle, CheckCircle, History, Scale } from "lucide-react";
-
 import { Badge } from "@/components/common/Badge";
 import { Table, Td } from "@/components/common/Table";
 import type { BadgeVariant } from "@/types";
 import type {
-  InventoryReconciliationReport,
-  InventoryReconciliationStatus,
-} from "./inventoryReconciliation";
+  InventoryAuditFinding,
+  InventoryAuditFindingCode,
+  InventoryAuditRun,
+  InventoryAuditResult,
+} from "./inventoryAuditApi";
 
-const STATUS_PRESENTATION: Record<
-  InventoryReconciliationStatus,
-  { label: string; variant: BadgeVariant; priority: number }
+const RESULT: Record<
+  InventoryAuditResult,
+  { label: string; variant: BadgeVariant }
 > = {
-  mismatch: { label: "Mismatch", variant: "danger", priority: 0 },
-  "insufficient-history": {
-    label: "Insufficient history",
-    variant: "warning",
-    priority: 1,
-  },
-  matched: { label: "Reconciled", variant: "success", priority: 2 },
+  matched: { label: "Matched", variant: "success" },
+  mismatch: { label: "Mismatch", variant: "danger" },
+  incomplete: { label: "Incomplete", variant: "warning" },
+};
+
+const FINDING: Record<InventoryAuditFindingCode, string> = {
+  matched: "Book and reconstructed ledger agree.",
+  book_ledger_difference:
+    "Recorded book stock differs from the reconstructed ledger.",
+  no_history: "No movement history is available for this item.",
+  ambiguous_order:
+    "Movements share a timestamp, so their order cannot be proven.",
+  invalid_arithmetic:
+    "A movement's before, change and after quantities disagree.",
+  sequence_gap: "Consecutive movement balances do not connect.",
 };
 
 const quantityFormatter = new Intl.NumberFormat("en-PH", {
   maximumFractionDigits: 3,
 });
-
-const dateTimeFormatter = new Intl.DateTimeFormat("en-PH", {
-  month: "short",
-  day: "numeric",
-  year: "numeric",
-  hour: "numeric",
-  minute: "2-digit",
+const dateFormatter = new Intl.DateTimeFormat("en-PH", {
+  timeZone: "Asia/Manila",
+  dateStyle: "medium",
+  timeStyle: "short",
 });
 
-function formatQuantity(value: number, unit: string): string {
+function quantity(value: number, unit: string): string {
   return `${quantityFormatter.format(value)} ${unit}`;
 }
 
-function formatVariance(value: number | null, unit: string): string {
-  if (value === null) {
-    return "—";
-  }
+function variance(row: InventoryAuditFinding): string | null {
+  if (row.ledgerQuantity === null) return null;
+  const value =
+    Math.round((row.bookQuantity - row.ledgerQuantity) * 1000) / 1000;
+  return `${value > 0 ? "+" : ""}${quantity(value, row.recordedUnit)}`;
+}
 
-  const prefix = value > 0 ? "+" : "";
-  return `${prefix}${quantityFormatter.format(value)} ${unit}`;
+function FindingStatus({ row }: { row: InventoryAuditFinding }) {
+  const presentation = RESULT[row.result];
+  return (
+    <div>
+      <Badge variant={presentation.variant}>{presentation.label}</Badge>
+      {row.result !== "matched" ? (
+        <details className="mt-0.5 text-xs text-muted-foreground">
+          <summary className="min-h-11 cursor-pointer rounded text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+            Why {row.result}?
+          </summary>
+          <p className="max-w-xs leading-5">{FINDING[row.findingCode]}</p>
+        </details>
+      ) : null}
+    </div>
+  );
 }
 
 export function InventoryReconciliationPanel({
-  report,
+  run,
+  rows,
   isLoading,
   error,
+  onOpenItem,
 }: {
-  report: InventoryReconciliationReport | null;
+  run: InventoryAuditRun | null;
+  rows: InventoryAuditFinding[];
   isLoading: boolean;
   error: string;
+  onOpenItem: (itemId: string) => void;
 }) {
-  const sortedRows = report
-    ? [...report.rows].sort((left, right) => {
-        const statusDifference =
-          STATUS_PRESENTATION[left.status].priority -
-          STATUS_PRESENTATION[right.status].priority;
-
-        return statusDifference || left.itemName.localeCompare(right.itemName);
-      })
-    : [];
-
   return (
     <section
-      aria-labelledby="inventory-reconciliation-heading"
-      className="mt-4 overflow-hidden rounded-xl border border-border bg-card"
+      aria-label="Inventory audit results"
+      className="manager-audit-panel mt-4 overflow-hidden rounded-xl border border-border bg-card"
     >
-      <div className="flex flex-col gap-3 border-b border-border px-4 py-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex items-start gap-2.5">
-          <div className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
-            <Scale className="h-4 w-4" />
-          </div>
-          <div>
-            <h2
-              id="inventory-reconciliation-heading"
-              className="text-sm font-extrabold text-foreground"
-            >
-              Inventory reconciliation
-            </h2>
-            <p className="mt-0.5 max-w-3xl text-xs leading-5 text-muted-foreground">
-              Read-only comparison of current stock, the latest transaction
-              balance, and the recorded ledger. Ledger totals start from the
-              earliest recorded quantity before; no zero opening balance is
-              assumed.
-            </p>
-          </div>
-        </div>
-
-        {report ? (
-          <div className="flex flex-wrap gap-1.5">
-            <Badge variant="neutral">
-              {report.returnedTransactionCount} ledger rows
-            </Badge>
-            <Badge variant="success">{report.matchedCount} reconciled</Badge>
-            <Badge variant={report.mismatchCount > 0 ? "danger" : "neutral"}>
-              {report.mismatchCount} mismatch
-            </Badge>
-            <Badge
-              variant={
-                report.insufficientHistoryCount > 0 ? "warning" : "neutral"
-              }
-            >
-              {report.insufficientHistoryCount} incomplete
-            </Badge>
-          </div>
-        ) : null}
-      </div>
-
       {isLoading ? (
-        <div className="px-4 py-8 text-center text-sm text-muted-foreground">
-          Loading reconciliation data…
-        </div>
+        <p className="px-4 py-8 text-center text-sm text-muted-foreground">
+          Loading audit results…
+        </p>
       ) : error ? (
-        <div className="m-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <p
+          role="alert"
+          className="m-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+        >
           {error}
-        </div>
-      ) : !report || report.rows.length === 0 ? (
-        <div className="px-4 py-8 text-center text-sm text-muted-foreground">
-          No inventory balances are available to reconcile.
-        </div>
+        </p>
+      ) : !run ? (
+        <p className="px-4 py-8 text-center text-sm text-muted-foreground">
+          No saved audits yet. Run an audit to compare recorded stock with its
+          ledger.
+        </p>
       ) : (
         <>
-          {!report.hasCompleteTransactionHistory ? (
-            <div className="m-4 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs leading-5 text-amber-900">
-              <History className="mt-0.5 h-4 w-4 flex-shrink-0" />
-              <p>
-                The manager transaction read reached its{" "}
-                {report.transactionLimit}
-                -row limit. Latest balances can still be compared, but complete
-                ledger totals are marked as insufficient history.
-              </p>
+          <div className="border-b border-border px-4 py-3">
+            <h2 className="text-sm font-bold text-foreground">
+              {dateFormatter.format(new Date(run.completedAt))}
+            </h2>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              <Badge variant="success">{run.matchedCount} matched</Badge>
+              <Badge variant={run.mismatchCount ? "danger" : "neutral"}>
+                {run.mismatchCount} mismatch
+              </Badge>
+              <Badge variant={run.incompleteCount ? "warning" : "neutral"}>
+                {run.incompleteCount} incomplete
+              </Badge>
             </div>
-          ) : null}
-
-          {report.mismatchCount > 0 ? (
-            <div className="mx-4 mb-4 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-xs leading-5 text-red-800">
-              <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
-              <p>
-                {report.mismatchCount} item
-                {report.mismatchCount === 1 ? "" : "s"} require review. This
-                report does not change stock or repair transaction history.
-              </p>
+            <p className="mt-2 text-xs text-muted-foreground">
+              {run.totalItems} items evaluated · {run.movementRowsExamined}{" "}
+              movement rows examined
+            </p>
+            <div className="mt-1 flex flex-wrap gap-x-4">
+              <details className="text-xs leading-5 text-muted-foreground">
+                <summary className="min-h-11 cursor-pointer rounded text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                  How results are determined
+                </summary>
+                <p className="max-w-3xl pb-1">
+                  Matched means saved book stock agrees with a reconstructed
+                  recorded ledger. Mismatch means those values differ.
+                  Incomplete means movement evidence cannot support a reliable
+                  ledger total. Unreceived requests are excluded from stock.
+                  Item names, units and quantities below are snapshots from this
+                  run.
+                </p>
+              </details>
+              <details className="text-xs leading-5 text-muted-foreground">
+                <summary className="min-h-11 cursor-pointer rounded text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                  Audit details
+                </summary>
+                <dl className="pb-1 [overflow-wrap:anywhere]">
+                  <div>
+                    <dt className="inline font-medium">Audit ID: </dt>
+                    <dd className="inline">{run.id}</dd>
+                  </div>
+                  <div>
+                    <dt className="inline font-medium">Manager ID: </dt>
+                    <dd className="inline">{run.performedBy}</dd>
+                  </div>
+                </dl>
+              </details>
             </div>
-          ) : report.insufficientHistoryCount === 0 ? (
-            <div className="mx-4 mb-4 flex items-start gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-xs leading-5 text-emerald-800">
-              <CheckCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
-              <p>All inventory balances reconcile with the recorded ledger.</p>
-            </div>
-          ) : null}
-
-          <Table
-            headers={[
-              "Item",
-              "Current",
-              "Latest Transaction",
-              "Ledger Total",
-              "Variance",
-              "Result",
-            ]}
-          >
-            {sortedRows.map((row) => {
-              const presentation = STATUS_PRESENTATION[row.status];
-
-              return (
-                <tr key={row.inventoryItemId}>
-                  <Td>
-                    <p className="text-sm font-bold text-foreground">
-                      {row.itemName}
-                    </p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {row.observedTransactionCount} transaction
-                      {row.observedTransactionCount === 1 ? "" : "s"} read
-                    </p>
-                  </Td>
-                  <Td className="whitespace-nowrap text-sm font-bold tabular-nums text-foreground">
-                    {formatQuantity(row.currentQuantity, row.unit)}
-                  </Td>
-                  <Td className="whitespace-nowrap">
-                    {row.latestTransactionQuantity === null ? (
-                      <span className="text-sm text-muted-foreground">—</span>
-                    ) : (
-                      <>
-                        <p className="text-sm font-semibold tabular-nums text-foreground">
-                          {formatQuantity(
-                            row.latestTransactionQuantity,
-                            row.unit,
-                          )}
-                        </p>
-                        {row.latestTransactionAt ? (
-                          <p className="mt-1 text-xs text-muted-foreground">
-                            {dateTimeFormatter.format(
-                              new Date(row.latestTransactionAt),
-                            )}
-                          </p>
-                        ) : null}
-                      </>
-                    )}
-                  </Td>
-                  <Td className="whitespace-nowrap text-sm tabular-nums text-foreground">
-                    {row.reconstructedLedgerQuantity === null
-                      ? "Not available"
-                      : formatQuantity(
-                          row.reconstructedLedgerQuantity,
-                          row.unit,
-                        )}
-                  </Td>
-                  <Td
-                    className={
-                      "whitespace-nowrap text-sm font-bold tabular-nums " +
-                      (row.varianceFromLatestTransaction === null ||
-                      row.varianceFromLatestTransaction === 0
-                        ? "text-muted-foreground"
-                        : "text-red-700")
-                    }
+          </div>
+          {rows.length === 0 ? (
+            <p className="px-4 py-6 text-sm text-muted-foreground">
+              This audit evaluated no inventory items.
+            </p>
+          ) : (
+            <>
+              <div
+                className="space-y-2 px-3 py-2 sm:hidden"
+                aria-label="Audit items"
+              >
+                {rows.map((row) => (
+                  <article
+                    key={row.id}
+                    className="rounded-lg border border-border p-2.5"
                   >
-                    {formatVariance(
-                      row.varianceFromLatestTransaction,
-                      row.unit,
-                    )}
-                  </Td>
-                  <Td className="max-w-[330px]">
-                    <Badge variant={presentation.variant}>
-                      {presentation.label}
-                    </Badge>
-                    <p className="mt-1.5 text-xs leading-5 text-muted-foreground">
-                      {row.details}
-                    </p>
-                  </Td>
-                </tr>
-              );
-            })}
-          </Table>
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <button
+                        type="button"
+                        onClick={() => onOpenItem(row.inventoryItemId)}
+                        aria-label={`View item details for ${row.itemName}`}
+                        className="min-h-11 min-w-0 flex-1 break-words rounded text-left font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary [overflow-wrap:anywhere]"
+                      >
+                        {row.itemName}
+                      </button>
+                      <FindingStatus row={row} />
+                    </div>
+                    <dl className="mt-1 grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
+                      <div>
+                        <dt className="text-xs text-muted-foreground">Book</dt>
+                        <dd className="tabular-nums">
+                          {quantity(row.bookQuantity, row.recordedUnit)}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-xs text-muted-foreground">
+                          Ledger
+                        </dt>
+                        <dd className="tabular-nums">
+                          {row.ledgerQuantity === null ? (
+                            <span aria-label="Ledger unavailable">—</span>
+                          ) : (
+                            quantity(row.ledgerQuantity, row.recordedUnit)
+                          )}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-xs text-muted-foreground">
+                          Variance
+                        </dt>
+                        <dd className="tabular-nums">
+                          {variance(row) ?? (
+                            <span aria-label="Variance unavailable">—</span>
+                          )}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-xs text-muted-foreground">
+                          Movements
+                        </dt>
+                        <dd className="tabular-nums">{row.movementCount}</dd>
+                      </div>
+                    </dl>
+                  </article>
+                ))}
+              </div>
+              <div className="manager-audit-results-table hidden sm:block">
+                <Table
+                  headers={[
+                    "Item",
+                    "Book",
+                    "Ledger",
+                    "Variance",
+                    "Movements",
+                    "Result",
+                  ]}
+                >
+                  {rows.map((row) => (
+                    <tr key={row.id}>
+                      <Td>
+                        <button
+                          type="button"
+                          onClick={() => onOpenItem(row.inventoryItemId)}
+                          aria-label={`View item details for ${row.itemName}`}
+                          className="min-h-11 max-w-full break-words rounded text-left font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary [overflow-wrap:anywhere]"
+                        >
+                          {row.itemName}
+                        </button>
+                      </Td>
+                      <Td className="whitespace-nowrap text-right tabular-nums">
+                        {quantity(row.bookQuantity, row.recordedUnit)}
+                      </Td>
+                      <Td className="whitespace-nowrap text-right tabular-nums">
+                        {row.ledgerQuantity === null ? (
+                          <span aria-label="Ledger unavailable">—</span>
+                        ) : (
+                          quantity(row.ledgerQuantity, row.recordedUnit)
+                        )}
+                      </Td>
+                      <Td className="whitespace-nowrap text-right tabular-nums">
+                        {variance(row) ?? (
+                          <span aria-label="Variance unavailable">—</span>
+                        )}
+                      </Td>
+                      <Td className="text-right tabular-nums">
+                        {row.movementCount}
+                      </Td>
+                      <Td>
+                        <FindingStatus row={row} />
+                      </Td>
+                    </tr>
+                  ))}
+                </Table>
+              </div>
+            </>
+          )}
         </>
       )}
     </section>

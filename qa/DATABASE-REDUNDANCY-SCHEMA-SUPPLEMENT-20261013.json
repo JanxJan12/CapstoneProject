@@ -1,0 +1,1254 @@
+{
+  "project": "zhzluhqvysvsadwuugpa",
+  "managed_and_public_tables": [
+    {
+      "name": "auth.users",
+      "connector_rows": 8,
+      "rls_enabled": true,
+      "comment": "Auth: Stores user login data within a secure schema."
+    },
+    {
+      "name": "auth.refresh_tokens",
+      "connector_rows": 42,
+      "rls_enabled": true,
+      "comment": "Auth: Store of tokens used to refresh JWT tokens once they expire."
+    },
+    {
+      "name": "auth.instances",
+      "connector_rows": 0,
+      "rls_enabled": true,
+      "comment": "Auth: Manages users across multiple sites."
+    },
+    {
+      "name": "auth.audit_log_entries",
+      "connector_rows": 0,
+      "rls_enabled": true,
+      "comment": "Auth: Audit trail for user actions."
+    },
+    {
+      "name": "auth.schema_migrations",
+      "connector_rows": 5,
+      "rls_enabled": true,
+      "comment": "Auth: Manages updates to the auth system."
+    },
+    {
+      "name": "auth.identities",
+      "connector_rows": 8,
+      "rls_enabled": true,
+      "comment": "Auth: Stores identities associated to a user."
+    },
+    {
+      "name": "auth.sessions",
+      "connector_rows": 13,
+      "rls_enabled": true,
+      "comment": "Auth: Stores session data associated to a user."
+    },
+    {
+      "name": "auth.mfa_factors",
+      "connector_rows": 0,
+      "rls_enabled": true,
+      "comment": "auth: stores metadata about factors"
+    },
+    {
+      "name": "auth.mfa_challenges",
+      "connector_rows": 0,
+      "rls_enabled": true,
+      "comment": "auth: stores metadata about challenge requests made"
+    },
+    {
+      "name": "auth.mfa_amr_claims",
+      "connector_rows": 13,
+      "rls_enabled": true,
+      "comment": "auth: stores authenticator method reference claims for multi factor authentication"
+    },
+    {
+      "name": "auth.sso_providers",
+      "connector_rows": 0,
+      "rls_enabled": true,
+      "comment": "Auth: Manages SSO identity provider information; see saml_providers for SAML."
+    },
+    {
+      "name": "auth.sso_domains",
+      "connector_rows": 0,
+      "rls_enabled": true,
+      "comment": "Auth: Manages SSO email address domain mapping to an SSO Identity Provider."
+    },
+    {
+      "name": "auth.saml_providers",
+      "connector_rows": 0,
+      "rls_enabled": true,
+      "comment": "Auth: Manages SAML Identity Provider connections."
+    },
+    {
+      "name": "auth.saml_relay_states",
+      "connector_rows": 0,
+      "rls_enabled": true,
+      "comment": "Auth: Contains SAML Relay State information for each Service Provider initiated login."
+    },
+    {
+      "name": "auth.flow_state",
+      "connector_rows": 37,
+      "rls_enabled": true,
+      "comment": "Stores metadata for all OAuth/SSO login flows"
+    },
+    {
+      "name": "auth.one_time_tokens",
+      "connector_rows": 0,
+      "rls_enabled": true,
+      "comment": null
+    },
+    {
+      "name": "auth.oauth_clients",
+      "connector_rows": 0,
+      "rls_enabled": false,
+      "comment": null
+    },
+    {
+      "name": "auth.oauth_authorizations",
+      "connector_rows": 0,
+      "rls_enabled": false,
+      "comment": null
+    },
+    {
+      "name": "auth.oauth_consents",
+      "connector_rows": 0,
+      "rls_enabled": false,
+      "comment": null
+    },
+    {
+      "name": "auth.oauth_client_states",
+      "connector_rows": 0,
+      "rls_enabled": false,
+      "comment": "Stores OAuth states for third-party provider authentication flows where Supabase acts as the OAuth client."
+    },
+    {
+      "name": "auth.custom_oauth_providers",
+      "connector_rows": 0,
+      "rls_enabled": false,
+      "comment": null
+    },
+    {
+      "name": "auth.webauthn_credentials",
+      "connector_rows": 0,
+      "rls_enabled": false,
+      "comment": null
+    },
+    {
+      "name": "auth.webauthn_challenges",
+      "connector_rows": 0,
+      "rls_enabled": false,
+      "comment": null
+    },
+    {
+      "name": "realtime.schema_migrations",
+      "connector_rows": 8,
+      "rls_enabled": false,
+      "comment": null
+    },
+    {
+      "name": "realtime.subscription",
+      "connector_rows": 0,
+      "rls_enabled": false,
+      "comment": null
+    },
+    {
+      "name": "storage.migrations",
+      "connector_rows": 12,
+      "rls_enabled": true,
+      "comment": null
+    },
+    {
+      "name": "storage.buckets",
+      "connector_rows": 3,
+      "rls_enabled": true,
+      "comment": null
+    },
+    {
+      "name": "storage.objects",
+      "connector_rows": 30,
+      "rls_enabled": true,
+      "comment": null
+    },
+    {
+      "name": "storage.s3_multipart_uploads",
+      "connector_rows": 0,
+      "rls_enabled": true,
+      "comment": null
+    },
+    {
+      "name": "storage.s3_multipart_uploads_parts",
+      "connector_rows": 0,
+      "rls_enabled": true,
+      "comment": null
+    },
+    {
+      "name": "storage.buckets_analytics",
+      "connector_rows": 0,
+      "rls_enabled": true,
+      "comment": null
+    },
+    {
+      "name": "storage.buckets_vectors",
+      "connector_rows": 0,
+      "rls_enabled": true,
+      "comment": null
+    },
+    {
+      "name": "storage.vector_indexes",
+      "connector_rows": 0,
+      "rls_enabled": true,
+      "comment": null
+    },
+    {
+      "name": "realtime.messages",
+      "connector_rows": 0,
+      "rls_enabled": true,
+      "comment": null
+    },
+    {
+      "name": "public.profiles",
+      "connector_rows": 8,
+      "rls_enabled": true,
+      "comment": "Public application profile connected one-to-one with Supabase auth.users."
+    },
+    {
+      "name": "public.riders",
+      "connector_rows": 2,
+      "rls_enabled": true,
+      "comment": null
+    },
+    {
+      "name": "public.menu_categories",
+      "connector_rows": 5,
+      "rls_enabled": true,
+      "comment": null
+    },
+    {
+      "name": "public.menu_items",
+      "connector_rows": 20,
+      "rls_enabled": true,
+      "comment": null
+    },
+    {
+      "name": "public.inventory_items",
+      "connector_rows": 18,
+      "rls_enabled": true,
+      "comment": null
+    },
+    {
+      "name": "public.menu_ingredients",
+      "connector_rows": 28,
+      "rls_enabled": true,
+      "comment": null
+    },
+    {
+      "name": "public.suppliers",
+      "connector_rows": 0,
+      "rls_enabled": true,
+      "comment": null
+    },
+    {
+      "name": "public.supplier_items",
+      "connector_rows": 0,
+      "rls_enabled": true,
+      "comment": null
+    },
+    {
+      "name": "public.purchase_orders",
+      "connector_rows": 0,
+      "rls_enabled": true,
+      "comment": null
+    },
+    {
+      "name": "public.purchase_order_items",
+      "connector_rows": 0,
+      "rls_enabled": true,
+      "comment": null
+    },
+    {
+      "name": "public.orders",
+      "connector_rows": 45,
+      "rls_enabled": true,
+      "comment": null
+    },
+    {
+      "name": "public.order_items",
+      "connector_rows": 50,
+      "rls_enabled": true,
+      "comment": null
+    },
+    {
+      "name": "public.payments",
+      "connector_rows": 27,
+      "rls_enabled": true,
+      "comment": null
+    },
+    {
+      "name": "public.order_status_history",
+      "connector_rows": 223,
+      "rls_enabled": true,
+      "comment": null
+    },
+    {
+      "name": "public.inventory_transactions",
+      "connector_rows": 43,
+      "rls_enabled": true,
+      "comment": null
+    },
+    {
+      "name": "public.delivery_assignments",
+      "connector_rows": 14,
+      "rls_enabled": true,
+      "comment": null
+    },
+    {
+      "name": "public.kds_terminals",
+      "connector_rows": 2,
+      "rls_enabled": true,
+      "comment": null
+    },
+    {
+      "name": "public.cashier_shifts",
+      "connector_rows": 5,
+      "rls_enabled": true,
+      "comment": null
+    },
+    {
+      "name": "public.cashier_transactions",
+      "connector_rows": 26,
+      "rls_enabled": true,
+      "comment": null
+    },
+    {
+      "name": "public.menu_modifier_groups",
+      "connector_rows": 6,
+      "rls_enabled": true,
+      "comment": null
+    },
+    {
+      "name": "public.menu_modifier_options",
+      "connector_rows": 16,
+      "rls_enabled": true,
+      "comment": null
+    },
+    {
+      "name": "public.menu_item_modifier_groups",
+      "connector_rows": 27,
+      "rls_enabled": true,
+      "comment": null
+    },
+    {
+      "name": "supabase_migrations.schema_migrations",
+      "connector_rows": 46,
+      "rls_enabled": false,
+      "comment": null
+    },
+    {
+      "name": "auth.scim_users",
+      "connector_rows": 0,
+      "rls_enabled": false,
+      "comment": null
+    },
+    {
+      "name": "auth.scim_tokens",
+      "connector_rows": 0,
+      "rls_enabled": false,
+      "comment": null
+    },
+    {
+      "name": "auth.mfa_recovery_code_sets",
+      "connector_rows": 0,
+      "rls_enabled": false,
+      "comment": null
+    },
+    {
+      "name": "auth.mfa_recovery_codes",
+      "connector_rows": 0,
+      "rls_enabled": false,
+      "comment": null
+    },
+    {
+      "name": "public.receiving_reports",
+      "connector_rows": 1,
+      "rls_enabled": true,
+      "comment": "Source-neutral Foodhouse receiving header. production_team receipts have no PO; direct_supplier receipts remain PO-backed. Only post_receiving_report authoritatively posts stock."
+    },
+    {
+      "name": "public.receiving_report_items",
+      "connector_rows": 2,
+      "rls_enabled": true,
+      "comment": "Foodhouse receiving line. Production Team lines identify inventory directly; direct supplier lines identify a PO item, which determines inventory. Accepted quantities create batches and linked ledger movements when posted."
+    },
+    {
+      "name": "public.inventory_batches",
+      "connector_rows": 2,
+      "rls_enabled": true,
+      "comment": "Phase 6B.3 structural batch record. Future posting must require use_by_date on every receiving batch whose inventory item has expiry_required = true. No legacy-opening rows are created by this migration."
+    },
+    {
+      "name": "public.inventory_opening_balances",
+      "connector_rows": 0,
+      "rls_enabled": true,
+      "comment": "One-time, verified Foodhouse cutover count per batch-managed inventory item. Zero counts are recorded here without creating a batch or ledger movement."
+    },
+    {
+      "name": "public.inventory_transaction_batch_allocations",
+      "connector_rows": 0,
+      "rls_enabled": true,
+      "comment": "Positive child allocations that reconcile one confirmed-order inventory issuance to the exact physical batches consumed."
+    },
+    {
+      "name": "public.paid_order_cancellations",
+      "connector_rows": 0,
+      "rls_enabled": true,
+      "comment": "Manager-attested, completed full refund and preparation-aware inventory disposition. Waste/no_return means sale issuance remains consumed; it is not a second stock deduction."
+    },
+    {
+      "name": "public.production_replenishment_requests",
+      "connector_rows": 0,
+      "rls_enabled": true,
+      "comment": null
+    },
+    {
+      "name": "public.production_replenishment_status_events",
+      "connector_rows": 0,
+      "rls_enabled": true,
+      "comment": null
+    },
+    {
+      "name": "realtime.messages_2026_10_09",
+      "connector_rows": 0,
+      "rls_enabled": false,
+      "comment": null
+    },
+    {
+      "name": "realtime.messages_2026_10_10",
+      "connector_rows": 0,
+      "rls_enabled": false,
+      "comment": null
+    },
+    {
+      "name": "realtime.messages_2026_10_11",
+      "connector_rows": 0,
+      "rls_enabled": false,
+      "comment": null
+    },
+    {
+      "name": "realtime.messages_2026_10_12",
+      "connector_rows": 0,
+      "rls_enabled": false,
+      "comment": null
+    },
+    {
+      "name": "realtime.messages_2026_10_13",
+      "connector_rows": 0,
+      "rls_enabled": false,
+      "comment": null
+    },
+    {
+      "name": "realtime.messages_2026_10_14",
+      "connector_rows": 0,
+      "rls_enabled": false,
+      "comment": null
+    },
+    {
+      "name": "realtime.messages_2026_10_15",
+      "connector_rows": 0,
+      "rls_enabled": false,
+      "comment": null
+    },
+    {
+      "name": "public.inventory_request_documents",
+      "connector_rows": 1,
+      "rls_enabled": true,
+      "comment": null
+    },
+    {
+      "name": "public.inventory_request_lines",
+      "connector_rows": 2,
+      "rls_enabled": true,
+      "comment": null
+    },
+    {
+      "name": "public.inventory_request_revisions",
+      "connector_rows": 1,
+      "rls_enabled": true,
+      "comment": null
+    },
+    {
+      "name": "public.inventory_request_events",
+      "connector_rows": 3,
+      "rls_enabled": true,
+      "comment": null
+    }
+  ],
+  "columns": [
+    {
+      "table_name": "cashier_shifts",
+      "columns": "id:uuid, cashier_id:uuid, terminal:character varying, opening_cash:numeric, status:USER-DEFINED, started_at:timestamp with time zone, ended_at:timestamp with time zone, actual_cash:numeric, expected_cash:numeric, variance:numeric, variance_reason:text, notes:text, closed_by:uuid, manager_approved_by:uuid, manager_approved_at:timestamp with time zone"
+    },
+    {
+      "table_name": "cashier_transactions",
+      "columns": "id:uuid, transaction_number:character varying, receipt_number:character varying, order_id:uuid, payment_id:uuid, shift_id:uuid, cashier_id:uuid, status:USER-DEFINED, void_reason:text, voided_at:timestamp with time zone, created_at:timestamp with time zone, request_id:uuid"
+    },
+    {
+      "table_name": "delivery_assignments",
+      "columns": "id:uuid, order_id:uuid, rider_id:uuid, assignment_method:USER-DEFINED, status:USER-DEFINED, assigned_at:timestamp with time zone, responded_at:timestamp with time zone, accepted_at:timestamp with time zone, rejected_at:timestamp with time zone, picked_up_at:timestamp with time zone, out_for_delivery_at:timestamp with time zone, delivered_at:timestamp with time zone, rejection_reason:text, proof_of_delivery_path:text, created_at:timestamp with time zone, updated_at:timestamp with time zone"
+    },
+    {
+      "table_name": "inventory_batches",
+      "columns": "id:uuid, batch_code:character varying, inventory_item_id:uuid, origin_type:text, receiving_report_item_id:uuid, supplier_lot_code:text, received_at:timestamp with time zone, manufactured_on:date, use_by_date:date, quantity_initial:numeric, quantity_on_hand:numeric, secondary_quantity_initial:numeric, secondary_quantity_on_hand:numeric, created_at:timestamp with time zone, opening_balance_id:uuid, received_at_is_estimated:boolean, notes:text, quantity_positive_adjustments:numeric"
+    },
+    {
+      "table_name": "inventory_items",
+      "columns": "id:uuid, item_name:character varying, unit:character varying, quantity_on_hand:numeric, reorder_level:numeric, inventory_category:character varying, is_active:boolean, created_at:timestamp with time zone, updated_at:timestamp with time zone, item_kind:text, secondary_unit:character varying, quantity_scale:smallint, rotation_policy:text, expiry_required:boolean, shelf_life_days:smallint, batch_consumption_enabled:boolean"
+    },
+    {
+      "table_name": "inventory_opening_balances",
+      "columns": "id:uuid, request_id:uuid, inventory_item_id:uuid, verified_by:uuid, verified_at:timestamp with time zone, quantity_total:numeric, batch_count:integer, request_payload:jsonb, notes:text, created_at:timestamp with time zone"
+    },
+    {
+      "table_name": "inventory_request_documents",
+      "columns": "id:uuid, request_number:text, current_revision:integer, status:text, priority:text, needed_at:timestamp with time zone, reason:text, issue_input:jsonb, issued_by:uuid, issued_at:timestamp with time zone, closed_at:timestamp with time zone, closed_by:uuid, close_reason:text"
+    },
+    {
+      "table_name": "inventory_request_events",
+      "columns": "id:bigint, request_id:uuid, revision:integer, event_type:text, actor_id:uuid, recorded_at:timestamp with time zone, details:jsonb"
+    },
+    {
+      "table_name": "inventory_request_lines",
+      "columns": "request_id:uuid, inventory_item_id:uuid, item_name:text, requested_unit:text, quantity_scale:integer, requested_quantity:numeric, recommendation:jsonb, override_reason:text"
+    },
+    {
+      "table_name": "inventory_request_revisions",
+      "columns": "request_id:uuid, revision:integer, snapshot:jsonb, issued_by:uuid, issued_at:timestamp with time zone"
+    },
+    {
+      "table_name": "inventory_transaction_batch_allocations",
+      "columns": "id:uuid, inventory_transaction_id:uuid, inventory_batch_id:uuid, quantity:numeric, created_at:timestamp with time zone"
+    },
+    {
+      "table_name": "inventory_transactions",
+      "columns": "id:uuid, inventory_item_id:uuid, purchase_order_item_id:uuid, order_id:uuid, performed_by:uuid, transaction_type:USER-DEFINED, quantity_change:numeric, quantity_before:numeric, quantity_after:numeric, reason:text, created_at:timestamp with time zone, mutation_request_id:uuid, inventory_batch_id:uuid, opening_balance_id:uuid, batch_quantity_before:numeric, batch_quantity_after:numeric, batch_mutation_notes:text, reverses_issuance_id:uuid, reverses_allocation_id:uuid"
+    },
+    {
+      "table_name": "kds_terminals",
+      "columns": "id:uuid, terminal_name:text, secret_hash:text, is_active:boolean, created_at:timestamp with time zone, last_used_at:timestamp with time zone"
+    },
+    {
+      "table_name": "menu_categories",
+      "columns": "id:uuid, name:character varying, description:text, is_active:boolean, created_at:timestamp with time zone, updated_at:timestamp with time zone"
+    },
+    {
+      "table_name": "menu_ingredients",
+      "columns": "id:uuid, menu_item_id:uuid, inventory_item_id:uuid, quantity_required:numeric, created_at:timestamp with time zone"
+    },
+    {
+      "table_name": "menu_item_modifier_groups",
+      "columns": "menu_item_id:uuid, group_id:character varying, sort_order:integer"
+    },
+    {
+      "table_name": "menu_items",
+      "columns": "id:uuid, category_id:uuid, name:character varying, description:text, price:numeric, image_path:text, is_available:boolean, is_active:boolean, created_at:timestamp with time zone, updated_at:timestamp with time zone, code:character varying, aliases:ARRAY"
+    },
+    {
+      "table_name": "menu_modifier_groups",
+      "columns": "id:character varying, name:character varying, selection_type:USER-DEFINED, min_selections:smallint, max_selections:smallint, is_active:boolean"
+    },
+    {
+      "table_name": "menu_modifier_options",
+      "columns": "id:character varying, group_id:character varying, name:character varying, price_adjustment:numeric, sort_order:integer, is_active:boolean"
+    },
+    {
+      "table_name": "order_items",
+      "columns": "id:uuid, order_id:uuid, menu_item_id:uuid, quantity:integer, unit_price:numeric, line_total:numeric, special_instructions:text, created_at:timestamp with time zone, item_name:character varying, modifiers:jsonb"
+    },
+    {
+      "table_name": "order_status_history",
+      "columns": "id:uuid, order_id:uuid, status:USER-DEFINED, changed_by:uuid, notes:text, created_at:timestamp with time zone"
+    },
+    {
+      "table_name": "orders",
+      "columns": "id:uuid, order_number:character varying, customer_id:uuid, processed_by:uuid, order_channel:USER-DEFINED, fulfillment_type:USER-DEFINED, customer_name:character varying, customer_contact_number:character varying, delivery_address:text, landmark:text, geolocation:text, current_status:USER-DEFINED, subtotal:numeric, delivery_fee:numeric, grand_total:numeric, notes:text, confirmed_at:timestamp with time zone, created_at:timestamp with time zone, completed_at:timestamp with time zone, cancelled_at:timestamp with time zone, table_number:character varying, discount_type:character varying, discount_reference:character varying, discount_amount:numeric, tax_amount:numeric, customer_request_id:uuid"
+    },
+    {
+      "table_name": "paid_order_cancellations",
+      "columns": "id:uuid, order_id:uuid, payment_id:uuid, cashier_transaction_id:uuid, previous_status:USER-DEFINED, inventory_disposition:text, refund_amount:numeric, refund_method:USER-DEFINED, refund_reference:text, reason:text, processed_by:uuid, processed_at:timestamp with time zone"
+    },
+    {
+      "table_name": "payments",
+      "columns": "id:uuid, order_id:uuid, payment_method:USER-DEFINED, amount:numeric, gcash_reference_number:character varying, proof_image_path:text, status:USER-DEFINED, verified_by:uuid, verified_at:timestamp with time zone, rejection_reason:text, created_at:timestamp with time zone, updated_at:timestamp with time zone, cash_received:numeric, rejection_notes:text, rejected_by:uuid, rejected_at:timestamp with time zone"
+    },
+    {
+      "table_name": "production_replenishment_requests",
+      "columns": "id:uuid, inventory_item_id:uuid, requested_unit:text, requested_quantity:numeric, needed_at:timestamp with time zone, priority:text, note:text, status:text, requested_by:uuid, requested_at:timestamp with time zone, ready_at:timestamp with time zone, closed_at:timestamp with time zone, fulfilled_report_id:uuid"
+    },
+    {
+      "table_name": "production_replenishment_status_events",
+      "columns": "id:bigint, request_id:uuid, previous_status:text, next_status:text, changed_by:uuid, changed_at:timestamp with time zone, receiving_report_id:uuid"
+    },
+    {
+      "table_name": "profiles",
+      "columns": "id:uuid, first_name:character varying, last_name:character varying, contact_number:character varying, role:USER-DEFINED, is_active:boolean, created_at:timestamp with time zone, updated_at:timestamp with time zone, avatar_url:text"
+    },
+    {
+      "table_name": "purchase_order_items",
+      "columns": "id:uuid, purchase_order_id:uuid, inventory_item_id:uuid, quantity_ordered:numeric, quantity_received:numeric, unit_cost:numeric, total_cost:numeric, received_at:timestamp with time zone, expiration_date:date, created_at:timestamp with time zone, updated_at:timestamp with time zone, secondary_quantity_ordered:numeric, secondary_quantity_received:numeric, quantity_cancelled:numeric, quantity_remaining:numeric"
+    },
+    {
+      "table_name": "purchase_orders",
+      "columns": "id:uuid, po_number:character varying, supplier_id:uuid, created_by:uuid, status:USER-DEFINED, ordered_at:timestamp with time zone, received_at:timestamp with time zone, total_amount:numeric, notes:text, created_at:timestamp with time zone, updated_at:timestamp with time zone"
+    },
+    {
+      "table_name": "receiving_report_items",
+      "columns": "id:uuid, receiving_report_id:uuid, purchase_order_item_id:uuid, quantity_delivered:numeric, quantity_accepted:numeric, quantity_rejected:numeric, secondary_quantity_delivered:numeric, secondary_quantity_accepted:numeric, secondary_quantity_rejected:numeric, rejection_reason:text, notes:text, created_at:timestamp with time zone, updated_at:timestamp with time zone, inventory_item_id:uuid, source_lot_code:text, manufactured_on:date, use_by_date:date"
+    },
+    {
+      "table_name": "receiving_reports",
+      "columns": "id:uuid, rr_number:character varying, purchase_order_id:uuid, received_at:timestamp with time zone, received_by:uuid, status:text, supplier_delivery_reference:text, notes:text, posted_at:timestamp with time zone, posted_by:uuid, created_at:timestamp with time zone, updated_at:timestamp with time zone, source_type:text, source_reference:text, replenishment_request_id:uuid, inventory_request_id:uuid, inventory_request_revision:integer, inspected_by_name:text, inspection_note:text"
+    },
+    {
+      "table_name": "riders",
+      "columns": "id:uuid, valid_id_path:text, or_cr_document_path:text, driver_license_number:character varying, plate_number:character varying, motor_brand:character varying, motor_model:character varying, rider_photo_path:text, approval_status:USER-DEFINED, availability_status:USER-DEFINED, last_assigned_at:timestamp with time zone, created_at:timestamp with time zone, updated_at:timestamp with time zone"
+    },
+    {
+      "table_name": "supplier_items",
+      "columns": "id:uuid, supplier_id:uuid, inventory_item_id:uuid, price_per_unit:numeric, is_preferred:boolean, created_at:timestamp with time zone, updated_at:timestamp with time zone"
+    },
+    {
+      "table_name": "suppliers",
+      "columns": "id:uuid, name:character varying, contact_person:character varying, contact_number:character varying, email:character varying, address:text, is_active:boolean, created_at:timestamp with time zone, updated_at:timestamp with time zone"
+    }
+  ],
+  "policies": [
+    {
+      "schemaname": "public",
+      "tablename": "cashier_shifts",
+      "policyname": "cashier_shifts_select_staff",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "((cashier_id = auth.uid()) OR (EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.id = auth.uid()) AND (p.is_active = true) AND (p.role = 'manager'::user_role)))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "cashier_transactions",
+      "policyname": "cashier_transactions_select_staff",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "((cashier_id = auth.uid()) OR (EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.id = auth.uid()) AND (p.is_active = true) AND (p.role = 'manager'::user_role)))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "delivery_assignments",
+      "policyname": "rider_select_own_assignments",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "(rider_id = auth.uid())",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "menu_categories",
+      "policyname": "menu_categories_select_active",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "(is_active = true)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "menu_items",
+      "policyname": "menu_items_select_active",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "((is_active = true) AND (is_available = true))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "menu_items",
+      "policyname": "menu_items_select_staff",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "((is_active = true) AND (EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.id = auth.uid()) AND (p.is_active = true) AND (p.role = ANY (ARRAY['cashier'::user_role, 'manager'::user_role]))))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "order_items",
+      "policyname": "customers_select_own_order_items",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "(EXISTS ( SELECT 1\n   FROM orders o\n  WHERE ((o.id = order_items.order_id) AND (o.customer_id = auth.uid()))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "order_items",
+      "policyname": "rider_select_assigned_order_items",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "((EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.id = auth.uid()) AND (p.is_active = true) AND (p.role = 'rider'::user_role)))) AND (EXISTS ( SELECT 1\n   FROM delivery_assignments da\n  WHERE ((da.order_id = order_items.order_id) AND (da.rider_id = auth.uid()) AND (da.status = ANY (ARRAY['offered'::delivery_assignment_status, 'accepted'::delivery_assignment_status, 'picked_up'::delivery_assignment_status, 'out_for_delivery'::delivery_assignment_status, 'delivered'::delivery_assignment_status]))))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "order_items",
+      "policyname": "staff_select_order_items",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "(EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.id = auth.uid()) AND (p.is_active = true) AND (p.role = ANY (ARRAY['cashier'::user_role, 'manager'::user_role])))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "order_status_history",
+      "policyname": "customers_select_own_order_status_history",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "(EXISTS ( SELECT 1\n   FROM orders o\n  WHERE ((o.id = order_status_history.order_id) AND (o.customer_id = auth.uid()))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "order_status_history",
+      "policyname": "staff_select_order_status_history",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "(EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.id = auth.uid()) AND (p.is_active = true) AND (p.role = ANY (ARRAY['cashier'::user_role, 'manager'::user_role])))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "orders",
+      "policyname": "customers_select_own_orders",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "(customer_id = auth.uid())",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "orders",
+      "policyname": "rider_select_assigned_orders",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "((EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.id = auth.uid()) AND (p.is_active = true) AND (p.role = 'rider'::user_role)))) AND (EXISTS ( SELECT 1\n   FROM delivery_assignments da\n  WHERE ((da.order_id = orders.id) AND (da.rider_id = auth.uid()) AND (da.status = ANY (ARRAY['offered'::delivery_assignment_status, 'accepted'::delivery_assignment_status, 'picked_up'::delivery_assignment_status, 'out_for_delivery'::delivery_assignment_status, 'delivered'::delivery_assignment_status]))))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "orders",
+      "policyname": "staff_select_orders",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "(EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.id = auth.uid()) AND (p.is_active = true) AND (p.role = ANY (ARRAY['cashier'::user_role, 'manager'::user_role])))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "profiles",
+      "policyname": "managers_view_profiles",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "(current_user_role() = 'manager'::user_role)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "profiles",
+      "policyname": "profiles_select_own",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "(( SELECT auth.uid() AS uid) = id)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "profiles",
+      "policyname": "profiles_update_own",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "UPDATE",
+      "qual": "(( SELECT auth.uid() AS uid) = id)",
+      "with_check": "(( SELECT auth.uid() AS uid) = id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "profiles",
+      "policyname": "profiles_view_own",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "(id = ( SELECT auth.uid() AS uid))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "riders",
+      "policyname": "riders_view_own_application",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "(((id = auth.uid()) AND (current_user_role() IS NOT NULL)) OR (current_user_role() = 'manager'::user_role))",
+      "with_check": null
+    },
+    {
+      "schemaname": "storage",
+      "tablename": "objects",
+      "policyname": "customer_read_own_payment_proof",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "((bucket_id = 'payment-proofs'::text) AND (split_part(name, '/'::text, 1) = (auth.uid())::text) AND (EXISTS ( SELECT 1\n   FROM orders o\n  WHERE (((o.id)::text = split_part(objects.name, '/'::text, 2)) AND (o.customer_id = auth.uid())))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "storage",
+      "tablename": "objects",
+      "policyname": "customer_upload_own_payment_proof",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "((bucket_id = 'payment-proofs'::text) AND (split_part(name, '/'::text, 1) = (auth.uid())::text) AND (EXISTS ( SELECT 1\n   FROM (orders o\n     JOIN profiles p ON ((p.id = o.customer_id)))\n  WHERE (((o.id)::text = split_part(objects.name, '/'::text, 2)) AND (o.customer_id = auth.uid()) AND (o.current_status = 'waiting_payment_verification'::order_status) AND (p.role = 'customer'::user_role) AND (p.is_active = true)))))"
+    },
+    {
+      "schemaname": "storage",
+      "tablename": "objects",
+      "policyname": "manager_read_rider_application_documents",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "((bucket_id = 'rider-documents'::text) AND (EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.id = auth.uid()) AND (p.is_active = true) AND (p.role = 'manager'::user_role)))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "storage",
+      "tablename": "objects",
+      "policyname": "rider_applicant_read_own_documents",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "((bucket_id = 'rider-documents'::text) AND (split_part(name, '/'::text, 1) = (auth.uid())::text) AND (EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.id = auth.uid()) AND (p.is_active = true) AND (p.role = ANY (ARRAY['customer'::user_role, 'rider'::user_role]))))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "storage",
+      "tablename": "objects",
+      "policyname": "rider_applicant_upload_own_documents",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "((bucket_id = 'rider-documents'::text) AND (split_part(name, '/'::text, 1) = (auth.uid())::text) AND (split_part(name, '/'::text, 2) = ANY (ARRAY['valid-id'::text, 'or-cr'::text, 'photo'::text])) AND (split_part(name, '/'::text, 3) <> ''::text) AND (split_part(name, '/'::text, 4) = ''::text) AND (EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.id = auth.uid()) AND (p.is_active = true) AND (p.role = 'customer'::user_role)))))"
+    },
+    {
+      "schemaname": "storage",
+      "tablename": "objects",
+      "policyname": "rider_read_own_delivery_proof",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "((bucket_id = 'delivery-proofs'::text) AND (split_part(name, '/'::text, 1) = (auth.uid())::text) AND (EXISTS ( SELECT 1\n   FROM delivery_assignments da\n  WHERE (((da.id)::text = split_part(objects.name, '/'::text, 2)) AND (da.rider_id = auth.uid())))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "storage",
+      "tablename": "objects",
+      "policyname": "rider_upload_own_delivery_proof",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "((bucket_id = 'delivery-proofs'::text) AND (split_part(name, '/'::text, 1) = (auth.uid())::text) AND (EXISTS ( SELECT 1\n   FROM ((delivery_assignments da\n     JOIN profiles p ON ((p.id = da.rider_id)))\n     JOIN riders r ON ((r.id = da.rider_id)))\n  WHERE (((da.id)::text = split_part(objects.name, '/'::text, 2)) AND (da.rider_id = auth.uid()) AND (da.status = 'out_for_delivery'::delivery_assignment_status) AND (p.role = 'rider'::user_role) AND (p.is_active = true) AND (r.approval_status = 'approved'::rider_approval_status)))))"
+    },
+    {
+      "schemaname": "storage",
+      "tablename": "objects",
+      "policyname": "staff_read_payment_proofs",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "((bucket_id = 'payment-proofs'::text) AND (EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.id = auth.uid()) AND (p.is_active = true) AND (p.role = ANY (ARRAY['cashier'::user_role, 'manager'::user_role]))))))",
+      "with_check": null
+    }
+  ],
+  "migration_provenance": [
+    {
+      "table": "profiles",
+      "source_create_migration": "20260825183637_remote_schema (baseline snapshot)",
+      "note": "baseline remote schema; original pre-snapshot creation date unknown"
+    },
+    {
+      "table": "riders",
+      "source_create_migration": "20260825183637_remote_schema (baseline snapshot)",
+      "note": "baseline remote schema; original pre-snapshot creation date unknown"
+    },
+    {
+      "table": "menu_categories",
+      "source_create_migration": "20260825183637_remote_schema (baseline snapshot)",
+      "note": "baseline remote schema; original pre-snapshot creation date unknown"
+    },
+    {
+      "table": "menu_items",
+      "source_create_migration": "20260825183637_remote_schema (baseline snapshot)",
+      "note": "baseline remote schema; original pre-snapshot creation date unknown"
+    },
+    {
+      "table": "inventory_items",
+      "source_create_migration": "20260825183637_remote_schema (baseline snapshot)",
+      "note": "baseline remote schema; original pre-snapshot creation date unknown"
+    },
+    {
+      "table": "menu_ingredients",
+      "source_create_migration": "20260825183637_remote_schema (baseline snapshot)",
+      "note": "baseline remote schema; original pre-snapshot creation date unknown"
+    },
+    {
+      "table": "suppliers",
+      "source_create_migration": "20260825183637_remote_schema (baseline snapshot)",
+      "note": "baseline remote schema; original pre-snapshot creation date unknown"
+    },
+    {
+      "table": "supplier_items",
+      "source_create_migration": "20260825183637_remote_schema (baseline snapshot)",
+      "note": "baseline remote schema; original pre-snapshot creation date unknown"
+    },
+    {
+      "table": "purchase_orders",
+      "source_create_migration": "20260825183637_remote_schema (baseline snapshot)",
+      "note": "baseline remote schema; original pre-snapshot creation date unknown"
+    },
+    {
+      "table": "purchase_order_items",
+      "source_create_migration": "20260825183637_remote_schema (baseline snapshot)",
+      "note": "baseline remote schema; original pre-snapshot creation date unknown"
+    },
+    {
+      "table": "orders",
+      "source_create_migration": "20260825183637_remote_schema (baseline snapshot)",
+      "note": "baseline remote schema; original pre-snapshot creation date unknown"
+    },
+    {
+      "table": "order_items",
+      "source_create_migration": "20260825183637_remote_schema (baseline snapshot)",
+      "note": "baseline remote schema; original pre-snapshot creation date unknown"
+    },
+    {
+      "table": "payments",
+      "source_create_migration": "20260825183637_remote_schema (baseline snapshot)",
+      "note": "baseline remote schema; original pre-snapshot creation date unknown"
+    },
+    {
+      "table": "order_status_history",
+      "source_create_migration": "20260825183637_remote_schema (baseline snapshot)",
+      "note": "baseline remote schema; original pre-snapshot creation date unknown"
+    },
+    {
+      "table": "inventory_transactions",
+      "source_create_migration": "20260825183637_remote_schema (baseline snapshot)",
+      "note": "baseline remote schema; original pre-snapshot creation date unknown"
+    },
+    {
+      "table": "delivery_assignments",
+      "source_create_migration": "20260825183637_remote_schema (baseline snapshot)",
+      "note": "baseline remote schema; original pre-snapshot creation date unknown"
+    },
+    {
+      "table": "kds_terminals",
+      "source_create_migration": "20260825183637_remote_schema (baseline snapshot)",
+      "note": "baseline remote schema; original pre-snapshot creation date unknown"
+    },
+    {
+      "table": "cashier_shifts",
+      "source_create_migration": "20260825183637_remote_schema (baseline snapshot)",
+      "note": "baseline remote schema; original pre-snapshot creation date unknown"
+    },
+    {
+      "table": "cashier_transactions",
+      "source_create_migration": "20260825183637_remote_schema (baseline snapshot)",
+      "note": "baseline remote schema; original pre-snapshot creation date unknown"
+    },
+    {
+      "table": "menu_modifier_groups",
+      "source_create_migration": "20260825183637_remote_schema (baseline snapshot)",
+      "note": "baseline remote schema; original pre-snapshot creation date unknown"
+    },
+    {
+      "table": "menu_modifier_options",
+      "source_create_migration": "20260825183637_remote_schema (baseline snapshot)",
+      "note": "baseline remote schema; original pre-snapshot creation date unknown"
+    },
+    {
+      "table": "menu_item_modifier_groups",
+      "source_create_migration": "20260825183637_remote_schema (baseline snapshot)",
+      "note": "baseline remote schema; original pre-snapshot creation date unknown"
+    },
+    {
+      "table": "receiving_reports",
+      "source_create_migration": "20260923010000_receiving_batch_foundation",
+      "note": "CREATE TABLE located in named migration"
+    },
+    {
+      "table": "receiving_report_items",
+      "source_create_migration": "20260923010000_receiving_batch_foundation",
+      "note": "CREATE TABLE located in named migration"
+    },
+    {
+      "table": "inventory_batches",
+      "source_create_migration": "20260923010000_receiving_batch_foundation",
+      "note": "CREATE TABLE located in named migration"
+    },
+    {
+      "table": "inventory_opening_balances",
+      "source_create_migration": "20261004160118_inventory_master_data_foundation",
+      "note": "CREATE TABLE located in named migration"
+    },
+    {
+      "table": "inventory_transaction_batch_allocations",
+      "source_create_migration": "20261004170254_fifo_batch_aware_sales_consumption",
+      "note": "CREATE TABLE located in named migration"
+    },
+    {
+      "table": "paid_order_cancellations",
+      "source_create_migration": "20261007080031_phase_7a_paid_order_cancellation",
+      "note": "CREATE TABLE located in named migration"
+    },
+    {
+      "table": "production_replenishment_requests",
+      "source_create_migration": "20261007082647_phase_7b_production_replenishment_requests",
+      "note": "CREATE TABLE located in named migration"
+    },
+    {
+      "table": "production_replenishment_status_events",
+      "source_create_migration": "20261007082647_phase_7b_production_replenishment_requests",
+      "note": "CREATE TABLE located in named migration"
+    },
+    {
+      "table": "inventory_request_documents",
+      "source_create_migration": "20261012181744_manager_inventory_request_documents",
+      "note": "CREATE TABLE located in named migration"
+    },
+    {
+      "table": "inventory_request_lines",
+      "source_create_migration": "20261012181744_manager_inventory_request_documents",
+      "note": "CREATE TABLE located in named migration"
+    },
+    {
+      "table": "inventory_request_revisions",
+      "source_create_migration": "20261012181744_manager_inventory_request_documents",
+      "note": "CREATE TABLE located in named migration"
+    },
+    {
+      "table": "inventory_request_events",
+      "source_create_migration": "20261012181744_manager_inventory_request_documents",
+      "note": "CREATE TABLE located in named migration"
+    }
+  ],
+  "applied_migrations": [
+    {
+      "version": "20260825183637",
+      "name": "remote_schema"
+    },
+    {
+      "version": "20260829133414",
+      "name": "get_cashier_sale"
+    },
+    {
+      "version": "20260830000000",
+      "name": "get_open_cashier_shift"
+    },
+    {
+      "version": "20260830010000",
+      "name": "get_current_shift_walk_in_sales"
+    },
+    {
+      "version": "20260830020000",
+      "name": "submit_customer_payment"
+    },
+    {
+      "version": "20260830030000",
+      "name": "cashier_online_payment_hydration"
+    },
+    {
+      "version": "20260831000000",
+      "name": "secure_customer_gcash_verification"
+    },
+    {
+      "version": "20260831010000",
+      "name": "customer_gcash_rejection_resubmission"
+    },
+    {
+      "version": "20260831151352",
+      "name": "manager_inventory_mvp"
+    },
+    {
+      "version": "20260901065622",
+      "name": "harden_cancel_order_financial_guard"
+    },
+    {
+      "version": "20260903160000",
+      "name": "secure_cashier_order_operational_edit"
+    },
+    {
+      "version": "20260903170000",
+      "name": "remove_legacy_confirm_order"
+    },
+    {
+      "version": "20260904000000",
+      "name": "inventory_phase_2a_recipe_deduction"
+    },
+    {
+      "version": "20260904010000",
+      "name": "inventory_phase_2b_effective_availability"
+    },
+    {
+      "version": "20260904020000",
+      "name": "inventory_transaction_order_reference"
+    },
+    {
+      "version": "20260907120000",
+      "name": "manager_phase_1_read_apis"
+    },
+    {
+      "version": "20260908120000",
+      "name": "manager_phase_2_core_integrations"
+    },
+    {
+      "version": "20260909120000",
+      "name": "release_ready_order_offer_rider"
+    },
+    {
+      "version": "20260913000000",
+      "name": "harden_internal_function_acl"
+    },
+    {
+      "version": "20260913230000",
+      "name": "harden_function_execute_acl"
+    },
+    {
+      "version": "20260914000000",
+      "name": "harden_numeric_inputs"
+    },
+    {
+      "version": "20260914010000",
+      "name": "harden_transition_replay_safety"
+    },
+    {
+      "version": "20260914020000",
+      "name": "harden_customer_order_idempotency"
+    },
+    {
+      "version": "20260914030000",
+      "name": "harden_inventory_mutation_idempotency"
+    },
+    {
+      "version": "20260914040000",
+      "name": "harden_inactive_account_rls"
+    },
+    {
+      "version": "20260915000000",
+      "name": "deduct_inventory_for_all_confirmed_orders"
+    },
+    {
+      "version": "20260915010000",
+      "name": "cleanup_redundant_auth_profile_trigger"
+    },
+    {
+      "version": "20260918000000",
+      "name": "rider_application_foundation"
+    },
+    {
+      "version": "20260918010000",
+      "name": "manager_rider_approval_workflow"
+    },
+    {
+      "version": "20260918020000",
+      "name": "fix_suspended_rider_access"
+    },
+    {
+      "version": "20260918030000",
+      "name": "fix_manager_rider_approval_ambiguity"
+    },
+    {
+      "version": "20260920000000",
+      "name": "harden_protected_table_acl"
+    },
+    {
+      "version": "20260921000000",
+      "name": "record_inventory_waste"
+    },
+    {
+      "version": "20260921010000",
+      "name": "harmonize_delivered_order_reporting"
+    },
+    {
+      "version": "20260923000000",
+      "name": "inventory_po_semantics_foundation"
+    },
+    {
+      "version": "20260923010000",
+      "name": "receiving_batch_foundation"
+    },
+    {
+      "version": "20261003105241",
+      "name": "source_neutral_receiving_posting"
+    },
+    {
+      "version": "20261003164153",
+      "name": "manager_receiving_draft_authoring"
+    },
+    {
+      "version": "20261004160118",
+      "name": "inventory_master_data_foundation"
+    },
+    {
+      "version": "20261004163102",
+      "name": "controlled_foodhouse_inventory_menu_configuration"
+    },
+    {
+      "version": "20261004170254",
+      "name": "fifo_batch_aware_sales_consumption"
+    },
+    {
+      "version": "20261005013037",
+      "name": "batch_aware_waste_adjustment"
+    },
+    {
+      "version": "20261005082921",
+      "name": "manager_inventory_workspace_reads"
+    },
+    {
+      "version": "20261007080031",
+      "name": "phase_7a_paid_order_cancellation"
+    },
+    {
+      "version": "20261007082647",
+      "name": "phase_7b_production_replenishment_requests"
+    },
+    {
+      "version": "20261012181744",
+      "name": "manager_inventory_request_documents"
+    }
+  ],
+  "edge_functions": []
+}

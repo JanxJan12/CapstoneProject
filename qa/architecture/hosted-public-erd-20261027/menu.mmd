@@ -1,0 +1,49 @@
+%% RRJ'S FOOD-HOUSE - Menu
+%% Source: hosted PostgreSQL pg_catalog, captured 2026-10-26T20:58:45.038881+00:00
+%% Field types are Mermaid-safe tokens. Exact PostgreSQL types, nullability and defaults are in hosted-public-catalog.json and column-dictionary.html.
+erDiagram
+  menu_categories {
+    uuid id PK
+    character_varying_100 name UK
+    text description
+    boolean is_active
+    timestamp_with_time_zone created_at
+    timestamp_with_time_zone updated_at
+  }
+  menu_items {
+    uuid id PK,FK
+    uuid category_id FK
+    character_varying_150 name
+    text description
+    numeric_10_2 price
+    text image_path
+    boolean is_available
+    boolean is_active
+    timestamp_with_time_zone created_at
+    timestamp_with_time_zone updated_at
+    character_varying_20 code UK
+    text aliases
+    numeric_10_2 without_rice_price
+    uuid without_rice_inventory_item_id FK
+  }
+  menu_ingredients {
+    uuid id PK
+    uuid menu_item_id FK,UK
+    uuid inventory_item_id FK,UK
+    numeric_12_3 quantity_required
+    timestamp_with_time_zone created_at
+    timestamp_with_time_zone fixed_meal_added_at
+  }
+  drink_choices {
+    uuid menu_item_id PK,FK
+    text choice_kind
+    character_varying_50 option_id PK
+    character_varying_100 option_name
+    numeric_12_2 price_adjustment
+    integer sort_order
+    boolean is_active
+  }
+  menu_items ||--o{ drink_choices : "R010 drink_choices_menu_item_id_fkey"
+  menu_items ||--o{ menu_ingredients : "R039 menu_ingredients_menu_item_id_fkey"
+  menu_categories ||--o{ menu_items : "R040 menu_items_category_id_fkey"
+  menu_ingredients o|--o{ menu_items : "R041 menu_items_without_rice_inventory_fkey"

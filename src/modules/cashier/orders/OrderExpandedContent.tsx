@@ -1,5 +1,7 @@
 import { formatDateTime, formatMoney } from "../constants";
 import type { Order } from "../types";
+import { useCashierStore } from "../hooks/CashierStore";
+import { getRecordedDeliveryFee, presentTimelineActor } from "./orderOperations";
 
 export function OrderExpandedContent({
   order,
@@ -8,12 +10,14 @@ export function OrderExpandedContent({
   order: Order;
   onView: (order: Order) => void;
 }) {
+  const { state } = useCashierStore();
   const fulfillment =
     order.type === "Dine-in"
-      ? `Table ${order.tableNumber ?? "not assigned"}`
+      ? "Dine-in"
       : order.type === "Delivery"
         ? (order.deliveryAddress ?? "Address not provided")
         : "Take-out counter";
+  const deliveryFee = getRecordedDeliveryFee(order);
 
   return (
     <td colSpan={10} className="px-6 py-4">
@@ -28,9 +32,6 @@ export function OrderExpandedContent({
             <Label>Fulfillment detail</Label>
           </div>
           <p className="mt-2 text-xs font-bold">{fulfillment}</p>
-          <p className="mt-1 text-[11px] text-muted-foreground">
-            {order.orderInstructions || "No special instructions"}
-          </p>
         </div>
         <div>
           <Label>Item breakdown</Label>
@@ -44,6 +45,11 @@ export function OrderExpandedContent({
               </li>
             ))}
           </ul>
+          <div className="mt-3 space-y-1 border-t border-border pt-2 text-[11px]">
+            <div className="flex justify-between gap-3"><span>Item subtotal</span><strong>{formatMoney(order.subtotal)}</strong></div>
+            {deliveryFee !== undefined ? <div className="flex justify-between gap-3"><span>Delivery fee</span><strong>{formatMoney(deliveryFee)}</strong></div> : null}
+            <div className="flex justify-between gap-3 font-black"><span>Order total</span><span>{formatMoney(order.total)}</span></div>
+          </div>
         </div>
         <div>
           <Label>Latest timeline</Label>
@@ -54,8 +60,8 @@ export function OrderExpandedContent({
               .map((event) => (
                 <div key={event.id}>
                   <p className="text-[11px] font-bold">{event.label}</p>
-                  <p className="text-[10px] text-muted-foreground">
-                    {formatDateTime(event.timestamp)} · {event.actor}
+                  <p className="text-[10px] text-muted-foreground" title={presentTimelineActor(event.actor, state.cashier.id, state.cashier.name).technicalId}>
+                    {formatDateTime(event.timestamp)} · {presentTimelineActor(event.actor, state.cashier.id, state.cashier.name).label}
                   </p>
                 </div>
               ))}

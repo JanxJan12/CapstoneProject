@@ -35,9 +35,11 @@ export function CustomerLoginPage(_props: Props) {
   const navigate = useNavigate();
 
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
+    setErrorMessage(null);
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -53,8 +55,9 @@ export function CustomerLoginPage(_props: Props) {
       console.error("Google sign-in failed:", error.message);
 
       setGoogleLoading(false);
-
-      window.alert(`Google sign-in failed: ${error.message}`);
+      setErrorMessage(
+        "Google sign-in could not be started. Please check your connection and try again.",
+      );
     }
   };
 
@@ -116,6 +119,19 @@ export function CustomerLoginPage(_props: Props) {
 
           {/* Actions */}
           <div className="bg-card/90 p-6 sm:p-8">
+            {errorMessage && (
+              <div
+                role="alert"
+                className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3.5"
+              >
+                <p className="text-sm font-bold text-red-800">Sign-in failed</p>
+
+                <p className="mt-1 text-sm leading-relaxed text-red-700">
+                  {errorMessage}
+                </p>
+              </div>
+            )}
+
             <button
               type="button"
               onClick={handleGoogleLogin}

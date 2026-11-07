@@ -1,0 +1,359 @@
+/* Hallmark · shape: ordering app · genre: editorial · theme: RRJ night dining · redesign: customer palette and photo treatment · paper: warm · accent: umbrella red · display: Manrope · body: Manrope · nav: Home Menu Cart Profile · signature: real venue beside menu · states: existing · v2.0.0 */
+/* Hallmark · critique: the pale hero lost the venue's atmosphere and the restaurant photo read too dark; a charcoal panel and tighter, lifted crop give the real place a clearer introduction. */
+/* Hallmark · waive 79 · the live Home view shows only the catalog items currently returned · the remaining viewport belongs to the ordering app, so extra content would invent menu material. */
+/* Hallmark · answered F19: 400 descriptions, 500 navigation, 600 actions and 700 dish/section headings follow the supplied menu hierarchy. */
+/* Hallmark · finish-review: in-thread · Home and Menu recaptured at desktop and phone · 0 open Floor or Reflex findings. */
+@import url("./tokens.css");
+@import url("./base.css");
+:root {
+  --customer-font: var(--font-body);
+  --customer-paper: var(--color-paper);
+  --customer-surface: var(--color-paper-2);
+  --customer-ink: var(--color-ink);
+  --customer-muted: var(--color-muted);
+  --customer-rule: var(--color-rule);
+  --customer-field-rule: var(--color-field-rule);
+  --customer-brand: var(--color-accent);
+  --customer-brand-hover: var(--color-accent-hover);
+  --customer-sand: var(--color-paper-3);
+  --customer-deep: var(--color-ink-2);
+  --customer-available: var(--color-success);
+  --customer-focus: var(--color-focus);
+}
+.customer-app {
+  background: var(--customer-paper);
+  color: var(--customer-ink);
+  font-family: var(--customer-font);
+  --customer-font-display: var(--font-display);
+  --background: var(--customer-paper);
+  --foreground: var(--customer-ink);
+  --card: var(--customer-surface);
+  --card-foreground: var(--customer-ink);
+  --popover: var(--customer-surface);
+  --popover-foreground: var(--customer-ink);
+  --primary: var(--customer-brand);
+  --primary-foreground: var(--color-accent-ink);
+  --muted: var(--customer-sand);
+  --muted-foreground: var(--customer-muted);
+  --border: var(--customer-rule);
+}
+
+.customer-app .customer-display-font { font-family: var(--font-display); }
+.customer-app .font-bold, .customer-app .font-extrabold, .customer-app .font-black { font-weight: var(--weight-emphasis); }
+.customer-app .font-semibold { font-weight: var(--weight-ui); }
+
+.customer-app :is(h1, h2, h3) {
+  font-family: var(--customer-font) !important;
+  font-weight: var(--weight-heading);
+  letter-spacing: 0;
+  overflow-wrap: break-word;
+  min-width: 0;
+  text-wrap: balance;
+}
+
+.customer-app :is(button, a, input, textarea, select):focus-visible {
+  outline: 3px solid var(--customer-focus);
+  outline-offset: 2px;
+}
+.customer-app .customer-home-actions button:focus-visible {
+  outline: 3px solid var(--color-hero-ink) !important;
+  outline-offset: 3px;
+}
+.customer-app :is(button, a):active { filter: brightness(0.94); }
+.customer-app .uppercase { text-transform: none; letter-spacing: normal; }
+
+.customer-app .customer-nav { background: var(--customer-surface); border-color: var(--customer-rule); box-shadow: none; }
+.customer-app .customer-nav .customer-desktop-nav button { font-family: var(--customer-font); }
+.customer-app .customer-storefront, .customer-app .customer-detail-scroll { background: var(--customer-paper); }
+
+.customer-app .customer-menu-toolbar {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
+  position: static;
+}
+.customer-app .customer-menu-toolbar input { border-color: var(--customer-field-rule); background: var(--customer-surface); box-shadow: none; }
+.customer-app .customer-menu-toolbar [aria-pressed="true"] { background: var(--customer-ink); border-color: var(--customer-ink); color: var(--customer-surface); }
+
+.customer-app .customer-food-list { gap: 0 28px; }
+.customer-app .customer-food-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  min-width: 0;
+  min-height: 112px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--customer-rule);
+}
+.customer-app .customer-food-row-clickable { cursor: pointer; }
+.customer-app .customer-food-row-image {
+  flex: 0 0 92px;
+  width: 92px;
+  height: 88px;
+  overflow: hidden;
+  border-radius: 6px;
+  background: var(--customer-sand);
+}
+.customer-app .customer-food-row-image img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.customer-app .customer-food-row-copy { flex: 1 1 auto; min-width: 0; }
+.customer-app .customer-food-row-copy h3 { margin: 0 0 4px; font-size: 16px; line-height: 1.3; }
+.customer-app .customer-food-row-copy h3 button { text-align: left; font-weight: var(--weight-emphasis); }
+.customer-app .customer-food-row-copy h3 button:hover { color: var(--customer-brand-hover); }
+.customer-app .customer-food-row-copy p { margin: 0 0 8px; color: var(--customer-muted); font-size: 14px; line-height: 1.45; }
+.customer-app .customer-food-available { color: var(--customer-available); font-size: 13px; font-weight: 600; }
+.customer-app .customer-food-unavailable { color: var(--customer-muted); font-size: 13px; font-weight: 600; }
+.customer-app .customer-food-row-side { display: flex; flex: 0 0 auto; flex-direction: column; align-items: flex-end; justify-content: space-between; align-self: stretch; gap: 8px; text-align: right; }
+.customer-app .customer-food-row-side strong { color: var(--customer-ink); font-size: 16px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.customer-app .customer-food-row-side button { min-height: 44px; border: 1px solid var(--customer-rule); border-radius: var(--radius-control); background: var(--customer-surface); color: var(--customer-ink); font-size: var(--text-sm); font-weight: var(--weight-emphasis); padding: 0 12px; }
+.customer-app .customer-food-row-side button:hover { border-color: var(--customer-brand); color: var(--customer-brand-hover); }
+.customer-app .customer-food-row-side button:disabled { color: var(--customer-muted); text-decoration: none; cursor: not-allowed; }
+
+.customer-app .customer-detail-layout { background: transparent; border: 0; border-radius: 0; box-shadow: none; padding: 0; }
+.customer-app .customer-cart-item > div:first-child { flex: 1 1 200px; min-width: 0; }
+.customer-app .customer-cart-line-total { flex: 0 0 auto; }
+
+.customer-app .customer-checkout-progress { border-bottom: 1px solid var(--customer-rule); }
+.customer-app .customer-checkout-progress > div { border-bottom: 2px solid transparent; border-radius: 0; box-shadow: none; justify-content: flex-start; }
+.customer-app .customer-checkout-progress > [aria-current="step"] { border-bottom-color: var(--customer-brand); }
+.customer-app .customer-checkout-summary { background: var(--customer-sand); border-color: var(--customer-sand); color: var(--customer-ink); box-shadow: none; }
+
+.customer-app .customer-tracking-order { box-shadow: none; }
+.customer-app .customer-tracking-lead { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.6fr); gap: 24px; background: var(--customer-surface); }
+.customer-app .customer-tracking-lead h2 { margin-bottom: 0; }
+.customer-app .customer-tracking-facts { display: grid; align-content: start; gap: 16px; margin: 0; padding-left: 24px; border-left: 1px solid var(--customer-rule); }
+.customer-app .customer-tracking-facts dt { color: var(--customer-muted); font-size: 13px; }
+.customer-app .customer-tracking-facts dd { margin: 4px 0 0; font-size: 16px; font-weight: 700; }
+
+/* One ordering surface: the restaurant image introduces the kitchen, then the menu takes over. */
+.customer-app .customer-home-banner {
+  grid-template-columns: minmax(0, 0.6fr) minmax(0, 1.1fr);
+  height: 232px;
+  border: 1px solid var(--customer-deep);
+  border-radius: var(--radius-card);
+  background: var(--customer-deep);
+  box-shadow: none;
+}
+.customer-app .customer-home-photo { position: relative; grid-column: 2; grid-row: 1; min-height: 0; }
+.customer-app .customer-home-photo > :is(img, div) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 78%; filter: brightness(1.14) contrast(1.04) saturate(0.94); }
+.customer-app .customer-home-intro { grid-column: 1; grid-row: 1; }
+.customer-app .customer-home-banner h1 { max-width: 18ch; color: var(--color-hero-ink); font-size: clamp(1.65rem, 3vw, 2.5rem); line-height: 1.12; }
+.customer-app .customer-home-actions button { border-radius: var(--radius-control); font-size: var(--text-sm); font-weight: var(--weight-emphasis); }
+.customer-app .customer-home-actions button:first-child { background: var(--customer-brand); color: var(--color-accent-ink); }
+.customer-app .customer-home-actions button:last-child { background: transparent; border: 0; color: var(--color-hero-ink); }
+.customer-app .customer-home-actions button:last-child:hover { color: var(--color-hero-muted); }
+.customer-app .customer-home-categories { border-bottom: 1px solid var(--customer-rule); }
+.customer-app .customer-home-categories button {
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding-inline: 12px;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-ui);
+}
+.customer-app .customer-home-categories button:hover { border-bottom-color: var(--customer-brand); color: var(--customer-brand-hover); }
+.customer-app .customer-storefront h1 { font-size: var(--text-page); font-weight: var(--weight-heading); }
+.customer-app .customer-storefront h2 { font-weight: var(--weight-heading); }
+.customer-app .customer-storefront :is(p, dd, dt, label) { line-height: 1.5; }
+.customer-app .customer-storefront .text-xs { font-size: var(--text-xs); }
+.customer-app .customer-storefront .text-sm { font-size: var(--text-sm); }
+.customer-app .customer-storefront .shadow-sm { box-shadow: none; }
+.customer-app .customer-storefront .rounded-2xl { border-radius: var(--radius-card); }
+.customer-app .customer-storefront .rounded-xl { border-radius: var(--radius-control); }
+.customer-app .customer-menu-screen .customer-food-list { margin-top: 12px; }
+.customer-app .customer-menu-toolbar > div:last-child { border-color: var(--customer-rule); }
+.customer-app .customer-menu-toolbar [aria-pressed="false"] { background: transparent; border-color: var(--customer-rule); }
+.customer-app .customer-menu-toolbar [aria-pressed="true"] { background: var(--customer-deep); border-color: var(--customer-deep); color: var(--customer-surface); }
+.customer-app .customer-cart-items,
+.customer-app .customer-cart-summary,
+.customer-app .customer-checkout-screen section.bg-card,
+.customer-app .customer-history-screen article,
+.customer-app .customer-profile-screen aside,
+.customer-app .customer-profile-screen section.bg-card {
+  border-color: var(--customer-rule);
+  border-radius: var(--radius-card);
+  background: var(--customer-surface);
+  box-shadow: none;
+}
+.customer-app .customer-cart-summary .rounded-xl.bg-muted\/70,
+.customer-app .customer-checkout-summary .rounded-xl.bg-muted\/70 { border-radius: 0; background: transparent; padding-inline: 0; border-top: 1px solid var(--customer-rule); }
+.customer-app .customer-cart-line-total p:last-child { font-variant-numeric: tabular-nums; }
+.customer-app .customer-checkout-progress { background: transparent; }
+.customer-app .customer-checkout-progress > div { min-height: 48px; font-size: var(--text-sm); }
+.customer-app .customer-checkout-progress > div span:first-child { background: transparent; color: inherit; font-size: var(--text-sm); }
+.customer-app .customer-checkout-screen section.bg-card > span:first-child,
+.customer-app .customer-checkout-screen section.bg-card > div:first-child > span:first-child,
+.customer-app .customer-profile-screen section.bg-card > div:first-child > span:first-child { display: none; }
+.customer-app .customer-checkout-summary { background: var(--customer-surface); border-color: var(--customer-rule); }
+.customer-app .customer-tracking-screen [role="status"].bg-card { border: 0; border-bottom: 1px solid var(--customer-rule); border-radius: 0; background: transparent; padding-inline: 0; }
+.customer-app .customer-tracking-order { border-color: var(--customer-rule); border-radius: var(--radius-card); }
+.customer-app .customer-tracking-lead { background: var(--color-ink-2); color: var(--color-paper-2); }
+.customer-app .customer-tracking-lead :is(h2, p, dt, dd) { color: inherit; }
+.customer-app .customer-tracking-lead p:first-child,
+.customer-app .customer-tracking-lead dt { color: var(--customer-sand); }
+.customer-app .customer-tracking-facts { border-color: color-mix(in srgb, var(--customer-surface) 25%, transparent); }
+.customer-app .customer-history-screen article { border: 0; border-bottom: 1px solid var(--customer-rule); border-radius: 0; background: transparent; }
+.customer-app .customer-profile-screen aside > div:first-child { background: transparent; }
+.customer-app .customer-profile-screen aside dl > div + div { border-top: 1px solid var(--customer-rule); padding-top: 16px; }
+.customer-app .customer-storefront input,
+.customer-app .customer-storefront textarea { border-color: var(--customer-field-rule); background: var(--customer-surface); }
+.customer-app .customer-storefront :is(button, input, textarea, select):disabled { cursor: not-allowed; }
+.customer-app .customer-storefront button { transition: background-color var(--dur-micro) ease, color var(--dur-micro) ease, border-color var(--dur-micro) ease; }
+.customer-app .customer-storefront { scrollbar-color: var(--customer-muted) var(--customer-paper); }
+
+/* The first screen opens on the order task; account and receipt screens remain quiet. */
+.customer-app .customer-home-categories { margin-bottom: 24px; }
+.customer-app .customer-menu-toolbar { margin-bottom: 16px; }
+.customer-app .customer-menu-toolbar input { border-radius: var(--radius-control); }
+.customer-app .customer-detail-page { max-width: 1100px; }
+.customer-app .customer-detail-product { max-width: 680px; }
+.customer-app .customer-detail-media .customer-menu-visual { height: min(45vw, 420px); min-height: 280px; }
+.customer-app .customer-detail-choices { border-color: var(--customer-rule); }
+.customer-app .customer-detail-choice { background: var(--customer-surface); border-color: var(--customer-rule); }
+.customer-app .customer-detail-choice:has(input:checked) { border-color: var(--customer-brand); background: var(--customer-sand); }
+.customer-app .customer-detail-choice:focus-within { outline: 3px solid var(--customer-focus); outline-offset: 2px; }
+.customer-app .customer-detail-order-bar { border-color: var(--customer-rule); }
+.customer-app .customer-cart-items,
+.customer-app .customer-cart-summary { border: 0; border-radius: 0; background: transparent; padding: 0; }
+.customer-app .customer-cart-list { border-bottom: 1px solid var(--customer-rule); }
+.customer-app .customer-cart-item { border-color: var(--customer-rule); }
+.customer-app .customer-cart-heading > span { border: 0; background: transparent; padding: 0; }
+.customer-app .customer-checkout-receipt { align-self: start; }
+.customer-app .customer-checkout-payment-amount { border-color: var(--customer-rule); background: var(--customer-sand); color: var(--customer-ink); }
+.customer-app .customer-tracking-sync { border: 0; border-bottom: 1px solid var(--customer-rule); border-radius: 0; background: transparent; padding-inline: 0; }
+.customer-app .customer-tracking-record { background: var(--customer-surface); border-color: var(--customer-rule); }
+.customer-app .customer-tracking-timeline,
+.customer-app .customer-tracking-items { border: 0; border-top: 1px solid var(--customer-rule); border-radius: 0; background: transparent; padding-inline: 0; }
+.customer-app .customer-history-order { border-bottom: 1px solid var(--customer-rule); }
+.customer-app .customer-history-order-head { padding-inline: 0; }
+.customer-app .customer-history-order-body { padding-inline: 0; }
+.customer-app .customer-profile-account { border-radius: 0; border-inline: 0; background: transparent; }
+.customer-app .customer-profile-contact { max-width: 640px; }
+
+/* Featured dishes keep the real catalog imagery and the order action together. */
+.customer-app .customer-featured-list { gap: 16px; }
+.customer-app .customer-featured-dish {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--customer-rule);
+  border-radius: var(--radius-card);
+  background: var(--customer-surface);
+}
+.customer-app .customer-featured-dish .customer-food-row-image {
+  flex: none;
+  width: 100%;
+  height: 176px;
+  border-radius: 0;
+}
+.customer-app .customer-featured-dish .customer-food-row-copy { flex: 1; padding: 16px 16px 0; }
+.customer-app .customer-featured-dish .customer-food-row-copy p { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.customer-app .customer-featured-dish .customer-food-row-side { flex-direction: row; align-items: center; align-self: stretch; padding: 8px 16px 16px; }
+.customer-app .customer-featured-dish .customer-food-row-side button { background: var(--customer-brand); border-color: var(--customer-brand); color: var(--color-accent-ink); }
+.customer-app .customer-featured-dish .customer-food-row-side button:hover { background: var(--customer-brand-hover); color: var(--color-accent-ink); }
+
+.customer-app .customer-menu-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; align-items: start; gap: 32px; }
+.customer-app .customer-menu-content { min-width: 0; }
+.customer-app .customer-menu-content .customer-food-list { grid-template-columns: minmax(0, 1fr); }
+.customer-app .customer-menu-cart { position: sticky; top: 20px; display: flex; flex-direction: column; min-height: min(620px, calc(100vh - 180px)); max-height: calc(100vh - 160px); border: 1px solid var(--customer-rule); border-radius: var(--radius-card); background: var(--customer-surface); }
+.customer-app .customer-menu-cart-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 20px; border-bottom: 1px solid var(--customer-rule); }
+.customer-app .customer-menu-cart-heading h2 { margin: 0; font-size: 22px; }
+.customer-app .customer-menu-cart-heading span { color: var(--customer-muted); font-size: var(--text-sm); }
+.customer-app .customer-menu-cart-empty { display: flex; flex: 1; flex-direction: column; align-items: center; justify-content: center; padding: 32px 20px; text-align: center; }
+.customer-app .customer-menu-cart-empty svg { width: 34px; height: 34px; color: var(--customer-muted); }
+.customer-app .customer-menu-cart-empty p { margin: 12px 0 4px; font-weight: 700; }
+.customer-app .customer-menu-cart-empty span { color: var(--customer-muted); font-size: var(--text-sm); }
+.customer-app .customer-menu-cart-lines { flex: 1; min-height: 0; overflow-y: auto; padding: 4px 20px; }
+.customer-app .customer-menu-cart-line { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; gap: 8px; align-items: start; padding: 16px 0; border-bottom: 1px solid var(--customer-rule); font-size: var(--text-sm); }
+.customer-app .customer-menu-cart-line:last-child { border-bottom: 0; }
+.customer-app .customer-menu-cart-qty { color: var(--customer-brand-hover); font-weight: 700; }
+.customer-app .customer-menu-cart-line strong { display: block; line-height: 1.4; }
+.customer-app .customer-menu-cart-line small { display: block; margin-top: 4px; color: var(--customer-muted); font-size: var(--text-xs); }
+.customer-app .customer-menu-cart-footer { padding: 16px 20px 20px; border-top: 1px solid var(--customer-rule); }
+.customer-app .customer-menu-cart-subtotal { display: flex; justify-content: space-between; gap: 12px; font-size: var(--text-sm); }
+.customer-app .customer-menu-cart-footer > p { margin: 8px 0 16px; color: var(--customer-muted); font-size: var(--text-xs); }
+.customer-app .customer-menu-cart-footer .customer-menu-cart-error { color: var(--color-error); }
+.customer-app .customer-menu-cart-checkout { width: 100%; min-height: 48px; border-radius: var(--radius-control); background: var(--customer-brand); color: var(--color-accent-ink); font-weight: 700; }
+.customer-app .customer-menu-cart-checkout:hover { background: var(--customer-brand-hover); }
+.customer-app .customer-menu-cart-checkout:disabled { background: var(--customer-sand); color: var(--customer-muted); }
+.customer-app .customer-menu-cart-edit { display: block; min-height: 44px; margin: 4px auto 0; padding: 0 12px; color: var(--customer-ink); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.customer-app .customer-history-groups { display: grid; gap: 28px; }
+.customer-app .customer-history-groups h2 { margin: 0 0 8px; font-size: 20px; }
+.customer-app .customer-profile-orders:hover { color: var(--customer-brand-hover); }
+
+@media (max-width: 1099px) {
+  .customer-app .customer-menu-layout { grid-template-columns: minmax(0, 1fr); }
+  .customer-app .customer-menu-cart { display: none; }
+  .customer-app .customer-menu-content .customer-food-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 767px) {
+  .customer-app .customer-home-banner { grid-template-columns: minmax(0, 1fr); grid-template-rows: 130px auto; height: auto; margin-inline: 0; }
+  .customer-app .customer-home-photo { grid-column: 1; grid-row: 1; min-height: 0; }
+  .customer-app .customer-home-intro { grid-column: 1; grid-row: 2; }
+  .customer-app .customer-home-intro { padding: 12px; }
+  .customer-app .customer-home-banner h1 { max-width: 18ch; font-size: 1.45rem; }
+  .customer-app .customer-home-actions { flex-wrap: wrap; gap: 0 8px; margin-top: 8px; }
+  .customer-app .customer-home-actions button { min-height: 44px; padding-inline: 12px; }
+  .customer-app .customer-home-categories { margin-right: -16px; }
+  .customer-app .customer-header-cart { display: none; }
+  .customer-app .customer-mobile-bottom-nav {
+    position: fixed;
+    z-index: 40;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    padding-bottom: env(safe-area-inset-bottom);
+    background: var(--customer-surface);
+    border-top: 1px solid var(--customer-rule);
+  }
+  .customer-app .customer-mobile-bottom-nav button {
+    position: relative;
+    display: flex;
+    min-width: 0;
+    min-height: 64px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    border-top: 2px solid transparent;
+    color: var(--customer-muted);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .customer-app .customer-mobile-bottom-nav button svg { width: 18px; height: 18px; }
+  .customer-app .customer-mobile-bottom-nav .customer-bottom-cart-count { position: absolute; top: 4px; right: calc(50% - 24px); display: grid; min-width: 18px; height: 18px; place-items: center; border-radius: 999px; background: var(--customer-brand); color: var(--customer-surface); font-size: 11px; line-height: 1; }
+  .customer-app .customer-mobile-bottom-nav button[aria-current="page"] { border-top-color: var(--customer-brand); color: var(--customer-brand-hover); }
+  .customer-app .customer-mobile-bottom-nav button:hover { background: var(--customer-sand); }
+  .customer-app .customer-storefront, .customer-app .customer-detail-scroll { padding-bottom: calc(5rem + env(safe-area-inset-bottom)); }
+  .customer-app .customer-cart-action-bar { margin-bottom: calc(4rem + env(safe-area-inset-bottom)); box-shadow: none; }
+  .customer-app .customer-added-toast { top: 4.75rem; bottom: auto; }
+  .customer-app .customer-food-row { min-height: 100px; padding: 16px 0; gap: 12px; }
+  .customer-app .customer-food-row-image { flex-basis: 72px; width: 72px; height: 72px; }
+  .customer-app .customer-featured-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .customer-app .customer-featured-dish .customer-food-row-image { width: 100%; height: 118px; }
+  .customer-app .customer-featured-dish .customer-food-row-copy { padding: 12px 12px 0; }
+  .customer-app .customer-featured-dish .customer-food-row-copy h3 { font-size: 16px; }
+  .customer-app .customer-featured-dish .customer-food-row-copy p { display: none; }
+  .customer-app .customer-featured-dish .customer-food-row-side { flex-wrap: wrap; padding: 8px 12px 12px; }
+  .customer-app .customer-featured-dish .customer-food-row-side button { width: 100%; }
+  .customer-app .customer-menu-content .customer-food-list { grid-template-columns: minmax(0, 1fr); }
+  .customer-app .customer-detail-media .customer-menu-visual { height: 220px; min-height: 0; }
+  .customer-app .customer-tracking-lead { grid-template-columns: 1fr; gap: 16px; }
+  .customer-app .customer-tracking-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 16px 0 0; border-left: 0; border-top: 1px solid var(--customer-rule); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .customer-app *, .customer-app *::before, .customer-app *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

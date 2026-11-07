@@ -56,7 +56,7 @@ const NOTICE_CONFIG: Record<NonNullable<AuthNotice>, NoticeConfig> = {
     messageColor: "text-red-700",
     title: "Access Denied",
     message:
-      "This account cannot access the staff workspace. Sign in with a Google account assigned as Cashier or Manager.",
+      "This account cannot access the staff workspace. Sign in with an assigned staff account.",
   },
 
   maintenance: {
@@ -184,7 +184,7 @@ export function StaffLoginPage(_props: Props) {
               </div>
 
               <div className="mt-0.5 text-sm font-semibold uppercase tracking-widest text-muted-foreground">
-                Cashier & Manager
+                Staff
               </div>
             </div>
           </div>
@@ -196,7 +196,7 @@ export function StaffLoginPage(_props: Props) {
             </h1>
 
             <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-              Sign in using the Google account assigned to a manager or cashier.
+              Sign in using your assigned staff Google account.
             </p>
           </div>
 

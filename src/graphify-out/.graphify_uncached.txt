@@ -1,0 +1,4 @@
+C:\Users\Janmari\Downloads\Capstone Project\src\modules\cashier\components\README.md
+C:\Users\Janmari\Downloads\Capstone Project\src\modules\cashier\pos\README.md
+C:\Users\Janmari\Downloads\Capstone Project\src\assets\brand\rrj-logo.jpg
+C:\Users\Janmari\Downloads\Capstone Project\src\assets\brand\rrj-restaurant.jpg

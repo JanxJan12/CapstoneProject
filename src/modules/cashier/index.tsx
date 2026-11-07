@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router";
 import {
   Banknote,
   ClipboardList,
   CreditCard,
-  History,
   LayoutDashboard,
   ShoppingCart,
 } from "lucide-react";
@@ -13,7 +13,7 @@ import { AppShell } from "../../components/layout/AppShell";
 import type { NavGroup } from "../../types";
 
 import { useAuth } from "@/app/providers/AuthProvider";
-import { useCashierStore } from "./hooks/CashierStore";
+import { CashierProvider, useCashierStore } from "./hooks/CashierStore";
 
 import type {
   CashierNavigationIntent,
@@ -23,13 +23,18 @@ import type {
 import { CashierDashboardPage } from "./dashboard/CashierDashboardPage";
 import { PendingPaymentsPage } from "./payments/PendingPaymentsPage";
 import { WalkInPOSPage } from "./pos/WalkInPOSPage";
-import { CashierOrderListPage } from "./orders/CashierOrderListPage";
-import { TransactionHistoryPage } from "./transactions/TransactionHistoryPage";
+import { OrdersReceiptsPage } from "./OrdersReceiptsPage";
+import { cashierPathFor, resolveCashierPath } from "./ordersReceiptsNavigation";
+import { cashierHydrationView } from "./cashierHydrationView";
 import { ShiftSettlementPage } from "./shifts/ShiftSettlementPage";
 import { ConfirmationDialog, ErrorBanner } from "./components";
 
 export function CashierApp() {
-  return <CashierModule />;
+  return (
+    <CashierProvider>
+      <CashierModule />
+    </CashierProvider>
+  );
 }
 
 function CashierModule() {
@@ -46,11 +51,18 @@ function CashierModule() {
 
   const { session, logout } = useAuth();
 
-  const [page, setPage] =
-    useState<CashierPageId>("dashboard");
+  const location = useLocation();
+  const routerNavigate = useNavigate();
+  const destination = resolveCashierPath(location.pathname);
+  const page = destination.page;
+  const hydrationView = cashierHydrationView(isHydrating, databaseError);
+  const intent = (location.state as { cashierIntent?: CashierNavigationIntent } | null)?.cashierIntent;
 
-  const [intent, setIntent] =
-    useState<CashierNavigationIntent>();
+  useEffect(() => {
+    if (location.pathname !== destination.canonicalPath) {
+      routerNavigate(destination.canonicalPath, { replace: true, state: location.state });
+    }
+  }, [destination.canonicalPath, location.pathname, location.state, routerNavigate]);
 
   const [posDirty, setPosDirty] =
     useState(false);
@@ -59,6 +71,7 @@ function CashierModule() {
     useState<{
       page: CashierPageId;
       intent?: CashierNavigationIntent;
+      notificationId?: string;
     }>();
 
   /*
@@ -103,16 +116,10 @@ function CashierModule() {
             shortcut: "F2",
           },
           {
-            id: "order-list",
-            label: "Order List",
+            id: "orders-receipts",
+            label: "Orders & Receipts",
             icon: ClipboardList,
             shortcut: "F4",
-          },
-          {
-            id: "transactions",
-            label: "Transaction History",
-            icon: History,
-            shortcut: "F6",
           },
           {
             id: "shift-settlement",
@@ -131,10 +138,11 @@ function CashierModule() {
       nextPage: CashierPageId,
       nextIntent?: CashierNavigationIntent,
     ) => {
-      setPage(nextPage);
-      setIntent(nextIntent);
+      routerNavigate(cashierPathFor(nextPage, nextIntent?.workspaceView), {
+        state: { cashierIntent: nextIntent },
+      });
     },
-    [],
+    [routerNavigate],
   );
 
   const navigate = useCallback(
@@ -179,18 +187,23 @@ function CashierModule() {
         return;
       }
 
-      markNotificationRead(
-        notificationId,
-      );
+      if (page === "walkin-pos" && notification.page !== "walkin-pos" && posDirty) {
+        setPendingNavigation({
+          page: notification.page,
+          intent: notification.intent,
+          notificationId,
+        });
+        return;
+      }
 
-      navigate(
-        notification.page,
-        notification.intent,
-      );
+      markNotificationRead(notificationId);
+      commitNavigation(notification.page, notification.intent);
     },
     [
       markNotificationRead,
-      navigate,
+      commitNavigation,
+      page,
+      posDirty,
       state.notifications,
     ],
   );
@@ -230,7 +243,7 @@ function CashierModule() {
         F1: "dashboard",
         F2: "walkin-pos",
         F3: "pending-payments",
-        F4: "order-list",
+        F4: "orders-receipts",
         F6: "transactions",
         F7: "shift-settlement",
       };
@@ -257,12 +270,8 @@ function CashierModule() {
       ) {
         event.preventDefault();
 
-        navigate(
-          "order-list",
-          {
-            focusSearch: true,
-          },
-        );
+        navigate(page === "orders-receipts" && destination.view === "receipts"
+          ? "transactions" : "order-list", { focusSearch: true });
       }
     };
 
@@ -276,7 +285,7 @@ function CashierModule() {
         "keydown",
         shortcuts,
       );
-  }, [navigate, page]);
+  }, [navigate, page, destination.view]);
 
   const content =
     page === "dashboard" ? (
@@ -291,17 +300,16 @@ function CashierModule() {
         onDirtyChange={
           setPosDirty
         }
+        onOpenShift={() => navigate("shift-settlement")}
       />
-    ) : page === "order-list" ? (
-      <CashierOrderListPage
+    ) : page === "orders-receipts" ? (
+      <OrdersReceiptsPage
+        view={destination.view}
         intent={intent}
-      />
-    ) : page === "transactions" ? (
-      <TransactionHistoryPage
-        intent={intent}
+        onNavigate={navigate}
       />
     ) : (
-      <ShiftSettlementPage />
+      <ShiftSettlementPage onReviewPayments={() => navigate("pending-payments")} />
     );
 
   return (
@@ -345,7 +353,14 @@ function CashierModule() {
             </div>
           ) : null}
           <div className="min-h-0 flex-1">
-            {isHydrating && page !== "dashboard" ? (
+            {hydrationView === "failed" ? (
+              <div
+                role="status"
+                className="rounded-xl border border-border bg-card px-4 py-10 text-center text-xs font-semibold text-muted-foreground"
+              >
+                Cashier operations are unavailable. Use Retry above to load them.
+              </div>
+            ) : hydrationView === "loading" && page !== "dashboard" ? (
               <div
                 role="status"
                 className="rounded-xl border border-border bg-card px-4 py-10 text-center text-xs font-semibold text-muted-foreground"
@@ -379,6 +394,9 @@ function CashierModule() {
           if (
             pendingNavigation
           ) {
+            if (pendingNavigation.notificationId) {
+              markNotificationRead(pendingNavigation.notificationId);
+            }
             commitNavigation(
               pendingNavigation.page,
               pendingNavigation.intent,

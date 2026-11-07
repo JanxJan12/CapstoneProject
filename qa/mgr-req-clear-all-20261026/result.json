@@ -1,0 +1,175 @@
+{
+  "result": "PASS",
+  "checks": [
+    "1280: prepare",
+    "1280: new sheet empty",
+    "1280: suggest action",
+    "1280: refresh action after suggestion",
+    "1280: priority edit",
+    "1280: manual add search",
+    "1280: manual add",
+    "1280: eight headers",
+    "1280: open confirmation",
+    "1280: cancel",
+    "1280: cancellation retains seven rows",
+    "1280: confirm open",
+    "1280: confirm clear",
+    "1280: empty row and stable header proportions",
+    "1280: request details preserved",
+    "1280: no quantities or clear controls",
+    "1280: rerender through priority",
+    "1280: rerender stays empty",
+    "1280: autocomplete search",
+    "1280: autocomplete does not repopulate",
+    "1280: date edit",
+    "1280: date edit stays empty",
+    "1280: no duplicate header refresh",
+    "1280: suggest updates changed date",
+    "1280: clear refreshed rows",
+    "1280: confirm refreshed clear",
+    "1280: manual add after clear",
+    "1280: select individual suggested item",
+    "1280: individual row has Remove",
+    "1280: independent Clear request",
+    "1280: confirm Clear request",
+    "1280: Clear request leaves hidden suggestions hidden",
+    "1280: explicit suggest after clear",
+    "1280: stock suggestions restored",
+    "390: prepare",
+    "390: new sheet empty",
+    "390: suggest action",
+    "390: refresh action after suggestion",
+    "390: priority edit",
+    "390: manual add search",
+    "390: manual add",
+    "390: eight headers",
+    "390: open confirmation",
+    "390: cancel",
+    "390: cancellation retains seven rows",
+    "390: confirm open",
+    "390: confirm clear",
+    "390: empty row and stable header proportions",
+    "390: request details preserved",
+    "390: no quantities or clear controls",
+    "390: rerender through priority",
+    "390: rerender stays empty",
+    "390: autocomplete search",
+    "390: autocomplete does not repopulate",
+    "390: date edit",
+    "390: date edit stays empty",
+    "390: no duplicate header refresh",
+    "390: suggest updates changed date",
+    "390: clear refreshed rows",
+    "390: confirm refreshed clear",
+    "390: manual add after clear",
+    "390: select individual suggested item",
+    "390: individual row has Remove",
+    "390: independent Clear request",
+    "390: confirm Clear request",
+    "390: Clear request leaves hidden suggestions hidden",
+    "390: explicit suggest after clear",
+    "390: stock suggestions restored",
+    "no browser exceptions",
+    "no external requests or writes"
+  ],
+  "measurements": [
+    {
+      "width": 1280,
+      "before": {
+        "headers": [
+          189,
+          63,
+          72,
+          90,
+          81,
+          81,
+          108,
+          216
+        ],
+        "rows": 7,
+        "empty": false,
+        "overflow": 0
+      },
+      "empty": {
+        "headers": [
+          186,
+          62,
+          71,
+          89,
+          80,
+          80,
+          107,
+          213
+        ],
+        "rows": 1,
+        "empty": true,
+        "overflow": 0
+      },
+      "restored": {
+        "headers": [
+          189,
+          63,
+          72,
+          90,
+          81,
+          81,
+          108,
+          216
+        ],
+        "rows": 6,
+        "empty": false,
+        "overflow": 0
+      }
+    },
+    {
+      "width": 390,
+      "before": {
+        "headers": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "rows": 7,
+        "empty": false,
+        "overflow": 0
+      },
+      "empty": {
+        "headers": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "rows": 1,
+        "empty": true,
+        "overflow": 0
+      },
+      "restored": {
+        "headers": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "rows": 6,
+        "empty": false,
+        "overflow": 0
+      }
+    }
+  ],
+  "browserExceptions": [],
+  "networkWrites": 0
+}

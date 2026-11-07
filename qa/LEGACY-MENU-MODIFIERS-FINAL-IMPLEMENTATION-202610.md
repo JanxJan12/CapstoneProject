@@ -1,0 +1,103 @@
+# Final legacy menu modifier retirement — local implementation, 21 October 2026
+
+## Hosted Migration B deployed — final database retirement (22 October 2026)
+
+**COMPLETE for the authorized legacy Menu Modifiers database retirement.** The exact approved `supabase/migrations/20261021190100_retire_legacy_menu_modifier_tables.sql` matched SHA-256 `3AA7B0B12C662D7F02FA5E70C4D2B7ABB5C0AFC0C0425E4087427007B9C0701D` immediately before hosted execution. Only this named migration was applied to `zhzluhqvysvsadwuugpa`; Supabase recorded actual hosted version **`20261021194914 / retire_legacy_menu_modifier_tables`**. Migration A remains `20261021154712 / drink_choices_transition`. The local B filename prefix is not its hosted version. No unrelated SQL was replayed or history repaired.
+
+Read-only hosted verification found all three target tables and `get_customer_menu_modifiers()` absent, with zero remaining public function-source references. All seven approved D1/D2 drink choices, names, and +₱0/+₱15 adjustments remain and the public replacement RPC returns seven. Customer/Cashier writers and Manager drink RPCs retain expected signatures, ownership, and ACLs; the replacement table retains RLS and no direct anon/authenticated table access. Fixed Meal Options read RPC executes (zero configured rows), and KDS v2 remains deployed with its snapshot-based contract. The receipt RPC retains its authenticated-only grant and reads saved order-item labels and prices without old-catalog joins.
+
+Pre/post read-only full-row aggregate fingerprints were unchanged for 48 orders, 53 order lines, 30 payments, and 28 Cashier transactions; the three nonempty historical choice snapshots remain. All 28 receipt transactions still join to an order, payment, and item. No hosted sale, payment, stock, shift, or historical row was intentionally mutated by this verification. Authenticated hosted receipt execution, hosted writer execution, and terminal-authenticated post-drop KDS were **NOT TESTED**; the actual receipt RPC did pass under an authenticated Cashier on synthetic data after exact B in the representative disposable fixture. That fixture was **not a faithful hosted-schema replay**. Drink browser interaction remains untested because the real drinks were out of stock.
+
+The prior approval-gate and NO-GO sections below are historical and superseded by this deployed result. No further hosted migration is needed for the authorized three-table retirement.
+
+## Migration B — Receipt Gate Closure and Final Decision (22 October 2026)
+
+**GO for separate hosted approval; Migration B remains NOT DEPLOYED.** The prior NO-GO section below is historical and superseded. Hosted project `zhzluhqvysvsadwuugpa` records Migration A as `20261021154712`; the B candidate `supabase/migrations/20261021190100_retire_legacy_menu_modifier_tables.sql` remained unchanged and was verified at SHA-256 `3AA7B0B12C662D7F02FA5E70C4D2B7ABB5C0AFC0C0425E4087427007B9C0701D` just before isolated execution.
+
+Only the named disposable PostgreSQL container was started after Docker Desktop recovered. A fresh `retirement_b_receipt_20261022` database reconstructed the relevant pre-drop target tables and old RPC from the existing retirement setup, then installed the actual hosted `get_cashier_sale(uuid)` definition (confirmed unchanged read-only) with the hosted owner and ACL. An authenticated active synthetic Cashier created a ₱120 sale using the real sale RPC; a stored `No Onion` legacy snapshot was added to that synthetic order line. The receipt RPC passed before B. The exact B SQL then dropped its three named tables and the old read RPC in the disposable DB. The receipt RPC passed again after B with the identical `RCP-000003` number, snapshot label, ₱120 unit/line prices, ₱120 order total, and ₱120 payment amount. Anon execution remained denied, authenticated execution allowed, seven drink choices remained, and the old tables/RPC were absent. Executed assertions are in `verify_migration_b_receipt_before_local.sql` and `verify_migration_b_receipt_after_local.sql`.
+
+This is a **representative targeted reconstruction**, not a faithful hosted-schema replay. Previously passed post-drop Customer/Cashier, KDS, FIFO, and authorization suites were not repeated. Real drink browser interaction remained untested because both drinks were out of stock; no hosted sale or stock adjustment was made. No unresolved live legacy-table dependency was found. Separate explicit approval for **Migration B only** is now the next gate; no hosted table drop was performed in this turn.
+
+## Migration B — Final Hosted Dependency and Post-Drop Readiness (22 October 2026)
+
+**NO-GO pending one executable receipt rehearsal.** Migration A is hosted as `20261021154712` in project `zhzluhqvysvsadwuugpa`; Migration B is **NOT DEPLOYED**. The unchanged B file `supabase/migrations/20261021190100_retire_legacy_menu_modifier_tables.sql` hashes to `3AA7B0B12C662D7F02FA5E70C4D2B7ABB5C0AFC0C0425E4087427007B9C0701D`. The hosted three target tables remain.
+
+Actual hosted catalog checks found only the old `get_customer_menu_modifiers()` RPC referring to the legacy tables, and B explicitly drops it. No external FK, public view/materialized view, target trigger, or target policy dependency was found. `get_cashier_sale(uuid)` and KDS v2 read stored `order_items` snapshots without legacy joins; hosted counts confirm 3 named historical choice lines and 28 receipt transactions linked to orders, payments, and lines. Those are structural and read-only preservation evidence, not an executed post-drop receipt preview.
+
+Two active frontend loaders retained a `PGRST202` compatibility fallback to the old RPC. Those branches are now removed; both use the deployed `get_drink_choices()` RPC and fail closed on error. Active `src` has no remaining legacy table/RPC reference. TypeScript, the two drink-cart scripts, and production build pass after this scoped change.
+
+In a fresh disposable DB cloned from the earlier targeted post-transition fixture, the hosted-style legacy table definitions, RLS/grants/FKs, seven synthetic source choices, and old read RPC were recreated. The **exact** B SQL executed successfully and removed only the old read RPC and three target tables. Seven new choices and unrelated order/catalog/RPC structures remained. Customer/Cashier, KDS, and FIFO SQL suites passed after the drop, including synthetic snapshot and authorization checks; all business test transactions rolled back. This reconstructed fixture is **not a faithful hosted-schema replay**. It lacked the hosted `get_cashier_sale` routine, and Docker Desktop's engine became unavailable before that definition and a synthetic receipt could be exercised. This is the sole current NO-GO blocker. Restore the disposable engine, install the captured hosted receipt routine, run one authenticated synthetic post-drop receipt assertion, then reassess and request separate destructive approval for B if it passes. No hosted data or Migration B was changed.
+
+## Hosted transition deployed — current checkpoint
+
+**Migration A PASS; final table retirement PARTIALLY COMPLETE.** The user authorized only the drink transition. SHA-256 `407FFA6B22CE8D7C7757B15EC3B56B81EC0B710B343D6A91CCBA6FCB17CCD0D6` was reconfirmed before application. The hosted catalog precheck matched seven choices and found no unexpected D1/D2 links. Only the named transition SQL was applied to `zhzluhqvysvsadwuugpa`; Supabase recorded **hosted version `20261021154712`**, name `drink_choices_transition`, rather than local prefix `20261021190000`. No other migration was replayed.
+
+Post-deployment read-only checks found exactly the seven reviewed active D1/D2 options and their +₱0/+₱15 adjustments in `drink_choices`; `get_drink_choices()` returns seven. Customer and Cashier writer signatures, result shapes, SECURITY DEFINER ownership, and authenticated/service-role grants are present, with anon denied; their sources now use `drink_choices` without legacy table references. The new public read RPC and authenticated Manager read/update RPCs have the intended grants. The new table has RLS and no direct anon/authenticated table access. Fixed Meal Options read RPC executes (zero configured rows at this checkpoint), its setter remains present, and KDS v2's signature/grants remain present. All three legacy tables and the old read RPC remain. No hosted order, payment, receipt, shift, stock, or financial record was deliberately changed; migration-time SQL only inserted catalog rows into the new table. Hosted writer execution, Manager JWT, terminal-authenticated KDS, and browser acceptance remain **NOT TESTED**.
+
+The older sections below are retained as historical checkpoints; their statements that Migration A is undeployed are superseded here. **Migration B was not authorized or executed.** Its destructive approval requires later browser acceptance and hosted dependency verification. Hosted migration-history version drift remains: do not run a blanket push or repair unrelated history as part of this release.
+
+## Current hosted release checkpoint — read-only preflight
+
+**PARTIALLY COMPLETE; awaiting the explicit approval required by the controlled release request for Migration A.** Project `zhzluhqvysvsadwuugpa` has KDS v2 (`20261021144029`) and Fixed Meal Options (`20261021144109`) recorded under hosted versions different from local filenames. Migration A and B are absent from hosted history; `drink_choices` and its RPCs are absent, and all three legacy modifier tables remain. No hosted SQL from this package has run.
+
+The canonical transition file `supabase/migrations/20261021190000_drink_choices_transition.sql` has SHA-256 `407FFA6B22CE8D7C7757B15EC3B56B81EC0B710B343D6A91CCBA6FCB17CCD0D6`. Read-only hosted catalog checks confirm exactly the seven reviewed active D1/D2 flavor and size choices and their +₱0/+₱15 adjustments, with no unexpected drink product association. Relevant hosted columns, constraints, writer signatures/ACLs, fixed-meal setter, and KDS v2 exist. SQL inspection shows the transition only seeds the new choice table at migration time; it does not rewrite existing orders, financial records, receipts, snapshots, or stock. The transaction has atomic failure rollback; any later functional reversal requires a separately reviewed corrective migration.
+
+The targeted disposable SQL, cart, TypeScript, quality, and build passes listed below remain the local evidence. Authenticated local-browser acceptance against the new hosted RPCs, hosted runtime authorization/pricing, a faithful hosted-schema replay, and post-drop receipt/history verification are **NOT TESTED**. Migration A's assigned hosted version must be captured after its exact-file application; do not infer it from `20261021190000` or run a blanket push. Migration B's SHA-256 is `3AA7B0B12C662D7F02FA5E70C4D2B7ABB5C0AFC0C0425E4087427007B9C0701D`, and it is neither approved nor executed. The next action requiring approval is **only** hosted Migration A; table retirement needs a separate later destructive approval.
+
+## Decision and exact scope
+
+The explicit product decision supersedes the prior keep-modifiers assessment: ordinary food no longer offers Extra Rice, Extra Sauce, preparation, spice, or cooking choices. Existing configured meals retain only With Rice / Without Rice. Drinks retain their required flavor/size choices through a focused product-choice table. `order_items.modifiers` remains an immutable-style JSONB snapshot field for old and new lines.
+
+The current local implementation is prepared and targeted tests pass. **Neither migration is deployed to hosted Supabase.** Hosted cleanup is not ready for approval until transition and browser acceptance. No hosted orders, payments, inventory, catalog records, or tables were changed.
+
+## Dependency checklist and implementation
+
+| Area | Local result |
+|---|---|
+| Customer product detail | Generic food controls removed by loading drink choices only for Beverages; ordinary food shows product, price, quantity, and Add to Cart. Configured fixed meals retain rice choices. The cart rejects stale food modifier IDs and refreshes drink labels/prices from the current choice read. |
+| Cashier POS | Food cards add directly; drink cards open `ChoiceDrawer` and require selection; fixed meals open the existing rice selector. Old auto-selection helper and generic modifier validator were removed. Cart, receipt preview, keyboard behavior, and payment layout remain. |
+| Manager | No active generic modifier administration existed at this checkpoint. A focused Drink Choices section now edits price adjustment and availability for the reviewed options; the backend enforces active Manager role and at least one active option per required kind. Existing meal, product, category, Inventory, and Receiving screens remain. |
+| Backend writers | `place_customer_order` and `create_walk_in_sale` validate submitted option IDs only against active `drink_choices` rows for that product, require one per configured kind, compute catalog prices, and persist canonical choice snapshots. The existing `modifier_ids` payload key is retained solely as a rollout-compatible wire key. |
+| Kitchen/history | KDS v2 and historical Customer/Cashier/receipt readers use stored order-line JSONB. The new drink and fixed-meal snapshots use the same field. No historical table or column is dropped. |
+| Independent rice | Hosted White Rice `R1` exists as a separate active ₱35 product. No new SKU or price was created. Chicken Biryani remains without configured rice choices. |
+
+The only temporary legacy application reference is a **drink-only read fallback** to `get_customer_menu_modifiers()` when `get_drink_choices()` returns `PGRST202` before deployment. It selects only `softdrink-flavor` and `drink-size`. Once the transition RPC exists, active reads use it; after the table-drop migration the fallback is unreachable in a healthy deployment. No generic food row is shown or submitted.
+
+## Reviewed catalog and migrations
+
+Read-only hosted inspection found Softdrinks D1: Coke/Sprite/Royal (+₱0), Regular (+₱0), Large (+₱15); Buko Juice D2: Regular (+₱0), Large (+₱15). Each flavor/size group has `min_selections=max_selections=1`. The migration copies these seven definitions from the hosted legacy catalog, with a seven-row guard; it does not insert guessed drink data.
+
+1. `supabase/migrations/20261021190000_drink_choices_transition.sql`: one table (`public.drink_choices`), an index, `get_drink_choices`, `get_manager_drink_choices`, `set_manager_drink_choice`, and replacement definitions for the two order writers and `set_manager_fixed_meal_option`. The writer bodies preserve pre-existing authorization, idempotency, discounts, payments, inventory, and order-line snapshot logic outside the narrowed choice block. Manager changes are serialized per product and cannot disable the last active choice of a kind.
+2. `supabase/migrations/20261021190100_retire_legacy_menu_modifier_tables.sql`: preflight checks for function-source references, drops the old read RPC, then the three tables in FK-safe order without `CASCADE` or changes to `order_items.modifiers`.
+
+Hosted read-only migration listing confirms KDS v2 `20261021144029` and Fixed Meal Options `20261021144109` were already applied. Their local filenames have different prefixes. Neither was replayed, and unrelated migration history was not repaired.
+
+## Verification matrix
+
+| Check | Result | Evidence/limit |
+|---|---|---|
+| Transition migration | PASS | Applied to `modifier_retirement_qa` with a seven-row synthetic hosted-catalog fixture. |
+| Retirement migration | PASS in targeted fixture | Applied without `CASCADE`; seven choices and read RPC remained; all three legacy tables absent and public routine source references count zero. No faithful hosted-schema replay. |
+| Old read RPC removal | PASS in targeted fixture | A second disposable database installed `20261020173810_restore_customer_menu_modifiers_rpc.sql` before transition; cleanup dropped it and the Customer suite passed afterward. |
+| Customer ordinary, required flavor/size, Buko size, missing/invalid/duplicate, food modifier rejection | PASS | `verify_drink_retirement_customer_local.sql` before and after drop. |
+| Customer authoritative price, With/Without Rice, unconfigured Biryani, mixed cart, independent rice, line snapshots, payment state | PASS | Same SQL suite; forged client unit price ignored. |
+| Cashier direct ordinary item, required drink, invalid food modifier, forged price, distinct lines, sale financial totals | PASS in SQL | Same SQL suite against `create_walk_in_sale`; no rendered receipt/browser test. |
+| Manager configuration and authorization | PASS in SQL | Price/availability update, last active size guard, Cashier denial, anon writer ACL. Hosted JWT/RLS acceptance not run. |
+| KDS choice labels and terminal exposure | PASS | `verify_drink_retirement_kds_local.sql` after drop. |
+| FIFO/stock semantics | PASS | `verify_drink_retirement_fifo_local.sql` after drop; original suite first failed on a missing hosted-only idempotency column in the targeted fixture, then the adapted transaction-local suite passed. |
+| Customer cart reconciliation | PASS | `node scripts/verify-customer-drink-cart.mjs` executes the current reconciliation function with ordinary, stale food choice, required drink, canonical refresh, and meal cases. |
+| Cashier POS cart | PASS | `node scripts/verify-drink-choice-cart.mjs` and existing `verify-fixed-meal-cart.mjs`: drink variants, same-choice merge, separate rice, rice-choice lines. |
+| TypeScript, quality, production build | PASS | `npm.cmd run typecheck`; `npm.cmd run verify:quality` (11 checks); `npm.cmd run build`. |
+| Browser Customer/Cashier/Manager/KDS new UI | NOT TESTED | New hosted RPC and Manager write RPC are undeployed; no live business transaction was created. Source/build is not rendered acceptance. |
+| Faithful hosted-schema replay and hosted post-drop receipt/history | NOT TESTED | Disposable schema came from the prior targeted local PostgreSQL fixture, not a hosted dump. |
+
+Initial fixture failures were corrected before final passes: duplicate synthetic profiles from the auth trigger, table-read permissions while checking rows under `authenticated`, the prior FIFO suite's absent hosted-only idempotency column, and an absent old read RPC in the first targeted fixture. A second fixture installed and dropped the exact old RPC. The final test scripts run with `ON_ERROR_STOP` and rollback synthetic transaction data. No failing final focused test remains. The broad repository `git diff --check` still reports whitespace in unrelated pre-existing Inventory/config/receiving changes; focused changed tracked paths pass.
+
+## Controlled release and recovery
+
+1. Keep the current local frontend with its narrow drink read fallback. Before backend action, recheck hosted seven-choice eligibility/prices, object dependencies, current RPC definitions, and hosted migration versions read-only. Do not issue a blanket migration push.
+2. Request approval for **only** `20261021190000_drink_choices_transition.sql`. Apply it under a reviewed hosted version without replaying KDS v2 or Fixed Meal Options. Verify objects and migration history read-only. If it fails, the transaction leaves legacy tables intact. If a later functional issue arises before cleanup, restore the two prior writer definitions from the deployed fixed-meal contract as a separately reviewed corrective migration; preserve the legacy catalog and new choice data.
+3. With transition deployed, perform read-only browser acceptance on local Customer ordinary food, both drinks, Cashier ordinary and drinks, Manager drink configuration display, fixed meal configured/unconfigured states, and KDS historical display. Do not place actual orders or mutate hosted business data for acceptance. A synthetic isolated API rehearsal may be refreshed if needed.
+4. Before any hosted drop, capture an exact backup of the three legacy table definitions and rows, rerun hosted read-only function/view/trigger/FK checks, and perform a faithful hosted-schema replay if available. Request a **separate destructive approval** for only `20261021190100_retire_legacy_menu_modifier_tables.sql`. On failure the SQL transaction rolls back. Recovery after a committed drop requires the captured exact schema/data and a separately reviewed restore; historical order snapshots must not be rewritten.
+
+**Next approval required:** transition migration only. Table retirement, hosted browser acceptance, and hosted data cleanup remain pending.

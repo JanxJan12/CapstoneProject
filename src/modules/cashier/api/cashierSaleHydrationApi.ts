@@ -1,7 +1,6 @@
 import { supabase } from "@/lib/supabase";
 
 import type {
-  DiscountType,
   Order,
   OrderItemModifier,
   OrderStatus,
@@ -22,7 +21,6 @@ interface DatabaseOrder {
   customer_contact_number: string | null;
   delivery_address: string | null;
   landmark: string | null;
-  table_number: string | null;
   current_status:
     | "waiting_payment_verification"
     | "confirmed"
@@ -37,12 +35,9 @@ interface DatabaseOrder {
     | "cancelled"
     | "rejected";
   subtotal: number | string;
-  discount_type: string | null;
-  discount_reference: string | null;
-  discount_amount: number | string;
+  delivery_fee?: number | string;
   tax_amount: number | string;
   grand_total: number | string;
-  notes: string | null;
   confirmed_at: string | null;
   created_at: string;
 }
@@ -77,7 +72,6 @@ interface DatabasePayment {
 
 interface DatabaseTransaction {
   id: string;
-  transaction_number: string;
   receipt_number: string;
   order_id: string;
   payment_id: string;
@@ -147,9 +141,7 @@ function mapPaymentStatus(
       return "Rejected";
 
     case "voided":
-      throw new Error(
-        "The completed sale returned a voided payment.",
-      );
+      return "Voided";
   }
 }
 
@@ -201,19 +193,6 @@ function mapOrderStatus(
   }
 }
 
-function mapDiscountType(
-  value: string | null,
-): DiscountType {
-  if (
-    value === "Senior Citizen" ||
-    value === "PWD"
-  ) {
-    return value;
-  }
-
-  return null;
-}
-
 function mapModifiers(
   value: unknown,
 ): OrderItemModifier[] | undefined {
@@ -247,6 +226,8 @@ function mapModifiers(
       continue;
     }
 
+    if (modifier.id === "fixed_meal:with_rice" ||
+      modifier.id === "fixed_meal:without_rice") continue;
     modifiers.push({
       id: modifier.id,
       name: modifier.name,
@@ -257,6 +238,15 @@ function mapModifiers(
   return modifiers.length
     ? modifiers
     : undefined;
+}
+
+function mapMealOption(value: unknown): "with_rice" | "without_rice" | undefined {
+  if (!Array.isArray(value)) return undefined;
+  if (value.some((entry) => entry && typeof entry === "object" &&
+    (entry as Record<string, unknown>).id === "fixed_meal:without_rice")) return "without_rice";
+  if (value.some((entry) => entry && typeof entry === "object" &&
+    (entry as Record<string, unknown>).id === "fixed_meal:with_rice")) return "with_rice";
+  return undefined;
 }
 
 function validateDatabaseCashierSale(
@@ -321,12 +311,6 @@ export function mapDatabaseCashierSale(
       sale.payment.status,
     );
 
-  const discountAmount =
-    toNumber(
-      sale.order.discount_amount,
-      "discount amount",
-    );
-
   const grandTotal =
     toNumber(
       sale.order.grand_total,
@@ -385,12 +369,6 @@ export function mapDatabaseCashierSale(
     type:
       orderType,
 
-    tableNumber:
-      orderType === "Delivery"
-        ? undefined
-        : sale.order.table_number?.trim() ||
-          undefined,
-
     items:
       sale.items.map((item) => ({
         id:
@@ -409,6 +387,9 @@ export function mapDatabaseCashierSale(
             "item unit price",
           ),
 
+        lineTotal:
+          toNumber(item.line_total, "item line total"),
+
         quantity:
           item.quantity,
 
@@ -420,6 +401,7 @@ export function mapDatabaseCashierSale(
           mapModifiers(
             item.modifiers,
           ),
+        mealOption: mapMealOption(item.modifiers),
       })),
 
     subtotal:
@@ -428,16 +410,9 @@ export function mapDatabaseCashierSale(
         "subtotal",
       ),
 
-    discountType:
-      mapDiscountType(
-        sale.order.discount_type,
-      ),
-
-    discountReference:
-      sale.order.discount_reference?.trim() ||
-      undefined,
-
-    discountAmount,
+    deliveryFee: sale.order.delivery_fee === undefined
+      ? undefined
+      : toNumber(sale.order.delivery_fee, "delivery fee"),
 
     taxAmount:
       toNumber(
@@ -447,10 +422,6 @@ export function mapDatabaseCashierSale(
 
     total:
       grandTotal,
-
-    orderInstructions:
-      sale.order.notes?.trim() ||
-      undefined,
 
     paymentId:
       sale.payment.id,
@@ -498,10 +469,11 @@ export function mapDatabaseCashierSale(
         timestamp:
           entry.created_at,
 
-        actor:
-          entry.changed_by
-            ? "Staff / Customer"
-            : "System",
+        actor: entry.changed_by
+          ? `Account ${entry.changed_by}`
+          : ["Kitchen started preparation", "Kitchen marked order ready"].includes(entry.notes?.trim() ?? "")
+            ? "Kitchen terminal"
+            : "System / terminal",
       })),
   };
 
@@ -522,6 +494,9 @@ export function mapDatabaseCashierSale(
       paymentMethod === "Cash"
         ? cashReceived ?? paymentAmount
         : paymentAmount,
+
+    cashReceived:
+      paymentMethod === "Cash" ? cashReceived : undefined,
 
     status:
       paymentStatus,
@@ -557,9 +532,6 @@ export function mapDatabaseCashierSale(
     id:
       sale.transaction.id,
 
-    transactionNumber:
-      sale.transaction.transaction_number,
-
     receiptNumber:
       sale.transaction.receipt_number,
 
@@ -572,7 +544,6 @@ export function mapDatabaseCashierSale(
     amount:
       grandTotal,
 
-    discountAmount,
 
     method:
       paymentMethod,
@@ -625,8 +596,9 @@ export async function fetchCashierSale(
     throw new Error(error.message);
   }
 
+  const [sale] = await attachRecordedDeliveryFees([data]);
   return mapDatabaseCashierSale(
-    data,
+    sale,
     cashierName,
   );
 }
@@ -648,10 +620,47 @@ export async function fetchCurrentShiftCashierSales(
     );
   }
 
-  return data.map((sale) =>
+  const withFees = await attachRecordedDeliveryFees(data);
+  return withFees.map((sale) =>
     mapDatabaseCashierSale(
       sale,
       cashierName,
     ),
   );
+}
+
+export async function findCurrentShiftWalkInSaleByRequestId(
+  requestId: string,
+  cashierName: string,
+): Promise<HydratedCashierSale | null> {
+  const { data, error } = await supabase.rpc("get_current_shift_cashier_sales");
+  if (error) throw new Error("Unable to check the current shift sales.");
+  if (!Array.isArray(data)) throw new Error("The current shift sales could not be read.");
+
+  const matching = data.find((entry: unknown) => {
+    if (!entry || typeof entry !== "object" || !("transaction" in entry)) return false;
+    const transaction = entry.transaction;
+    return Boolean(transaction && typeof transaction === "object" &&
+      "request_id" in transaction && transaction.request_id === requestId);
+  });
+  if (!matching) return null;
+  const [sale] = await attachRecordedDeliveryFees([matching]);
+  return mapDatabaseCashierSale(sale, cashierName);
+}
+
+async function attachRecordedDeliveryFees(sales: unknown[]): Promise<unknown[]> {
+  const ids = sales.map((sale) => validateDatabaseCashierSale(sale).order.id);
+  if (!ids.length) return sales;
+  const feeById = new Map<string, number | string>();
+  for (let start = 0; start < ids.length; start += 100) {
+    const { data, error } = await supabase.from("orders")
+      .select("id,delivery_fee").in("id", ids.slice(start, start + 100));
+    if (error) throw new Error("Unable to read recorded delivery fees.");
+    for (const row of data ?? []) feeById.set(row.id, row.delivery_fee);
+  }
+  return sales.map((entry) => {
+    const sale = validateDatabaseCashierSale(entry);
+    if (!feeById.has(sale.order.id)) throw new Error("A sale has no authorized order fee snapshot.");
+    return { ...sale, order: { ...sale.order, delivery_fee: feeById.get(sale.order.id) } };
+  });
 }

@@ -95,7 +95,7 @@ export const SearchBar = memo(function SearchBar({
         ease-[cubic-bezier(.22,1,.36,1)]
         motion-reduce:transition-none
         max-w-full
-        ${isExpanded ? "w-full sm:w-[430px]" : "w-full sm:w-[240px]"}
+        w-full sm:w-[430px]
       `}
       onFocusCapture={() => {
         setFocused(true);
@@ -176,7 +176,7 @@ export const SearchBar = memo(function SearchBar({
         className="
           h-10 w-full rounded-xl
           pl-9 pr-14
-          text-[11px] font-bold
+          text-sm font-semibold
           transition-[border-color,box-shadow,background-color]
           duration-150
         "

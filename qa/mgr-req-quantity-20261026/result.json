@@ -1,0 +1,35 @@
+{
+  "result": "PASS",
+  "checks": [
+    {
+      "width": 1280,
+      "pageOverflow": 0,
+      "tableOverflow": 0,
+      "dateRight": 1206.40625,
+      "sideRight": 1221
+    },
+    {
+      "width": 1502,
+      "pageOverflow": 0,
+      "tableOverflow": 0,
+      "dateRight": 1428.40625,
+      "sideRight": 1443
+    },
+    {
+      "width": 820,
+      "pageOverflow": 0,
+      "tableOverflow": 0,
+      "dateRight": 756,
+      "sideRight": 773
+    },
+    {
+      "width": 390,
+      "pageOverflow": 0,
+      "tableOverflow": 0,
+      "dateRight": 330,
+      "sideRight": 347
+    }
+  ],
+  "browserExceptions": 0,
+  "networkWrites": 0
+}

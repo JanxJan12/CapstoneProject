@@ -4,6 +4,7 @@ export type CashierPageId =
   | "walkin-pos"
   | "order-list"
   | "transactions"
+  | "orders-receipts"
   | "shift-settlement";
 
 export type OrderType = "Dine-in" | "Take-out" | "Delivery";
@@ -22,13 +23,14 @@ export type OrderStatus =
   | "Cancelled";
 export type PaymentMethod = "Cash" | "GCash";
 export type PaymentStatus =
+  | "Unknown"
   | "Unpaid"
   | "Pending"
   | "Verified"
-  | "Rejected";
+  | "Rejected"
+  | "Voided";
 export type TransactionStatus = "Completed" | "Refunded" | "Voided";
 export type ShiftStatus = "Open" | "Pending Review" | "Closed";
-export type DiscountType = "Senior Citizen" | "PWD" | null;
 export type RiderAvailability = "Available" | "Assigned" | "Offline";
 
 export interface CashierUser {
@@ -46,8 +48,12 @@ export interface MenuItem {
   category: string;
   description: string;
   price: number;
+  withoutRicePrice?: number;
+  withRiceAvailable?: boolean;
+  withoutRiceAvailable?: boolean;
   available: boolean;
   preparationMinutes?: number;
+  drinkChoiceGroups?: DrinkChoiceGroup[];
 }
 
 export interface OrderItemModifier {
@@ -56,11 +62,13 @@ export interface OrderItemModifier {
   price: number;
 }
 
-export interface MenuModifierGroup {
+export interface DrinkChoiceGroup {
   id: string;
   name: string;
   selection: "single" | "multiple";
   required: boolean;
+  minSelections: number;
+  maxSelections: number;
   options: OrderItemModifier[];
 }
 
@@ -70,8 +78,11 @@ export interface OrderItem {
   name: string;
   unitPrice: number;
   quantity: number;
+  /** Stored order_items.line_total when available; preserves the historical line amount. */
+  lineTotal?: number;
   note?: string;
   modifiers?: OrderItemModifier[];
+  mealOption?: "with_rice" | "without_rice";
 }
 
 export interface OrderTimelineEvent {
@@ -100,22 +111,33 @@ export interface Order {
   deliveryAddress?: string;
   landmark?: string;
   type: OrderType;
-  tableNumber?: string;
   items: OrderItem[];
   subtotal: number;
-  discountType: DiscountType;
-  discountReference?: string;
-  discountAmount: number;
+  /** Recorded orders.delivery_fee; absent for orders without a stored fee. */
+  deliveryFee?: number;
   taxAmount?: number;
   total: number;
-  orderInstructions?: string;
   paymentId?: string;
   transactionId?: string;
-  paymentMethod: PaymentMethod;
+  paymentMethod: PaymentMethod | "Unknown";
   paymentStatus: PaymentStatus;
+  /** An owned sale exists, but its financial records did not reconcile. */
+  paymentResolutionUncertain?: boolean;
   status: OrderStatus;
   assignedRider?: string;
   riderStatus?: string;
+  riderAssignmentKnown?: boolean;
+  riderAssignmentId?: string;
+  riderAssignmentStatus?:
+    | "offered"
+    | "accepted"
+    | "rejected"
+    | "picked_up"
+    | "out_for_delivery"
+    | "delivered"
+    | "cancelled";
+  riderAssignedAt?: string;
+  riderAssignmentUpdatedAt?: string;
   createdAt: string;
   updatedAt: string;
   cashierId?: string;
@@ -132,6 +154,8 @@ export interface Payment {
   method: PaymentMethod;
   amount: number;
   submittedAmount: number;
+  /** Actual cash_received, distinct from submittedAmount's legacy amount fallback. */
+  cashReceived?: number;
   status: PaymentStatus;
   referenceNumber?: string;
   proofLabel?: string;
@@ -152,12 +176,10 @@ export interface Payment {
 
 export interface Transaction {
   id: string;
-  transactionNumber?: string;
   receiptNumber?: string;
   orderId: string;
   customerName: string;
   amount: number;
-  discountAmount: number;
   method: PaymentMethod;
   status: TransactionStatus;
   cashierId: string;
@@ -180,10 +202,6 @@ export interface CashierShift {
   actualCash?: number;
   expectedCash?: number;
   variance?: number;
-  varianceReason?: string;
-  notes?: string;
-  managerApprovedBy?: string;
-  managerApprovedAt?: string;
   pendingPaymentCountAtClose?: number;
   status: ShiftStatus;
 }
@@ -244,11 +262,7 @@ export interface HeldOrder {
   contactNumber?: string;
   deliveryAddress?: string;
   type: OrderType;
-  tableNumber?: string;
   items: OrderItem[];
-  discountType: DiscountType;
-  discountReference?: string;
-  orderInstructions?: string;
   heldAt: string;
 }
 
@@ -272,16 +286,12 @@ export interface WalkInOrderInput {
   contactNumber?: string;
   deliveryAddress?: string;
   type: OrderType;
-  tableNumber?: string;
   items: Array<
     Pick<
       OrderItem,
-      "menuItemId" | "name" | "unitPrice" | "quantity" | "note" | "modifiers"
+      "menuItemId" | "name" | "unitPrice" | "quantity" | "note" | "modifiers" | "mealOption"
     >
   >;
-  discountType: DiscountType;
-  discountReference?: string;
-  orderInstructions?: string;
   paymentMethod: PaymentMethod;
   amountTendered?: number;
   gcashReference?: string;
@@ -290,12 +300,13 @@ export interface WalkInOrderInput {
 export interface OrderOperationalEditInput {
   customerName: string;
   contactNumber: string;
-  tableNumber?: string;
   deliveryAddress?: string;
-  orderInstructions?: string;
 }
 
 export interface CashierNavigationIntent {
+  workspaceView?: "orders" | "receipts";
+  orderId?: string;
+  transactionId?: string;
   statuses?: OrderStatus[];
   orderTypes?: OrderType[];
   transactionStatuses?: TransactionStatus[];
@@ -314,7 +325,6 @@ export interface ShiftTotals {
   refunds: number;
   cashRefunds: number;
   voids: number;
-  discounts: number;
   transactionCount: number;
   ordersProcessed: number;
   expectedCash: number;
@@ -322,8 +332,6 @@ export interface ShiftTotals {
 
 export interface ShiftClosureInput {
   actualCash: number;
-  varianceReason?: string;
-  notes?: string;
 }
 
 export type CashierQueueStage =
@@ -344,6 +352,7 @@ export type CashierQueuePriority = 1 | 2 | 3;
 
 export interface CashierActionQueueItem {
   orderId: string;
+  createdAt: string;
   customerName: string;
   orderType: OrderType;
   totalAmount: number;
@@ -352,6 +361,7 @@ export interface CashierActionQueueItem {
   nextAction: CashierQueueNextAction;
   waitingMinutes: number;
   isDelayed: boolean;
+  orderAgeReview: boolean;
   priority: CashierQueuePriority;
   orderStatus: OrderStatus;
   stageStartedAt: string;
@@ -372,11 +382,17 @@ export interface CashierAttentionSummary {
   pendingPayments: number;
   readyOrders: number;
   delayedOrders: number;
+  agingOrders: number;
+  kitchenQueued: number;
+  preparingOrders: number;
+  waitingForRider: number;
+  deliveryInProgress: number;
   actionRequired: number;
   allActive: number;
+  olderBacklog: number;
 }
 
 export type CashierQueueView =
-  "action_required" | "all_active" | "ready_for_handoff";
+  "action_required" | "current_orders" | "ready_for_handoff" | "older_backlog" | "all_active";
 
 export type CashierAttentionFilter = "payments" | "ready" | "delayed";

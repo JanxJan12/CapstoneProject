@@ -1,0 +1,87 @@
+{
+  "boundary": "http://127.0.0.1:64521",
+  "fixture": "54-entry targeted synthetic base plus local-only access migration",
+  "checks": [
+    "obsolete transition EXECUTE removed from anon and authenticated",
+    "legacy read remains callable only for authenticated profiles",
+    "legacy creation revoked; linked Receiving entry retained",
+    "three real local GoTrue role sessions",
+    "anonymous legacy read denied",
+    "anonymous transition denied",
+    "former Production profile cannot read legacy queue",
+    "former Production profile cannot execute transition",
+    "unauthorized Customer cannot read legacy history",
+    "unauthorized Customer cannot start legacy Receiving",
+    "Manager can read historical legacy request",
+    "Manager can create linked legacy Receiving draft",
+    "legacy draft saved without stock movement",
+    "Manager posted linked legacy Receiving",
+    "legacy accepted-only batch and ledger reconciliation",
+    "legacy status closed by shared post trigger",
+    "Manager can reopen historical legacy request and posted Receiving",
+    "Manager formal proposal remains available",
+    "Manager formal request issuance remains functional",
+    "Manager linked formal Receiving draft without stock movement",
+    "formal draft saved without stock movement",
+    "Manager formal Receiving post remains functional",
+    "formal accepted-only batch and ledger reconciliation",
+    "formal duplicate post rejected without stock mutation"
+  ],
+  "records": {
+    "legacy": {
+      "itemId": "0354be8f-f7a8-4ce8-9298-918b804c5980",
+      "requestId": "30c38b4e-ce69-4b13-933d-43b11553a19b",
+      "before": {
+        "aggregate": 0,
+        "batches": 0,
+        "batchQuantity": 0,
+        "ledger": 0,
+        "ledgerQuantity": 0
+      },
+      "reportId": "00919832-6aee-47f4-a45d-000556c295df",
+      "after": {
+        "aggregate": 1,
+        "batches": 1,
+        "batchQuantity": 1,
+        "ledger": 1,
+        "ledgerQuantity": 1
+      }
+    },
+    "formal": {
+      "itemId": "3fbc8eac-6de3-4f18-893d-a7e7498ff203",
+      "requestId": "34ce79aa-2e41-4a0d-9669-300b6c99319d",
+      "reportId": "e82e4f5c-68b3-4b58-9f87-426fb5524c63",
+      "before": {
+        "aggregate": 0,
+        "batches": 0,
+        "batchQuantity": 0,
+        "ledger": 0,
+        "ledgerQuantity": 0
+      },
+      "after": {
+        "aggregate": 1,
+        "batches": 1,
+        "batchQuantity": 1,
+        "ledger": 1,
+        "ledgerQuantity": 1
+      }
+    }
+  },
+  "acl": {
+    "advance_anon": false,
+    "advance_authenticated": false,
+    "read_anon": false,
+    "read_authenticated": true,
+    "create_authenticated": false,
+    "start_authenticated": true
+  },
+  "denials": {
+    "anonRead": 401,
+    "anonAdvance": 401,
+    "productionRead": 403,
+    "productionReadCode": "42501",
+    "productionAdvance": 403,
+    "productionAdvanceCode": "42501"
+  },
+  "result": "PASS"
+}

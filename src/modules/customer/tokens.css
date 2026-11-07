@@ -1,0 +1,33 @@
+:root {
+  --color-paper: #f5f2ec;
+  --color-paper-2: #fffdfa;
+  --color-paper-3: #eae2d7;
+  --color-ink: #211e1b;
+  --color-ink-2: #29231f;
+  --color-muted: #625b54;
+  --color-rule: #ddd5cb;
+  --color-field-rule: #82786d;
+  --color-accent: #a83826;
+  --color-accent-hover: #842819;
+  --color-accent-ink: #fffdfa;
+  --color-hero-ink: #fbf4e9;
+  --color-hero-muted: #e9d8ca;
+  --color-focus: #176b9d;
+  --color-success: #1e6644;
+  --color-error: #a42d25;
+  --font-display: Manrope, "Segoe UI", Arial, sans-serif;
+  --font-body: Manrope, "Segoe UI", Arial, sans-serif;
+  --weight-ui: 500;
+  --weight-emphasis: 600;
+  --weight-heading: 700;
+  --text-xs: 0.8125rem;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-page: 2rem;
+  --radius-card: 8px;
+  --radius-control: 8px;
+  --dur-micro: 120ms;
+  --dur-short: 220ms;
+}

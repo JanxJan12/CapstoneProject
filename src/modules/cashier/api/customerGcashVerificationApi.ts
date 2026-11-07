@@ -6,7 +6,6 @@ interface DatabaseVerificationResult {
   payment_id: unknown;
   request_id: unknown;
   transaction_id: unknown;
-  transaction_number: unknown;
   receipt_number: unknown;
   shift_id: unknown;
   cashier_id: unknown;
@@ -22,7 +21,6 @@ export interface CustomerGcashVerificationResult {
   paymentId: string;
   requestId: string;
   transactionId: string;
-  transactionNumber: string;
   receiptNumber: string;
   shiftId: string;
   cashierId: string;
@@ -35,7 +33,6 @@ export interface CustomerGcashVerificationResult {
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const ORDER_NUMBER_PATTERN = /^ORD-\d{6}$/;
-const TRANSACTION_NUMBER_PATTERN = /^TXN-\d{6}$/;
 const RECEIPT_NUMBER_PATTERN = /^RCP-\d{6}$/;
 
 function requireRecord(
@@ -123,10 +120,6 @@ function mapVerificationResult(
     row.transaction_id,
     "transaction ID",
   );
-  const transactionNumber = requireString(
-    row.transaction_number,
-    "transaction number",
-  );
   const receiptNumber = requireString(
     row.receipt_number,
     "receipt number",
@@ -146,21 +139,9 @@ function mapVerificationResult(
     );
   }
 
-  if (!TRANSACTION_NUMBER_PATTERN.test(transactionNumber)) {
-    throw new Error(
-      "The server returned an invalid transaction number.",
-    );
-  }
-
   if (!RECEIPT_NUMBER_PATTERN.test(receiptNumber)) {
     throw new Error(
       "The server returned an invalid receipt number.",
-    );
-  }
-
-  if (transactionNumber.slice(4) !== receiptNumber.slice(4)) {
-    throw new Error(
-      "The server returned transaction and receipt numbers from different sequences.",
     );
   }
 
@@ -194,7 +175,6 @@ function mapVerificationResult(
     paymentId,
     requestId,
     transactionId,
-    transactionNumber,
     receiptNumber,
     shiftId,
     cashierId,

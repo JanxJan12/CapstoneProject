@@ -1,0 +1,11 @@
+# RRJ customer ordering visual prototype
+
+Open [index.html](index.html) in a browser. This is a local, static design sample. It does not connect to Supabase, sign in, quote an order, submit payment, or create an order.
+
+Review the captured [phone Menu](screenshots/menu-phone.png), [phone item detail](screenshots/detail-phone.png), [phone Cart](screenshots/cart-phone.png), [phone checkout](screenshots/checkout-phone.png), and [phone Tracking](screenshots/tracking-phone.png). The `screenshots` folder also contains each screen at 768×1024 and 1440×900.
+
+The sample follows Menu → Chicken Bicol Express detail → Cart → guest checkout, with a separate Tracking layout. Search, category, quantity, and screen navigation are local interactions for design review. The menu names, descriptions, availability, and prices shown here came from the local customer capture on 2026-11-03. They may differ from the live catalog now. The Tracking screen uses labels present in `customerOrderSteps.ts`; its “Preparing” and “Verified” combination is an illustrative state, not a captured order.
+
+Design choices to review: one sans-serif UI, direct mobile destinations, a denser menu, no emoji food imagery, one estimate explanation, and server status before the timeline. The revised visual direction uses the existing RRJ logo and a cropped photo of the restaurant for identity, warmer surfaces, and a stronger distinction between browsing and checkout. The restaurant photo does not represent a menu item. The prototype groups available dishes ahead of unavailable ones for review; applying that ordering to the live menu requires an explicit product decision. The live app's routes, logic, data access, and payment safeguards are unchanged.
+
+Verification: 15 screenshots captured with no script errors, broken logo, multiple visible screens, or horizontal overflow. Local search, category filtering, quantity update, and navigation to checkout passed in the static prototype. Hallmark lint with render: 0 FAIL, 1 WARN. The warning treats the mutually exclusive category filters as competing filled actions; they are selection controls, and only the active filter has a filled treatment. Signed-in checkout, GCash payment, and live tracking were not tested.

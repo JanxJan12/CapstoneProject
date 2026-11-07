@@ -1,0 +1,121 @@
+%% RRJ'S FOOD-HOUSE - Requests and receiving
+%% Source: hosted PostgreSQL pg_catalog, captured 2026-10-26T20:58:45.038881+00:00
+%% Field types are Mermaid-safe tokens. Exact PostgreSQL types, nullability and defaults are in hosted-public-catalog.json and column-dictionary.html.
+erDiagram
+  inventory_request_documents {
+    uuid id PK
+    text request_number UK
+    integer current_revision
+    text status
+    text priority
+    timestamp_with_time_zone needed_at
+    jsonb issue_input
+    uuid issued_by FK
+    timestamp_with_time_zone issued_at
+    timestamp_with_time_zone closed_at
+    uuid closed_by FK
+    text close_reason
+  }
+  inventory_request_lines {
+    uuid request_id PK,FK
+    uuid inventory_item_id PK,FK
+    text item_name
+    text requested_unit
+    integer quantity_scale
+    numeric_12_3 requested_quantity
+    jsonb recommendation
+    text override_reason
+  }
+  inventory_request_revisions {
+    uuid request_id PK,FK
+    integer revision PK
+    jsonb snapshot
+    uuid issued_by FK
+    timestamp_with_time_zone issued_at
+  }
+  inventory_request_events {
+    bigint id PK
+    uuid request_id FK
+    integer revision
+    text event_type
+    uuid actor_id FK
+    timestamp_with_time_zone recorded_at
+    jsonb details
+  }
+  receiving_reports {
+    uuid id PK
+    character_varying_50 rr_number UK
+    uuid purchase_order_id FK
+    timestamp_with_time_zone received_at
+    uuid received_by FK
+    text status
+    text supplier_delivery_reference
+    text notes
+    timestamp_with_time_zone posted_at
+    uuid posted_by FK
+    timestamp_with_time_zone created_at
+    timestamp_with_time_zone updated_at
+    text source_type
+    text source_reference
+    uuid replenishment_request_id FK,UK
+    uuid inventory_request_id FK
+    integer inventory_request_revision
+    text inspected_by_name
+    text inspection_note
+    text emergency_reason
+    uuid emergency_authorized_by FK
+    timestamp_with_time_zone emergency_authorized_at
+    text emergency_inspected_by_name
+  }
+  receiving_report_items {
+    uuid id PK
+    uuid receiving_report_id FK,UK
+    uuid purchase_order_item_id FK,UK
+    numeric_12_3 quantity_delivered
+    numeric_12_3 quantity_accepted
+    numeric_12_3 quantity_rejected
+    numeric_12_3 secondary_quantity_delivered
+    numeric_12_3 secondary_quantity_accepted
+    numeric_12_3 secondary_quantity_rejected
+    text rejection_reason
+    text notes
+    timestamp_with_time_zone created_at
+    timestamp_with_time_zone updated_at
+    uuid inventory_item_id FK
+    text source_lot_code
+    date manufactured_on
+    date use_by_date
+  }
+  production_replenishment_requests {
+    uuid id PK
+    uuid inventory_item_id FK
+    text requested_unit
+    numeric_12_3 requested_quantity
+    timestamp_with_time_zone needed_at
+    text priority
+    text note
+    text status
+    uuid requested_by FK
+    timestamp_with_time_zone requested_at
+    timestamp_with_time_zone ready_at
+    timestamp_with_time_zone closed_at
+    uuid fulfilled_report_id FK,UK
+  }
+  production_replenishment_status_events {
+    bigint id PK
+    uuid request_id FK
+    text previous_status
+    text next_status
+    uuid changed_by FK
+    timestamp_with_time_zone changed_at
+    uuid receiving_report_id FK
+  }
+  inventory_request_documents ||--o{ inventory_request_events : "R023 inventory_request_events_request_id_fkey"
+  inventory_request_documents ||--o{ inventory_request_lines : "R025 inventory_request_lines_request_id_fkey"
+  inventory_request_documents ||--o{ inventory_request_revisions : "R027 inventory_request_revisions_request_id_fkey"
+  receiving_reports o|--o| production_replenishment_requests : "R055 production_replenishment_requests_fulfilled_report_id_fkey"
+  receiving_reports o|--o{ production_replenishment_status_events : "R059 production_replenishment_status_events_receiving_report_id_fkey"
+  production_replenishment_requests ||--o{ production_replenishment_status_events : "R060 production_replenishment_status_events_request_id_fkey"
+  receiving_reports ||--o{ receiving_report_items : "R068 receiving_report_items_receiving_report_id_fkey"
+  inventory_request_documents o|--o{ receiving_reports : "R070 receiving_reports_inventory_request_id_fkey"
+  production_replenishment_requests o|--o| receiving_reports : "R074 receiving_reports_replenishment_request_id_fkey"

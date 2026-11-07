@@ -1,0 +1,63 @@
+# RRJ’S FOOD-HOUSE — Production delivery policy implementation and QA
+
+**Date:** 2026-10-13 (Asia/Manila)  
+**Decision:** **PASS for the tested isolated local policy and rendered Manager workflow; NO-GO for hosted migration, deployment, or release.**
+
+## Scope and source of truth
+
+This continues `CHICKEN-DELIVERY-AS-IS-TARGET-GAP-ANALYSIS-20261013.md`, `CHICKEN-DELIVERY-ISOLATED-VALIDATION-20261013.md`, `RECOVERY-STABILIZATION-20261013.md`, and `DATABASE-REDUNDANCY-AUDIT-20261013.md`. The canonical checkout was dirty before this work. No reset, clean, stash, deletion, hosted write, password rotation, external message, or Docker-volume removal occurred. The project mirror under `.codex/.chatgpt-projects/.../sources` was not edited. All new application writes in this run targeted the existing, unlinked, synthetic `isolated-stack` at `127.0.0.1:56321` / `56322`.
+
+Current source mounts `/manager` and `/production`. Formal Manager Requests and linked Receiving already use the inventory-request RPCs; the old Phase 7B queue and generic Production draft remained alternate new-request paths. Existing `post_receiving_report(uuid)` already supplied accepted-only stock mutation, duplicate-post rejection, and reconciliation. The change therefore constrains *new* Production provenance and exposes it to the Manager, without replacing that posting boundary or rewriting old reports.
+
+The hosted `RRJS-Foodhouse-Final` project (`zhzluhqvysvsadwuugpa`) was inspected **SELECT-only**. The sampled current counts were one formal request and zero legacy, unlinked Production, and direct-supplier reports. Those counts are a point-in-time sample, not proof that historical paths can be removed. The earlier report established matching definitions for nine inspected hosted/local RPCs before this new local migration; this run did not claim new hosted parity.
+
+## Local implementation and exact change inventory
+
+| File changed in this run | Change |
+| --- | --- |
+| `supabase/migrations/20261013053159_production_delivery_policy.sql` (new) | Add four emergency evidence columns and all-or-none check; require a current active Manager for a new unlinked Production receipt; use the database clock for authorization; make emergency evidence immutable and undeletable; retain preexisting unlinked rows and existing Phase 7B linkage; revoke authenticated execution of legacy *creation* RPC; add Manager-only emergency creation and evidence/classification RPCs; label future receiving movement reasons by source. No table was removed. |
+| `supabase/tests/verify_production_delivery_policy.sql` (new) | Rollback-only synthetic SQL checks for grants, normal denial, Manager emergency, timestamp spoof prevention, evidence immutability, accepted-only posting, duplicate retry, direct-supplier PO posting, and movement labels. |
+| `qa/production-delivery-auth-e2e-20261013.ps1` (new) | Guarded loopback-only authenticated Manager/Cashier API checks. Synthetic Auth rows and one emergency draft persist in the local volume; no business baseline was used. |
+| `src/modules/manager/inventory/receivingApi.ts` | Add emergency creation/evidence calls and document classification lookup. |
+| `src/modules/manager/inventory/ReceivingDocumentList.tsx` | Show formal, Manager emergency, historical legacy/unlinked, and supplier provenance distinctly. |
+| `src/modules/manager/inventory/StockReceivingPage.tsx` | Route ordinary Production intake through issued Requests; require emergency reason and named physical inspector for the exception; display actor/server time/evidence; protect emergency source and delete controls; fix long batch-code wrapping on mobile. |
+| `src/modules/manager/inventory/ReplenishmentPage.tsx` | Keep historical Phase 7B queue and its follow-through, remove its new normal request form/call, label it historical. The `/production` route remains. |
+| `src/modules/kitchen/services/kdsTerminalService.ts` | Validate terminal UUID shape in the client so a malformed entry gives a useful error instead of raw SQL syntax. |
+
+The new migration was run directly against the isolated database for testing and is **not** in that test database's migration-history table. Its guard function was replaced locally once more to incorporate the server-clock assertion. No hosted migration was applied. The migration's `BEGIN`/`COMMIT` makes its initial application atomic. Existing ledger reasons are not backfilled; only movements created after the new trigger get provenance-specific reason text. The document list derives provenance from report relationships and emergency evidence for old as well as new records.
+
+The cautious local policy treats the Manager's explicit reason and named inspector as attestations. Messenger dispatch and acknowledgment remain manual records of real events, not automatic messages. No independent signature, attachment retention rule, separate approver, or emergency threshold was invented. Management must decide whether those stronger controls are required before release.
+
+## Verification results
+
+| Check | Result | Evidence and limit |
+| --- | --- | --- |
+| New normal Production receipt without issued request | **PASS local denial** | Authenticated Manager generic unlinked draft denied by database guard; blank emergency reason denied. Existing historical rows are not recast as new emergencies. |
+| Emergency permission and evidence | **PASS local** | Signed-in Manager could create one exception with reason, actor UUID, database timestamp, and named inspector; Cashier denied. Direct caller-supplied timestamp was overwritten by the database; emergency evidence update and delete denied. Draft created no stock movement. |
+| Legacy new-request path | **PASS local denial** | Authenticated execution of `create_replenishment_request` revoked; client creation form removed. Existing legacy queue/status/Receiving SQL regression passed. |
+| Direct supplier and accepted-only posting | **PASS rollback-only SQL** | PO receipt still posted accepted quantity and emitted a supplier-labeled movement; emergency receipt posted accepted 1 of delivered 2/rejected 1, created one batch/movement, and denied repeat post. SQL fixtures rolled back. |
+| Formal split Receiving, overage, serial/concurrent retry, shortfall | **PASS prior isolated authenticated run** | `CHICKEN-DELIVERY-ISOLATED-VALIDATION-20261013.md` records two partial receipts, atomic overage rollback, duplicate protection, audited shortfall and separate fulfillment. The policy run reused those unchanged RPCs; it did not repeat every concurrency case after this migration. |
+| Existing SQL security/compatibility | **PASS local** | `verify_manager_inventory_request_documents.sql`, `verify_manager_inventory_request_security.sql`, `verify_phase_7b_replenishment_requests.sql`, and new `verify_production_delivery_policy.sql` passed against isolated PostgreSQL with rollback fixtures. |
+| Signed-in API boundary | **PASS local** | `qa/production-delivery-auth-e2e-20261013.ps1` used GoTrue/PostgREST: Manager emergency/evidence succeeded; Cashier emergency/evidence, ordinary unlinked draft, and legacy new-request RPC failed as intended. |
+| Manager browser, desktop | **PASS local rendered path** | Stock Monitor suggestion → formal Requests pre-issue review and issuance → text export → linked Receiving → accepted posting → fulfilled request and stock movement. Separate Manager emergency reason/inspector → draft → accepted posting showed immutable actor/time and distinct document label. Synthetic item stock advanced 3→4→5 over the two browser receipts. |
+| Messenger dispatch/acknowledgment | **PASS truthful no-send state; NOT TESTED actual record** | Export downloaded locally. No external message was sent and no false dispatch/ack event was recorded; UI displayed “Send Not Recorded / No Reply Recorded.” Manual real-world exchange and subsequent record remain a release exercise. |
+| Manager browser, mobile | **PASS sampled 390×844** | Receiving view and document detail rendered; long batch code caused 20 px horizontal overflow initially, fixed and rechecked at 390 px body width. Broader device matrix untested. |
+| Customer browser | **PASS public/menu/cart; NOT TESTED OAuth checkout** | Rendered public menu and mobile cart; subtotal ₱120 plus estimated ₱50 delivery fee showed ₱170. Checkout correctly required sign-in. No Google OAuth flow was attempted. |
+| Cashier/KDS browser | **PARTIAL** | Manager session was refused at `/cashier` as unauthorized. KDS activation screen rendered and malformed terminal ID now gives “Enter a valid terminal ID.” Signed-in Cashier screen and valid terminal activation were not exercised in browser. |
+| Customer → payment → Cashier → KDS → Rider | **PASS local same-database API/Storage** | `node qa/recovery-auth-order-rider-e2e-20261013.mjs` passed synthetic order/payment replay, Cashier, KDS, Rider assignment/transit/proof/delivery and final joins. This is not a browser/device journey. |
+| Main web source | **PASS** | Final `npm.cmd run typecheck` and `npm.cmd run build` passed after all UI changes. |
+| Rider source/unit | **PASS** | `npm.cmd run typecheck`; `npm.cmd test` 8/8 in the Rider checkout. |
+| Rider Android | **PARTIAL / NOT TESTED authenticated features** | Android emulator booted and installed the available October 11 release APK with emulator Wi-Fi disabled. The Rider welcome/Google sign-in screen rendered. That APK predates this run; no approved local Rider login or live Google flow was available, so offers, map/directions, camera/proof capture/upload, and delivery transitions were **NOT TESTED on device**. No hosted write was attempted. |
+| Hosted change | **NOT TESTED / NOT APPLIED** | Hosted SQL was SELECT-only; no hosted QA insert, migration, grant, Auth change, or deployment. |
+
+The browser tests used Vite pointed at the isolated loopback API without altering the canonical hosted `.env.local`. Synthetic browser documents included `PR-20261013-000012`, linked `RR-20261013-E4C729A4`, and emergency `RR-20261013-E2BE9F98`. They remain in the preserved local volume. The browser-created movements preceded the final source-label trigger installation and retain the earlier generic reason; the later rollback-only SQL check confirmed correct labels for *future* posts. Classification in the Receiving list remained correct. No production/business stock was seeded from synthetic data.
+
+## Release safeguards and unresolved decisions
+
+**NO-GO remains in force.** The local encrypted recovery archive exists, but this run did not verify an independent off-device encrypted copy or rehearse restore from that independent copy. The previously disclosed database password's private rotation status could not be confirmed without handling the secret; the user should verify it privately and should not paste it into chat. Hosted `authenticated` MAINTAIN grants on three inspected operational tables remain present; the pending repair migration was **not** applied. Hosted migration provenance and recovery gates from the October 13 reports remain open. No USB or sensitive Auth/proof export was created.
+
+Before any hosted proposal: review the exact new migration against current hosted schema/provenance; confirm an encrypted database plus private Storage-byte recovery copy and isolated restore rehearsal; confirm private password rotation; separately approve the named hosted MAINTAIN repair and any later migration; rerun authenticated/role/browser/device tests in an approved staging environment; decide whether emergency approval needs an independent approver, signature/proof retention, or thresholds; and verify actual Messenger dispatch/ack records without synthetic attestations. Hosted release requires fresh project-specific approval. None is inferred from approval for local implementation.
+
+## Safe rollback
+
+No hosted rollback is needed because no hosted change occurred. For local source, review and revert only the migration and five application files listed above against their pre-work versions; retire the two new QA fixtures and this report only if their evidence is no longer needed. Do not reset or clean the checkout. The new migration has no automatic down migration. On the isolated test database, use a verified pre-test encrypted snapshot for recovery only after an explicit decision; preserve the local volume instead of dropping policy columns or rewriting synthetic evidence. A future hosted reversal would require a separately reviewed additive migration and a data/evidence retention decision, not deletion of emergency audit rows. Existing historical Phase 7B and direct-supplier receipts must remain readable throughout any reversal.

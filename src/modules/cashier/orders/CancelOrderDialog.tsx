@@ -22,12 +22,14 @@ export function CancelOrderDialog({
   open,
   orderId,
   loading,
+  disabled = false,
   onOpenChange,
   onConfirm,
 }: {
   open: boolean;
   orderId: string;
   loading: boolean;
+  disabled?: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: (reason: string) => Promise<void>;
 }) {
@@ -99,7 +101,7 @@ export function CancelOrderDialog({
             >
               Keep order
             </CashierButton>
-            <CashierButton type="submit" variant="danger" loading={loading}>
+            <CashierButton type="submit" variant="danger" loading={loading} disabled={disabled}>
               Confirm cancellation
             </CashierButton>
           </DialogFooter>

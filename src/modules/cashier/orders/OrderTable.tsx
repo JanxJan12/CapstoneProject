@@ -2,6 +2,7 @@ import { ArrowDown, ArrowUp } from "lucide-react";
 import { EmptyState } from "../components";
 import type { Order } from "../types";
 import type { OrderSortDescriptor, OrderSortKey } from "./orderOperations";
+import { canCancelCashierOrder } from "./orderOperations";
 import { OrderTableRow } from "./OrderTableRow";
 
 const HEADERS: { label: string; sortKey?: OrderSortKey; className?: string }[] =
@@ -9,12 +10,9 @@ const HEADERS: { label: string; sortKey?: OrderSortKey; className?: string }[] =
     { label: "Order", sortKey: "orderNumber" },
     { label: "Customer", sortKey: "customer" },
     { label: "Type", sortKey: "type" },
-    { label: "Total", sortKey: "total" },
-    { label: "Order Status" },
+    { label: "Total", sortKey: "total", className: "text-right" },
+    { label: "Order status" },
     { label: "Payment", sortKey: "payment" },
-    { label: "Rider", sortKey: "rider" },
-    { label: "Created", sortKey: "created" },
-    { label: "Actions" },
   ];
 
 export interface OrderTableProps {
@@ -23,13 +21,10 @@ export interface OrderTableProps {
   now: number;
   sorts: OrderSortDescriptor[];
   selectedIds: Set<string>;
-  expandedIds: Set<string>;
   onSort: (key: OrderSortKey, additive: boolean) => void;
   onToggleSelect: (orderId: string) => void;
   onToggleSelectAll: () => void;
-  onToggleExpand: (orderId: string) => void;
-  onView: (order: Order) => void;
-  onEdit: (order: Order) => void;
+  onView: (order: Order, trigger: HTMLElement) => void;
   onCancel: (order: Order) => void;
 }
 
@@ -39,7 +34,7 @@ export function OrderTable(props: OrderTableProps) {
       <div className="p-4">
         <EmptyState
           title="No matching orders"
-          description="Adjust the search, status, type, date, or quick filters."
+          description="Adjust your search or filters to find an order."
         />
       </div>
     );
@@ -51,25 +46,38 @@ export function OrderTable(props: OrderTableProps) {
   const someSelected = props.orders.some((order) =>
     props.selectedIds.has(order.id),
   );
+  const showActions = props.orders.some(canCancelCashierOrder);
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto" role="region" aria-label="Scrollable order table" tabIndex={0}>
       <table
-        className="rrj-table w-full min-w-[1240px]"
+        className="rrj-table cashier-orders-table w-full min-w-[1040px] table-fixed"
         aria-label="Central order operations table"
       >
+        <colgroup>
+          <col className="w-[4%]" />
+          <col className="w-[14%]" />
+          <col className="w-[20%]" />
+          <col className="w-[10%]" />
+          <col className="w-[11%]" />
+          <col className="w-[19%]" />
+          <col className={showActions ? "w-[17%]" : "w-[22%]"} />
+          {showActions ? <col className="w-[5%]" /> : null}
+        </colgroup>
         <thead>
-          <tr className="border-b border-border bg-gradient-to-r from-[#f7f1ea] to-[#fbf8f4]">
-            <th scope="col" className="w-12 px-3 py-3 text-left">
-              <input
-                type="checkbox"
-                checked={allSelected}
-                aria-checked={
-                  someSelected && !allSelected ? "mixed" : allSelected
-                }
-                aria-label="Select all orders on this page"
-                onChange={props.onToggleSelectAll}
-                className="h-4 w-4 accent-primary"
-              />
+          <tr>
+            <th scope="col" className="w-11 px-1 py-1 text-left">
+              <label className="inline-flex h-11 w-11 items-center justify-center">
+                <input
+                  type="checkbox"
+                  checked={allSelected}
+                  aria-checked={
+                    someSelected && !allSelected ? "mixed" : allSelected
+                  }
+                  aria-label="Select all orders on this page"
+                  onChange={props.onToggleSelectAll}
+                  className="h-5 w-5 accent-primary"
+                />
+              </label>
             </th>
             {HEADERS.map((header) => (
               <SortableHeader
@@ -79,9 +87,10 @@ export function OrderTable(props: OrderTableProps) {
                 onSort={props.onSort}
               />
             ))}
+            {showActions ? <th scope="col" className="px-2.5 py-2 text-center text-xs font-semibold text-muted-foreground">Actions</th> : null}
           </tr>
         </thead>
-        <tbody className="divide-y divide-border">
+        <tbody>
           {props.orders.map((order) => (
             <OrderTableRow
               key={order.id}
@@ -89,11 +98,9 @@ export function OrderTable(props: OrderTableProps) {
               delayedThreshold={props.delayedThreshold}
               now={props.now}
               selected={props.selectedIds.has(order.id)}
-              expanded={props.expandedIds.has(order.id)}
+              showActions={showActions}
               onToggleSelect={props.onToggleSelect}
-              onToggleExpand={props.onToggleExpand}
               onView={props.onView}
-              onEdit={props.onEdit}
               onCancel={props.onCancel}
             />
           ))}
@@ -128,13 +135,13 @@ function SortableHeader({
             : "descending"
           : undefined
       }
-      className={`px-3 py-3 text-left text-[9px] font-black uppercase tracking-widest text-muted-foreground ${className ?? ""}`}
+      className={`px-3 py-2 text-left text-xs font-semibold text-muted-foreground ${className ?? ""}`}
     >
       {sortKey ? (
         <button
           type="button"
           title="Click to sort. Hold Shift to add another sort."
-          className="flex min-h-9 items-center gap-1.5 whitespace-nowrap rounded-md text-left hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className={`flex min-h-11 w-full items-center gap-1.5 whitespace-nowrap rounded-md text-xs font-semibold hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${className === "text-right" ? "justify-end" : "text-left"}`}
           onClick={(event) => onSort(sortKey, event.shiftKey)}
         >
           {label}

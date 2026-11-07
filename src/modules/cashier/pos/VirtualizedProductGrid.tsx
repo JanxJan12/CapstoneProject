@@ -60,15 +60,15 @@ export const VirtualizedProductGrid = memo(function VirtualizedProductGrid({
   );
 
   const columns =
-    viewport.width >= 1450
+    viewport.width >= 1650
       ? 6
-      : viewport.width >= 1160
+      : viewport.width >= 1380
         ? 5
-        : viewport.width >= 880
+        : viewport.width >= 1100
           ? 4
-          : viewport.width >= 620
+          : viewport.width >= 700
             ? 3
-            : viewport.width >= 360
+            : viewport.width >= 520
               ? 2
               : 1;
   const totalRows = Math.ceil(items.length / columns);

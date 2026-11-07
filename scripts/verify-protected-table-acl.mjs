@@ -202,7 +202,7 @@ check(
 );
 const directMutation = directMutations[0];
 check(
-  directMutation?.file === "src/modules/customer/index.tsx" &&
+  directMutation?.file === "src/modules/customer/customerProfilePage.tsx" &&
     directMutation.table === "profiles" &&
     directMutation.operation === "update" &&
     directMutation.columns.join(",") === "contact_number",

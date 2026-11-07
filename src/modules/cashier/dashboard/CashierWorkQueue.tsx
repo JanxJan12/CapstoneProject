@@ -1,95 +1,89 @@
-import { useMemo } from "react";
 import {
   AlertTriangle,
   ArrowRight,
-  CheckCircle2,
   X,
 } from "lucide-react";
 import { CashierButton } from "../components";
-import { formatMoney } from "../constants";
+import { formatElapsedMinutes, formatMoney } from "../constants";
+import { selectCashierQueueView, type partitionCashierWorkQueue } from "./workQueuePresentation";
 import type {
-  CashierActionQueueItem,
   CashierAttentionFilter,
   CashierAttentionSummary,
+  CashierActionQueueItem,
   CashierQueueView,
   Order,
 } from "../types";
 
-const VIEW_LABELS: Record<CashierQueueView, string> = {
-  action_required: "Action Required",
-  all_active: "All Active",
-  ready_for_handoff: "Ready for Handoff",
+function waitingLabel(item: CashierActionQueueItem) {
+  switch (item.stage) {
+    case "payment_pending": return "Awaiting payment review";
+    case "payment_resubmission": return item.currentStage === "Payment resubmission needed"
+      ? "Awaiting customer resubmission" : "Awaiting payment";
+    case "kitchen_queue": return "In kitchen queue";
+    case "preparing": return "In preparation";
+    case "ready_for_handoff": return item.nextAction === "release_order"
+      ? "Ready for handoff" : "Rider offer pending in Kitchen";
+    case "rider_assignment": return "Waiting for rider";
+    case "rider_assigned": return "Rider accepted";
+    case "picked_up": return "Picked up";
+    case "out_for_delivery": return "Out for delivery";
+  }
+}
+
+function compactDuration(minutes: number) {
+  return formatElapsedMinutes(minutes)
+    .replace(/(\d+) hr\b/g, "$1h")
+    .replace(/(\d+) min\b/g, "$1m");
+}
+
+const VISIBLE_VIEWS = [
+  "action_required",
+  "current_orders",
+  "all_active",
+] as const satisfies readonly CashierQueueView[];
+
+const VIEW_LABELS: Record<(typeof VISIBLE_VIEWS)[number], string> = {
+  action_required: "Needs action",
+  current_orders: "Current orders",
+  all_active: "All unresolved",
 };
 
 const FILTER_LABELS: Record<CashierAttentionFilter, string> = {
   payments: "Payment pending",
   ready: "Ready for handoff",
-  delayed: "Delayed exceptions",
+  delayed: "Past stage threshold",
 };
 
 export function CashierWorkQueue({
-  items,
+  queue,
   attention,
   view,
   attentionFilter,
   orders,
-  actionsEnabled,
-  loadingOrderId,
   onViewChange,
   onClearAttentionFilter,
   onSelect,
   onVerify,
-  onRelease,
 }: {
-  items: CashierActionQueueItem[];
+  queue: ReturnType<typeof partitionCashierWorkQueue>;
   attention: CashierAttentionSummary;
   view: CashierQueueView;
   attentionFilter?: CashierAttentionFilter;
   orders: Order[];
-  actionsEnabled: boolean;
-  loadingOrderId?: string;
   onViewChange: (view: CashierQueueView) => void;
   onClearAttentionFilter: () => void;
   onSelect: (order: Order) => void;
   onVerify: (order: Order) => void;
-  onRelease: (order: Order) => void;
 }) {
-  const visibleItems = useMemo(() => {
-    let next = items;
+  const visibleItems = selectCashierQueueView(queue, view, attentionFilter);
 
-    if (view === "action_required") {
-      next = next.filter(
-        (item) =>
-          item.nextAction !== "view_details" || item.isDelayed,
-      );
-    } else if (view === "ready_for_handoff") {
-      next = next.filter(
-        (item) => item.nextAction === "release_order",
-      );
-    }
-
-    if (attentionFilter === "payments") {
-      next = next.filter(
-        (item) => item.nextAction === "verify_payment",
-      );
-    } else if (attentionFilter === "ready") {
-      next = next.filter(
-        (item) => item.nextAction === "release_order",
-      );
-    } else if (attentionFilter === "delayed") {
-      next = next.filter((item) => item.isDelayed);
-    }
-
-    return next;
-  }, [attentionFilter, items, view]);
-
-  const tabCounts: Record<CashierQueueView, number> = {
+  const tabCounts: Record<(typeof VISIBLE_VIEWS)[number], number> = {
     action_required: attention.actionRequired,
+    current_orders: queue.current.length,
     all_active: attention.allActive,
-    ready_for_handoff: attention.readyOrders,
   };
 
-  const emptyState = useMemo(() => {
+  const emptyState = (() => {
     if (attentionFilter === "payments") {
       return {
         title: "No payment-pending orders",
@@ -100,33 +94,37 @@ export function CashierWorkQueue({
 
     if (attentionFilter === "ready") {
       return {
-        title: "No orders ready for handoff",
+        title: "No current orders ready for handoff",
         description:
-          "Orders will appear here once they are ready to be released.",
+          "Older ready orders remain available in All unresolved.",
       };
     }
 
     if (attentionFilter === "delayed") {
       return {
-        title: "No delayed orders",
+        title: "No current stage delays",
         description:
-          "There are currently no delayed orders requiring review.",
+          "No current orders have passed a configured stage threshold.",
       };
     }
 
     if (view === "action_required") {
       return {
-        title: "No orders need attention",
-        description:
-          "There are no pending cashier actions at the moment.",
+        title: "Nothing needs action now",
+        description: queue.current.length
+          ? `${queue.current.length} current order${queue.current.length === 1 ? " is" : "s are"} still in progress.`
+          : queue.older.length
+            ? `${queue.older.length} older unresolved order${queue.older.length === 1 ? " remains" : "s remain"}.`
+            : "New orders will appear here.",
       };
     }
 
-    if (view === "ready_for_handoff") {
+    if (view === "current_orders") {
       return {
-        title: "No orders ready for handoff",
-        description:
-          "Prepared orders will appear here when they are ready to release.",
+        title: "No current orders in progress",
+        description: queue.older.length
+          ? `${queue.older.length} older unresolved order${queue.older.length === 1 ? " remains" : "s remain"} in the backlog.`
+          : "New orders will appear here when they begin processing.",
       };
     }
 
@@ -135,19 +133,8 @@ export function CashierWorkQueue({
       description:
         "New orders will appear here when cashier processing begins.",
     };
-  }, [attentionFilter, view]);
+  })();
 
-  const canResetEmptyState =
-    Boolean(attentionFilter) || view !== "all_active";
-
-  const resetEmptyState = () => {
-    if (attentionFilter) {
-      onClearAttentionFilter();
-      return;
-    }
-
-    onViewChange("all_active");
-  };
 
   return (
     <section
@@ -159,22 +146,18 @@ export function CashierWorkQueue({
           <div>
             <h2
               id="cashier-work-queue-title"
-              className="text-[15px] font-black tracking-tight text-foreground"
+              className="text-lg font-black tracking-tight text-foreground"
             >
-              Cashier Work Queue
+              Work queue
             </h2>
-
-            <p className="mt-1 text-[10px] font-semibold text-muted-foreground">
-              Review active orders and complete the next required action.
-            </p>
           </div>
 
-          <div
-            className="flex max-w-full gap-1 overflow-x-auto rounded-xl bg-muted/60 p-1"
-            role="tablist"
+          {!attentionFilter ? <div
+            className="grid w-full grid-cols-3 gap-1 rounded-xl bg-muted/60 p-1 xl:w-auto"
+            role="group"
             aria-label="Cashier work queue views"
           >
-            {(Object.keys(VIEW_LABELS) as CashierQueueView[]).map(
+            {VISIBLE_VIEWS.map(
               (tab) => {
                 const selected = view === tab;
 
@@ -182,24 +165,23 @@ export function CashierWorkQueue({
                   <button
                     key={tab}
                     type="button"
-                    role="tab"
-                    aria-selected={selected}
+                    aria-pressed={selected}
                     onClick={() => onViewChange(tab)}
                     className={[
-                      "flex min-h-9 items-center gap-2 whitespace-nowrap rounded-lg",
-                      "px-3 text-[10px] font-black transition",
+                      "flex min-h-14 min-w-0 flex-col items-center justify-center gap-0.5 rounded-lg",
+                      "px-1.5 text-[13px] font-semibold transition sm:min-h-12 sm:flex-row sm:gap-2 sm:px-3.5",
                       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
                       selected
                         ? "bg-white text-primary shadow-sm"
                         : "text-muted-foreground hover:bg-white/60 hover:text-foreground",
                     ].join(" ")}
                   >
-                    <span>{VIEW_LABELS[tab]}</span>
+                    <span className="text-center leading-4">{VIEW_LABELS[tab]}</span>
 
                     <span
                       className={[
                         "inline-flex min-w-5 items-center justify-center rounded-full",
-                        "px-1.5 py-0.5 text-[9px]",
+                        "px-1.5 py-0.5 text-xs font-bold",
                         selected
                           ? "bg-primary/10 text-primary"
                           : "bg-black/5 text-muted-foreground",
@@ -211,13 +193,13 @@ export function CashierWorkQueue({
                 );
               },
             )}
-          </div>
+          </div> : null}
         </div>
 
         {attentionFilter ? (
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <span className="text-[10px] font-bold text-muted-foreground">
-              Active filter
+              Active filter · {attentionFilter === "payments" ? "all dates" : "current orders"}
             </span>
 
             <button
@@ -242,35 +224,11 @@ export function CashierWorkQueue({
       </div>
 
       {visibleItems.length === 0 ? (
-        <div className="flex min-h-[154px] flex-col items-center justify-center px-6 py-6 text-center">
-          <div className="grid h-10 w-10 place-items-center rounded-xl border border-border bg-white shadow-sm">
-            <CheckCircle2
-              className="h-4.5 w-4.5 text-muted-foreground"
-              aria-hidden="true"
-            />
+        <div className="flex min-h-20 flex-col gap-2 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+          <div>
+            <h3 className="text-sm font-black text-foreground">{emptyState.title}</h3>
+            <p className="mt-1 text-[11px] font-medium leading-4 text-muted-foreground">{emptyState.description}</p>
           </div>
-
-          <h3 className="mt-3 text-sm font-black text-foreground">
-            {emptyState.title}
-          </h3>
-
-          <p className="mt-1.5 max-w-sm text-[11px] font-medium leading-5 text-muted-foreground">
-            {emptyState.description}
-          </p>
-
-          {canResetEmptyState ? (
-            <CashierButton
-              type="button"
-              variant="secondary"
-              size="sm"
-              className="mt-3"
-              onClick={resetEmptyState}
-            >
-              {attentionFilter
-                ? "Clear filter"
-                : "View all active orders"}
-            </CashierButton>
-          ) : null}
         </div>
       ) : (
         <div className="max-h-[520px] divide-y divide-border/80 overflow-y-auto">
@@ -280,83 +238,98 @@ export function CashierWorkQueue({
             );
 
             if (!order) return null;
+            const older = queue.older.includes(item);
+            const overdue = !older && (item.isDelayed || item.orderAgeReview);
+            const hasStageTime = Number.isFinite(new Date(item.stageStartedAt).getTime());
+            const stageLabel = waitingLabel(item);
 
             const actionLabel =
               item.nextAction === "verify_payment"
                 ? "Verify Payment"
                 : item.nextAction === "release_order"
-                  ? "Release Order"
-                  : item.isDelayed
-                    ? "Review Delay"
+                  ? "Review & Release"
+                  : item.isDelayed && !older
+                    ? "View Status"
                     : "View Details";
 
             return (
               <article
                 key={item.orderId}
                 className={[
-                  "grid min-h-[74px] gap-2.5 px-4 py-3",
+                  "grid min-h-[80px] gap-2.5 px-4 py-2.5",
                   "transition-colors sm:grid-cols-[minmax(0,1fr)_auto]",
                   "sm:items-center sm:px-5",
-                  item.isDelayed
+                  item.isDelayed && !older
                     ? "border-l-4 border-l-red-500 bg-red-50/45"
                     : "border-l-4 border-l-transparent hover:bg-amber-50/25",
                 ].join(" ")}
               >
-                <button
-                  type="button"
-                  onClick={() => onSelect(order)}
-                  className="
-                    min-w-0 rounded-lg text-left
-                    focus-visible:outline-none
-                    focus-visible:ring-2
-                    focus-visible:ring-primary
-                    focus-visible:ring-offset-2
-                  "
-                  aria-label={`Open details for ${item.orderId}, ${item.customerName}`}
-                >
-                  <span className="flex items-start justify-between gap-3">
+                <div className="flex min-h-11 min-w-0 items-center text-left">
+                  <span className="flex w-full items-start justify-between gap-3">
                     <span className="min-w-0">
                       <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                        <strong className="font-mono text-[11px] text-primary">
+                        <strong className="font-mono text-[13px] text-primary">
                           {item.orderId}
                         </strong>
 
-                        <span className="truncate text-[11px] font-black text-foreground">
+                        <span className="min-w-0 break-words text-sm font-black text-foreground">
                           {item.customerName}
                         </span>
                       </span>
 
-                      <span className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[10px] font-semibold text-muted-foreground">
+                      <span className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs font-semibold leading-5 text-muted-foreground">
+                        {older ? (
+                          <>
+                            <span className="font-black text-amber-800">Older unresolved</span>
+                            <span aria-hidden="true">·</span>
+                          </>
+                        ) : null}
                         <span>{item.orderType}</span>
-                        <span aria-hidden="true">·</span>
+                        {item.currentStage !== stageLabel ? (
+                          <>
+                            <span aria-hidden="true">·</span>
+                            <span
+                              className={
+                                item.isDelayed && !older
+                                  ? "font-black text-red-700"
+                                  : "font-bold text-foreground/75"
+                              }
+                            >
+                              {item.currentStage}
+                            </span>
+                          </>
+                        ) : null}
 
-                        <span
-                          className={
-                            item.isDelayed
-                              ? "font-black text-red-700"
-                              : "font-bold text-foreground/75"
-                          }
-                        >
-                          {item.currentStage}
-                        </span>
-
-                        <span aria-hidden="true">·</span>
-
+                      </span>
+                      <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs font-semibold leading-5 text-muted-foreground">
                         <span>
-                          Waiting {item.waitingMinutes} min
-                          {item.isDelayed ? " · Delayed" : ""}
+                          {hasStageTime
+                            ? `${stageLabel} · ${compactDuration(item.waitingMinutes)}`
+                            : "Stage time unavailable"}
                         </span>
+                        {overdue ? (
+                          <span
+                            className="rounded-full bg-red-50 px-2 py-0.5 font-bold text-red-800"
+                            aria-label={item.isDelayed && item.orderAgeReview
+                              ? "Overdue: stage and order age review thresholds passed"
+                              : item.isDelayed
+                                ? "Overdue: stage threshold passed"
+                                : "Overdue: order age review threshold passed"}
+                          >
+                            Overdue
+                          </span>
+                        ) : null}
                       </span>
                     </span>
 
-                    <strong className="shrink-0 text-xs font-black text-foreground sm:hidden">
+                    <strong className="shrink-0 text-sm font-black text-foreground sm:hidden">
                       {formatMoney(item.totalAmount)}
                     </strong>
                   </span>
-                </button>
+                </div>
 
                 <div className="flex items-center justify-between gap-3 sm:justify-end">
-                  <strong className="hidden min-w-[82px] text-right text-xs font-black text-foreground sm:block">
+                  <strong className="hidden min-w-[82px] text-right text-sm font-black text-foreground sm:block">
                     {formatMoney(item.totalAmount)}
                   </strong>
 
@@ -366,27 +339,17 @@ export function CashierWorkQueue({
                         ? "secondary"
                         : "primary"
                     }
-                    size="sm"
-                    className="min-w-[116px]"
-                    disabled={
-                      item.nextAction !== "view_details" &&
-                      !actionsEnabled
-                    }
-                    loading={loadingOrderId === item.orderId}
-                    loadingLabel="Working…"
+                    size="md"
+                    className="min-w-[170px] min-h-11 w-full text-[13px] sm:w-auto"
                     onClick={() => {
                       if (item.nextAction === "verify_payment") {
                         onVerify(order);
-                      } else if (
-                        item.nextAction === "release_order"
-                      ) {
-                        onRelease(order);
                       } else {
                         onSelect(order);
                       }
                     }}
                   >
-                    {item.isDelayed &&
+                    {item.isDelayed && !older &&
                     item.nextAction === "view_details" ? (
                       <AlertTriangle aria-hidden="true" />
                     ) : (

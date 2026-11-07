@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 import { Dialog } from "@/components/ui/dialog";
 import { cn } from "@/components/ui/utils";
 import { CashierDialogContent } from "./Modal";
@@ -9,6 +9,7 @@ export interface DrawerProps {
   children: ReactNode;
   size?: "md" | "lg";
   className?: string;
+  onCloseAutoFocus?: ComponentProps<typeof CashierDialogContent>["onCloseAutoFocus"];
 }
 
 const SIZE_STYLES: Record<NonNullable<DrawerProps["size"]>, string> = {
@@ -22,10 +23,12 @@ export function Drawer({
   children,
   size = "md",
   className,
+  onCloseAutoFocus,
 }: DrawerProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <CashierDialogContent
+        onCloseAutoFocus={onCloseAutoFocus}
         className={cn(
           "cashier-drawer left-auto right-0 top-0 h-dvh max-h-dvh w-full translate-x-0 translate-y-0 overflow-y-auto overscroll-contain rounded-none bg-[#f8f4ef] p-0 shadow-[-18px_0_50px_rgba(36,26,19,0.16)] sm:rounded-l-2xl",
           SIZE_STYLES[size],

@@ -1,0 +1,37 @@
+# M3.2B recovery package design — review draft
+
+**Status: DESIGN ONLY / PARTIAL LOCAL EVIDENCE / NO USB COPY / NO RESTORE.** Hosted project `zhzluhqvysvsadwuugpa`. This is an inclusion and recovery-dependency inventory, not a recovery authorization or a completed package. See [the engineering report](M3-2B-EVIDENCE-VALIDATION-AND-RECOVERY-20261018.md) and [the existing authorization contract](HOSTED-RECOVERY-APPROVAL-20261014.md).
+
+## Local sources and verified integrity
+
+The source root is `%LOCALAPPDATA%\RRJ-Private-Backups\Supabase-20261013-062110`. Its `backup-manifest-v2.csv` is 6,866 bytes, SHA-256 `E46B590ED584A19EC4714498D5B3C9597820DCC3B4B94134A233E723F3D7CDD1`. All **34/34** listed source files currently match size and SHA-256; the 30 private Storage physical files were checked as a size/hash multiset against the manifest. Logical object names were not used as physical filenames. Do not publish those names.
+
+| Source within root | Bytes | SHA-256 | What it may recover; limit |
+| --- | ---: | --- | --- |
+| `roles.sql` | 1,327 | `427EA3CB24083D778BB59F8AEEAD481FD62ED216AD329E94198CC43914BAF444` | Exported role SQL; not current hosted role parity. |
+| `schema.sql` | 538,815 | `F1022EB33031D3D62AE27A4E9564632BF2338BA019CCA834CDF95B42DAAF1A9B` | Public schema/functions/privileges as exported; no migration ledger. |
+| `data.sql` | 188,003 | `9FD18E166AAEF422F5BF8B7B6178642B1D7D02E61148D984EC29A9B1EF65B114` | Later public business-data snapshot; not original historical stock proof. |
+| `managed-auth-storage-data-retry.dump` | 31,493 | `AFCF6E4EDBF8379A00C8DA8EC9AB82EDE689585F452E0D3CAA0121D03EDFBD20` | `PGDMP` Auth and Storage metadata retry; restore not independently verified. |
+| `storage` files (30) | See private manifest | Per-file hashes in manifest | Local private bytes; current hosted byte parity unverified. |
+
+The sibling `%LOCALAPPDATA%\RRJ-Private-Backups\rehearsal-20261013\recovery-supplement-manifest.csv` is 655 bytes, SHA-256 `A298605C9282E4BF4DBCBA3C693A88C6DC5D12E1A68781E2C8CD021BA41AB4B7`. Its **6/6** entries match current size/hash: `auth-trigger-live.sql`, `storage-policies-live.sql`, `remote-acl-local-rehearsal.sql`, `remote-table-acl-local-rehearsal.sql`, `managed-restore-current.list`, and `public-only-data.sql`. Their roles and applicability to a fresh restore need review; these files are not a migration-ledger backup. The 40 source components in these two manifests total **6,475,637 bytes**, excluding manifest/metadata overhead.
+
+Exclude the zero-byte `managed-auth-storage-data.dump`, Phase 8 synthetic fixtures/dumps, unreviewed temporary files, and the preexisting `RRJ-Recovery-20261013.7z` from a proposed new source package. The existing 7z archive is 2,739,138 bytes, SHA-256 `37A6CD5A11F17AFFC0A99D3EC5953D2DA1011C07F279A1BFD140FC5CC1852E50`; it predates the supplement and was neither decrypted nor opened in M3.2B. Retain it separately. Do not assume supplement inclusion or usable key custody.
+
+## Coverage boundary
+
+The source set can be an **October 13 partial local recovery candidate** for exported roles, public schema/data, managed Auth/Storage metadata, and 30 local private objects. The current hosted metadata has 30 objects in three private buckets (11 delivery proofs, 16 payment proofs, 3 rider documents). The sorted bucket/name identity MD5 equals the local manifest's normalized identity digest, `77779feb58df942aa09a81e7936ec620`. This is name/count parity at inspection time, **not hosted-byte parity**, a fresh database snapshot, or complete recovery proof. The set lacks a verified hosted migration ledger/applied-SQL archive and current Auth/config/OAuth and catalog parity. The six-file supplement may be necessary to reconstruct triggers, policies and effective grants, but has not been proven sufficient. An independent encrypted copy, key recovery and a complete restore are absent.
+
+## Proposed protection and destination — pending separate approval
+
+Use an authenticated-encryption container, such as a reviewed AES-256-GCM streaming implementation with a versioned header, unique nonce, authentication tag, and a restore reader that rejects any altered/truncated package **before extraction**. Node 22 provides the primitive; a reviewed implementation, secure owner-held key provisioning, test vectors and a recovery runbook are still needed. `7z.exe` is present, but its available 7zAES mode alone has not been established as authenticated encryption for this requirement. No password, key, or package has been generated. Never place a key in the repo, archive, USB, chat, process arguments, or logs. The owner/security reviewer must choose a secure credential route and recovery custodian; test key recovery without exposing the secret.
+
+The sole positively identified removable device is disk 1, `General UDisk USB Device`, `D:`, volume `\\?\Volume{037908d5-cac3-11f1-ada6-cc4740379154}\`, FAT32, 8,051,064,832-byte volume, 7,558,397,952 bytes free at inspection. Its label is empty. **Proposed only:** `D:\RRJ-Recovery\M3-2B-20261018\` with a new, collision-free encrypted package name and a non-secret SHA-256/size receipt. The directory does not exist; no existing file is to be overwritten. Forty source files total approximately 6.48 MB before container overhead, but the final size is unknown. FAT32 limits each file to under 4 GiB, so a later complete hosted package may require a different destination/filesystem or reviewed segmentation. BitLocker status could not be read without elevation; the drive is **not proven encrypted**. Unrelated files already exist on it. No directory, file or permission change has been made on `D:`.
+
+**Copy procedure only after exact authorization and credential readiness:** re-identify disk/volume, confirm free space and no target collision, rehash source files, build the authenticated package in an approved restricted local directory, authenticate/read-test without exposing payloads, write only to the approved USB path, compare source/destination SHA-256 and size, re-authenticate from the USB, record result, and have the owner safely eject/store it under documented custody. A copied drive is not independently protected until removal and custody are confirmed. The current source set must never be labeled a complete hosted recovery set.
+
+## Restore and access prerequisites
+
+A rehearsal requires a separately approved named isolated target (proposed `rrj_m32b_restore_20261018`), permission for real business/Auth/Storage data, protected host/storage, compatible PostgreSQL/Supabase services, sufficient capacity, the package decryption route, restore order, and no production connection. Restore roles/schema/data/Auth and Storage metadata, policies/grants/triggers and object bytes; independently compare catalog/ledger, Auth counts/integrity, business relationships, three bucket inventories and per-object hashes. Record timing and errors. The existing source set cannot pass the full hosted recovery gate while ledger, current snapshot and applied-SQL provenance are unresolved.
+
+The source root, supplement and archive inherit `CodexSandboxUsers` ReadAndExecute alongside user/SYSTEM/Administrators access. The group-membership and intended access policy need owner/security review. Review inheritance and restrict plaintext recovery material to the accountable owner, backup service and administrators as appropriate, while retaining a tested recovery path; do not change ACLs automatically. Encryption and off-device custody are separate requirements.

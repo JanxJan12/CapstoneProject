@@ -1,32 +1,22 @@
-import type { FieldErrors, UseFormRegister } from "react-hook-form";
 import { ArrowLeft, ArrowRight, ClipboardCheck, X } from "lucide-react";
 import { formatMoney } from "../constants";
-import type { POSForm } from "../schemas";
 import { POSCart } from "./POSCart";
-import { POSOrderDetails } from "./POSOrderDetails";
 import type { POSCartLine, WalkInOrderType } from "./types";
 
 export function OrderReviewDrawer({
   orderNumber,
   orderType,
   items,
-  values,
-  optionsOpen,
   subtotal,
-  discountAmount,
   taxAmount,
   taxEnabled,
   total,
   canContinue,
   disabledReason,
-  register,
-  errors,
-  onOptionsOpenChange,
   onAdjust,
   onQuantityChange,
   onRemove,
   onDuplicate,
-  onNoteChange,
   onCustomize,
   onReorder,
   onClear,
@@ -36,23 +26,16 @@ export function OrderReviewDrawer({
   orderNumber: string;
   orderType: WalkInOrderType;
   items: POSCartLine[];
-  values: POSForm;
-  optionsOpen: boolean;
   subtotal: number;
-  discountAmount: number;
   taxAmount: number;
   taxEnabled: boolean;
   total: number;
   canContinue: boolean;
   disabledReason?: string;
-  register: UseFormRegister<POSForm>;
-  errors: FieldErrors<POSForm>;
-  onOptionsOpenChange: (open: boolean) => void;
   onAdjust: (lineId: string, delta: number) => void;
   onQuantityChange: (lineId: string, quantity: number) => void;
   onRemove: (lineId: string) => void;
   onDuplicate: (lineId: string) => void;
-  onNoteChange: (lineId: string, note: string) => void;
   onCustomize: (lineId: string) => void;
   onReorder: (sourceLineId: string, targetLineId: string) => void;
   onClear: () => void;
@@ -95,18 +78,9 @@ export function OrderReviewDrawer({
           onQuantityChange={onQuantityChange}
           onRemove={onRemove}
           onDuplicate={onDuplicate}
-          onNoteChange={onNoteChange}
           onCustomize={onCustomize}
           onReorder={onReorder}
           onClear={onClear}
-        />
-
-        <POSOrderDetails
-          discountType={values.discountType}
-          optionsOpen={optionsOpen}
-          onOptionsOpenChange={onOptionsOpenChange}
-          register={register}
-          errors={errors}
         />
 
         <section className="pos-summary-totals space-y-1.5 border-t px-4 py-3 text-[11px]">
@@ -114,12 +88,6 @@ export function OrderReviewDrawer({
             <span>Subtotal</span>
             <span>{formatMoney(subtotal)}</span>
           </div>
-          {discountAmount > 0 ? (
-            <div className="pos-discount-row flex justify-between font-semibold">
-              <span>Discount</span>
-              <span>−{formatMoney(discountAmount)}</span>
-            </div>
-          ) : null}
           {taxEnabled ? (
             <div className="flex justify-between">
               <span>Tax</span>

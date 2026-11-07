@@ -1,0 +1,117 @@
+%% RRJ'S FOOD-HOUSE - Inventory and audit
+%% Source: hosted PostgreSQL pg_catalog, captured 2026-10-26T20:58:45.038881+00:00
+%% Field types are Mermaid-safe tokens. Exact PostgreSQL types, nullability and defaults are in hosted-public-catalog.json and column-dictionary.html.
+erDiagram
+  inventory_items {
+    uuid id PK
+    character_varying_150 item_name UK
+    character_varying_20 unit
+    numeric_12_3 quantity_on_hand
+    numeric_12_3 reorder_level
+    character_varying_100 inventory_category
+    boolean is_active
+    timestamp_with_time_zone created_at
+    timestamp_with_time_zone updated_at
+    text item_kind
+    character_varying_20 secondary_unit
+    smallint quantity_scale
+    text rotation_policy
+    boolean expiry_required
+    smallint shelf_life_days
+    boolean batch_consumption_enabled
+  }
+  inventory_batches {
+    uuid id PK
+    character_varying_100 batch_code UK
+    uuid inventory_item_id FK
+    text origin_type
+    uuid receiving_report_item_id FK
+    text supplier_lot_code
+    timestamp_with_time_zone received_at
+    date manufactured_on
+    date use_by_date
+    numeric_12_3 quantity_initial
+    numeric_12_3 quantity_on_hand
+    numeric_12_3 secondary_quantity_initial
+    numeric_12_3 secondary_quantity_on_hand
+    timestamp_with_time_zone created_at
+    uuid opening_balance_id FK
+    boolean received_at_is_estimated
+    text notes
+    numeric_12_3 quantity_positive_adjustments
+  }
+  inventory_opening_balances {
+    uuid id PK
+    uuid request_id UK
+    uuid inventory_item_id FK,UK
+    uuid verified_by FK
+    timestamp_with_time_zone verified_at
+    numeric_12_3 quantity_total
+    integer batch_count
+    jsonb request_payload
+    text notes
+    timestamp_with_time_zone created_at
+  }
+  inventory_transactions {
+    uuid id PK,UK
+    uuid inventory_item_id FK,UK
+    uuid purchase_order_item_id FK
+    uuid order_id FK
+    uuid performed_by FK
+    inventory_transaction_type transaction_type
+    numeric_12_3 quantity_change
+    numeric_12_3 quantity_before
+    numeric_12_3 quantity_after
+    text reason
+    timestamp_with_time_zone created_at
+    uuid mutation_request_id
+    uuid inventory_batch_id FK
+    uuid opening_balance_id FK
+    numeric_12_3 batch_quantity_before
+    numeric_12_3 batch_quantity_after
+    text batch_mutation_notes
+    uuid reverses_issuance_id FK
+    uuid reverses_allocation_id FK
+  }
+  inventory_transaction_batch_allocations {
+    uuid id PK
+    uuid inventory_transaction_id FK,UK
+    uuid inventory_batch_id FK,UK
+    numeric_12_3 quantity
+    timestamp_with_time_zone created_at
+  }
+  inventory_audits {
+    uuid id PK
+    uuid request_id UK
+    uuid performed_by FK
+    timestamp_with_time_zone started_at
+    timestamp_with_time_zone completed_at
+    text status
+    bigint movement_rows_examined
+  }
+  inventory_audit_items {
+    uuid id PK
+    uuid audit_id FK,UK
+    uuid inventory_item_id FK,UK
+    uuid latest_movement_id FK
+    text item_name
+    text recorded_unit
+    numeric_12_3 book_quantity
+    numeric_12_3 ledger_quantity
+    text result
+    text finding_code
+    integer movement_count
+  }
+  inventory_audits ||--o{ inventory_audit_items : "R011 inventory_audit_items_audit_id_fkey"
+  inventory_items ||--o{ inventory_audit_items : "R012 inventory_audit_items_inventory_item_id_fkey"
+  inventory_transactions o|--o{ inventory_audit_items : "R013 inventory_audit_movement_item_fk"
+  inventory_items ||--o{ inventory_batches : "R015 inventory_batches_inventory_item_id_fkey"
+  inventory_opening_balances o|--o{ inventory_batches : "R016 inventory_batches_opening_balance_id_fkey"
+  inventory_items ||--o| inventory_opening_balances : "R018 inventory_opening_balances_inventory_item_id_fkey"
+  inventory_transactions ||--o{ inventory_transaction_batch_allocations : "R028 inventory_transaction_batch_alloc_inventory_transaction_id_fkey"
+  inventory_batches ||--o{ inventory_transaction_batch_allocations : "R029 inventory_transaction_batch_allocations_inventory_batch_id_fkey"
+  inventory_batches o|--o{ inventory_transactions : "R030 inventory_transactions_inventory_batch_id_fkey"
+  inventory_items ||--o{ inventory_transactions : "R031 inventory_transactions_inventory_item_id_fkey"
+  inventory_opening_balances o|--o{ inventory_transactions : "R032 inventory_transactions_opening_balance_id_fkey"
+  inventory_transaction_batch_allocations o|--o{ inventory_transactions : "R036 inventory_transactions_reverses_allocation_id_fkey"
+  inventory_transactions o|--o{ inventory_transactions : "R037 inventory_transactions_reverses_issuance_id_fkey"

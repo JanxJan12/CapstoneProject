@@ -1,0 +1,625 @@
+{
+  "action": "schedule",
+  "dryRun": true,
+  "capturedAt": "2026-10-15T17:30:50.820Z",
+  "executableStopAllowlist": [
+    "supabase_analytics_rrj_h08c_history_20261015"
+  ],
+  "reviewOnly": [
+    {
+      "project": "rrj_h07_financial_20261014",
+      "running": 5,
+      "services": [
+        {
+          "name": "supabase_storage_rrj_h07_financial_20261014",
+          "id": "74b5ba6d38ca",
+          "running": true,
+          "restarted": 1,
+          "startedAt": "2026-10-15T16:39:46.469650489Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_rest_rrj_h07_financial_20261014",
+          "id": "f8c4f6885aa9",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:32.730995813Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_auth_rrj_h07_financial_20261014",
+          "id": "d8b130694c1d",
+          "running": true,
+          "restarted": 3,
+          "startedAt": "2026-10-15T16:39:51.044857433Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_kong_rrj_h07_financial_20261014",
+          "id": "e8f7b6161dd3",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:32.62424963Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_db_rrj_h07_financial_20261014",
+          "id": "db4249c0ec4c",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:32.761064903Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        }
+      ]
+    },
+    {
+      "project": "rrj_h08b_history_20261015",
+      "running": 5,
+      "services": [
+        {
+          "name": "supabase_storage_rrj_h08b_history_20261015",
+          "id": "1cc9c7088cba",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:33.007598434Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_rest_rrj_h08b_history_20261015",
+          "id": "4f23e160669b",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:33.049848513Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_auth_rrj_h08b_history_20261015",
+          "id": "e3685155639e",
+          "running": true,
+          "restarted": 3,
+          "startedAt": "2026-10-15T16:39:49.895694303Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_kong_rrj_h08b_history_20261015",
+          "id": "4e7af74404e1",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:32.406216065Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_db_rrj_h08b_history_20261015",
+          "id": "c7716c7d279e",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:33.054234708Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        }
+      ]
+    },
+    {
+      "project": "rrj_manager_lifecycle_20261014",
+      "running": 5,
+      "services": [
+        {
+          "name": "supabase_storage_rrj_manager_lifecycle_20261014",
+          "id": "b7f9e3a021fe",
+          "running": true,
+          "restarted": 1,
+          "startedAt": "2026-10-15T16:39:48.598625457Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_rest_rrj_manager_lifecycle_20261014",
+          "id": "dcdd656c805d",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:33.063186074Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_auth_rrj_manager_lifecycle_20261014",
+          "id": "caca8252418a",
+          "running": true,
+          "restarted": 3,
+          "startedAt": "2026-10-15T16:39:49.775751666Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_kong_rrj_manager_lifecycle_20261014",
+          "id": "7088583f5d03",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:32.655643414Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_db_rrj_manager_lifecycle_20261014",
+          "id": "8d75e1ef2533",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:32.829658678Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        }
+      ]
+    },
+    {
+      "project": "rrj_phase3_prefix_20261014_a1",
+      "running": 5,
+      "services": [
+        {
+          "name": "supabase_storage_rrj_phase3_prefix_20261014_a1",
+          "id": "ae137e6fa583",
+          "running": true,
+          "restarted": 1,
+          "startedAt": "2026-10-15T16:39:49.213734255Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_rest_rrj_phase3_prefix_20261014_a1",
+          "id": "04cf7973e393",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:32.0430493Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_auth_rrj_phase3_prefix_20261014_a1",
+          "id": "de14fe3d9d51",
+          "running": true,
+          "restarted": 2,
+          "startedAt": "2026-10-15T16:39:45.48379666Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_kong_rrj_phase3_prefix_20261014_a1",
+          "id": "0129b244cbaa",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:32.711122933Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_db_rrj_phase3_prefix_20261014_a1",
+          "id": "8d9ccc55fd6b",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:33.100072667Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        }
+      ]
+    },
+    {
+      "project": "rrj_phase8_sim",
+      "running": 11,
+      "services": [
+        {
+          "name": "supabase_studio_rrj_phase8_sim",
+          "id": "7b74a27c4f03",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:32.063675453Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_pg_meta_rrj_phase8_sim",
+          "id": "e8027b107be7",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:32.650157165Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_edge_runtime_rrj_phase8_sim",
+          "id": "21337dc139d7",
+          "running": false,
+          "restarted": 0,
+          "startedAt": "2026-10-10T15:13:59.720351595Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_storage_rrj_phase8_sim",
+          "id": "ba0909dcc96a",
+          "running": true,
+          "restarted": 1,
+          "startedAt": "2026-10-15T16:39:53.654771326Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_rest_rrj_phase8_sim",
+          "id": "33b54d736e83",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:32.891354695Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_realtime_rrj_phase8_sim",
+          "id": "240232e06d4b",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:32.947037769Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_inbucket_rrj_phase8_sim",
+          "id": "69e08c98aa8e",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:33.041293744Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_auth_rrj_phase8_sim",
+          "id": "05248ee14735",
+          "running": true,
+          "restarted": 3,
+          "startedAt": "2026-10-15T16:39:49.845177375Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_kong_rrj_phase8_sim",
+          "id": "fd2fcefdfbc8",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:32.597490917Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_vector_rrj_phase8_sim",
+          "id": "2877b8ab0d4d",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:32.83369207Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_analytics_rrj_phase8_sim",
+          "id": "bf3087423191",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T17:07:54.531669531Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_db_rrj_phase8_sim",
+          "id": "f4dc2b611561",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:32.482983685Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        }
+      ]
+    },
+    {
+      "project": "rrj_rc_synthetic_replay_20261013",
+      "running": 5,
+      "services": [
+        {
+          "name": "supabase_storage_rrj_rc_synthetic_replay_20261013",
+          "id": "5a15b115b197",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:32.769338984Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_rest_rrj_rc_synthetic_replay_20261013",
+          "id": "aee7e2307389",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:32.422583714Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_auth_rrj_rc_synthetic_replay_20261013",
+          "id": "85c59c5ec0b5",
+          "running": true,
+          "restarted": 3,
+          "startedAt": "2026-10-15T16:39:51.217042781Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_kong_rrj_rc_synthetic_replay_20261013",
+          "id": "e77021711b8d",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:33.073833652Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_db_rrj_rc_synthetic_replay_20261013",
+          "id": "9410f82c405e",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:32.843105859Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        }
+      ]
+    },
+    {
+      "project": "rrj_defense_demo_20261014_r2",
+      "running": 5,
+      "services": [
+        {
+          "name": "supabase_storage_rrj_defense_demo_20261014_r2",
+          "id": "fadb21325353",
+          "running": true,
+          "restarted": 1,
+          "startedAt": "2026-10-15T16:39:46.518360853Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_rest_rrj_defense_demo_20261014_r2",
+          "id": "30d5bf2f23a1",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:32.584260734Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_auth_rrj_defense_demo_20261014_r2",
+          "id": "e133aed5720f",
+          "running": true,
+          "restarted": 3,
+          "startedAt": "2026-10-15T16:39:50.0331778Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_kong_rrj_defense_demo_20261014_r2",
+          "id": "56c80a5f8803",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:33.082313078Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_db_rrj_defense_demo_20261014_r2",
+          "id": "beec6b1192ca",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:32.783404208Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        }
+      ]
+    },
+    {
+      "project": "rrj_defense_demo_20261014_r3",
+      "running": 5,
+      "services": [
+        {
+          "name": "supabase_storage_rrj_defense_demo_20261014_r3",
+          "id": "bdd4c001c232",
+          "running": true,
+          "restarted": 1,
+          "startedAt": "2026-10-15T16:39:46.560250559Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_rest_rrj_defense_demo_20261014_r3",
+          "id": "a47c5ff84b74",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:32.341417511Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_auth_rrj_defense_demo_20261014_r3",
+          "id": "92bb64389b29",
+          "running": true,
+          "restarted": 3,
+          "startedAt": "2026-10-15T16:39:49.625408199Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_kong_rrj_defense_demo_20261014_r3",
+          "id": "08696de9d4e4",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:32.549415234Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_db_rrj_defense_demo_20261014_r3",
+          "id": "85e0d9d47432",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:33.091677262Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        }
+      ]
+    },
+    {
+      "project": "rrj_h08c_history_20261015",
+      "running": 11,
+      "services": [
+        {
+          "name": "supabase_studio_rrj_h08c_history_20261015",
+          "id": "d99279ea81a3",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:32.93898284Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_pg_meta_rrj_h08c_history_20261015",
+          "id": "36204297b02b",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:32.643203244Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_edge_runtime_rrj_h08c_history_20261015",
+          "id": "bb74cd675941",
+          "running": false,
+          "restarted": 0,
+          "startedAt": "2026-10-14T19:22:25.217801834Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_storage_rrj_h08c_history_20261015",
+          "id": "3cde5a00ddf7",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:32.599450545Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_rest_rrj_h08c_history_20261015",
+          "id": "feebac47f5fa",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:32.738344267Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_realtime_rrj_h08c_history_20261015",
+          "id": "ff427135d2df",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:32.217103913Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_inbucket_rrj_h08c_history_20261015",
+          "id": "0ad2bab7e2eb",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:32.859331581Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_auth_rrj_h08c_history_20261015",
+          "id": "862664844b42",
+          "running": true,
+          "restarted": 2,
+          "startedAt": "2026-10-15T16:39:43.852130258Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_kong_rrj_h08c_history_20261015",
+          "id": "d3bd5187fb2a",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:32.501449763Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_vector_rrj_h08c_history_20261015",
+          "id": "ab7d705432f5",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:32.868170902Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_analytics_rrj_h08c_history_20261015",
+          "id": "2d9de3b44279",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T17:16:18.042844494Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        },
+        {
+          "name": "supabase_db_rrj_h08c_history_20261015",
+          "id": "774017228b5e",
+          "running": true,
+          "restarted": 0,
+          "startedAt": "2026-10-15T16:39:32.297417846Z",
+          "composeProjectMatches": true,
+          "supabaseProjectMatches": true
+        }
+      ]
+    }
+  ],
+  "protectedProjects": [
+    "rrj_h09_order_flow_20261015",
+    "rrj_defense_demo_20261014",
+    "rrj_recovery_20261014_source",
+    "rrj_recovery_20261014_target",
+    "isolated-stack",
+    "my-local-todo-app",
+    "<unlabeled>"
+  ],
+  "consentChecklist": [
+    "Exact project and every service approved by owner",
+    "Current users, jobs, browser tabs and tests checked; last-use time recorded",
+    "Network aliases, mounted data and downstream feature dependencies reviewed",
+    "Restore order, original IDs, ports and health checks recorded",
+    "WSL RAM/swap and Docker responsiveness satisfy preflight"
+  ],
+  "restoreManifestTemplate": {
+    "project": "<approved exact project>",
+    "approvedServices": [],
+    "originalContainerIds": [],
+    "originalRunningStates": [],
+    "portBindings": [],
+    "stopOrder": [],
+    "startOrder": [],
+    "stoppedAt": null,
+    "restoredAt": null,
+    "ownerApprovalReference": null,
+    "healthResult": null
+  },
+  "blocked": "No stack-level stop is implemented; current use and owner approval remain unverified"
+}

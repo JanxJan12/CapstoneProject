@@ -1,0 +1,203 @@
+{
+  "node_count": 2025,
+  "unverified_node_count": 0,
+  "raw_edge_count": 6461,
+  "non_object_edges": 0,
+  "missing_endpoint_edges": 0,
+  "dangling_endpoint_edges": 14,
+  "external_reference_edges": 368,
+  "self_loop_edges": 1,
+  "valid_candidate_edges": 6079,
+  "exact_duplicate_edges": 0,
+  "directed_unique_endpoint_pairs": 6027,
+  "directed_same_endpoint_collapsed_edges": 52,
+  "undirected_unique_endpoint_pairs": 6026,
+  "undirected_same_endpoint_collapsed_edges": 53,
+  "same_endpoint_group_count": 51,
+  "relation_variant_groups": 40,
+  "source_file_variant_groups": 0,
+  "source_location_variant_groups": 12,
+  "context_variant_groups": 2,
+  "post_build_graph_type": "Graph",
+  "post_build_node_count": 2076,
+  "post_build_edge_count": 6407,
+  "post_build_error": "",
+  "producer_suppression": {
+    "path": "C:\\Users\\Janmari\\AppData\\Roaming\\uv\\tools\\graphifyy\\Lib\\site-packages\\graphify\\extract.py",
+    "total_sites": 12,
+    "sites": [
+      {
+        "line": 1856,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids = {n[\"id\"] for n in nodes}"
+      },
+      {
+        "line": 2419,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids = {n[\"id\"] for n in nodes}"
+      },
+      {
+        "line": 2421,
+        "name": "seen_doc_refs",
+        "tuple_arity": 0,
+        "sample": "seen_doc_refs: set[str] = set()"
+      },
+      {
+        "line": 3088,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = {n[\"id\"] for n in nodes}"
+      },
+      {
+        "line": 3235,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids = {n.get(\"id\") for n in nodes}"
+      },
+      {
+        "line": 4376,
+        "name": "seen_keys",
+        "tuple_arity": 0,
+        "sample": "seen_keys: set[tuple] = set()"
+      },
+      {
+        "line": 4562,
+        "name": "seen_keys",
+        "tuple_arity": 0,
+        "sample": "seen_keys: set[tuple] = set()"
+      },
+      {
+        "line": 8269,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 8377,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 8456,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 8981,
+        "name": "seen_ids",
+        "tuple_arity": 0,
+        "sample": "seen_ids: set[str] = set()"
+      },
+      {
+        "line": 8982,
+        "name": "seen_edges",
+        "tuple_arity": 4,
+        "sample": "seen_edges: set[tuple[str, str, str, str | None]] = set()"
+      }
+    ],
+    "error": ""
+  },
+  "examples": [
+    {
+      "source": "components_common_index",
+      "target": "components_common_button",
+      "edge_count": 3,
+      "relations": [
+        "imports_from",
+        "re_exports"
+      ],
+      "source_files": [
+        "components/common/index.ts"
+      ],
+      "source_locations": [
+        "L2",
+        "L3"
+      ],
+      "contexts": [
+        "export",
+        "re-export"
+      ]
+    },
+    {
+      "source": "app_routes",
+      "target": "app_shell_shell",
+      "edge_count": 2,
+      "relations": [
+        "imports",
+        "indirect_call"
+      ],
+      "source_files": [
+        "app/routes.tsx"
+      ],
+      "source_locations": [
+        "L7",
+        "L96"
+      ],
+      "contexts": [
+        "collection",
+        "import"
+      ]
+    },
+    {
+      "source": "components_common_index",
+      "target": "components_common_badge",
+      "edge_count": 2,
+      "relations": [
+        "imports_from",
+        "re_exports"
+      ],
+      "source_files": [
+        "components/common/index.ts"
+      ],
+      "source_locations": [
+        "L1"
+      ],
+      "contexts": [
+        "export",
+        "re-export"
+      ]
+    },
+    {
+      "source": "components_common_index",
+      "target": "components_common_input",
+      "edge_count": 2,
+      "relations": [
+        "imports_from",
+        "re_exports"
+      ],
+      "source_files": [
+        "components/common/index.ts"
+      ],
+      "source_locations": [
+        "L4"
+      ],
+      "contexts": [
+        "export",
+        "re-export"
+      ]
+    },
+    {
+      "source": "components_common_index",
+      "target": "components_common_statcard",
+      "edge_count": 2,
+      "relations": [
+        "imports_from",
+        "re_exports"
+      ],
+      "source_files": [
+        "components/common/index.ts"
+      ],
+      "source_locations": [
+        "L5"
+      ],
+      "contexts": [
+        "export",
+        "re-export"
+      ]
+    }
+  ]
+}

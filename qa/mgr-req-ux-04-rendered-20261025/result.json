@@ -1,0 +1,82 @@
+{
+  "result": "PASS",
+  "checks": [
+    {
+      "width": 1280,
+      "proposalRows": true,
+      "longName": true,
+      "consolidatedWarning": true,
+      "guidanceDisclosure": true,
+      "checkboxSelection": true,
+      "quantityValidation": true,
+      "noOverflow": true
+    },
+    {
+      "width": 820,
+      "proposalRows": true,
+      "longName": true,
+      "consolidatedWarning": true,
+      "guidanceDisclosure": true,
+      "checkboxSelection": true,
+      "quantityValidation": true,
+      "noOverflow": true
+    },
+    {
+      "width": 390,
+      "proposalRows": true,
+      "longName": true,
+      "consolidatedWarning": true,
+      "guidanceDisclosure": true,
+      "checkboxSelection": true,
+      "quantityValidation": true,
+      "noOverflow": true
+    }
+  ],
+  "coveredGapsAt1280_820_390": true,
+  "zeroQuantityBlockedFromReview": true,
+  "editBeforeSelect": true,
+  "deselectReselect": true,
+  "refreshedSuggestionAndManualEdit": true,
+  "unselectedExcludedFromReviewAndLocalIssue": true,
+  "visualBounds": {
+    ".manager-request-sheet": {
+      "x": 304,
+      "y": 238,
+      "width": 1156,
+      "height": 699
+    },
+    ".manager-request-authoring-main": {
+      "x": 321,
+      "y": 255,
+      "width": 752,
+      "height": 237
+    },
+    ".manager-request-authoring-side": {
+      "x": 1089,
+      "y": 255,
+      "width": 354,
+      "height": 245
+    },
+    ".manager-request-add-item": {
+      "x": 321,
+      "y": 383,
+      "width": 752,
+      "height": 109
+    },
+    ".manager-request-table-wrap": {
+      "x": 321,
+      "y": 569,
+      "width": 1122,
+      "height": 335
+    },
+    ".manager-request-edit-table tbody tr": {
+      "x": 322,
+      "y": 617,
+      "width": 1120,
+      "height": 48
+    }
+  },
+  "browserExceptions": 0,
+  "externalRequests": 0,
+  "networkWrites": 0
+}

@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "existingCustomerOrder": "ORD-000076",
+  "customerOrderId": "4d2847b4-c56a-4b78-8d7d-44489ba2c616",
+  "walkInOrderId": "d4311cdd-c86f-4639-8551-d9da36a58d75",
+  "checks": [
+    "Customer modified-order snapshot and pending GCash payment precondition",
+    "Local authenticated Cashier, Manager, and approved Rider identities",
+    "Cashier verified pre-existing local GCash proof and confirmed modified order",
+    "KDS terminal authentication, queue, denied duplicate, preparing and ready; modifier omission confirmed",
+    "Cashier release, Rider offer/accept/pickup/transit/private proof/delivery and assigned modifier RLS",
+    "Same-database Customer order, payment, and Cashier transaction reconciled",
+    "Modified walk-in cash POS sale, idempotent replay, denied duplicate modifier, and KDS queue"
+  ],
+  "caveat": "KDS get_kds_queue omits item modifier snapshots; no hosted or real GCash action occurred."
+}

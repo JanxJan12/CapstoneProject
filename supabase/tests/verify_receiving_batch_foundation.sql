@@ -10,7 +10,7 @@ declare
   v_table text;
   v_privilege text;
   v_generated_expression text;
-begin
+begin 
   if (
     select count(*)
     from information_schema.columns

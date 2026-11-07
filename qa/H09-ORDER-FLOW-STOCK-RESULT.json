@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "orderNumber": "ORD-000016",
+  "syntheticOpening": 10,
+  "beforeVerification": 10,
+  "afterVerification": 9,
+  "batchAfter": 9,
+  "stockDeductionCount": 1,
+  "shiftReceiptCount": 1,
+  "serverGrandTotal": 259,
+  "oversellDenied": true,
+  "boundary": "Disposable H09 diagnostic stack; 10 synthetic opening units are not a business baseline."
+}

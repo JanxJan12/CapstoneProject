@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { Toast } from "../components";
+import { formatMoney } from "../constants";
 import { useCashierStore } from "../hooks/CashierStore";
-import { calculateShiftTotals } from "../services/cashierService";
 import type { ShiftClosureInput } from "../types";
 
 export function useShiftSettlement() {
@@ -9,18 +9,11 @@ export function useShiftSettlement() {
     useCashierStore();
   const [startOpen, setStartOpen] = useState(false);
   const [endOpen, setEndOpen] = useState(false);
-  const [reportShiftId, setReportShiftId] = useState<string>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const pendingPayments = state.payments.filter(
     (payment) => payment.status === "Pending",
   );
-  const latest = activeShift ?? state.shifts[0];
-  const totals = latest ? calculateShiftTotals(state, latest.id) : shiftTotals;
-  const reportShift = state.shifts.find((shift) => shift.id === reportShiftId);
-  const reportTotals = reportShift
-    ? calculateShiftTotals(state, reportShift.id)
-    : undefined;
 
   const handleStart = useCallback(
     async (openingCash: number, terminal: string) => {
@@ -49,16 +42,16 @@ export function useShiftSettlement() {
       setLoading(true);
       setError("");
       try {
-        await endShift(input);
+        const saved = await endShift(input);
         setEndOpen(false);
-      Toast.success("Shift settled and closed", {
-        description:
-          "The closing cash count and settlement were saved.",
-      });
+        Toast.success("Shift settled and closed", {
+          description: `Saved expected ${formatMoney(saved.expectedCash)} · counted ${formatMoney(saved.actualCash)} · ${saved.variance === 0 ? "balanced" : saved.variance < 0 ? "shortage" : "overage"} ${formatMoney(Math.abs(saved.variance))}. View Saved closed shifts for the recorded settlement.`,
+        });
       } catch (caught) {
         setError(
           caught instanceof Error ? caught.message : "Unable to settle shift.",
         );
+        throw caught;
       } finally {
         setLoading(false);
       }
@@ -79,16 +72,11 @@ export function useShiftSettlement() {
     state,
     activeShift,
     shiftTotals,
-    latest,
-    totals,
     pendingPayments,
-    reportShift,
-    reportTotals,
     startOpen,
     setStartOpen,
     endOpen,
     setEndOpen,
-    setReportShiftId,
     loading,
     error,
     setError,

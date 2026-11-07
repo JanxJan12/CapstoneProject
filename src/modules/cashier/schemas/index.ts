@@ -35,20 +35,10 @@ export const orderOperationalEditSchema = z.object({
     .trim()
     .min(1, "Phone number is required.")
     .max(20, "Phone number must be 20 characters or fewer."),
-  tableNumber: z
-    .string()
-    .trim()
-    .max(20, "Table number must be 20 characters or fewer.")
-    .optional(),
   deliveryAddress: z
     .string()
     .trim()
     .max(200, "Delivery address must be 200 characters or fewer.")
-    .optional(),
-  orderInstructions: z
-    .string()
-    .trim()
-    .max(500, "Order instructions must be 500 characters or fewer.")
     .optional(),
 });
 
@@ -72,20 +62,22 @@ export const voidSchema = z.object({
 
 export const startShiftSchema = z.object({
   openingCash: z
-    .number()
-    .min(0, "Opening cash cannot be negative.")
-    .max(100000),
+    .string()
+    .trim()
+    .min(1, "Enter the physical opening cash amount.")
+    .regex(/^-?\d+(?:\.\d{1,2})?$/, "Enter a number with at most two decimal places.")
+    .transform(Number)
+    .pipe(z.number().finite().min(0, "Opening cash cannot be negative.")
+      .max(100000, "Opening cash cannot exceed ₱100,000.")),
   terminal: z.string().trim().min(2, "Terminal is required."),
 });
 
 export const endShiftSchema = z.object({
-  actualCash: z.number().min(0, "Actual cash cannot be negative."),
-  varianceReason: z.string().trim().max(120).optional(),
-  notes: z
-    .string()
-    .trim()
-    .max(500, "Notes must be 500 characters or fewer.")
-    .optional(),
+  actualCash: z.number({ error: "Enter the physical cash count." })
+    .finite("Enter a valid cash amount.")
+    .min(0, "Actual cash cannot be negative.")
+    .refine((value) => Math.abs(value - Math.round(value * 100) / 100) < 1e-9,
+      "Enter cash to two decimal places at most."),
 });
 
 export const posSchema = z
@@ -106,17 +98,10 @@ export const posSchema = z
       .max(200, "Delivery address must be 200 characters or fewer.")
       .optional(),
     orderType: z.enum(["Dine-in", "Take-out", "Delivery"]),
-    tableNumber: z.string().optional(),
-    paymentMethod: z.enum(["Cash", "GCash"]),
+    paymentMethod: z.literal("Cash"),
     amountTendered: z.number().optional(),
     gcashReference: z.string().optional(),
     gcashConfirmed: z.boolean(),
-    discountType: z.enum(["None", "Senior Citizen", "PWD"]),
-    discountReference: z.string().optional(),
-    orderInstructions: z
-      .string()
-      .max(300, "Order instructions must be 300 characters or fewer.")
-      .optional(),
   })
   .superRefine((value, ctx) => {
     if (value.orderType === "Delivery") {
@@ -142,27 +127,6 @@ export const posSchema = z
         });
       }
     }
-    if (value.paymentMethod === "GCash" && !value.gcashReference?.trim()) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["gcashReference"],
-        message: "GCash reference number is required.",
-      });
-    }
-    if (value.paymentMethod === "GCash" && !value.gcashConfirmed) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["gcashConfirmed"],
-        message: "Confirm the GCash payment before placing the order.",
-      });
-    }
-    if (value.discountType !== "None" && !value.discountReference?.trim()) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["discountReference"],
-        message: "ID or reference is required for this discount.",
-      });
-    }
   });
 
 export type RejectionForm = z.infer<typeof rejectionSchema>;
@@ -171,6 +135,6 @@ export type OrderOperationalEditForm = z.infer<
   typeof orderOperationalEditSchema
 >;
 export type VoidForm = z.infer<typeof voidSchema>;
-export type StartShiftForm = z.infer<typeof startShiftSchema>;
+export type StartShiftForm = z.input<typeof startShiftSchema>;
 export type EndShiftForm = z.infer<typeof endShiftSchema>;
 export type POSForm = z.infer<typeof posSchema>;

@@ -1,0 +1,85 @@
+DATABASE tb_baseline
+FUNCTION HASHES proname             |               md5                
+--------------------------------+----------------------------------
+ advance_rider_delivery         | 5a02c96e0eeb14e1847ce85f2d1d46c0
+ settle_paid_order_cancellation | f4ee0ef351d3eb7a29824617958c66d2
+(2 rows)
+SCHEMA EVIDENCE enabled_triggers | policies | rls_tables 
+------------------+----------+------------
+               43 |       19 |          6
+(1 row)
+BASELINE current_status |  status  |  status  |  status   | count | count 
+----------------+----------+----------+-----------+-------+-------
+ rider_accepted | accepted | verified | completed |     0 |     0
+(1 row)
+MANAGER BEGIN 20000000-0000-0000-0000-000000000001
+RIDER BEGIN 30000000-0000-0000-0000-000000000001
+MANAGER WAIT wait_event_type |  wait_event   | pg_blocking_pids 
+-----------------+---------------+------------------
+ Lock            | transactionid | {2125}
+(1 row)
+RIDER CALL 30000000-0000-0000-0000-000000000001|20000000-0000-0000-0000-000000000001|picked_up|picked_up
+MANAGER CALL 
+MANAGER END 
+RIDER END 
+AFTER RACE current_status |  status   |  status  |  status   | count | count 
+----------------+-----------+----------+-----------+-------+-------
+ picked_up      | picked_up | verified | completed |     0 |     1
+(1 row)
+MANAGER RETRY ERROR:  22023: Only a paid order before rider pickup or completion can be settled.
+CONTEXT:  PL/pgSQL function public.settle_paid_order_cancellation(uuid,text,text,public.payment_method,text,boolean,boolean) line 81 at RAISE
+LOCATION:  exec_stmt_raise, pl_exec.c:3911
+RIDER RETRY ERROR:  P0001: Delivery transition rejected because the assignment status has changed. Expected accepted, current picked_up.
+CONTEXT:  PL/pgSQL function advance_rider_delivery(uuid,delivery_assignment_status) line 83 at RAISE
+LOCATION:  exec_stmt_raise, pl_exec.c:3911
+ROLE CHECK RIDER CANCELLATION ERROR:  42501: Active Manager access is required.
+CONTEXT:  PL/pgSQL function public.settle_paid_order_cancellation(uuid,text,text,public.payment_method,text,boolean,boolean) line 25 at RAISE
+LOCATION:  exec_stmt_raise, pl_exec.c:3911
+ROLE CHECK MANAGER DELIVERY ERROR:  P0001: Only an active approved rider may update a delivery.
+CONTEXT:  PL/pgSQL function advance_rider_delivery(uuid,delivery_assignment_status) line 32 at RAISE
+LOCATION:  exec_stmt_raise, pl_exec.c:3911
+ANON EXECUTE has_function_privilege | has_function_privilege 
+------------------------+------------------------
+ f                      | f
+(1 row)
+FINAL current_status |  status   |  status  |  status   | count | count 
+----------------+-----------+----------+-----------+-------+-------
+ picked_up      | picked_up | verified | completed |     0 |     1
+(1 row)
+TRIGGER SIDE EFFECTS push_outbox | inventory_transactions | auth_audit | profiles | assignment_timestamp_updated | payment_timestamp_updated | rider_timestamp_updated 
+-------------+------------------------+------------+----------+------------------------------+---------------------------+-------------------------
+           0 |                      0 |          0 |        3 | t                            | f                         | f
+(1 row)
+MANAGER ERRORS ERROR:  40P01: deadlock detected
+DETAIL:  Process 2124 waits for ShareLock on transaction 17932; blocked by process 2125.
+Process 2125 waits for ShareLock on transaction 17931; blocked by process 2124.
+HINT:  See server log for query details.
+CONTEXT:  while locking tuple (0,1) in relation "delivery_assignments"
+SQL statement "select assignment.rider_id                   from public.delivery_assignments assignment
+  where assignment.order_id = p_order_id
+    and assignment.status in (
+      'offered'::public.delivery_assignment_status,
+      'accepted'::public.delivery_assignment_status
+    )
+  order by assignment.assigned_at desc, assignment.id desc
+  limit 1 for update"
+PL/pgSQL function public.settle_paid_order_cancellation(uuid,text,text,public.payment_method,text,boolean,boolean) line 260 at SQL statement
+LOCATION:  DeadLockReport, deadlock.c:1130
+
+ERROR:  22023: Only a paid order before rider pickup or completion can be settled.
+CONTEXT:  PL/pgSQL function public.settle_paid_order_cancellation(uuid,text,text,public.payment_method,text,boolean,boolean) line 81 at RAISE
+LOCATION:  exec_stmt_raise, pl_exec.c:3911
+
+ERROR:  P0001: Only an active approved rider may update a delivery.
+CONTEXT:  PL/pgSQL function advance_rider_delivery(uuid,delivery_assignment_status) line 32 at RAISE
+LOCATION:  exec_stmt_raise, pl_exec.c:3911
+
+RIDER ERRORS ERROR:  P0001: Delivery transition rejected because the assignment status has changed. Expected accepted, current picked_up.
+CONTEXT:  PL/pgSQL function advance_rider_delivery(uuid,delivery_assignment_status) line 83 at RAISE
+LOCATION:  exec_stmt_raise, pl_exec.c:3911
+
+ERROR:  42501: Active Manager access is required.
+CONTEXT:  PL/pgSQL function public.settle_paid_order_cancellation(uuid,text,text,public.payment_method,text,boolean,boolean) line 25 at RAISE
+LOCATION:  exec_stmt_raise, pl_exec.c:3911
+
+ASSERTIONS PASS baseline

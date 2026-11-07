@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  AlertTriangle,
   CheckCircle2,
   CreditCard,
   DollarSign,
@@ -8,6 +7,7 @@ import {
   RefreshCw,
   ShoppingCart,
   Store,
+  ArrowUpRight,
 } from "lucide-react";
 
 import { useAuth } from "@/app/providers/AuthProvider";
@@ -22,6 +22,8 @@ import {
   ManagerOrderStatusBadge,
   managerOrderNeedsAttention,
 } from "../components/ManagerStatusBadge";
+import { getManagerStockSummary } from "../inventory/inventoryApi";
+import { countLowUsableStock } from "./usableStockAttention";
 
 const STATUS_ORDER: ManagerOrderStatus[] = [
   "waiting_payment_verification",
@@ -50,16 +52,30 @@ function formatCurrency(value: number): string {
 }
 
 function getErrorMessage(error: unknown): string {
-  return error instanceof Error
-    ? error.message
-    : "Unable to load the manager dashboard.";
+  const message = error instanceof Error ? error.message : "";
+  if (
+    message.includes("Active manager access required") ||
+    message.includes("Authentication required")
+  )
+    return "Manager access is required to view this dashboard.";
+  return "The dashboard could not be refreshed. Check your connection or access, then retry.";
+}
+
+function isAccessFailure(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : "";
+  return (
+    message.includes("Active manager access required") ||
+    message.includes("Authentication required")
+  );
 }
 
 function SparkAreaChart({ data }: { data: ManagerDailySale[] }) {
-  if (data.length === 0) {
+  if (data.length === 0 || data.every((entry) => entry.sales === 0)) {
     return (
       <div className="flex h-[116px] items-center justify-center text-sm text-muted-foreground">
-        No daily sales data is available.
+        {data.length === 0
+          ? "No daily sales data is available."
+          : "No verified-payment revenue in this period."}
       </div>
     );
   }
@@ -107,7 +123,7 @@ function SparkAreaChart({ data }: { data: ManagerDailySale[] }) {
       width="100%"
       height={height}
       role="img"
-      aria-label="Verified fulfilled revenue for the last seven calendar days"
+      aria-label="Verified-payment revenue for the last seven fulfillment dates"
     >
       {[0, 0.5, 1].map((tick, index) => {
         const y = paddingTop + innerHeight - tick * innerHeight;
@@ -191,7 +207,7 @@ function AttentionCard({
   return (
     <article
       className={
-        "flex min-h-[112px] items-center gap-4 rounded-xl border p-4 " +
+        "flex min-h-[88px] items-center gap-3 rounded-xl border p-3 " +
         (active ? activeTone : "border-border/80 bg-muted/25 text-foreground")
       }
     >
@@ -215,7 +231,7 @@ function AttentionCard({
         <p className="text-xs font-extrabold uppercase tracking-[0.1em] text-current/75">
           {label}
         </p>
-        <p className="mt-1 font-['Fraunces'] text-2xl font-bold leading-none text-current">
+        <p className="mt-1 font-['Manrope'] text-2xl font-extrabold leading-none text-current">
           {value}
         </p>
         <p className="mt-1.5 text-xs font-medium leading-4 text-current/75">
@@ -226,29 +242,134 @@ function AttentionCard({
   );
 }
 
-export function ManagerDashboard() {
-  const { session } = useAuth();
-  const [dashboard, setDashboard] = useState<ManagerDashboardData | null>(null);
+export function ManagerDashboard({
+  onNavigate,
+}: {
+  onNavigate?: (
+    page:
+      "inventory" | "orders" | "replenishment" | "stock-receiving" | "reports",
+  ) => void;
+}) {
+  const { session, loading: authLoading } = useAuth();
+  const [storedDashboard, setDashboard] = useState<ManagerDashboardData | null>(
+    null,
+  );
+  const [loadedForSession, setLoadedForSession] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [loadedAt, setLoadedAt] = useState<Date | null>(null);
+  const requestVersion = useRef(0);
+  const [stockCount, setStockCount] = useState<number | null>(null);
+  const [stockItemCount, setStockItemCount] = useState<number | null>(null);
+  const [stockLoadedForSession, setStockLoadedForSession] = useState<string | null>(null);
+  const [stockLoadedAt, setStockLoadedAt] = useState<Date | null>(null);
+  const [stockLoading, setStockLoading] = useState(false);
+  const [stockError, setStockError] = useState(false);
+  const stockRequestVersion = useRef(0);
+  const stockInFlight = useRef(false);
+
+  const loadStock = useCallback(async () => {
+    if (stockInFlight.current) return;
+    stockInFlight.current = true;
+    const version = ++stockRequestVersion.current;
+    setStockLoading(true);
+    setStockError(false);
+    try {
+      const rows = await getManagerStockSummary();
+      const count = countLowUsableStock(rows);
+      if (version === stockRequestVersion.current) {
+        setStockCount(count);
+        setStockItemCount(rows.length);
+        setStockLoadedForSession(session?.id ?? null);
+        setStockLoadedAt(new Date());
+      }
+    } catch {
+      if (version === stockRequestVersion.current) setStockError(true);
+    } finally {
+      if (version === stockRequestVersion.current) {
+        stockInFlight.current = false;
+        setStockLoading(false);
+      }
+    }
+  }, [session?.id]);
 
   const loadDashboard = useCallback(async () => {
+    const version = ++requestVersion.current;
     setLoading(true);
     setError(null);
 
     try {
-      setDashboard(await getManagerDashboard());
+      const result = await getManagerDashboard();
+      if (version === requestVersion.current) {
+        setDashboard(result);
+        setLoadedForSession(session?.id ?? null);
+        setLoadedAt(new Date());
+      }
     } catch (loadError) {
-      setError(getErrorMessage(loadError));
+      if (version === requestVersion.current) {
+        if (isAccessFailure(loadError)) {
+          setDashboard(null);
+          setLoadedForSession(null);
+          setLoadedAt(null);
+        }
+        setError(getErrorMessage(loadError));
+      }
     } finally {
-      setLoading(false);
+      if (version === requestVersion.current) setLoading(false);
     }
-  }, []);
+  }, [session?.id]);
 
   useEffect(() => {
+    if (authLoading) return;
+    if (!session?.id || session.role !== "manager") {
+      requestVersion.current += 1;
+      stockRequestVersion.current += 1;
+      stockInFlight.current = false;
+      setDashboard(null);
+      setLoadedForSession(null);
+      setLoadedAt(null);
+      setError("Manager access is required to view this dashboard.");
+      setLoading(false);
+      setStockCount(null);
+      setStockItemCount(null);
+      setStockLoadedForSession(null);
+      setStockLoadedAt(null);
+      setStockLoading(false);
+      setStockError(false);
+      return;
+    }
+    setDashboard(null);
+    setLoadedForSession(null);
+    setLoadedAt(null);
+    setStockCount(null);
+    setStockItemCount(null);
+    setStockLoadedForSession(null);
+    setStockLoadedAt(null);
+    void loadStock();
     void loadDashboard();
-  }, [loadDashboard]);
+    return () => {
+      requestVersion.current += 1;
+      stockRequestVersion.current += 1;
+      stockInFlight.current = false;
+    };
+  }, [authLoading, session?.id, session?.role, loadDashboard, loadStock]);
 
+  const dashboard =
+    !authLoading &&
+    session?.role === "manager" &&
+    session.id === loadedForSession
+      ? storedDashboard
+      : null;
+  const usableCount =
+    !authLoading &&
+    session?.role === "manager" &&
+    session.id === stockLoadedForSession
+      ? stockCount
+      : null;
+  const refreshDashboard = () => {
+    void loadDashboard();
+    void loadStock();
+  };
   const totalStatusCount =
     dashboard?.orderStatusCounts.reduce((sum, entry) => sum + entry.count, 0) ??
     0;
@@ -271,23 +392,65 @@ export function ManagerDashboard() {
     : "Good day.";
 
   return (
-    <div className="manager-dashboard space-y-4">
-      <header className="flex flex-col gap-2 border-b border-border/80 pb-4 sm:flex-row sm:items-end sm:justify-between">
+    <div className="manager-dashboard min-w-0 space-y-5">
+      <header className="manager-dashboard-hero flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="mb-1.5 flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.14em] text-primary">
-            <Store className="h-4 w-4" /> Manager overview
+          <p className="mb-2 flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.14em] text-primary">
+            <Store className="h-4 w-4" /> RRJ's Food-Haus · Operations
           </p>
-          <h1 className="text-foreground">{greeting}</h1>
+          <h1 className="text-foreground">Manager dashboard</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {greeting} Review the recorded queues and today's activity.
+          </p>
         </div>
-        <p className="text-sm font-medium text-muted-foreground">{today}</p>
+        <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+          <p className="manager-dashboard-date text-sm font-semibold text-muted-foreground">
+            {today}
+          </p>
+          <Button
+            variant="secondary"
+            size="md"
+            onClick={refreshDashboard}
+            disabled={loading || authLoading || session?.role !== "manager"}
+            aria-label="Refresh manager dashboard"
+          >
+            <RefreshCw className="h-4 w-4" /> Refresh
+          </Button>
+        </div>
       </header>
 
+      {dashboard && loadedAt && (
+        <p className="text-xs text-muted-foreground">
+          Dashboard last loaded{" "}
+          {new Intl.DateTimeFormat("en-PH", {
+            timeZone: "Asia/Manila",
+            dateStyle: "medium",
+            timeStyle: "short",
+          }).format(loadedAt)}. Values may change between refreshes.
+        </p>
+      )}
+      {loading && dashboard && (
+        <p
+          className="rounded-xl border border-border bg-card px-4 py-3 text-sm text-muted-foreground"
+          role="status"
+        >
+          Refreshing dashboard… Previously loaded values remain visible until
+          the read finishes.
+        </p>
+      )}
+
       {loading && !dashboard ? (
-        <div className="rrj-card p-8 text-center text-sm text-muted-foreground">
+        <div
+          role="status"
+          className="rrj-card p-8 text-center text-sm text-muted-foreground"
+        >
           Loading manager dashboard…
         </div>
       ) : error && !dashboard ? (
-        <div className="rrj-card flex flex-col items-start gap-3 p-5">
+        <div
+          role="alert"
+          className="rrj-card flex flex-col items-start gap-3 p-5"
+        >
           <div>
             <p className="text-sm font-bold text-red-700">
               Dashboard unavailable
@@ -296,7 +459,7 @@ export function ManagerDashboard() {
           </div>
           <Button
             variant="secondary"
-            size="sm"
+            size="md"
             onClick={() => void loadDashboard()}
           >
             <RefreshCw className="h-4 w-4" /> Retry
@@ -305,11 +468,17 @@ export function ManagerDashboard() {
       ) : dashboard ? (
         <>
           {error && (
-            <div className="flex items-center justify-between gap-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-              <span>{error}</span>
+            <div
+              role="alert"
+              className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+            >
+              <span>
+                {error} The displayed values are from the last successful load
+                and may be outdated.
+              </span>
               <Button
                 variant="secondary"
-                size="sm"
+                size="md"
                 onClick={() => void loadDashboard()}
               >
                 Retry
@@ -317,50 +486,106 @@ export function ManagerDashboard() {
             </div>
           )}
 
-          <section aria-labelledby="manager-attention-heading">
-            <div className="mb-2.5 flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-amber-700" />
+          <section
+            aria-labelledby="manager-attention-heading"
+            className="manager-dashboard-operations"
+          >
+            <div className="manager-section-heading">
               <div>
-                <h2
-                  id="manager-attention-heading"
-                  className="text-sm font-extrabold text-foreground"
-                >
-                  Needs attention
-                </h2>
-                <p className="text-xs text-muted-foreground">
-                  Current payment and inventory exception queues
+                <p className="manager-page-context">Operational queues</p>
+                <h2 id="manager-attention-heading">Needs attention</h2>
+                <p>
+                  Current pending payments, physical and usable stock warnings, plus
+                  orders created today.
                 </p>
               </div>
             </div>
 
-            <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.8fr)]">
-              <div className="rrj-card grid gap-3 p-3 sm:grid-cols-2">
-                <AttentionCard
-                  label="Pending payments"
-                  value={dashboard.pendingPayments.toLocaleString("en-PH")}
-                  description={
-                    dashboard.pendingPayments > 0
-                      ? "Waiting in the cashier verification queue"
-                      : "No payments are waiting for verification"
-                  }
-                  active={dashboard.pendingPayments > 0}
-                  tone="amber"
-                  icon={CreditCard}
-                />
-                <AttentionCard
-                  label="Low stock"
-                  value={
-                    dashboard.lowStockCount.toLocaleString("en-PH") + " items"
-                  }
-                  description={
-                    dashboard.lowStockCount > 0
-                      ? "At or below the configured reorder level"
-                      : "No items are at their reorder level"
-                  }
-                  active={dashboard.lowStockCount > 0}
-                  tone="red"
-                  icon={Package}
-                />
+            <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.85fr)]">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="manager-dashboard-action">
+                  <AttentionCard
+                    label="Pending payments"
+                    value={dashboard.pendingPayments.toLocaleString("en-PH")}
+                    description={
+                      dashboard.pendingPayments > 0
+                        ? "Pending payments across all dates"
+                        : "No payments are pending across all dates"
+                    }
+                    active={dashboard.pendingPayments > 0}
+                    tone="amber"
+                    icon={CreditCard}
+                  />
+                  {onNavigate && (
+                    <button type="button" onClick={() => onNavigate("orders")}>
+                      Review orders <ArrowUpRight className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+                <div className="manager-dashboard-action">
+                  <AttentionCard
+                    label="Low stock"
+                    value={
+                      dashboard.lowStockCount.toLocaleString("en-PH") + " items"
+                    }
+                    description={
+                      dashboard.lowStockCount > 0
+                        ? "Active items with recorded on-hand at or below reorder level"
+                        : "No active items have recorded on-hand at or below reorder level"
+                    }
+                    active={dashboard.lowStockCount > 0}
+                    tone="red"
+                    icon={Package}
+                  />
+                  {onNavigate && (
+                    <button
+                      type="button"
+                      onClick={() => onNavigate("inventory")}
+                    >
+                      Open Stock Monitor <ArrowUpRight className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+                <div className="manager-dashboard-action">
+                  <AttentionCard
+                    label="Low usable stock"
+                    value={
+                      usableCount === null
+                        ? "—"
+                        : usableCount.toLocaleString("en-PH") + " items"
+                    }
+                    description={
+                      stockLoading && usableCount === null
+                        ? "Loading usable stock…"
+                        : stockError && usableCount === null
+                          ? "Usable stock information is temporarily unavailable."
+                          : usableCount === null
+                            ? "Usable stock has not been loaded."
+                            : stockError
+                              ? "Previous usable-stock count; refresh failed and may be stale."
+                              : stockLoading
+                                ? "Refreshing usable stock; previous count shown."
+                                : stockItemCount === 0
+                                  ? "No inventory items were returned."
+                                  : usableCount === 0 && stockLoadedAt
+                                  ? "No active items at or below the recorded minimum."
+                                  : "Active items with usable stock at or below the recorded minimum."
+                    }
+                    active={usableCount !== null && usableCount > 0}
+                    tone="amber"
+                    icon={Package}
+                  />
+                  {stockError && (
+                    <Button variant="secondary" size="sm" onClick={() => void loadStock()} disabled={stockLoading}>
+                      Retry usable stock
+                    </Button>
+                  )}
+                  {onNavigate && (
+                    <button type="button" onClick={() => onNavigate("inventory")}>
+                      Open Stock Monitor <ArrowUpRight className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div className="rrj-card overflow-hidden">
@@ -370,7 +595,7 @@ export function ManagerDashboard() {
                       Today&apos;s order flow
                     </h2>
                     <p className="mt-0.5 text-xs text-muted-foreground">
-                      Current status across today&apos;s orders
+                      Status of orders created today, across channels
                     </p>
                   </div>
                   <span className="rounded-lg border border-border bg-muted/45 px-2.5 py-1 text-sm font-extrabold tabular-nums text-foreground">
@@ -417,6 +642,81 @@ export function ManagerDashboard() {
           </section>
 
           <section
+            aria-label="Business overview"
+            className="manager-dashboard-kpis grid gap-3 sm:grid-cols-2"
+          >
+            <article className="manager-dashboard-kpi rrj-card">
+              <span className="manager-dashboard-kpi-icon">
+                <DollarSign className="h-5 w-5" />
+              </span>
+              <p>Verified fulfilled sales today</p>
+              <strong>{formatCurrency(dashboard.salesToday)}</strong>
+              <small>Verified payments; fulfillment date</small>
+            </article>
+            <article className="manager-dashboard-kpi rrj-card">
+              <span className="manager-dashboard-kpi-icon">
+                <ShoppingCart className="h-5 w-5" />
+              </span>
+              <p>Orders today</p>
+              <strong>{dashboard.ordersToday.toLocaleString("en-PH")}</strong>
+              <small>Created today; all statuses and channels</small>
+            </article>
+          </section>
+
+          {onNavigate && (
+            <section
+              aria-labelledby="manager-quick-access-heading"
+              className="rrj-card p-4 sm:p-5"
+            >
+              <div className="mb-3">
+                <h2
+                  id="manager-quick-access-heading"
+                  className="text-base font-extrabold text-foreground"
+                >
+                  Quick access
+                </h2>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Open the existing Manager workspaces for the next task.
+                </p>
+              </div>
+              <div className="grid gap-2 sm:grid-cols-3">
+                {(
+                  [
+                    [
+                      "replenishment",
+                      "Inventory Requests",
+                      "Prepare or review a formal request",
+                    ],
+                    [
+                      "stock-receiving",
+                      "Receiving",
+                      "Inspect and post a delivery",
+                    ],
+                    ["reports", "Reports", "Review business reporting"],
+                  ] as const
+                ).map(([target, label, description]) => (
+                  <button
+                    key={target}
+                    type="button"
+                    onClick={() => onNavigate(target)}
+                    className="flex min-h-16 items-center justify-between gap-3 rounded-xl border border-border bg-background px-4 py-3 text-left hover:border-primary/50 hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  >
+                    <span>
+                      <strong className="block text-sm text-foreground">
+                        {label}
+                      </strong>
+                      <small className="mt-1 block text-xs text-muted-foreground">
+                        {description}
+                      </small>
+                    </span>
+                    <ArrowUpRight className="h-4 w-4 shrink-0 text-primary" />
+                  </button>
+                ))}
+              </div>
+            </section>
+          )}
+
+          <section
             className="rrj-card overflow-hidden"
             aria-labelledby="recent-orders-heading"
           >
@@ -428,7 +728,7 @@ export function ManagerDashboard() {
                 Recent orders
               </h2>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                Latest activity across all order channels
+                Latest four orders across all dates and channels
               </p>
             </div>
             {dashboard.recentOrders.length === 0 ? (
@@ -437,10 +737,13 @@ export function ManagerDashboard() {
               </p>
             ) : (
               <div className="overflow-x-auto">
+                <p className="px-4 pt-3 text-xs text-muted-foreground sm:hidden">
+                  Scroll horizontally to read every order field.
+                </p>
                 <table className="w-full min-w-[620px]">
                   <thead>
                     <tr className="border-b border-border bg-muted/45">
-                      {["Order", "Customer", "Total", "Order status"].map(
+                      {["Order", "Customer", "Order total", "Order status"].map(
                         (heading) => (
                           <th
                             key={heading}
@@ -465,10 +768,10 @@ export function ManagerDashboard() {
                               : "hover:bg-muted/25"
                         }
                       >
-                        <td className="px-4 py-3 font-mono text-xs font-bold text-primary">
+                        <td className="max-w-[180px] break-all px-4 py-3 font-mono text-xs font-bold text-primary">
                           {order.orderNumber}
                         </td>
-                        <td className="px-4 py-3 text-sm font-semibold text-foreground">
+                        <td className="max-w-[220px] break-words px-4 py-3 text-sm font-semibold text-foreground">
                           {order.customerName}
                         </td>
                         <td className="px-4 py-3 text-sm font-bold tabular-nums text-foreground">
@@ -502,32 +805,51 @@ export function ManagerDashboard() {
                 Verified payments on successfully fulfilled orders
               </p>
             </div>
-            <div className="grid gap-4 p-4 lg:grid-cols-[240px_minmax(0,1fr)] lg:items-center">
-              <div className="grid grid-cols-2 gap-3 lg:grid-cols-1">
-                <div className="rounded-xl border border-border/80 bg-muted/25 p-3">
-                  <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground">
-                    <DollarSign className="h-4 w-4 text-emerald-700" />
-                    Verified fulfilled sales today
-                  </div>
-                  <p className="mt-2 font-['Fraunces'] text-xl font-bold tabular-nums text-foreground">
-                    {formatCurrency(dashboard.salesToday)}
-                  </p>
-                </div>
-                <div className="rounded-xl border border-border/80 bg-muted/25 p-3">
-                  <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground">
-                    <ShoppingCart className="h-4 w-4 text-blue-700" />
-                    Orders today
-                  </div>
-                  <p className="mt-2 font-['Fraunces'] text-xl font-bold tabular-nums text-foreground">
-                    {dashboard.ordersToday.toLocaleString("en-PH")}
-                  </p>
-                </div>
-              </div>
+            <div className="p-4 sm:p-5">
               <div className="min-w-0">
                 <p className="mb-1 text-xs font-bold text-muted-foreground">
-                  Verified fulfilled revenue · Last 7 fulfillment dates
+                  Verified-payment revenue · Last 7 fulfillment dates
                 </p>
                 <SparkAreaChart data={dashboard.dailySales} />
+                {dashboard.dailySales.length > 0 && (
+                  <details className="mt-3 text-sm">
+                    <summary className="min-h-11 cursor-pointer rounded-lg px-2 py-3 font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                      View seven daily values
+                    </summary>
+                    <div className="max-w-full overflow-x-auto rounded-lg border border-border">
+                      <table className="w-full min-w-[260px] text-sm">
+                        <thead>
+                          <tr>
+                            <th scope="col" className="px-3 py-2 text-left">
+                              Date
+                            </th>
+                            <th scope="col" className="px-3 py-2 text-right">
+                              Verified-payment revenue
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {dashboard.dailySales.map((day) => (
+                            <tr
+                              key={day.date}
+                              className="border-t border-border"
+                            >
+                              <th
+                                scope="row"
+                                className="px-3 py-2 text-left font-normal"
+                              >
+                                {day.date}
+                              </th>
+                              <td className="px-3 py-2 text-right tabular-nums">
+                                {formatCurrency(day.sales)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </details>
+                )}
               </div>
             </div>
           </section>

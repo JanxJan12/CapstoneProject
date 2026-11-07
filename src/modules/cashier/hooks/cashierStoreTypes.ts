@@ -7,6 +7,8 @@ import type {
   ShiftTotals,
   WalkInOrderInput,
 } from "../types";
+import type { HydratedCashierSale } from "../api/cashierSaleHydrationApi";
+import type { CloseCashierShiftResult } from "../api/shiftApi";
 
 export interface CashierActions {
   verifyPayment: (paymentId: string) => Promise<void>;
@@ -19,6 +21,7 @@ export interface CashierActions {
   requestId: string,
   input: WalkInOrderInput,
 ) => Promise<Order>;
+  recoverWalkInOrder: (requestId: string) => Promise<HydratedCashierSale | null>;
 
   cancelOrder: (orderId: string, reason: string) => Promise<void>;
   updateOrder: (
@@ -30,7 +33,7 @@ export interface CashierActions {
   holdOrder: (order: Omit<HeldOrder, "id" | "heldAt">) => Promise<HeldOrder>;
   removeHeldOrder: (heldId: string) => void;
   startShift: (openingCash: number, terminal: string) => Promise<void>;
-  endShift: (input: ShiftClosureInput) => Promise<void>;
+  endShift: (input: ShiftClosureInput) => Promise<CloseCashierShiftResult>;
   markNotificationRead: (notificationId: string) => void;
   markNotificationsRead: () => void;
 }

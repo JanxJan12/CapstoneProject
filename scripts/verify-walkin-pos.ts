@@ -133,12 +133,12 @@ assert(
 );
 const tablelessDineIn = getOrderSummaryAvailability(
   cart,
-  { ...DEFAULT_POS_FORM, orderType: "Dine-in", tableNumber: "" },
+  { ...DEFAULT_POS_FORM, orderType: "Dine-in" },
   state.menuItems,
 );
 assert(
   tablelessDineIn.canContinue,
-  "Dine-in orders must continue without a table number.",
+  "Dine-in orders must continue.",
 );
 
 const heldResult = holdOrder(state, {
@@ -147,7 +147,6 @@ const heldResult = holdOrder(state, {
     ...item,
     id: `POS-HOLD-${index + 1}`,
   })),
-  discountType: null,
 });
 state = heldResult.state;
 assert(

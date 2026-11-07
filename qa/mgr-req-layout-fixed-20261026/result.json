@@ -1,0 +1,46 @@
+{
+  "result": "PASS",
+  "paths": [
+    "initial suggestions",
+    "catalog search",
+    "manual add",
+    "positive quantity",
+    "remove",
+    "undo",
+    "clear",
+    "review",
+    "zero-gap explanation"
+  ],
+  "widths": [
+    {
+      "width": 1502,
+      "gapPx": 18,
+      "tableWidthPx": 1122,
+      "tableOverflowPx": 0,
+      "manualTableOverflowPx": 0
+    },
+    {
+      "width": 1280,
+      "gapPx": 18,
+      "tableWidthPx": 900,
+      "tableOverflowPx": 0,
+      "manualTableOverflowPx": 0
+    },
+    {
+      "width": 820,
+      "gapPx": 18,
+      "tableWidthPx": 0,
+      "tableOverflowPx": 0,
+      "manualTableOverflowPx": 0
+    },
+    {
+      "width": 390,
+      "gapPx": 18,
+      "tableWidthPx": 0,
+      "tableOverflowPx": 0,
+      "manualTableOverflowPx": 0
+    }
+  ],
+  "browserExceptions": 0,
+  "networkWrites": 0
+}

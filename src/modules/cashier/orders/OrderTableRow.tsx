@@ -1,11 +1,6 @@
-import { Fragment, memo } from "react";
+import { memo } from "react";
 import {
-  ChevronDown,
-  ChevronRight,
-  Eye,
-  History,
   MoreHorizontal,
-  Pencil,
   XCircle,
 } from "lucide-react";
 import {
@@ -16,197 +11,123 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { CashierIconButton, StatusBadge } from "../components";
 import {
-  CANCELLABLE_STATUSES,
-  formatDateTime,
   formatMoney,
 } from "../constants";
 import type { Order } from "../types";
-import { OrderExpandedContent } from "./OrderExpandedContent";
-import { getRiderStatus, isOrderDelayed } from "./orderOperations";
+import {
+  canCancelCashierOrder,
+  getOrderWaitingPresentation,
+} from "./orderOperations";
 
-type BadgeTone = "neutral" | "amber" | "blue" | "green" | "red";
-const TONE_STYLE: Record<BadgeTone, string> = {
-  neutral: "border-zinc-200 bg-zinc-50 text-zinc-700",
-  amber: "border-amber-200 bg-amber-50 text-amber-800",
-  blue: "border-sky-200 bg-sky-50 text-sky-800",
-  green: "border-emerald-200 bg-emerald-50 text-emerald-800",
-  red: "border-red-200 bg-red-50 text-red-800",
-};
 
-const EDITABLE_ORDER_STATUSES = new Set<Order["status"]>([
-  "Awaiting Payment",
-  "Confirmed",
-  "Preparing",
-  "Ready",
-  "Waiting for Rider",
-]);
 
 export interface OrderTableRowProps {
   order: Order;
   delayedThreshold: number;
   now: number;
   selected: boolean;
-  expanded: boolean;
+  showActions: boolean;
   onToggleSelect: (orderId: string) => void;
-  onToggleExpand: (orderId: string) => void;
-  onView: (order: Order) => void;
-  onEdit: (order: Order) => void;
+  onView: (order: Order, trigger: HTMLElement) => void;
   onCancel: (order: Order) => void;
 }
 
 export const OrderTableRow = memo(function OrderTableRow(
   props: OrderTableRowProps,
 ) {
-  const { order, delayedThreshold, now, selected, expanded } = props;
-  const delayed = isOrderDelayed(order, delayedThreshold, now);
-  const rider = getRiderStatus(order);
+  const { order, delayedThreshold, now, selected } = props;
+  const waiting = getOrderWaitingPresentation(order, delayedThreshold, now);
+
   return (
-    <Fragment>
-      <tr
-        className={
-          delayed
-            ? "border-l-4 border-l-red-500 bg-red-50/60"
-            : selected
-              ? "bg-amber-50/60"
-              : "hover:bg-muted/20"
-        }
+    <tr
+        data-selected={selected || undefined}
+        data-delayed={waiting.delayed || undefined}
       >
-        <td className="px-3 py-3">
-          <input
-            type="checkbox"
-            checked={selected}
-            aria-label={`Select ${order.id}`}
-            onChange={() => props.onToggleSelect(order.id)}
-            className="h-4 w-4 accent-primary"
-          />
+        <td className="px-1 py-1">
+          <label className="inline-flex h-11 w-11 items-center justify-center">
+            <input
+              type="checkbox"
+              checked={selected}
+              aria-label={`Select ${order.id}`}
+              onChange={() => props.onToggleSelect(order.id)}
+              className="h-5 w-5 accent-primary"
+            />
+          </label>
         </td>
-        <td className="px-3 py-3">
-          <div className="flex items-center gap-1">
+        <td className="px-3 py-2">
+          <div className="flex items-center">
             <button
               type="button"
-              aria-label={`${expanded ? "Collapse" : "Expand"} ${order.id}`}
-              aria-expanded={expanded}
-              onClick={() => props.onToggleExpand(order.id)}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-white hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-            >
-              {expanded ? (
-                <ChevronDown className="h-4 w-4" />
-              ) : (
-                <ChevronRight className="h-4 w-4" />
-              )}
-            </button>
-            <button
-              type="button"
-              onClick={() => props.onView(order)}
-              className="min-h-11 font-mono text-xs font-black text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              aria-label={`View details for ${order.id}`}
+              onClick={(event) => props.onView(order, event.currentTarget)}
+              className="min-h-11 rounded-md font-mono text-[13px] font-bold text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
               {order.id}
             </button>
           </div>
         </td>
-        <td className="px-3 py-3 text-xs font-bold">{order.customerName}</td>
-        <td className="px-3 py-3 text-xs font-semibold">{order.type}</td>
-        <td className="px-3 py-3 text-xs font-black">
+        <td className="px-3 py-2 text-[13px] font-semibold">
+          <span className="block truncate" title={order.customerName}>
+            {order.customerName}
+          </span>
+        </td>
+        <td className="whitespace-nowrap px-3 py-2 text-[13px]">
+          {order.type}
+        </td>
+        <td className="whitespace-nowrap px-3 py-2 text-right text-[13px] font-bold tabular-nums">
           {formatMoney(order.total)}
         </td>
-        <td className="px-3 py-3">
+        <td className="px-3 py-2">
           <StatusBadge status={order.status} />
         </td>
-        <td className="px-3 py-3">
-          <StatusBadge status={order.paymentStatus} />
+        <td className="px-3 py-2">
+          <StatusBadge
+            status={order.paymentStatus}
+            unknownLabel="Payment status unavailable"
+            className={
+              order.paymentStatus === "Verified"
+                ? "border-emerald-100 bg-emerald-50/55 text-emerald-700 shadow-none"
+                : undefined
+            }
+          />
         </td>
-        <td className="px-3 py-3">
-          <OperationalBadge label={rider} tone={riderTone(rider)} />
-        </td>
-        <td className="whitespace-nowrap px-3 py-3 text-[11px] font-semibold text-foreground/65">
-          {formatDateTime(order.createdAt)}
-        </td>
-        <td className="px-3 py-3">
-          <OrderActions {...props} />
-        </td>
-      </tr>
-      {expanded ? (
-        <tr className="bg-[#fbf8f4]">
-          <OrderExpandedContent order={order} onView={props.onView} />
-        </tr>
-      ) : null}
-    </Fragment>
+
+        {props.showActions ? (
+          <td className="px-1 py-2 text-center">
+            {canCancelCashierOrder(order) ? (
+              <OrderActionMenu order={order} onCancel={props.onCancel} />
+            ) : null}
+          </td>
+        ) : null}
+    </tr>
   );
 });
 
-function OrderActions(props: OrderTableRowProps) {
-  const { order } = props;
+export function OrderActionMenu({
+  order,
+  onCancel,
+}: {
+  order: Order;
+  onCancel: (order: Order) => void;
+}) {
+  if (!canCancelCashierOrder(order)) return null;
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <CashierIconButton
           label={`Actions for ${order.id}`}
           icon={MoreHorizontal}
+          className="h-11 w-11 rounded-lg"
         />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-52">
-        <Action
-          icon={Eye}
-          label="Quick view"
-          onSelect={() => props.onToggleExpand(order.id)}
-        />
-        {EDITABLE_ORDER_STATUSES.has(order.status) ? (
-          <Action
-            icon={Pencil}
-            label="Edit"
-            onSelect={() => props.onEdit(order)}
-          />
-        ) : null}
-        <Action
-          icon={History}
-          label="Timeline"
-          onSelect={() => props.onView(order)}
-        />
-        {CANCELLABLE_STATUSES.includes(order.status) ? (
-          <DropdownMenuItem
-            variant="destructive"
-            onSelect={() => props.onCancel(order)}
-          >
-            <XCircle className="h-4 w-4" aria-hidden="true" /> Cancel
-          </DropdownMenuItem>
-        ) : null}
+      <DropdownMenuContent align="end" collisionPadding={8} className="w-52 max-w-[calc(100vw-1rem)]">
+        <DropdownMenuItem
+          variant="destructive"
+          onSelect={() => onCancel(order)}
+        >
+          <XCircle className="h-4 w-4" aria-hidden="true" /> Cancel
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
 }
-
-function Action({
-  icon: Icon,
-  label,
-  onSelect,
-}: {
-  icon: typeof Eye;
-  label: string;
-  onSelect: () => void;
-}) {
-  return (
-    <DropdownMenuItem onSelect={onSelect}>
-      <Icon className="h-4 w-4" aria-hidden="true" />
-      {label}
-    </DropdownMenuItem>
-  );
-}
-
-function OperationalBadge({ label, tone }: { label: string; tone: BadgeTone }) {
-  return (
-    <span
-      className={`cashier-status-badge inline-flex min-h-6 items-center rounded-full border px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.08em] shadow-[0_1px_2px_rgba(36,26,19,0.03)] ${TONE_STYLE[tone]}`}
-    >
-      {label}
-    </span>
-  );
-}
-
-const riderTone = (value: string): BadgeTone =>
-  value === "Unassigned"
-    ? "red"
-    : value === "Not required"
-      ? "neutral"
-      : value.includes("Delivered")
-        ? "green"
-        : "blue";

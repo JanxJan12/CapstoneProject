@@ -1,0 +1,38 @@
+# Prepare Request quantity workflow — visual fidelity pass
+
+**Date:** 2026-10-26 (Asia/Manila)  
+**Scope:** Manager Prepare Request frontend presentation only. No hosted data, backend, migrations, Receiving source, or other module was changed.
+
+## Reference boundary
+
+The six original interaction illustrations were supplied at `C:/Users/Janmari/Pictures/Screenshots/ChatGPT Image Oct 26, 2026, 02_38_30 AM-1.png` through `02_38_47 AM-6.png` and visually inspected. They show the same green Manager shell and four-step strip, an orange stock-alert bar, a compact left request sheet beside Request Details, quantity inclusion states, zero-gap guidance, working-copy controls, and a focused Review panel. The earlier approved screenshot itself remains unavailable; the prior [approved-design note](MGR-REQ-UX-04-APPROVED-DESIGN-FIDELITY-20261025.md) describes its two-column composition. This is a visual comparison, **not** a pixel-exact claim. Illustration values and some controls are synthetic or conflict with the finalized functional flow; the real proposal, units, 0 defaults, positive-quantity inclusion, Review-only reasons, and existing request actions take precedence.
+
+## State-by-state comparison
+
+The original [before manifest](mgr-req-fidelity-20261026/before/result.json) contains six state captures per width, and the final [after manifest](mgr-req-fidelity-20261026/after/result.json) contains those six plus the added-row, Remove, Undo, and Clear captures at **1502, 1280, 820, and 390 px**. The captures use a local synthetic Manager fixture and do not make hosted writes.
+
+| Illustration | Before discrepancy | Resolved in after capture | Honest compromise |
+| --- | --- | --- | --- |
+| 1 · Set request details | At 1502, Request Details sat above a full-width table and the alert used a low-emphasis green treatment. | [Before](mgr-req-fidelity-20261026/before/zero-1502.png) → [After](mgr-req-fidelity-20261026/after/zero-1502.png): details beside the compact table, orange alert, 0 quantities, four-step strip, and real Priority/date controls. | Review request remains visible in Details because the functional workflow needs an accessible next step. At 1280, the table spans the sheet for legibility; 820/390 use cards. |
+| 2 · Add an item | Picker and table were spread across the full width and the post-add row was not in the earlier evidence set. | [Picker](mgr-req-fidelity-20261026/after/add-item-1502.png) → [Added row](mgr-req-fidelity-20261026/after/added-row-1502.png): a manual line starts at 0 and stays in the compact workspace. | The illustration shows dashes and a fake Manual item pill. The real proposal provides stock, unit, and status for manually added catalog items, so those values remain visible. |
+| 3 · Enter quantities | Positive Request Qty was included functionally but looked close to a zero row. | [Before](mgr-req-fidelity-20261026/before/positive-1502.png) → [After](mgr-req-fidelity-20261026/after/positive-1502.png): Included/Not included labels, green positive rows, emphasized quantities, and retained stock guidance. | The local fixture has two positive lines instead of the illustration's three. The source values and quantity precision are not copied from the image. |
+| 4 · Read stock guidance | Zero-gap mobile help floated over the first card. | [Before](mgr-req-fidelity-20261026/before/zero-gap-390.png) → [After](mgr-req-fidelity-20261026/after/zero-gap-390.png): inline disclosure explains zero-gap arithmetic; positive quantities remain allowed, with override reasons collected in Review. | Stock status remains visible alongside inclusion status. The illustration's Manual request label is not inferred from sample data. |
+| 5 · Remove or clear | The illustration groups included and non-included lines separately; the pre-reference capture showed a single table with Remove controls. | [Positive lines](mgr-req-fidelity-20261026/after/positive-1502.png) → [Remove](mgr-req-fidelity-20261026/after/remove-1502.png) → [Undo](mgr-req-fidelity-20261026/after/undo-1502.png) → [Clear](mgr-req-fidelity-20261026/after/clear-1502.png): manual removal and confirmation-based clear work, and suggested rows remain visible at 0. | The single stock table is retained so exact stock guidance stays in view; no second data section was introduced. The first baseline set did not capture a separate removal state. |
+| 6 · Review overrides | Review was a full-width document preview without suggested-gap or match/override columns; missing reasons were indicated mainly by a disabled Issue button. | [Before](mgr-req-fidelity-20261026/before/review-missing-1502.png) → [After missing reason](mgr-req-fidelity-20261026/after/review-missing-1502.png) and [After ready](mgr-req-fidelity-20261026/after/review-ready-1502.png): focused overlay, positive lines only, suggested gap, request quantity, status, inline explanation, warning, and close/Back controls. [Mobile](mgr-req-fidelity-20261026/after/review-missing-390.png) uses cards. | Quantity remains read-only in Review; Back to edit handles quantity changes. Existing draft PDF export and request document metadata remain available. |
+
+The capture manifests record zero browser exceptions, external requests, or network writes. The final capture script also verifies the Review dialog at all four widths and Escape returning focus to the request sheet. The 1502 and 1280 fixture table had no horizontal overflow in the focused quantity browser check; 820/390 use cards with no page overflow. The capture script is [capture-mgr-req-fidelity-20261026.mjs](../scripts/capture-mgr-req-fidelity-20261026.mjs).
+
+## Verification
+
+- PASS: `node scripts/verify-mgr-req-quantity-20261026.mjs` at 1280/1502/820/390, including zero defaults, positive inclusion, manual add/remove/undo/clear, Refresh, Review reasons, local synthetic Issue, keyboard focus, and no external writes.
+- PASS: `node scripts/verify-h23-request-workflow.mjs` — 40 offline request checks.
+- PASS: `node scripts/verify-mgr-rec-ux-02-browser.mjs` — local synthetic Receiving register/draft/inspect/review/posted regression at 1280/820/390. Receiving source was untouched.
+- PASS: `npm run typecheck` and `npm run build`.
+
+The six illustrations were directly compared; the separate original approved screenshot is still unavailable. Authenticated hosted appearance, live proposal values, real Issue, and physical Receiving acceptance were not tested.
+
+## Final table and document reconciliation
+
+The final local pass removes the empty action column when only suggested rows are present. A manual catalog row reveals a compact Action column with its Remove control; removing that row releases the width back to item names and status. The eight-column default table fits at 1502 and 1280 px without horizontal scrolling; 820 and 390 px use cards. The draft Review and draft export omit Destination because the authoring form does not collect it. Issued historical documents still display a destination when one is present in their saved snapshot.
+
+The final [after captures](mgr-req-fidelity-20261026/after/result.json) include zero/default, positive, add, remove, undo, clear, zero-gap, missing-reason, and valid-reason states at all four widths. Compared with the six interaction illustrations, the composition, stock alert, quantity inclusion, manual editing, and Review-only explanation flow are present. The illustration's stock numbers, manually supplied item labels, and separated included/excluded tables are not adopted as business data or behavior. The distinct original approved screenshot was not available for a direct pixel comparison.

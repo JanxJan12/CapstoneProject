@@ -17,7 +17,6 @@ export type PrototypeManagerPage =
   | "dashboard"
   | "orders"
   | "payments"
-  | "kitchen-monitor"
   | "menu"
   | "inventory"
   | "inv-transactions"
@@ -176,6 +175,7 @@ export interface NavItem<T extends string> {
   id: T;
   label: string;
   icon: React.ElementType;
+  section?: string;
   badge?: number;
   shortcut?: string;
 }
@@ -183,6 +183,13 @@ export interface NavItem<T extends string> {
 export interface NavGroup<T extends string> {
   label: string;
   items: NavItem<T>[];
+  collapsible?: boolean;
+  icon?: React.ElementType;
+  subgroups?: Array<{
+    label: string;
+    icon?: React.ElementType;
+    items: NavItem<T>[];
+  }>;
 }
 
 export interface PageEntry {

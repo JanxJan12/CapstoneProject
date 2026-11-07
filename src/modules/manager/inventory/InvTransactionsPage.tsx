@@ -1,221 +1,415 @@
-import { useCallback, useEffect, useState } from "react";
-import { ArrowDownRight, ArrowRight, ArrowUpRight } from "lucide-react";
-
-import { Badge } from "@/components/common/Badge";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/common/Button";
-import { Table, Td } from "@/components/common/Table";
-import type { BadgeVariant } from "@/types";
 import {
-  getManagerInventoryTransactions,
+  getManagerStockMovements,
+  getManagerStockSummary,
   type InventoryTransactionType,
-  type ManagerInventoryTransaction,
+  type ManagerInventoryStock,
+  type ManagerStockMovement,
+  type StockMovementPage,
 } from "./inventoryApi";
+import { StockMovementList } from "./StockMovementList";
 import {
-  InventoryWorkspaceNav,
-  type InventoryWorkspacePage,
-} from "./InventoryWorkspaceNav";
+  appendMovementPage,
+  claimMovementPageLoad,
+  releaseMovementPageLoad,
+} from "./movementPage";
 
-const TRANSACTION_PRESENTATION: Record<
-  InventoryTransactionType,
-  { label: string; variant: BadgeVariant }
-> = {
-  receiving: { label: "Receiving", variant: "success" },
-  restock: { label: "Restock", variant: "success" },
-  issuance: { label: "Issuance", variant: "orange" },
-  adjustment: { label: "Adjustment", variant: "neutral" },
-  waste: { label: "Waste", variant: "warning" },
-};
-
-const quantityFormatter = new Intl.NumberFormat("en-PH", {
-  maximumFractionDigits: 3,
-});
-
-const dateFormatter = new Intl.DateTimeFormat("en-PH", {
-  month: "short",
-  day: "numeric",
-  year: "numeric",
-});
-
-const timeFormatter = new Intl.DateTimeFormat("en-PH", {
-  hour: "numeric",
-  minute: "2-digit",
-});
-
-function getErrorMessage(caught: unknown): string {
-  return caught instanceof Error
-    ? caught.message
-    : "Unable to load inventory transactions.";
-}
-
-function formatSignedQuantity(value: number): string {
-  return (value > 0 ? "+" : "") + quantityFormatter.format(value);
-}
+const TYPES: Array<[InventoryTransactionType, string]> = [
+  ["receiving", "Receiving"],
+  ["restock", "Restock"],
+  ["issuance", "Sale / Issuance"],
+  ["waste", "Waste"],
+  ["adjustment", "Adjustment"],
+  ["opening_balance", "Opening Balance"],
+];
 
 export function InvTransactionsPage({
-  onNavigate,
+  initialItemId = "",
+  initialReceiptReference = "",
+  onBackToItem,
+  onOpenReceipt,
 }: {
-  onNavigate: (page: InventoryWorkspacePage) => void;
+  initialItemId?: string;
+  initialReceiptReference?: string;
+  onBackToItem?: () => void;
+  onOpenReceipt?: (reference: string) => void;
 }) {
-  const [transactions, setTransactions] = useState<
-    ManagerInventoryTransaction[]
-  >([]);
+  const [items, setItems] = useState<ManagerInventoryStock[]>([]);
+  const [itemId, setItemId] = useState(initialItemId);
+  const [type, setType] = useState<InventoryTransactionType | "">("");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+  const [search, setSearch] = useState("");
+  const [receiptReference, setReceiptReference] = useState(initialReceiptReference);
+  const [receiptMatches, setReceiptMatches] = useState<ManagerStockMovement[] | null>(null);
+  const [receiptScanStatus, setReceiptScanStatus] = useState<"idle" | "searching" | "complete" | "error">("idle");
+  const [receiptScanMessage, setReceiptScanMessage] = useState("");
+  const receiptScanVersion = useRef(0);
+  const [rows, setRows] = useState<ManagerStockMovement[]>([]);
+  const [cursor, setCursor] = useState<StockMovementPage["nextCursor"]>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState("");
-
-  const loadTransactions = useCallback(async () => {
-    setIsLoading(true);
-    setError("");
-
-    try {
-      setTransactions(await getManagerInventoryTransactions(100));
-    } catch (caught) {
-      setTransactions([]);
-      setError(getErrorMessage(caught));
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const requestVersion = useRef(0);
+  const firstInFlight = useRef(false);
+  const moreInFlightVersion = useRef<number | null>(null);
+  const rowsRef = useRef<ManagerStockMovement[]>([]);
+  const cursorRef = useRef<StockMovementPage["nextCursor"]>(null);
+  const filters = { itemId, type, fromDate, toDate };
+  const searchTerm = search.trim().toLocaleLowerCase();
+  const hasServerFilters = Boolean(
+    itemId !== initialItemId || type || fromDate || toDate,
+  );
+  const displayedRows = receiptMatches ?? rows;
+  const visibleRows = displayedRows.filter((row) =>
+    (!receiptReference || (row.transactionType === "receiving" && row.referenceLabel?.toLocaleLowerCase() === receiptReference.trim().toLocaleLowerCase())) && [
+      row.itemName,
+      row.referenceLabel,
+      row.reason,
+      row.performedByName,
+      ...row.batches.map((batch) => batch.batchCode),
+    ].some((value) => value?.toLocaleLowerCase().includes(searchTerm)),
+  );
 
   useEffect(() => {
-    void loadTransactions();
-  }, [loadTransactions]);
+    let active = true;
+    void getManagerStockSummary()
+      .then((result) => {
+        if (active) setItems(result);
+      })
+      .catch(() => {
+        /* Movement history remains usable without the item selector. */
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const loadFirst = useCallback(async () => {
+    receiptScanVersion.current += 1;
+    setReceiptMatches(null);
+    setReceiptScanStatus("idle");
+    setReceiptScanMessage("");
+    const version = ++requestVersion.current;
+    firstInFlight.current = true;
+    moreInFlightVersion.current = null;
+    setIsLoading(true);
+    setIsLoadingMore(false);
+    setError("");
+    try {
+      const page = await getManagerStockMovements({
+        itemId,
+        type,
+        fromDate,
+        toDate,
+      });
+      if (version !== requestVersion.current) return;
+      const nextRows = appendMovementPage([], page.rows);
+      rowsRef.current = nextRows;
+      cursorRef.current = page.nextCursor;
+      setRows(nextRows);
+      setCursor(page.nextCursor);
+    } catch (caught) {
+      if (version !== requestVersion.current) return;
+      rowsRef.current = [];
+      cursorRef.current = null;
+      setRows([]);
+      setCursor(null);
+      setError(
+        caught instanceof Error
+          ? caught.message
+          : "Unable to load stock movements.",
+      );
+    } finally {
+      if (version === requestVersion.current) {
+        firstInFlight.current = false;
+        setIsLoading(false);
+      }
+    }
+  }, [itemId, type, fromDate, toDate]);
+  useEffect(() => {
+    void loadFirst();
+  }, [loadFirst]);
+  useEffect(() => () => { receiptScanVersion.current += 1; }, []);
+
+  const searchEntireReceiptHistory = async () => {
+    const reference = receiptReference.trim().toLocaleLowerCase();
+    if (!reference || receiptScanStatus === "searching") return;
+    const version = ++receiptScanVersion.current;
+    setReceiptMatches(null);
+    setReceiptScanStatus("searching");
+    setReceiptScanMessage("Searching receiving movements across server pages…");
+    const matches: ManagerStockMovement[] = [];
+    const ids = new Set<string>();
+    let next: StockMovementPage["nextCursor"] = null;
+    let scanned = 0;
+    try {
+      do {
+        const page = await getManagerStockMovements({ itemId, type: "receiving", fromDate, toDate }, next, 100);
+        if (version !== receiptScanVersion.current) return;
+        for (const row of page.rows) {
+          if (ids.has(row.id)) throw new Error("The server repeated a movement while searching. Refresh and try again.");
+          ids.add(row.id);
+          if (row.referenceLabel?.toLocaleLowerCase() === reference) matches.push(row);
+        }
+        scanned += page.rows.length;
+        if (page.nextCursor && page.rows.length === 0) throw new Error("The server returned an empty movement page with more history pending.");
+        next = page.nextCursor;
+        setReceiptScanMessage(`Checked ${scanned} receiving movement${scanned === 1 ? "" : "s"}…`);
+      } while (next);
+      setReceiptMatches(matches);
+      setReceiptScanStatus("complete");
+      setReceiptScanMessage(`${matches.length} movement${matches.length === 1 ? "" : "s"} for ${receiptReference.trim()} across ${scanned} receiving movement${scanned === 1 ? "" : "s"} checked.`);
+    } catch (caught) {
+      if (version !== receiptScanVersion.current) return;
+      setReceiptScanStatus("error");
+      setReceiptScanMessage(caught instanceof Error ? caught.message : "Unable to finish the receipt search.");
+    }
+  };
+
+  const loadMore = async () => {
+    const activeCursor = cursorRef.current;
+    if (!activeCursor || firstInFlight.current) return;
+    const version = requestVersion.current;
+    if (!claimMovementPageLoad(moreInFlightVersion, version)) return;
+    setIsLoadingMore(true);
+    setError("");
+    try {
+      const page = await getManagerStockMovements(filters, activeCursor);
+      if (version !== requestVersion.current) return;
+      const nextRows = appendMovementPage(rowsRef.current, page.rows);
+      rowsRef.current = nextRows;
+      cursorRef.current = page.nextCursor;
+      setRows(nextRows);
+      setCursor(page.nextCursor);
+    } catch (caught) {
+      if (version === requestVersion.current)
+        setError(
+          caught instanceof Error
+            ? caught.message
+            : "Unable to load more movements.",
+        );
+    } finally {
+      if (releaseMovementPageLoad(moreInFlightVersion, version)) {
+        setIsLoadingMore(false);
+      }
+    }
+  };
+
+  const changeFilters = (change: () => void) => {
+    receiptScanVersion.current += 1;
+    setReceiptMatches(null);
+    setReceiptScanStatus("idle");
+    setReceiptScanMessage("");
+    requestVersion.current += 1;
+    firstInFlight.current = true;
+    moreInFlightVersion.current = null;
+    cursorRef.current = null;
+    setIsLoading(true);
+    setIsLoadingMore(false);
+    change();
+  };
+
+  const clearFilters = () => {
+    if (hasServerFilters) {
+      changeFilters(() => {
+        setItemId(initialItemId);
+        setType("");
+        setFromDate("");
+        setToDate("");
+      });
+    }
+    setSearch("");
+    setReceiptReference("");
+    receiptScanVersion.current += 1;
+    setReceiptMatches(null);
+    setReceiptScanStatus("idle");
+    setReceiptScanMessage("");
+  };
 
   return (
-    <div className="inventory-workspace-page inventory-transactions-page">
-      <header className="manager-page-header mb-3">
-        <h1 className="text-foreground">Inventory Transactions</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Stock movement audit trail
-        </p>
-      </header>
-
-      <InventoryWorkspaceNav
-        active="inv-transactions"
-        onNavigate={onNavigate}
-      />
-
-      {isLoading ? (
-        <div className="rounded-xl border border-border bg-card px-4 py-10 text-center text-sm text-muted-foreground">
-          Loading inventory transactions…
-        </div>
-      ) : error ? (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-4 text-sm text-red-700">
-          <p>{error}</p>
-          <div className="mt-3">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => void loadTransactions()}
+    <div className="inventory-workspace-page manager-support-page max-w-7xl [&_button]:min-h-11 [&_select]:min-h-11!">
+      <header className="manager-page-header mb-3 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="manager-page-context">Inventory / Stock Movements</p>
+          {onBackToItem ? (
+            <button
+              type="button"
+              onClick={onBackToItem}
+              className="mb-1 text-xs font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
-              Try Again
+              ← Item stock
+            </button>
+          ) : null}
+          <h1>Stock Movements</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Recorded stock changes · newest first
+          </p>
+        </div>
+        <Button
+          size="sm"
+          variant="secondary"
+          disabled={isLoading}
+          onClick={() => void loadFirst()}
+        >
+          Refresh
+        </Button>
+      </header>
+      <section
+        aria-label="Movement filters"
+        className="manager-movement-filters grid gap-3 rounded-xl border border-border bg-card p-3 sm:grid-cols-2 xl:grid-cols-4"
+      >
+        <label className="block min-w-0 text-xs font-semibold sm:col-span-2">
+          Search loaded movements
+          <input
+            type="search"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Item, batch, reference, reason, or actor"
+            className="mt-1 block min-h-11 w-full rounded-lg border border-border bg-input-background px-3 text-sm focus-visible:ring-2 focus-visible:ring-primary"
+          />
+        </label>
+        <label className="text-xs font-semibold">
+          Item
+          <select
+            value={itemId}
+            onChange={(event) => {
+              if (event.target.value !== itemId)
+                changeFilters(() => setItemId(event.target.value));
+            }}
+            className="mt-1 block min-h-11 w-full rounded-lg border border-border bg-input-background px-2 text-sm focus-visible:ring-2 focus-visible:ring-primary"
+          >
+            <option value="">All items</option>
+            {items.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.itemName}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="text-xs font-semibold">
+          Movement type
+          <select
+            value={type}
+            onChange={(event) => {
+              const nextType = event.target.value as
+                InventoryTransactionType | "";
+              if (nextType !== type) changeFilters(() => setType(nextType));
+            }}
+            className="mt-1 block min-h-11 w-full rounded-lg border border-border bg-input-background px-2 text-sm focus-visible:ring-2 focus-visible:ring-primary"
+          >
+            <option value="">All types</option>
+            {TYPES.map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="min-w-0 text-xs font-semibold sm:col-span-2 xl:col-span-2">
+          Receiving receipt number
+          <input type="search" value={receiptReference} onChange={(event) => { receiptScanVersion.current += 1; setReceiptMatches(null); setReceiptScanStatus("idle"); setReceiptScanMessage(""); setReceiptReference(event.target.value); }}
+            placeholder="Exact RR number in loaded movements"
+            className="mt-1 block min-h-11 w-full rounded-lg border border-border bg-input-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" />
+        </label>
+        {receiptReference.trim() ? <div className="flex items-end"><Button size="sm" variant="secondary" disabled={receiptScanStatus === "searching"} onClick={() => void searchEntireReceiptHistory()}>Search full receipt history</Button></div> : null}
+        <label className="text-xs font-semibold">
+          From date
+          <input
+            type="date"
+            value={fromDate}
+            max={toDate || undefined}
+            onChange={(event) => {
+              if (event.target.value !== fromDate)
+                changeFilters(() => setFromDate(event.target.value));
+            }}
+            className="mt-1 block min-h-11 w-full rounded-lg border border-border bg-input-background px-2 text-sm focus-visible:ring-2 focus-visible:ring-primary"
+          />
+        </label>
+        <label className="text-xs font-semibold">
+          To date
+          <input
+            type="date"
+            value={toDate}
+            min={fromDate || undefined}
+            onChange={(event) => {
+              if (event.target.value !== toDate)
+                changeFilters(() => setToDate(event.target.value));
+            }}
+            className="mt-1 block min-h-11 w-full rounded-lg border border-border bg-input-background px-2 text-sm focus-visible:ring-2 focus-visible:ring-primary"
+          />
+        </label>
+        {hasServerFilters || search || receiptReference ? (
+          <div className="flex items-end">
+            <Button size="sm" variant="secondary" onClick={clearFilters}>
+              Reset filters
             </Button>
           </div>
-        </div>
-      ) : transactions.length === 0 ? (
-        <div className="rounded-xl border border-border bg-card px-4 py-10 text-center text-sm text-muted-foreground">
-          No inventory transactions are available.
-        </div>
-      ) : (
-        <Table
-          headers={[
-            "Item",
-            "Type",
-            "Quantity Change",
-            "Before → After",
-            "Reason",
-            "Order",
-            "Date",
-            "Performed By",
-          ]}
+        ) : null}
+      </section>
+      <p className="mt-2 text-xs text-muted-foreground">
+        {receiptMatches ? "Full receipt search checked every available Receiving movement page for the selected item and dates." : "Search and receipt number check loaded rows only."}
+        {cursor && !receiptMatches ? " Load more to check older movements." : null}
+      </p>
+      {receiptScanStatus !== "idle" ? <p role={receiptScanStatus === "error" ? "alert" : "status"} className="mt-2 text-xs text-muted-foreground">{receiptScanMessage}</p> : null}
+      {!isLoading && (rows.length > 0 || !error) ? (
+        <p role="status" className="mt-3 text-sm text-muted-foreground">
+          {searchTerm
+            ? `${visibleRows.length} matches in ${displayedRows.length} ${receiptMatches ? "receipt movements" : "loaded movements"}`
+            : `${displayedRows.length} movements loaded`}
+          {cursor && !receiptMatches ? " · Older records available" : ""}
+        </p>
+      ) : null}
+      {error ? (
+        <div
+          role="alert"
+          className="mt-3 flex flex-wrap items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800"
         >
-          {transactions.map((transaction) => {
-            const typePresentation =
-              TRANSACTION_PRESENTATION[transaction.transactionType];
-            const isIncrease = transaction.quantityChange > 0;
-            const isDecrease = transaction.quantityChange < 0;
-            const ChangeIcon = isIncrease
-              ? ArrowUpRight
-              : isDecrease
-                ? ArrowDownRight
-                : ArrowRight;
-
-            return (
-              <tr key={transaction.id}>
-                <Td>
-                  <p className="text-sm font-bold text-foreground">
-                    {transaction.itemName}
-                  </p>
-                  <p
-                    className="mt-1 max-w-[190px] break-all font-mono text-xs text-muted-foreground/75"
-                    title={transaction.id}
-                  >
-                    Transaction {transaction.id}
-                  </p>
-                </Td>
-                <Td>
-                  <Badge variant={typePresentation.variant}>
-                    {typePresentation.label}
-                  </Badge>
-                </Td>
-                <Td>
-                  <div
-                    className={
-                      "inline-flex items-center gap-1.5 whitespace-nowrap text-sm font-extrabold tabular-nums " +
-                      (isIncrease
-                        ? "text-emerald-700"
-                        : isDecrease
-                          ? "text-orange-800"
-                          : "text-foreground")
-                    }
-                  >
-                    <ChangeIcon className="h-4 w-4" />
-                    {formatSignedQuantity(transaction.quantityChange)}{" "}
-                    {transaction.unit}
-                  </div>
-                </Td>
-                <Td>
-                  <div className="flex items-center gap-2 whitespace-nowrap text-sm tabular-nums">
-                    <span className="text-muted-foreground">
-                      {quantityFormatter.format(transaction.quantityBefore)}{" "}
-                      {transaction.unit}
-                    </span>
-                    <ArrowRight className="h-4 w-4 flex-shrink-0 text-muted-foreground/60" />
-                    <span className="font-bold text-foreground">
-                      {quantityFormatter.format(transaction.quantityAfter)}{" "}
-                      {transaction.unit}
-                    </span>
-                  </div>
-                </Td>
-                <Td className="max-w-[260px] text-sm leading-5 text-muted-foreground">
-                  <span title={transaction.reason ?? undefined}>
-                    {transaction.reason ?? "—"}
-                  </span>
-                </Td>
-                <Td className="whitespace-nowrap">
-                  {transaction.orderNumber ? (
-                    <p className="font-mono text-sm font-bold text-primary">
-                      {transaction.orderNumber}
-                    </p>
-                  ) : (
-                    <span className="text-sm text-muted-foreground">—</span>
-                  )}
-                </Td>
-                <Td className="whitespace-nowrap">
-                  <span className="block text-sm font-semibold text-foreground">
-                    {dateFormatter.format(new Date(transaction.createdAt))}
-                  </span>
-                  <span className="mt-0.5 block text-xs text-muted-foreground">
-                    {timeFormatter.format(new Date(transaction.createdAt))}
-                  </span>
-                </Td>
-                <Td className="text-sm text-muted-foreground">
-                  {transaction.performedByName}
-                </Td>
-              </tr>
-            );
-          })}
-        </Table>
-      )}
+          <span>{error}</span>
+          {rows.length === 0 ? (
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => void loadFirst()}
+            >
+              Retry movements
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
+      {isLoading ? (
+        <p
+          role="status"
+          className="mt-4 rounded-xl border border-border bg-card p-6"
+        >
+          Loading stock movements…
+        </p>
+      ) : !error && visibleRows.length === 0 ? (
+        <p className="mt-4 rounded-xl border border-border bg-card p-6">
+          {displayedRows.length === 0
+            ? "No stock movements match these filters."
+            : cursor && !receiptMatches
+              ? "No loaded movements match this search. Older records may still match."
+              : "No movements match this search within these filters."}
+        </p>
+      ) : visibleRows.length > 0 ? (
+        <div className="mt-4">
+          <StockMovementList rows={visibleRows} onOpenReceipt={onOpenReceipt} />
+        </div>
+      ) : null}
+      {cursor && !isLoading && !receiptMatches ? (
+        <div className="mt-4 flex justify-center">
+          <Button
+            size="sm"
+            variant="secondary"
+            disabled={isLoadingMore}
+            onClick={() => void loadMore()}
+          >
+            {isLoadingMore ? "Loading…" : "Load more movements"}
+          </Button>
+        </div>
+      ) : null}
     </div>
   );
 }

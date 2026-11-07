@@ -5,6 +5,7 @@
   import { StaffLoginPage } from "./pages/StaffLoginPage";
   import { CustomerLoginPage } from "./pages/CustomerLoginPage";
   import { RiderLoginPage } from "./pages/RiderLoginPage";
+  import { DemoPasswordLogin } from "./components/DemoPasswordLogin";
   import { ImageWithFallback } from "@/components/media/ImageWithFallback";
   import { useAuth } from "@/app/providers/AuthProvider";
   import type { AccountRole } from "../../data/accountRole";
@@ -42,6 +43,8 @@
     const {
     session,
     loading,
+    authError,
+    retrySession,
     logout, } = useAuth();
     const [screen, setScreen] = useState<AuthScreen>("staff");
 
@@ -280,6 +283,38 @@
           </nav>
 
           <div className="auth-panel-scroll">
+            {import.meta.env.VITE_DEMO_MODE === "true" && <DemoPasswordLogin />}
+            {import.meta.env.VITE_STAGE2_TEST_MODE === "true" &&
+              import.meta.env.VITE_SUPABASE_URL === "http://127.0.0.1:49321" &&
+              <DemoPasswordLogin mode="stage2" />}
+            {authError && (
+              <div
+                role="alert"
+                className="mx-auto mb-4 flex w-full max-w-[25rem] flex-col gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3.5 text-left sm:flex-row sm:items-center"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-bold text-red-800">
+                    Account check failed
+                  </p>
+
+                  <p className="mt-1 text-sm leading-relaxed text-red-700">
+                    {authError}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    void retrySession();
+                  }}
+                  disabled={loading}
+                  className="min-h-11 shrink-0 rounded-xl border border-red-300 bg-white px-4 text-sm font-bold text-red-800 transition-colors hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {loading ? "Checking…" : "Try again"}
+                </button>
+              </div>
+            )}
+
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={screen}

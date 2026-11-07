@@ -1,0 +1,23 @@
+{
+  "boundary": "http://127.0.0.1:61321",
+  "status": "PASS",
+  "checks": [
+    "Manager issued synthetic formal request",
+    "Manager revised request to revision 2",
+    "Draft did not move stock",
+    "Accepted-only posting, batch, and receiving ledger reconciled",
+    "Batch adjustment and transaction ledger reconciled",
+    "Authenticated Manager read receiving and adjustment movements",
+    "Manager closed revised request short without stock change",
+    "Manager disabled synthetic menu item",
+    "Manager restored synthetic menu item availability",
+    "Customer created isolated synthetic order for Manager review",
+    "Manager order list contains synthetic order",
+    "Manager cancelled eligible unpaid synthetic order",
+    "Cancelled order persisted in isolated database",
+    "Manager approved complete synthetic rider application",
+    "Manager suspended rider and set offline",
+    "Manager restored synthetic rider approval"
+  ],
+  "failures": []
+}

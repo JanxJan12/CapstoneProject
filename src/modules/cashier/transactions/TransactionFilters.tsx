@@ -1,10 +1,12 @@
+import { useState } from "react";
 import {
   ChevronDown,
   RotateCcw,
   Search,
   SlidersHorizontal,
 } from "lucide-react";
-import type { CashierShift, PaymentMethod, TransactionStatus } from "../types";
+import type { CashierShift, PaymentMethod } from "../types";
+import { formatDateTime } from "../constants";
 import {
   CashierButton,
   CashierInput,
@@ -16,9 +18,10 @@ import {
 export interface TransactionFilterValue {
   search: string;
   method: "All" | PaymentMethod;
-  status: "All" | TransactionStatus;
+  status: "All" | "Completed" | "Voided";
   from: string;
   to: string;
+  /** Retained for the legacy pure export adapter; the active owner-scoped UI has no selector. */
   cashier: string;
   shift: string;
   terminal: string;
@@ -31,7 +34,6 @@ export function TransactionFilters({
   value,
   searchRef,
   shifts,
-  cashiers,
   terminals,
   onChange,
   onReset,
@@ -39,11 +41,12 @@ export function TransactionFilters({
   value: TransactionFilterValue;
   searchRef: React.RefObject<HTMLInputElement | null>;
   shifts: CashierShift[];
-  cashiers: string[];
   terminals: string[];
   onChange: (value: TransactionFilterValue) => void;
   onReset: () => void;
 }) {
+  const [moreFiltersOpen, setMoreFiltersOpen] = useState(false);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const set = <K extends keyof TransactionFilterValue>(
     key: K,
     next: TransactionFilterValue[K],
@@ -51,17 +54,17 @@ export function TransactionFilters({
   const secondaryFilterCount = [
     Boolean(value.from),
     Boolean(value.to),
-    value.cashier !== "All",
     value.shift !== "All",
-    value.terminal !== "All",
     Boolean(value.customer),
-    Boolean(value.orderId),
-    Boolean(value.receiptNumber),
+    Boolean(value.orderId)
+  ].filter(Boolean).length;
+  const activeFilterCount = secondaryFilterCount + [
+    Boolean(value.search.trim()), value.method !== "All", value.status !== "All",
   ].filter(Boolean).length;
 
   return (
-    <SearchToolbar label="Transaction filters">
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(320px,1.6fr)_minmax(150px,0.65fr)_minmax(180px,0.75fr)_auto] xl:items-end">
+    <SearchToolbar label="Transaction filters" className="p-3.5">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(280px,1.5fr)_minmax(130px,0.65fr)_minmax(165px,0.75fr)_auto_auto] xl:items-end">
         <div className="sm:col-span-2 xl:col-span-1">
           <Label htmlFor="txn-search">Search</Label>
           <div className="relative">
@@ -72,11 +75,28 @@ export function TransactionFilters({
               aria-keyshortcuts="/"
               value={value.search}
               onChange={(event) => set("search", event.target.value)}
-              placeholder="Transaction or payment reference"
+              placeholder="Receipt, transaction ID, or GCash reference"
               className="pl-9"
             />
           </div>
         </div>
+        <div className="flex items-end gap-2 xl:hidden">
+          <CashierButton
+            variant="secondary"
+            className="flex-1"
+            aria-expanded={mobileFiltersOpen}
+            aria-controls="transaction-mobile-filters"
+            onClick={() => setMobileFiltersOpen((open) => !open)}
+          >
+            <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
+            Filters{activeFilterCount ? ` (${activeFilterCount})` : ""}
+            <ChevronDown className={`h-4 w-4 transition-transform ${mobileFiltersOpen ? "rotate-180" : ""}`} aria-hidden="true" />
+          </CashierButton>
+          {activeFilterCount ? (
+            <CashierButton variant="ghost" onClick={onReset}>Reset</CashierButton>
+          ) : null}
+        </div>
+        <div id="transaction-mobile-filters" className={`${mobileFiltersOpen ? "grid" : "hidden"} gap-3 sm:col-span-2 sm:grid-cols-2 xl:contents`}>
         <div>
           <Label htmlFor="txn-method">Payment</Label>
           <CashierSelect
@@ -108,41 +128,50 @@ export function TransactionFilters({
           >
             <option>All</option>
             <option>Completed</option>
+            <option>Voided</option>
           </CashierSelect>
         </div>
         <div className="flex items-end">
-          <CashierButton variant="ghost" className="w-full" onClick={onReset}>
-            <RotateCcw className="h-4 w-4" />
-            Reset
+          <CashierButton
+            variant="secondary"
+            className="w-full"
+            aria-expanded={moreFiltersOpen}
+            aria-controls="transaction-secondary-filters"
+            onClick={() => setMoreFiltersOpen((open) => !open)}
+          >
+            <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
+            More filters
+            {secondaryFilterCount ? (
+              <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary/10 px-1 text-[9px] text-primary">
+                {secondaryFilterCount}
+              </span>
+            ) : null}
+            <ChevronDown
+              className={`h-4 w-4 transition-transform ${moreFiltersOpen ? "rotate-180" : ""}`}
+              aria-hidden="true"
+            />
           </CashierButton>
+        </div>
+        <div className="flex items-end">
+          <CashierButton variant="ghost" className="w-full" onClick={onReset} disabled={!activeFilterCount}>
+            <RotateCcw className="h-4 w-4" />
+            Reset{activeFilterCount ? ` (${activeFilterCount})` : ""}
+          </CashierButton>
+        </div>
         </div>
       </div>
 
-      <details className="group mt-3 border-t border-border/70 pt-3">
-        <summary className="cashier-action inline-flex min-h-9 cursor-pointer list-none select-none items-center justify-center gap-2 rounded-[10px] border border-border bg-white px-3 text-[11px] font-black text-foreground shadow-sm transition-all hover:border-primary/25 hover:bg-amber-50/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 [&::-webkit-details-marker]:hidden">
-          <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
-          More filters
-          {secondaryFilterCount ? (
-            <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary/10 px-1 text-[9px] text-primary">
-              {secondaryFilterCount}
-            </span>
-          ) : null}
-          <ChevronDown
-            className="h-4 w-4 transition-transform group-open:rotate-180"
-            aria-hidden="true"
-          />
-        </summary>
+      {moreFiltersOpen ? (
         <div
           id="transaction-secondary-filters"
-          className="mt-3 rounded-xl border border-border/70 bg-white/55 p-3.5"
+          className={`${mobileFiltersOpen ? "" : "hidden xl:block"} mt-3 border-t border-border/70 pt-3`}
         >
           <div className="mb-3">
             <h2 className="text-[10px] font-black uppercase tracking-widest text-foreground/65">
               Advanced filters
             </h2>
             <p className="mt-1 text-[9px] text-muted-foreground">
-              Narrow linked receipt, shift, terminal, cashier, customer, and
-              order records.
+              Find transactions by date, shift, customer, or order.
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -165,19 +194,6 @@ export function TransactionFilters({
               />
             </div>
             <div>
-              <Label htmlFor="txn-cashier">Cashier</Label>
-              <CashierSelect
-                id="txn-cashier"
-                value={value.cashier}
-                onChange={(event) => set("cashier", event.target.value)}
-              >
-                <option>All</option>
-                {cashiers.map((cashier) => (
-                  <option key={cashier}>{cashier}</option>
-                ))}
-              </CashierSelect>
-            </div>
-            <div>
               <Label htmlFor="txn-shift">Shift</Label>
               <CashierSelect
                 id="txn-shift"
@@ -187,24 +203,12 @@ export function TransactionFilters({
                 <option value="All">All shifts</option>
                 {shifts.map((shift) => (
                   <option key={shift.id} value={shift.id}>
-                    {shift.id}
+                    {shift.terminal} · {formatDateTime(shift.startedAt)}
                   </option>
                 ))}
               </CashierSelect>
             </div>
-            <div>
-              <Label htmlFor="txn-terminal">Terminal</Label>
-              <CashierSelect
-                id="txn-terminal"
-                value={value.terminal}
-                onChange={(event) => set("terminal", event.target.value)}
-              >
-                <option>All</option>
-                {terminals.map((terminal) => (
-                  <option key={terminal}>{terminal}</option>
-                ))}
-              </CashierSelect>
-            </div>
+
             <div>
               <Label htmlFor="txn-customer">Customer</Label>
               <CashierInput
@@ -223,18 +227,9 @@ export function TransactionFilters({
                 placeholder="ORD-2048"
               />
             </div>
-            <div>
-              <Label htmlFor="txn-receipt">Receipt number</Label>
-              <CashierInput
-                id="txn-receipt"
-                value={value.receiptNumber}
-                onChange={(event) => set("receiptNumber", event.target.value)}
-                placeholder="RCP-4108"
-              />
-            </div>
           </div>
         </div>
-      </details>
+      ) : null}
     </SearchToolbar>
   );
 }

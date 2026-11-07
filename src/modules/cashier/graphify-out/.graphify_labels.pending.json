@@ -1,0 +1,19 @@
+{
+  "0": "components/index.ts",
+  "1": "constants/index.ts",
+  "2": "formatMoney",
+  "3": "orderOperations.ts",
+  "4": "ref_react",
+  "5": "cashier/types.ts",
+  "6": "onlinePaymentApi.ts",
+  "7": "useTransactionHistory.ts",
+  "8": "Order",
+  "9": "cashierSaleHydrationApi.ts",
+  "10": "supabaseOrderService.ts",
+  "11": "shiftService.ts",
+  "12": "useCashierActions.ts",
+  "13": "CashierStore.tsx",
+  "14": "ShiftSummaryHero.tsx",
+  "15": "CashierProvider",
+  "16": "walkInSaleApi.ts"
+}

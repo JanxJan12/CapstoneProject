@@ -2,6 +2,30 @@ import { supabase } from "@/lib/supabase";
 
 const KDS_SESSION_KEY = "rrj_kds_terminal_session_v1";
 
+export class KdsTerminalError extends Error {
+  constructor(
+    public readonly kind: "credential" | "conflict" | "unavailable",
+    message: string,
+  ) {
+    super(message);
+    this.name = "KdsTerminalError";
+  }
+}
+
+function kitchenRpcError(message: string, operation: "verify" | "queue" | "advance") {
+  if (/^(Invalid (or inactive )?(kitchen )?terminal credential\.|Invalid terminal credential\.)/i.test(message)) {
+    return new KdsTerminalError("credential", "Kitchen terminal access was rejected. Ask a manager to check the device credential, then activate again.");
+  }
+  if (operation === "advance" && message.startsWith("Kitchen transition rejected because the order status has changed.")) {
+    return new KdsTerminalError("conflict", "Another terminal has already updated this order. Refresh the queue before taking another action.");
+  }
+  return new KdsTerminalError("unavailable", operation === "verify"
+    ? "Could not verify the kitchen terminal. Check the connection and try again."
+    : operation === "queue"
+      ? "The kitchen queue is unavailable. Check the connection and try again."
+      : "The order update could not be confirmed. Check the refreshed queue before trying again.");
+}
+
 export interface KdsTerminalCredential {
   terminalId: string;
   terminalSecret: string;
@@ -29,14 +53,15 @@ export interface KdsQueueItem {
   quantity: number;
   unitPrice: number;
   specialInstructions?: string;
+  modifiers: { id: string; name: string; price: number }[];
 }
 
 export interface KdsQueueTicket {
   databaseId: string;
   orderNumber: string;
   fulfillmentType: KdsFulfillmentType;
+  orderChannel: "online" | "walk_in";
   status: KdsOrderStatus;
-  notes?: string;
   createdAt: string;
   items: KdsQueueItem[];
 }
@@ -48,14 +73,15 @@ interface KdsQueueRpcItem {
   quantity: number;
   unit_price: number | string;
   special_instructions: string | null;
+  modifiers?: unknown;
 }
 
 interface KdsQueueRpcRow {
   order_id: string;
   order_number: string;
   fulfillment_type: KdsFulfillmentType;
+  order_channel: "online" | "walk_in";
   current_status: KdsOrderStatus;
-  notes: string | null;
   created_at: string;
   items: KdsQueueRpcItem[];
 }
@@ -64,14 +90,14 @@ interface AdvanceKdsOrderRpcResult {
   order_id: string;
   order_number: string;
   previous_status: KdsOrderStatus;
-  current_status: KdsOrderStatus;
+  current_status: KdsOrderStatus | "waiting_for_rider";
 }
 
 export interface AdvanceKdsOrderResult {
   orderId: string;
   orderNumber: string;
   previousStatus: KdsOrderStatus;
-  currentStatus: KdsOrderStatus;
+  currentStatus: KdsOrderStatus | "waiting_for_rider";
 }
 
 interface VerifyKdsTerminalResult {
@@ -89,6 +115,10 @@ export async function verifyKdsTerminal(
     throw new Error("Terminal ID is required.");
   }
 
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(terminalId)) {
+    throw new Error("Enter a valid terminal ID.");
+  }
+
   if (!terminalSecret) {
     throw new Error("Device secret is required.");
   }
@@ -102,9 +132,7 @@ export async function verifyKdsTerminal(
   );
 
   if (error) {
-    throw new Error(
-      `Unable to verify kitchen terminal: ${error.message}`,
-    );
+    throw kitchenRpcError(error.message, "verify");
   }
 
   const result = (
@@ -112,9 +140,7 @@ export async function verifyKdsTerminal(
   )?.[0];
 
   if (!result) {
-    throw new Error(
-      "Invalid or inactive kitchen terminal credential.",
-    );
+    throw kitchenRpcError("Invalid or inactive kitchen terminal credential.", "verify");
   }
 
   return {
@@ -139,7 +165,7 @@ export async function fetchKdsQueue(
   }
 
   const { data, error } = await supabase.rpc(
-    "get_kds_queue",
+    "get_kds_queue_v2",
     {
       p_terminal_id: terminalId,
       p_terminal_secret: terminalSecret,
@@ -147,9 +173,7 @@ export async function fetchKdsQueue(
   );
 
   if (error) {
-    throw new Error(
-      `Unable to load kitchen queue: ${error.message}`,
-    );
+    throw kitchenRpcError(error.message, "queue");
   }
 
   const rows = (data ?? []) as KdsQueueRpcRow[];
@@ -158,8 +182,8 @@ export async function fetchKdsQueue(
     databaseId: row.order_id,
     orderNumber: row.order_number,
     fulfillmentType: row.fulfillment_type,
+    orderChannel: row.order_channel,
     status: row.current_status,
-    notes: row.notes?.trim() || undefined,
     createdAt: row.created_at,
 
     items: (row.items ?? []).map((item) => ({
@@ -173,6 +197,12 @@ export async function fetchKdsQueue(
       specialInstructions:
         item.special_instructions?.trim() ||
         undefined,
+      modifiers: Array.isArray(item.modifiers)
+        ? item.modifiers.filter((modifier): modifier is { id: string; name: string; price: number } =>
+            !!modifier && typeof modifier === "object" &&
+            typeof modifier.id === "string" && typeof modifier.name === "string" &&
+            typeof modifier.price === "number")
+        : [],
     })),
   }));
 }
@@ -189,10 +219,11 @@ export async function advanceKdsOrder(
 
   if (
   expectedStatus !== "confirmed" &&
-  expectedStatus !== "preparing"
+  expectedStatus !== "preparing" &&
+  expectedStatus !== "ready"
 ) {
   throw new Error(
-    "Only confirmed or preparing kitchen orders can be advanced.",
+    "Only confirmed, preparing, or ready kitchen orders can be advanced.",
   );
 }
 
@@ -219,9 +250,7 @@ export async function advanceKdsOrder(
   );
 
   if (error) {
-    throw new Error(
-      `Unable to advance kitchen order: ${error.message}`,
-    );
+    throw kitchenRpcError(error.message, "advance");
   }
 
   const result = (
@@ -229,9 +258,7 @@ export async function advanceKdsOrder(
   )?.[0];
 
   if (!result) {
-    throw new Error(
-      "The kitchen order was updated, but no result was returned.",
-    );
+    throw kitchenRpcError("", "advance");
   }
 
   return {

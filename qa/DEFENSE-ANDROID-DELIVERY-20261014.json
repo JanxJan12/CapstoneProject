@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "surface": "Android emulator with installed isolated v4 Rider APK",
+  "orderNumber": "ORD-000013",
+  "checks": [
+    "Local password Auth opened approved Rider dashboard",
+    "Fresh synthetic offer appeared in Today and Offers with modifier and fictional address",
+    "Android UI Accept changed the assignment to accepted",
+    "Android UI Mark picked up changed the assignment to picked_up",
+    "Android UI Start delivery changed the assignment to out_for_delivery",
+    "Android gallery selected a synthetic screenshot; Submit and complete delivery changed assignment and order to delivered",
+    "Private delivery-proofs bucket remained nonpublic and held exactly one object for the assignment",
+    "Payment remained internally verified and exactly one cashier transaction existed for this order",
+    "Rider History displayed the delivered synthetic order",
+    "No inventory batch had negative quantity_on_hand after the run"
+  ],
+  "screenshots": [
+    "RRJ-Food-House-Rider/qa/rider-defense-20261014/approved-rider-home.png",
+    "RRJ-Food-House-Rider/qa/rider-defense-20261014/offers-final.png",
+    "RRJ-Food-House-Rider/qa/rider-defense-20261014/delivered-history.png"
+  ],
+  "apkSha256": "BA604E5E2E649652DDD7CF0C98FA2DC9458B8FF514FC06C6723859DF7ADE0168",
+  "boundary": "Synthetic local backend and emulator gallery image only. No real handoff, physical camera, external payment settlement, hosted database, or physical handset test."
+}

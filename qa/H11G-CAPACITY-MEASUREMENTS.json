@@ -1,0 +1,100 @@
+{
+  "phase": "H-11G",
+  "dateManila": "2026-10-16",
+  "windowManila": "02:12-02:14",
+  "result": "PARTIAL_READ_ONLY_DIAGNOSIS_TRIAL_BLOCKED_BEFORE_MUTATION",
+  "source": "fresh local Windows, WSL, Docker and loopback probes",
+  "host": {
+    "physicalInstalledGiB": 16,
+    "visibleMiB": 16107,
+    "freeMiBSamples": [607, 536, 737],
+    "processWorkingSetMiBAt0213": {
+      "wslVm": 4908,
+      "browser15Processes": 2556,
+      "editor15Processes": 1639,
+      "workApp15Processes": 1456,
+      "dockerDesktop7Processes": 531
+    },
+    "workingSetCaution": "Process working sets can share pages; do not sum as guaranteed reclaimable RAM"
+  },
+  "wsl": {
+    "memTotalMiB": 7803,
+    "dockerMemoryCeilingBytes": 8182255616,
+    "swapTotalMiB": 2048,
+    "initialAvailableMiB": 843,
+    "planAvailableMiB": 780,
+    "h09AvailableMiB": [709, 731, 753, 736, 722, 712],
+    "demoAvailableMiB": [686, 683, 638],
+    "finalAvailableMiB": 705,
+    "initialSwapUsedMiB": 1903,
+    "h09SwapUsedMiBRange": [1892, 1897],
+    "demoSwapUsedMiBRange": [1892, 1896],
+    "finalSwapUsedMiB": 1965,
+    "lastPressureSomeAvg10": 0.14,
+    "lastPressureFullAvg10": 0.14,
+    "refusalFloorMiB": 400,
+    "minimumObservedMarginAboveFloorMiB": 238,
+    "sustainableHeadroomProven": false
+  },
+  "docker": {
+    "engineVersion": "29.8.2",
+    "projectsIncludingUnlabeled": 16,
+    "containersTotal": 99,
+    "containersRunning": 94,
+    "containersStopped": 5,
+    "historicalH11cNameIdMatches": 99,
+    "historicalH11cNameIdChangedOrMissing": 0,
+    "liveOomKilledFlagCount": 0,
+    "restartOrOomEventsIn0212To0216Manila": 0,
+    "restartCountInterpretation": "nonzero counts exist on several Auth and Storage containers; cumulative counts do not timestamp a new event",
+    "instantaneousProjectMemoryMiB": {
+      "h09": 233,
+      "canonicalDemo": 196,
+      "recoverySource": 181,
+      "recoveryTarget": 182,
+      "h08cHistory": 1239,
+      "phase8Simulation": 1255,
+      "unrelatedTodo": 1215
+    },
+    "h08cAnalytics": {
+      "name": "supabase_analytics_rrj_h08c_history_20261015",
+      "idPrefix": "2d9de3b44279",
+      "running": true,
+      "healthy": true,
+      "restartCount": 0,
+      "memoryMiB": 524,
+      "memoryLimitBytes": 0,
+      "memorySwapLimitBytes": 0,
+      "dataMounts": 0,
+      "loopbackPort": 59327,
+      "sameFixtureServicesRunning": ["studio", "pg-meta", "vector"],
+      "databaseClientBackendsIdle": 21,
+      "currentExternalUseIndependentlyExcluded": false
+    }
+  },
+  "health": {
+    "h09AuthRestSql": "PASS_6_OF_6_OVER_31_SECONDS",
+    "canonicalDemoAuthRestSql": "PASS_3_OF_3_OVER_13_SECONDS",
+    "recoverySourceSql": "PASS_ONE_READ_ONLY_SELECT_1",
+    "recoveryTargetSql": "PASS_ONE_READ_ONLY_SELECT_1",
+    "recoveryAuthRest": "H11F_PASS_NOT_REPEATED_IN_H11G",
+    "fullIntegrity": "NOT_TESTED",
+    "sustainedStability": "NOT_TESTED"
+  },
+  "trial": {
+    "eligible": false,
+    "reasons": ["current idle and dependent use unverified", "host physical free RAM below 1 GiB throughout readings", "WSL margin above 400 MiB floor narrowed to 238 MiB and swap remained near full", "script requires exact service approval and dependency attestation"],
+    "journalWritten": false,
+    "containerStops": [],
+    "containerStarts": [],
+    "duringState": null,
+    "measuredCapacityGainMiB": null,
+    "restoreState": "unchanged 94/99 running; no H11G stop to restore",
+    "soak": "NOT_PERFORMED"
+  },
+  "hostedContact": false,
+  "wslConfigChange": false,
+  "windowsProcessTermination": false,
+  "dockerPruneOrReset": false,
+  "businessDataMutation": false
+}

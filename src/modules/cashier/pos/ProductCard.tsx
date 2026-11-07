@@ -1,7 +1,7 @@
 import { memo } from "react";
-import { Flame, Plus, SlidersHorizontal } from "lucide-react";
+import { Flame, Plus } from "lucide-react";
 import { formatMoney } from "../constants";
-import { modifierGroupsFor } from "../constants/modifiers";
+import { drinkChoiceGroupsFor } from "../constants/drinkChoices";
 import type { MenuItem } from "../types";
 
 const MENU_IMAGES: Record<string, string> = {
@@ -37,7 +37,9 @@ export const ProductCard = memo(function ProductCard({
   onSelect,
   onQuickAdd,
 }: ProductCardProps) {
-  const modifierCount = modifierGroupsFor(item).length;
+  const drinkChoiceCount = drinkChoiceGroupsFor(item).length;
+  const hasMealChoice = item.withoutRicePrice !== undefined;
+  const requiresChoice = hasMealChoice || drinkChoiceCount > 0;
   const soldOut = !item.available;
 
   return (
@@ -50,11 +52,11 @@ export const ProductCard = memo(function ProductCard({
       <button
         type="button"
         disabled={soldOut}
-        onClick={onQuickAdd}
-        aria-label={`Add ${item.code} ${item.name} to order`}
-        className="pos-product-main flex min-h-0 flex-1 gap-3 p-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-amber-400"
+        onClick={requiresChoice ? onSelect : onQuickAdd}
+        aria-label={`${requiresChoice ? "Choose options for" : "Add"} ${item.code} ${item.name}${requiresChoice ? "" : " to order"}`}
+        className="pos-product-main flex min-h-0 flex-1 items-center gap-3 p-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-amber-400"
       >
-        <span className="pos-product-thumb relative h-14 w-14 shrink-0 overflow-hidden rounded-lg">
+        <span className="pos-product-thumb relative h-12 w-12 shrink-0 overflow-hidden rounded-lg">
           <img
             src={item.imageUrl ?? productImageFor(item.id)}
             alt=""
@@ -68,49 +70,18 @@ export const ProductCard = memo(function ProductCard({
         </span>
 
         <span className="min-w-0 flex-1">
-          <span className="flex items-start justify-between gap-2">
-            <b className="pos-product-code">{item.code}</b>
-            <span
-              className={`pos-availability ${soldOut ? "" : "is-available"}`}
-            >
-              <i /> {soldOut ? "Sold out" : "Ready"}
-            </span>
-          </span>
+          <span className="flex items-center gap-2"><b className="pos-product-code">{item.code}</b>{soldOut ? <span className="pos-availability">Sold out</span> : null}</span>
           <strong className="pos-product-name">{item.name}</strong>
           <span className="pos-product-price">{formatMoney(item.price)}</span>
-          <span className="pos-product-signals">
-            {bestSeller ? (
-              <em>
-                <Flame className="h-3 w-3" /> Popular
-              </em>
-            ) : null}
-          </span>
+          {bestSeller && !soldOut ? <span className="pos-product-signals"><em><Flame className="h-3 w-3" /> Popular</em></span> : null}
         </span>
-      </button>
-
-      <div
-        className={`pos-product-actions grid gap-2 px-3 pb-3 ${modifierCount ? "grid-cols-2" : ""}`}
-      >
-        <button
-          type="button"
-          disabled={soldOut}
-          onClick={onQuickAdd}
-          className="pos-menu-quick-add flex min-h-10 items-center justify-center gap-2 rounded-lg text-[10px] font-black"
-        >
-          <Plus className="h-3.5 w-3.5" aria-hidden="true" />
-          {soldOut ? "Unavailable" : "Quick add"}
-        </button>
-        {modifierCount > 0 && !soldOut ? (
-          <button
-            type="button"
-            onClick={onSelect}
-            className="pos-menu-customize flex min-h-10 items-center justify-center gap-2 rounded-lg border text-[10px] font-black"
-          >
-            <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden="true" />
-            Customize
-          </button>
+        {!soldOut ? (
+          <span className="pos-product-add-icon pos-product-action shrink-0 rounded-lg border" aria-hidden="true">
+            <Plus className="h-4 w-4" />
+            <span>{requiresChoice ? "Choose options" : "Add"}</span>
+          </span>
         ) : null}
-      </div>
+      </button>
     </article>
   );
 }, areProductCardPropsEqual);

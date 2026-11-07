@@ -1,13 +1,12 @@
 import {
   Banknote,
-  CalendarClock,
+  ChevronDown,
+  ChevronLeft,
   CreditCard,
   Printer,
-  ReceiptText,
-  ShieldCheck,
-  UserRound,
 } from "lucide-react";
 import {
+  DialogClose,
   DialogDescription,
   DialogHeader,
   DialogTitle,
@@ -16,8 +15,8 @@ import { formatDateTime, formatMoney } from "../constants";
 import type { CashierShift, Order, Payment, Transaction } from "../types";
 import { CashierButton, Drawer, StatusBadge } from "../components";
 import { getBasketQuantity, getReceiptNumber } from "./transactionRecords";
-import { buildTransactionAudit } from "./transactionAudit";
-import { FinancialLine, TransactionDetailCard } from "./TransactionDetailCards";
+import { basketSubtotalDisagrees, recordedBasketChoices, recordedBasketLine } from "./basketPresentation";
+import { FinancialLine } from "./TransactionDetailCards";
 
 export function TransactionDetailDrawer({
   transaction,
@@ -27,6 +26,7 @@ export function TransactionDetailDrawer({
   open,
   onOpenChange,
   onReprint,
+  onViewOrder,
 }: {
   transaction?: Transaction;
   order?: Order;
@@ -35,14 +35,19 @@ export function TransactionDetailDrawer({
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onReprint: (transaction: Transaction) => void;
+  onViewOrder?: () => void;
 }) {
   if (!transaction) return null;
-
-  const auditEntries = buildTransactionAudit(transaction, order, payment);
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange} size="lg">
       <DialogHeader className="sticky top-0 z-10 border-b border-border/80 bg-white/95 px-4 py-3.5 pr-14 shadow-[0_4px_14px_rgba(36,26,19,0.05)] backdrop-blur-xl sm:px-5">
+        <DialogClose asChild>
+          <CashierButton variant="ghost" className="min-h-11 self-start px-2">
+            <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+            Back to transactions
+          </CashierButton>
+        </DialogClose>
         <div className="flex flex-wrap items-center gap-2">
           <DialogTitle className="font-mono text-lg font-black text-primary">
             {getReceiptNumber(transaction)}
@@ -50,32 +55,18 @@ export function TransactionDetailDrawer({
           <StatusBadge status={transaction.status} />
         </div>
         <DialogDescription>
-          {transaction.id} · {formatDateTime(transaction.createdAt)}
+          {formatDateTime(transaction.createdAt)}
         </DialogDescription>
       </DialogHeader>
 
       <div className="space-y-4 p-4 sm:p-5">
-        <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <TransactionDetailCard
-            icon={ReceiptText}
-            label="Order"
-            value={transaction.orderId}
-          />
-          <TransactionDetailCard
-            icon={UserRound}
-            label="Cashier"
-            value={transaction.cashierName}
-          />
-          <TransactionDetailCard
-            icon={CalendarClock}
-            label="Shift"
-            value={transaction.shiftId}
-          />
-          <TransactionDetailCard
-            icon={ShieldCheck}
-            label="Terminal"
-            value={shift?.terminal ?? "Unlinked"}
-          />
+        <section className="rrj-card grid gap-x-5 gap-y-3 p-4 sm:grid-cols-2" aria-label="Transaction overview">
+          <Overview label="Order" value={transaction.orderId} />
+          <Overview label="Recorded amount" value={formatMoney(transaction.amount)} />
+          <Overview label="Cashier" value={transaction.cashierName} />
+          <Overview label="Payment method" value={transaction.method} />
+          <Overview label="Order status" value={order?.status ?? "Unavailable"} />
+          <Overview label="Shift terminal" value={shift?.terminal ?? "Unavailable"} />
         </section>
 
         <section className="rrj-card overflow-hidden">
@@ -88,22 +79,14 @@ export function TransactionDetailDrawer({
             <div className="space-y-2 text-xs">
               <FinancialLine
                 label="Order subtotal"
-                value={formatMoney(order?.subtotal ?? transaction.amount)}
+                value={order ? formatMoney(order.subtotal) : "Unavailable"}
               />
+              {order?.type === "Delivery" && order.deliveryFee !== undefined && Number.isFinite(order.deliveryFee) && order.deliveryFee > 0 ? (
+                <FinancialLine label="Delivery fee" value={formatMoney(order.deliveryFee)} />
+              ) : null}
+              {order?.taxAmount ? <FinancialLine label="Tax" value={formatMoney(order.taxAmount)} /> : null}
               <FinancialLine
-                label="Discount"
-                value={`−${formatMoney(transaction.discountAmount)}`}
-                tone="text-emerald-700"
-              />
-              {transaction.refundAmount !== undefined && (
-                <FinancialLine
-                  label="Refund"
-                  value={`−${formatMoney(transaction.refundAmount)}`}
-                  tone="text-blue-700"
-                />
-              )}
-              <FinancialLine
-                label="Transaction amount"
+                label={transaction.status === "Voided" ? "Voided recorded amount" : "Transaction amount"}
                 value={formatMoney(transaction.amount)}
                 strong
               />
@@ -117,31 +100,18 @@ export function TransactionDetailDrawer({
                 )}
                 {transaction.method}
               </p>
-              <p className="mt-2 text-[10px] text-muted-foreground">
-                Payment record: <strong>{payment?.id ?? "Unlinked"}</strong>
-              </p>
               {payment?.referenceNumber && (
                 <p className="mt-1 text-[10px] text-muted-foreground">
                   Reference: <strong>{payment.referenceNumber}</strong>
                 </p>
               )}
-              <div className="mt-3">
-                <StatusBadge
-                  status={
-                    payment?.status ??
-                    (transaction.status === "Completed"
-                      ? "Verified"
-                      : "Rejected")
-                  }
-                />
-              </div>
+              <div className="mt-3">{payment ? <StatusBadge status={payment.status} /> : <span className="text-xs text-muted-foreground">Payment record unavailable</span>}</div>
             </div>
           </div>
-          {(transaction.voidReason || transaction.status === "Refunded") && (
+          {transaction.status === "Voided" && (
             <div className="border-t border-border bg-red-50/60 px-4 py-3 text-xs text-red-800">
               <strong>{transaction.status}:</strong>{" "}
-              {transaction.voidReason ??
-                "Refund recorded against this transaction."}
+              {transaction.voidReason ?? "Reason not recorded."} This receipt is excluded from completed revenue.
             </div>
           )}
         </section>
@@ -149,13 +119,15 @@ export function TransactionDetailDrawer({
         <section>
           <div className="mb-2 flex items-center justify-between gap-3">
             <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground">
-              Basket · {getBasketQuantity(order)} items
+              Basket · {getBasketQuantity(order)}{" "}
+              {getBasketQuantity(order) === 1 ? "item" : "items"}
             </h3>
             <span className="text-[10px] text-muted-foreground">
               {order?.customerName ?? transaction.customerName}
             </span>
           </div>
           <div className="rrj-card overflow-hidden">
+            {order && basketSubtotalDisagrees(order) ? <p role="alert" className="border-b border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900">Recorded item totals differ from the recorded order subtotal. Review the original sale; amounts have not been changed.</p> : null}
             {order?.items.length ? (
               order.items.map((item) => (
                 <div
@@ -166,16 +138,14 @@ export function TransactionDetailDrawer({
                     <p className="text-sm font-bold">
                       {item.quantity} × {item.name}
                     </p>
-                    {item.modifiers?.length ? (
+                    {recordedBasketChoices(item).length ? (
                       <p className="mt-1 text-[10px] text-muted-foreground">
-                        {item.modifiers
-                          .map((modifier) => modifier.name)
-                          .join(", ")}
+                        {recordedBasketChoices(item).join(", ")}
                       </p>
                     ) : null}
                   </div>
                   <strong className="text-sm">
-                    {formatMoney(item.unitPrice * item.quantity)}
+                    {recordedBasketLine(item) === undefined ? "Amount unavailable" : formatMoney(recordedBasketLine(item)!)}
                   </strong>
                 </div>
               ))
@@ -187,31 +157,12 @@ export function TransactionDetailDrawer({
           </div>
         </section>
 
-        <section>
-          <h3 className="mb-3 text-xs font-black uppercase tracking-widest text-muted-foreground">
-            Audit timeline
-          </h3>
-          <ol className="relative space-y-4 border-l border-border pl-5">
-            {auditEntries.map((entry) => (
-              <li key={entry.id} className="relative">
-                <span className="absolute -left-[25px] top-1 h-2 w-2 rounded-full bg-primary ring-4 ring-amber-50" />
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="text-sm font-bold text-foreground">
-                    {entry.label}
-                  </p>
-                  <span className="cashier-status-badge rounded-full border border-border/70 bg-muted/70 px-2 py-0.5 text-[8px] font-black uppercase tracking-wider text-muted-foreground shadow-[0_1px_2px_rgba(36,26,19,0.03)]">
-                    {entry.source}
-                  </span>
-                </div>
-                <p className="mt-0.5 text-[11px] text-muted-foreground">
-                  {formatDateTime(entry.timestamp)} · {entry.actor}
-                </p>
-              </li>
-            ))}
-          </ol>
-        </section>
-
         <div className="sticky bottom-0 -mx-4 -mb-4 flex flex-wrap gap-2 border-t border-border/80 bg-[#f8f4ef]/95 px-4 py-3 backdrop-blur-xl sm:-mx-5 sm:-mb-5 sm:justify-end sm:px-5">
+          {onViewOrder ? (
+            <CashierButton variant="secondary" onClick={onViewOrder}>View linked order</CashierButton>
+          ) : (
+            <span className="self-center text-xs text-muted-foreground">Linked order details are unavailable to this Cashier.</span>
+          )}
           <CashierButton
             variant="secondary"
             disabled={transaction.status !== "Completed" || !order}
@@ -224,4 +175,8 @@ export function TransactionDetailDrawer({
       </div>
     </Drawer>
   );
+}
+
+function Overview({ label, value }: { label: string; value: string }) {
+  return <div className="min-w-0"><p className="text-[10px] text-muted-foreground">{label}</p><p className="break-words text-sm font-bold">{value}</p></div>;
 }

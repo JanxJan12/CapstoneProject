@@ -1,0 +1,944 @@
+{
+  "captured_at": "2026-10-12T16:29:55.248Z",
+  "project_name": "RRJS-Foodhouse-Final",
+  "project_ref": "zhzluhqvysvsadwuugpa",
+  "source": "Supabase execute_sql read-only catalog queries",
+  "sections": {
+    "functions": [
+      {
+        "proname": "close_replenishment_from_receiving",
+        "args": "",
+        "definition": "CREATE OR REPLACE FUNCTION public.close_replenishment_from_receiving()\n RETURNS trigger\n LANGUAGE plpgsql\n SET search_path TO 'public', 'extensions', 'pg_temp'\nAS $function$\ndeclare\n  v_request public.production_replenishment_requests%rowtype;\n  v_lines integer;\nbegin\n  if new.replenishment_request_id is null or new.status <> 'posted' then\n    return new;\n  end if;\n  select * into v_request from public.production_replenishment_requests\n  where id = new.replenishment_request_id for update;\n  if v_request.status <> 'ready_for_delivery' or v_request.fulfilled_report_id is not null then\n    raise exception 'Linked request is not ready for fulfillment.' using errcode = '22023';\n  end if;\n  select count(*) into v_lines from public.receiving_report_items line\n  where line.receiving_report_id = new.id and line.inventory_item_id = v_request.inventory_item_id;\n  if v_lines <> 1 then\n    raise exception 'Linked receiving must have exactly one requested item line.' using errcode = '22023';\n  end if;\n  update public.production_replenishment_requests\n  set status = 'received', fulfilled_report_id = new.id, closed_at = new.posted_at\n  where id = v_request.id;\n  return new;\nend;\n$function$\n",
+        "acl": "{postgres=X/postgres,service_role=X/postgres}"
+      },
+      {
+        "proname": "get_manager_receiving_workspace",
+        "args": "p_receiving_report_id uuid",
+        "definition": "CREATE OR REPLACE FUNCTION public.get_manager_receiving_workspace(p_receiving_report_id uuid DEFAULT NULL::uuid)\n RETURNS jsonb\n LANGUAGE plpgsql\n STABLE SECURITY DEFINER\n SET search_path TO 'public', 'extensions', 'pg_temp'\nAS $function$\ndeclare\n  v_actor_id uuid := auth.uid();\n  v_selected_report jsonb;\nbegin\n  if v_actor_id is null then\n    raise exception 'Authentication required.' using errcode = '42501';\n  end if;\n\n  if not exists (\n    select 1\n    from public.profiles profile\n    where profile.id = v_actor_id\n      and profile.role = 'manager'::public.user_role\n      and profile.is_active = true\n  ) then\n    raise exception 'Active manager access required.' using errcode = '42501';\n  end if;\n\n  if p_receiving_report_id is not null\n     and not exists (\n       select 1\n       from public.receiving_reports report\n       where report.id = p_receiving_report_id\n     )\n  then\n    raise exception 'Receiving report not found.' using errcode = 'P0002';\n  end if;\n\n  if p_receiving_report_id is not null then\n    select jsonb_build_object(\n      'id', report.id,\n      'rr_number', report.rr_number,\n      'source_type', report.source_type,\n      'source_reference', report.source_reference,\n      'purchase_order_id', report.purchase_order_id,\n      'purchase_order_number', purchase_order.po_number,\n      'supplier_id', supplier.id,\n      'supplier_name', supplier.name,\n      'received_at', report.received_at,\n      'received_by', report.received_by,\n      'received_by_name', concat_ws(' ', receiver.first_name, receiver.last_name),\n      'status', report.status,\n      'supplier_delivery_reference', report.supplier_delivery_reference,\n      'notes', report.notes,\n      'posted_at', report.posted_at,\n      'posted_by', report.posted_by,\n      'posted_by_name', nullif(concat_ws(' ', poster.first_name, poster.last_name), ''),\n      'created_at', report.created_at,\n      'updated_at', report.updated_at,\n      'items', coalesce((\n        select jsonb_agg(\n          jsonb_build_object(\n            'id', report_item.id,\n            'inventory_item_id', inventory_item.id,\n            'inventory_item_name', inventory_item.item_name,\n            'unit', inventory_item.unit,\n            'secondary_unit', inventory_item.secondary_unit,\n            'expiry_required', inventory_item.expiry_required,\n            'rotation_policy', inventory_item.rotation_policy,\n            'purchase_order_item_id', report_item.purchase_order_item_id,\n            'quantity_ordered', purchase_order_item.quantity_ordered,\n            'quantity_received', purchase_order_item.quantity_received,\n            'quantity_cancelled', purchase_order_item.quantity_cancelled,\n            'quantity_remaining', purchase_order_item.quantity_remaining,\n            'secondary_quantity_ordered', purchase_order_item.secondary_quantity_ordered,\n            'secondary_quantity_received', purchase_order_item.secondary_quantity_received,\n            'quantity_delivered', report_item.quantity_delivered,\n            'quantity_accepted', report_item.quantity_accepted,\n            'quantity_rejected', report_item.quantity_rejected,\n            'secondary_quantity_delivered', report_item.secondary_quantity_delivered,\n            'secondary_quantity_accepted', report_item.secondary_quantity_accepted,\n            'secondary_quantity_rejected', report_item.secondary_quantity_rejected,\n            'rejection_reason', report_item.rejection_reason,\n            'source_lot_code', report_item.source_lot_code,\n            'manufactured_on', report_item.manufactured_on,\n            'use_by_date', report_item.use_by_date,\n            'notes', report_item.notes,\n            'batch_id', batch.id,\n            'batch_code', batch.batch_code,\n            'created_at', report_item.created_at,\n            'updated_at', report_item.updated_at\n          )\n          order by report_item.created_at, report_item.id\n        )\n        from public.receiving_report_items report_item\n        left join public.purchase_order_items purchase_order_item\n          on purchase_order_item.id = report_item.purchase_order_item_id\n        join public.inventory_items inventory_item\n          on inventory_item.id = coalesce(\n            report_item.inventory_item_id,\n            purchase_order_item.inventory_item_id\n          )\n        left join public.inventory_batches batch\n          on batch.receiving_report_item_id = report_item.id\n        where report_item.receiving_report_id = report.id\n      ), '[]'::jsonb)\n    )\n    into v_selected_report\n    from public.receiving_reports report\n    left join public.purchase_orders purchase_order\n      on purchase_order.id = report.purchase_order_id\n    left join public.suppliers supplier\n      on supplier.id = purchase_order.supplier_id\n    join public.profiles receiver\n      on receiver.id = report.received_by\n    left join public.profiles poster\n      on poster.id = report.posted_by\n    where report.id = p_receiving_report_id;\n  end if;\n\n  return jsonb_build_object(\n    'reports', coalesce((\n      select jsonb_agg(report_summary.payload order by report_summary.sort_draft desc, report_summary.sort_at desc)\n      from (\n        select\n          report.status = 'draft' as sort_draft,\n          report.received_at as sort_at,\n          jsonb_build_object(\n            'id', report.id,\n            'rr_number', report.rr_number,\n            'source_type', report.source_type,\n            'source_reference', report.source_reference,\n            'purchase_order_id', report.purchase_order_id,\n            'purchase_order_number', purchase_order.po_number,\n            'supplier_name', supplier.name,\n            'received_at', report.received_at,\n            'status', report.status,\n            'posted_at', report.posted_at,\n            'line_count', (\n              select count(*)\n              from public.receiving_report_items report_item\n              where report_item.receiving_report_id = report.id\n            ),\n            'total_delivered', coalesce((\n              select sum(report_item.quantity_delivered)\n              from public.receiving_report_items report_item\n              where report_item.receiving_report_id = report.id\n            ), 0),\n            'total_accepted', coalesce((\n              select sum(report_item.quantity_accepted)\n              from public.receiving_report_items report_item\n              where report_item.receiving_report_id = report.id\n            ), 0),\n            'total_rejected', coalesce((\n              select sum(report_item.quantity_rejected)\n              from public.receiving_report_items report_item\n              where report_item.receiving_report_id = report.id\n            ), 0),\n            'updated_at', report.updated_at\n          ) as payload\n        from public.receiving_reports report\n        left join public.purchase_orders purchase_order\n          on purchase_order.id = report.purchase_order_id\n        left join public.suppliers supplier\n          on supplier.id = purchase_order.supplier_id\n        order by (report.status = 'draft') desc, report.received_at desc\n        limit 100\n      ) report_summary\n    ), '[]'::jsonb),\n    'selected_report', v_selected_report,\n    'inventory_items', coalesce((\n      select jsonb_agg(\n        jsonb_build_object(\n          'id', inventory_item.id,\n          'item_name', inventory_item.item_name,\n          'unit', inventory_item.unit,\n          'secondary_unit', inventory_item.secondary_unit,\n          'quantity_on_hand', inventory_item.quantity_on_hand,\n          'quantity_scale', inventory_item.quantity_scale,\n          'rotation_policy', inventory_item.rotation_policy,\n          'expiry_required', inventory_item.expiry_required\n        )\n        order by inventory_item.item_name\n      )\n      from public.inventory_items inventory_item\n      where inventory_item.is_active = true\n    ), '[]'::jsonb),\n    'purchase_orders', coalesce((\n      select jsonb_agg(\n        jsonb_build_object(\n          'id', purchase_order.id,\n          'po_number', purchase_order.po_number,\n          'supplier_id', supplier.id,\n          'supplier_name', supplier.name,\n          'status', purchase_order.status,\n          'ordered_at', purchase_order.ordered_at,\n          'total_amount', purchase_order.total_amount,\n          'items', coalesce((\n            select jsonb_agg(\n              jsonb_build_object(\n                'id', purchase_order_item.id,\n                'inventory_item_id', inventory_item.id,\n                'inventory_item_name', inventory_item.item_name,\n                'unit', inventory_item.unit,\n                'secondary_unit', inventory_item.secondary_unit,\n                'quantity_on_hand', inventory_item.quantity_on_hand,\n                'quantity_scale', inventory_item.quantity_scale,\n                'expiry_required', inventory_item.expiry_required,\n                'rotation_policy', inventory_item.rotation_policy,\n                'quantity_ordered', purchase_order_item.quantity_ordered,\n                'quantity_received', purchase_order_item.quantity_received,\n                'quantity_cancelled', purchase_order_item.quantity_cancelled,\n                'quantity_remaining', purchase_order_item.quantity_remaining,\n                'secondary_quantity_ordered', purchase_order_item.secondary_quantity_ordered,\n                'secondary_quantity_received', purchase_order_item.secondary_quantity_received,\n                'expiration_date', purchase_order_item.expiration_date\n              )\n              order by inventory_item.item_name\n            )\n            from public.purchase_order_items purchase_order_item\n            join public.inventory_items inventory_item\n              on inventory_item.id = purchase_order_item.inventory_item_id\n            where purchase_order_item.purchase_order_id = purchase_order.id\n              and purchase_order_item.quantity_remaining > 0\n              and inventory_item.is_active = true\n          ), '[]'::jsonb)\n        )\n        order by purchase_order.ordered_at desc nulls last, purchase_order.po_number\n      )\n      from public.purchase_orders purchase_order\n      join public.suppliers supplier\n        on supplier.id = purchase_order.supplier_id\n      where purchase_order.status in (\n        'submitted'::public.purchase_order_status,\n        'partially_received'::public.purchase_order_status\n      )\n        and supplier.is_active = true\n    ), '[]'::jsonb)\n  );\nend;\n$function$\n",
+        "acl": "{postgres=X/postgres,service_role=X/postgres,authenticated=X/postgres}"
+      },
+      {
+        "proname": "guard_linked_replenishment_line",
+        "args": "",
+        "definition": "CREATE OR REPLACE FUNCTION public.guard_linked_replenishment_line()\n RETURNS trigger\n LANGUAGE plpgsql\n SET search_path TO 'public', 'extensions', 'pg_temp'\nAS $function$\ndeclare\n  v_request_id uuid;\n  v_item_id uuid;\nbegin\n  select report.replenishment_request_id into v_request_id\n  from public.receiving_reports report\n  where report.id = new.receiving_report_id;\n  if v_request_id is null then return new; end if;\n  select request.inventory_item_id into v_item_id\n  from public.production_replenishment_requests request\n  where request.id = v_request_id;\n  if new.inventory_item_id is distinct from v_item_id\n     or new.purchase_order_item_id is not null then\n    raise exception 'Linked receiving line must match the requested item.' using errcode = '22023';\n  end if;\n  if exists (\n    select 1 from public.receiving_report_items line\n    where line.receiving_report_id = new.receiving_report_id and line.id <> new.id\n  ) then\n    raise exception 'Linked receiving accepts one item line.' using errcode = '22023';\n  end if;\n  return new;\nend;\n$function$\n",
+        "acl": "{postgres=X/postgres,service_role=X/postgres}"
+      },
+      {
+        "proname": "guard_linked_replenishment_report",
+        "args": "",
+        "definition": "CREATE OR REPLACE FUNCTION public.guard_linked_replenishment_report()\n RETURNS trigger\n LANGUAGE plpgsql\n SET search_path TO 'public', 'extensions', 'pg_temp'\nAS $function$\nbegin\n  if tg_op = 'DELETE' then\n    if old.replenishment_request_id is not null then\n      raise exception 'Linked receiving draft cannot be deleted.' using errcode = '22023';\n    end if;\n    return old;\n  end if;\n  if tg_op = 'INSERT' and new.replenishment_request_id is not null then\n    if not exists (\n      select 1 from public.production_replenishment_requests request\n      where request.id = new.replenishment_request_id\n        and request.status = 'ready_for_delivery'\n    ) then\n      raise exception 'Only a ready request can link Receiving.' using errcode = '22023';\n    end if;\n  end if;\n  if tg_op = 'UPDATE' and old.replenishment_request_id is null\n     and new.replenishment_request_id is not null then\n    raise exception 'Existing receiving reports cannot be linked retroactively.'\n      using errcode = '22023';\n  end if;\n  if tg_op = 'UPDATE' and old.replenishment_request_id is not null then\n    if new.replenishment_request_id is distinct from old.replenishment_request_id\n       or new.source_type is distinct from old.source_type\n       or new.purchase_order_id is distinct from old.purchase_order_id\n       or new.source_reference is distinct from old.source_reference\n    then\n      raise exception 'Linked receiving source and request cannot change.' using errcode = '22023';\n    end if;\n  end if;\n  return new;\nend;\n$function$\n",
+        "acl": "{postgres=X/postgres,service_role=X/postgres}"
+      },
+      {
+        "proname": "inventory_usable_quantity",
+        "args": "p_inventory_item_id uuid",
+        "definition": "CREATE OR REPLACE FUNCTION public.inventory_usable_quantity(p_inventory_item_id uuid)\n RETURNS numeric\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO ''\nAS $function$\n  select\n    case\n      when inventory_item.batch_consumption_enabled then\n        coalesce(\n          (\n            select sum(batch.quantity_on_hand)\n            from public.inventory_batches batch\n            where batch.inventory_item_id = inventory_item.id\n              and batch.quantity_on_hand > 0\n              and (\n                not inventory_item.expiry_required\n                or batch.use_by_date >=\n                  (current_timestamp at time zone 'Asia/Manila')::date\n              )\n          ),\n          0\n        )\n      else inventory_item.quantity_on_hand\n    end\n  from public.inventory_items inventory_item\n  where inventory_item.id = p_inventory_item_id;\n$function$\n",
+        "acl": "{postgres=X/postgres,service_role=X/postgres}"
+      },
+      {
+        "proname": "post_receiving_report",
+        "args": "p_receiving_report_id uuid",
+        "definition": "CREATE OR REPLACE FUNCTION public.post_receiving_report(p_receiving_report_id uuid)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public', 'extensions', 'pg_temp'\nAS $function$\ndeclare\n  v_actor_id uuid;\n  v_report public.receiving_reports%rowtype;\n  v_line record;\n  v_inventory_lock record;\n  v_po_lock record;\n  v_purchase_order_status public.purchase_order_status;\n  v_line_count integer := 0;\n  v_batch_count integer := 0;\n  v_transaction_count integer := 0;\n  v_total_accepted numeric := 0;\n  v_quantity_before numeric;\n  v_quantity_after numeric;\n  v_batch_id uuid;\n  v_posted_at timestamptz := now();\n  v_all_po_lines_resolved boolean;\n  v_any_po_quantity_received boolean;\nbegin\n  v_actor_id := auth.uid();\n\n  if v_actor_id is null then\n    raise exception 'Authentication required.'\n      using errcode = '42501';\n  end if;\n\n  if not exists (\n    select 1\n    from public.profiles profile\n    where profile.id = v_actor_id\n      and profile.role = 'manager'::public.user_role\n      and profile.is_active = true\n  ) then\n    raise exception 'Active manager access required.'\n      using errcode = '42501';\n  end if;\n\n  if p_receiving_report_id is null then\n    raise exception 'Receiving report ID is required.'\n      using errcode = '22023';\n  end if;\n\n  select report.*\n  into v_report\n  from public.receiving_reports report\n  where report.id = p_receiving_report_id\n  for update;\n\n  if not found then\n    raise exception 'Receiving report not found.'\n      using errcode = 'P0002';\n  end if;\n\n  if v_report.status = 'posted' then\n    raise exception 'Receiving report is already posted.'\n      using errcode = '22023';\n  end if;\n\n  if v_report.status <> 'draft' then\n    raise exception 'Only a draft receiving report can be posted.'\n      using errcode = '22023';\n  end if;\n\n  if v_report.source_type = 'production_team' then\n    if v_report.purchase_order_id is not null\n       or v_report.supplier_delivery_reference is not null\n    then\n      raise exception 'Production Team receiving cannot reference a purchase order or supplier delivery.'\n        using errcode = '22023';\n    end if;\n  elsif v_report.source_type = 'direct_supplier' then\n    if v_report.purchase_order_id is null then\n      raise exception 'Direct supplier receiving requires a purchase order.'\n        using errcode = '22023';\n    end if;\n\n    select purchase_order.status\n    into v_purchase_order_status\n    from public.purchase_orders purchase_order\n    where purchase_order.id = v_report.purchase_order_id\n    for update;\n\n    if not found then\n      raise exception 'Receiving report purchase order was not found.'\n        using errcode = 'P0002';\n    end if;\n\n    if v_purchase_order_status not in (\n      'submitted'::public.purchase_order_status,\n      'partially_received'::public.purchase_order_status\n    ) then\n      raise exception 'Purchase order must be submitted or partially received before receiving.'\n        using errcode = '22023';\n    end if;\n  else\n    raise exception 'Unsupported receiving source type.'\n      using errcode = '22023';\n  end if;\n\n  -- Lock every line before validating or mutating anything. A concurrent post\n  -- waits on the report row and then observes the posted state.\n  for v_line in\n    select report_item.id\n    from public.receiving_report_items report_item\n    where report_item.receiving_report_id = v_report.id\n    order by report_item.id\n    for update\n  loop\n    v_line_count := v_line_count + 1;\n  end loop;\n\n  if v_line_count = 0 then\n    raise exception 'Receiving report must contain at least one line.'\n      using errcode = '22023';\n  end if;\n\n  -- Lock PO lines and inventory items in stable UUID order to avoid deadlocks\n  -- between reports that touch overlapping records.\n  if v_report.source_type = 'direct_supplier' then\n    for v_po_lock in\n      select purchase_order_item.id\n      from public.purchase_order_items purchase_order_item\n      where purchase_order_item.id in (\n        select report_item.purchase_order_item_id\n        from public.receiving_report_items report_item\n        where report_item.receiving_report_id = v_report.id\n      )\n      order by purchase_order_item.id\n      for update\n    loop\n      null;\n    end loop;\n  end if;\n\n  for v_inventory_lock in\n    select inventory_item.id\n    from public.inventory_items inventory_item\n    where inventory_item.id in (\n      select case\n        when v_report.source_type = 'production_team'\n          then report_item.inventory_item_id\n        else purchase_order_item.inventory_item_id\n      end\n      from public.receiving_report_items report_item\n      left join public.purchase_order_items purchase_order_item\n        on purchase_order_item.id = report_item.purchase_order_item_id\n      where report_item.receiving_report_id = v_report.id\n    )\n    order by inventory_item.id\n    for update\n  loop\n    null;\n  end loop;\n\n  -- Validate every line before the first balance, batch, ledger, or PO update.\n  for v_line in\n    select\n      report_item.*,\n      purchase_order_item.purchase_order_id as line_purchase_order_id,\n      purchase_order_item.inventory_item_id as po_inventory_item_id,\n      purchase_order_item.quantity_remaining as po_quantity_remaining,\n      purchase_order_item.expiration_date as po_expiration_date,\n      inventory_item.id as resolved_inventory_item_id,\n      inventory_item.item_name,\n      inventory_item.unit,\n      inventory_item.secondary_unit,\n      inventory_item.is_active as inventory_item_is_active,\n      inventory_item.expiry_required,\n      inventory_item.quantity_on_hand as item_quantity_on_hand,\n      coalesce(\n        report_item.use_by_date,\n        purchase_order_item.expiration_date\n      ) as effective_use_by_date\n    from public.receiving_report_items report_item\n    left join public.purchase_order_items purchase_order_item\n      on purchase_order_item.id = report_item.purchase_order_item_id\n    left join public.inventory_items inventory_item\n      on inventory_item.id = case\n        when v_report.source_type = 'production_team'\n          then report_item.inventory_item_id\n        else purchase_order_item.inventory_item_id\n      end\n    where report_item.receiving_report_id = v_report.id\n    order by report_item.id\n  loop\n    if v_report.source_type = 'production_team' then\n      if v_line.inventory_item_id is null\n         or v_line.purchase_order_item_id is not null\n      then\n        raise exception 'Production Team receiving lines require inventory_item_id and cannot reference a PO item.'\n          using errcode = '22023';\n      end if;\n    else\n      if v_line.purchase_order_item_id is null\n         or v_line.inventory_item_id is not null\n      then\n        raise exception 'Direct supplier receiving lines require a PO item and cannot directly identify inventory.'\n          using errcode = '22023';\n      end if;\n\n      if v_line.line_purchase_order_id is null\n         or v_line.line_purchase_order_id <> v_report.purchase_order_id\n      then\n        raise exception 'Receiving line PO item does not belong to the report purchase order.'\n          using errcode = '22023';\n      end if;\n\n      if v_line.quantity_accepted > v_line.po_quantity_remaining then\n        raise exception 'Accepted quantity exceeds the PO item remaining quantity.'\n          using errcode = '22023';\n      end if;\n    end if;\n\n    if v_line.resolved_inventory_item_id is null then\n      raise exception 'Receiving line inventory item was not found.'\n        using errcode = 'P0002';\n    end if;\n\n    if not v_line.inventory_item_is_active then\n      raise exception 'Inactive inventory items cannot be received.'\n        using errcode = '22023';\n    end if;\n\n    if v_line.quantity_delivered is null\n       or v_line.quantity_delivered in (\n         'NaN'::numeric,\n         'Infinity'::numeric,\n         '-Infinity'::numeric\n       )\n       or v_line.quantity_delivered <= 0\n       or v_line.quantity_accepted is null\n       or v_line.quantity_accepted in (\n         'NaN'::numeric,\n         'Infinity'::numeric,\n         '-Infinity'::numeric\n       )\n       or v_line.quantity_accepted < 0\n       or v_line.quantity_accepted > v_line.quantity_delivered\n       or v_line.quantity_rejected\n          <> v_line.quantity_delivered - v_line.quantity_accepted\n    then\n      raise exception 'Receiving line base quantities are inconsistent.'\n        using errcode = '22023';\n    end if;\n\n    if v_line.secondary_unit is null then\n      if v_line.secondary_quantity_delivered is not null\n         or v_line.secondary_quantity_accepted is not null\n      then\n        raise exception 'Secondary quantities are not allowed when the inventory item has no secondary unit.'\n          using errcode = '22023';\n      end if;\n    else\n      if v_line.secondary_quantity_delivered is null\n         or v_line.secondary_quantity_accepted is null\n      then\n        raise exception 'Inventory items with a secondary unit require independent secondary receiving quantities.'\n          using errcode = '22023';\n      end if;\n\n      if v_line.secondary_quantity_delivered in (\n           'NaN'::numeric,\n           'Infinity'::numeric,\n           '-Infinity'::numeric\n         )\n         or v_line.secondary_quantity_delivered <= 0\n         or v_line.secondary_quantity_accepted in (\n           'NaN'::numeric,\n           'Infinity'::numeric,\n           '-Infinity'::numeric\n         )\n         or v_line.secondary_quantity_accepted < 0\n         or v_line.secondary_quantity_accepted\n            > v_line.secondary_quantity_delivered\n         or v_line.secondary_quantity_rejected\n            <> v_line.secondary_quantity_delivered\n               - v_line.secondary_quantity_accepted\n         or (\n           (v_line.quantity_accepted = 0)\n           <> (v_line.secondary_quantity_accepted = 0)\n         )\n      then\n        raise exception 'Receiving line secondary quantities are inconsistent.'\n          using errcode = '22023';\n      end if;\n    end if;\n\n    if (\n      v_line.quantity_rejected > 0\n      or coalesce(v_line.secondary_quantity_rejected, 0) > 0\n    ) and nullif(btrim(v_line.rejection_reason), '') is null\n    then\n      raise exception 'Rejection reason is required when any quantity is rejected.'\n        using errcode = '22023';\n    end if;\n\n    if v_line.expiry_required\n       and v_line.effective_use_by_date is null\n    then\n      raise exception 'Expiry-required inventory must include a use-by date.'\n        using errcode = '22023';\n    end if;\n\n    if v_line.manufactured_on is not null\n       and v_line.effective_use_by_date is not null\n       and v_line.manufactured_on > v_line.effective_use_by_date\n    then\n      raise exception 'Manufactured date cannot be after the use-by date.'\n        using errcode = '22023';\n    end if;\n  end loop;\n\n  for v_line in\n    select\n      report_item.*,\n      purchase_order_item.inventory_item_id as po_inventory_item_id,\n      purchase_order_item.expiration_date as po_expiration_date,\n      inventory_item.id as resolved_inventory_item_id,\n      inventory_item.quantity_on_hand as item_quantity_on_hand,\n      coalesce(\n        report_item.use_by_date,\n        purchase_order_item.expiration_date\n      ) as effective_use_by_date\n    from public.receiving_report_items report_item\n    left join public.purchase_order_items purchase_order_item\n      on purchase_order_item.id = report_item.purchase_order_item_id\n    join public.inventory_items inventory_item\n      on inventory_item.id = case\n        when v_report.source_type = 'production_team'\n          then report_item.inventory_item_id\n        else purchase_order_item.inventory_item_id\n      end\n    where report_item.receiving_report_id = v_report.id\n    order by report_item.id\n  loop\n    if v_line.quantity_accepted > 0 then\n      v_quantity_before := v_line.item_quantity_on_hand;\n\n      insert into public.inventory_batches (\n        batch_code,\n        inventory_item_id,\n        origin_type,\n        receiving_report_item_id,\n        supplier_lot_code,\n        received_at,\n        manufactured_on,\n        use_by_date,\n        quantity_initial,\n        quantity_on_hand,\n        secondary_quantity_initial,\n        secondary_quantity_on_hand,\n        created_at\n      )\n      values (\n        'RRB-' || replace(v_line.id::text, '-', ''),\n        v_line.resolved_inventory_item_id,\n        'receiving',\n        v_line.id,\n        v_line.source_lot_code,\n        v_report.received_at,\n        v_line.manufactured_on,\n        v_line.effective_use_by_date,\n        v_line.quantity_accepted,\n        v_line.quantity_accepted,\n        v_line.secondary_quantity_accepted,\n        v_line.secondary_quantity_accepted,\n        v_posted_at\n      )\n      returning id into v_batch_id;\n\n      update public.inventory_items inventory_item\n      set quantity_on_hand =\n        inventory_item.quantity_on_hand + v_line.quantity_accepted\n      where inventory_item.id = v_line.resolved_inventory_item_id\n      returning inventory_item.quantity_on_hand into v_quantity_after;\n\n      if v_quantity_after\n         is distinct from v_quantity_before + v_line.quantity_accepted\n      then\n        raise exception 'Inventory receiving arithmetic failed.'\n          using errcode = 'P0001';\n      end if;\n\n      insert into public.inventory_transactions (\n        inventory_item_id,\n        purchase_order_item_id,\n        order_id,\n        performed_by,\n        transaction_type,\n        quantity_change,\n        quantity_before,\n        quantity_after,\n        reason,\n        mutation_request_id,\n        inventory_batch_id,\n        created_at\n      )\n      values (\n        v_line.resolved_inventory_item_id,\n        v_line.purchase_order_item_id,\n        null,\n        v_actor_id,\n        'receiving'::public.inventory_transaction_type,\n        v_line.quantity_accepted,\n        v_quantity_before,\n        v_quantity_after,\n        'Formal receiving report ' || v_report.rr_number,\n        v_line.id,\n        v_batch_id,\n        v_posted_at\n      );\n\n      v_batch_count := v_batch_count + 1;\n      v_transaction_count := v_transaction_count + 1;\n      v_total_accepted := v_total_accepted + v_line.quantity_accepted;\n    end if;\n\n    if v_report.source_type = 'direct_supplier'\n       and v_line.quantity_accepted > 0\n    then\n      update public.purchase_order_items purchase_order_item\n      set\n        quantity_received =\n          purchase_order_item.quantity_received\n          + v_line.quantity_accepted,\n        secondary_quantity_received =\n          purchase_order_item.secondary_quantity_received\n          + coalesce(v_line.secondary_quantity_accepted, 0),\n        received_at = case\n          when purchase_order_item.quantity_remaining\n               = v_line.quantity_accepted\n            then v_posted_at\n          else purchase_order_item.received_at\n        end\n      where purchase_order_item.id = v_line.purchase_order_item_id;\n    end if;\n  end loop;\n\n  if v_report.source_type = 'direct_supplier' then\n    select\n      bool_and(purchase_order_item.quantity_remaining = 0),\n      bool_or(purchase_order_item.quantity_received > 0)\n    into\n      v_all_po_lines_resolved,\n      v_any_po_quantity_received\n    from public.purchase_order_items purchase_order_item\n    where purchase_order_item.purchase_order_id = v_report.purchase_order_id;\n\n    update public.purchase_orders purchase_order\n    set\n      status = case\n        when v_all_po_lines_resolved\n          then 'received'::public.purchase_order_status\n        when v_any_po_quantity_received\n          then 'partially_received'::public.purchase_order_status\n        else purchase_order.status\n      end,\n      received_at = case\n        when v_all_po_lines_resolved then v_posted_at\n        else purchase_order.received_at\n      end\n    where purchase_order.id = v_report.purchase_order_id;\n  end if;\n\n  update public.receiving_reports report\n  set\n    status = 'posted',\n    posted_at = v_posted_at,\n    posted_by = v_actor_id\n  where report.id = v_report.id;\n\n  return jsonb_build_object(\n    'receiving_report_id', v_report.id,\n    'rr_number', v_report.rr_number,\n    'source_type', v_report.source_type,\n    'status', 'posted',\n    'line_count', v_line_count,\n    'batch_count', v_batch_count,\n    'transaction_count', v_transaction_count,\n    'total_accepted', v_total_accepted,\n    'posted_at', v_posted_at,\n    'posted_by', v_actor_id\n  );\nend;\n$function$\n",
+        "acl": "{postgres=X/postgres,service_role=X/postgres,authenticated=X/postgres}"
+      }
+    ],
+    "tables": [
+      {
+        "relname": "inventory_batches",
+        "relrowsecurity": true,
+        "owner": "postgres",
+        "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "relname": "inventory_items",
+        "relrowsecurity": true,
+        "owner": "postgres",
+        "acl": "{postgres=arwdDxtm/postgres,anon=r/postgres,authenticated=r/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "relname": "production_replenishment_requests",
+        "relrowsecurity": true,
+        "owner": "postgres",
+        "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "relname": "profiles",
+        "relrowsecurity": true,
+        "owner": "postgres",
+        "acl": "{postgres=arwdDxtm/postgres,authenticated=r/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "relname": "receiving_report_items",
+        "relrowsecurity": true,
+        "owner": "postgres",
+        "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      },
+      {
+        "relname": "receiving_reports",
+        "relrowsecurity": true,
+        "owner": "postgres",
+        "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}"
+      }
+    ],
+    "columns": [
+      {
+        "table_name": "inventory_batches",
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "table_name": "inventory_batches",
+        "column_name": "batch_code",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "table_name": "inventory_batches",
+        "column_name": "inventory_item_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "table_name": "inventory_batches",
+        "column_name": "origin_type",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "table_name": "inventory_batches",
+        "column_name": "receiving_report_item_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "table_name": "inventory_batches",
+        "column_name": "supplier_lot_code",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "table_name": "inventory_batches",
+        "column_name": "received_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "table_name": "inventory_batches",
+        "column_name": "manufactured_on",
+        "data_type": "date",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "table_name": "inventory_batches",
+        "column_name": "use_by_date",
+        "data_type": "date",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "table_name": "inventory_batches",
+        "column_name": "quantity_initial",
+        "data_type": "numeric",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "table_name": "inventory_batches",
+        "column_name": "quantity_on_hand",
+        "data_type": "numeric",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "table_name": "inventory_batches",
+        "column_name": "secondary_quantity_initial",
+        "data_type": "numeric",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "table_name": "inventory_batches",
+        "column_name": "secondary_quantity_on_hand",
+        "data_type": "numeric",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "table_name": "inventory_batches",
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO",
+        "column_default": "now()"
+      },
+      {
+        "table_name": "inventory_batches",
+        "column_name": "opening_balance_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "table_name": "inventory_batches",
+        "column_name": "received_at_is_estimated",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "false"
+      },
+      {
+        "table_name": "inventory_batches",
+        "column_name": "notes",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "table_name": "inventory_batches",
+        "column_name": "quantity_positive_adjustments",
+        "data_type": "numeric",
+        "is_nullable": "NO",
+        "column_default": "0"
+      },
+      {
+        "table_name": "inventory_items",
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "table_name": "inventory_items",
+        "column_name": "item_name",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "table_name": "inventory_items",
+        "column_name": "unit",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "table_name": "inventory_items",
+        "column_name": "quantity_on_hand",
+        "data_type": "numeric",
+        "is_nullable": "NO",
+        "column_default": "0"
+      },
+      {
+        "table_name": "inventory_items",
+        "column_name": "reorder_level",
+        "data_type": "numeric",
+        "is_nullable": "NO",
+        "column_default": "0"
+      },
+      {
+        "table_name": "inventory_items",
+        "column_name": "inventory_category",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "table_name": "inventory_items",
+        "column_name": "is_active",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "true"
+      },
+      {
+        "table_name": "inventory_items",
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO",
+        "column_default": "now()"
+      },
+      {
+        "table_name": "inventory_items",
+        "column_name": "updated_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO",
+        "column_default": "now()"
+      },
+      {
+        "table_name": "inventory_items",
+        "column_name": "item_kind",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "table_name": "inventory_items",
+        "column_name": "secondary_unit",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "table_name": "inventory_items",
+        "column_name": "quantity_scale",
+        "data_type": "smallint",
+        "is_nullable": "NO",
+        "column_default": "3"
+      },
+      {
+        "table_name": "inventory_items",
+        "column_name": "rotation_policy",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": "'fifo'::text"
+      },
+      {
+        "table_name": "inventory_items",
+        "column_name": "expiry_required",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "false"
+      },
+      {
+        "table_name": "inventory_items",
+        "column_name": "shelf_life_days",
+        "data_type": "smallint",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "table_name": "inventory_items",
+        "column_name": "batch_consumption_enabled",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "false"
+      },
+      {
+        "table_name": "production_replenishment_requests",
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "table_name": "production_replenishment_requests",
+        "column_name": "inventory_item_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "table_name": "production_replenishment_requests",
+        "column_name": "requested_unit",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "table_name": "production_replenishment_requests",
+        "column_name": "requested_quantity",
+        "data_type": "numeric",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "table_name": "production_replenishment_requests",
+        "column_name": "needed_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "table_name": "production_replenishment_requests",
+        "column_name": "priority",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": "'normal'::text"
+      },
+      {
+        "table_name": "production_replenishment_requests",
+        "column_name": "note",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "table_name": "production_replenishment_requests",
+        "column_name": "status",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": "'requested'::text"
+      },
+      {
+        "table_name": "production_replenishment_requests",
+        "column_name": "requested_by",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "table_name": "production_replenishment_requests",
+        "column_name": "requested_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO",
+        "column_default": "now()"
+      },
+      {
+        "table_name": "production_replenishment_requests",
+        "column_name": "ready_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "table_name": "production_replenishment_requests",
+        "column_name": "closed_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "table_name": "production_replenishment_requests",
+        "column_name": "fulfilled_report_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "table_name": "profiles",
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "table_name": "profiles",
+        "column_name": "first_name",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "table_name": "profiles",
+        "column_name": "last_name",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "table_name": "profiles",
+        "column_name": "contact_number",
+        "data_type": "character varying",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "table_name": "profiles",
+        "column_name": "role",
+        "data_type": "USER-DEFINED",
+        "is_nullable": "NO",
+        "column_default": "'customer'::user_role"
+      },
+      {
+        "table_name": "profiles",
+        "column_name": "is_active",
+        "data_type": "boolean",
+        "is_nullable": "NO",
+        "column_default": "true"
+      },
+      {
+        "table_name": "profiles",
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO",
+        "column_default": "now()"
+      },
+      {
+        "table_name": "profiles",
+        "column_name": "updated_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO",
+        "column_default": "now()"
+      },
+      {
+        "table_name": "profiles",
+        "column_name": "avatar_url",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "table_name": "receiving_report_items",
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "table_name": "receiving_report_items",
+        "column_name": "receiving_report_id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "table_name": "receiving_report_items",
+        "column_name": "purchase_order_item_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "table_name": "receiving_report_items",
+        "column_name": "quantity_delivered",
+        "data_type": "numeric",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "table_name": "receiving_report_items",
+        "column_name": "quantity_accepted",
+        "data_type": "numeric",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "table_name": "receiving_report_items",
+        "column_name": "quantity_rejected",
+        "data_type": "numeric",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "table_name": "receiving_report_items",
+        "column_name": "secondary_quantity_delivered",
+        "data_type": "numeric",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "table_name": "receiving_report_items",
+        "column_name": "secondary_quantity_accepted",
+        "data_type": "numeric",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "table_name": "receiving_report_items",
+        "column_name": "secondary_quantity_rejected",
+        "data_type": "numeric",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "table_name": "receiving_report_items",
+        "column_name": "rejection_reason",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "table_name": "receiving_report_items",
+        "column_name": "notes",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "table_name": "receiving_report_items",
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO",
+        "column_default": "now()"
+      },
+      {
+        "table_name": "receiving_report_items",
+        "column_name": "updated_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO",
+        "column_default": "now()"
+      },
+      {
+        "table_name": "receiving_report_items",
+        "column_name": "inventory_item_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "table_name": "receiving_report_items",
+        "column_name": "source_lot_code",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "table_name": "receiving_report_items",
+        "column_name": "manufactured_on",
+        "data_type": "date",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "table_name": "receiving_report_items",
+        "column_name": "use_by_date",
+        "data_type": "date",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "table_name": "receiving_reports",
+        "column_name": "id",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": "gen_random_uuid()"
+      },
+      {
+        "table_name": "receiving_reports",
+        "column_name": "rr_number",
+        "data_type": "character varying",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "table_name": "receiving_reports",
+        "column_name": "purchase_order_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "table_name": "receiving_reports",
+        "column_name": "received_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "table_name": "receiving_reports",
+        "column_name": "received_by",
+        "data_type": "uuid",
+        "is_nullable": "NO",
+        "column_default": null
+      },
+      {
+        "table_name": "receiving_reports",
+        "column_name": "status",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": "'draft'::text"
+      },
+      {
+        "table_name": "receiving_reports",
+        "column_name": "supplier_delivery_reference",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "table_name": "receiving_reports",
+        "column_name": "notes",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "table_name": "receiving_reports",
+        "column_name": "posted_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "table_name": "receiving_reports",
+        "column_name": "posted_by",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "table_name": "receiving_reports",
+        "column_name": "created_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO",
+        "column_default": "now()"
+      },
+      {
+        "table_name": "receiving_reports",
+        "column_name": "updated_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO",
+        "column_default": "now()"
+      },
+      {
+        "table_name": "receiving_reports",
+        "column_name": "source_type",
+        "data_type": "text",
+        "is_nullable": "NO",
+        "column_default": "'direct_supplier'::text"
+      },
+      {
+        "table_name": "receiving_reports",
+        "column_name": "source_reference",
+        "data_type": "text",
+        "is_nullable": "YES",
+        "column_default": null
+      },
+      {
+        "table_name": "receiving_reports",
+        "column_name": "replenishment_request_id",
+        "data_type": "uuid",
+        "is_nullable": "YES",
+        "column_default": null
+      }
+    ],
+    "constraints": [
+      {
+        "table_name": "receiving_report_items",
+        "conname": "receiving_report_items_date_order_chk",
+        "definition": "CHECK (((manufactured_on IS NULL) OR (use_by_date IS NULL) OR (manufactured_on <= use_by_date)))"
+      },
+      {
+        "table_name": "receiving_report_items",
+        "conname": "receiving_report_items_inventory_item_id_fkey",
+        "definition": "FOREIGN KEY (inventory_item_id) REFERENCES inventory_items(id)"
+      },
+      {
+        "table_name": "receiving_report_items",
+        "conname": "receiving_report_items_pkey",
+        "definition": "PRIMARY KEY (id)"
+      },
+      {
+        "table_name": "receiving_report_items",
+        "conname": "receiving_report_items_purchase_order_item_id_fkey",
+        "definition": "FOREIGN KEY (purchase_order_item_id) REFERENCES purchase_order_items(id)"
+      },
+      {
+        "table_name": "receiving_report_items",
+        "conname": "receiving_report_items_quantity_accepted_le_delivered_chk",
+        "definition": "CHECK ((quantity_accepted <= quantity_delivered))"
+      },
+      {
+        "table_name": "receiving_report_items",
+        "conname": "receiving_report_items_quantity_accepted_nonneg_chk",
+        "definition": "CHECK (((quantity_accepted <> 'NaN'::numeric) AND (quantity_accepted >= (0)::numeric)))"
+      },
+      {
+        "table_name": "receiving_report_items",
+        "conname": "receiving_report_items_quantity_delivered_pos_chk",
+        "definition": "CHECK (((quantity_delivered <> 'NaN'::numeric) AND (quantity_delivered > (0)::numeric)))"
+      },
+      {
+        "table_name": "receiving_report_items",
+        "conname": "receiving_report_items_receiving_report_id_fkey",
+        "definition": "FOREIGN KEY (receiving_report_id) REFERENCES receiving_reports(id)"
+      },
+      {
+        "table_name": "receiving_report_items",
+        "conname": "receiving_report_items_rejection_reason_chk",
+        "definition": "CHECK (((NOT (((quantity_delivered - quantity_accepted) > (0)::numeric) OR ((secondary_quantity_delivered IS NOT NULL) AND ((secondary_quantity_delivered - secondary_quantity_accepted) > (0)::numeric)))) OR ((rejection_reason IS NOT NULL) AND (btrim(rejection_reason) <> ''::text))))"
+      },
+      {
+        "table_name": "receiving_report_items",
+        "conname": "receiving_report_items_report_po_item_key",
+        "definition": "UNIQUE (receiving_report_id, purchase_order_item_id)"
+      },
+      {
+        "table_name": "receiving_report_items",
+        "conname": "receiving_report_items_secondary_accepted_le_delivered_chk",
+        "definition": "CHECK (((secondary_quantity_accepted IS NULL) OR (secondary_quantity_accepted <= secondary_quantity_delivered)))"
+      },
+      {
+        "table_name": "receiving_report_items",
+        "conname": "receiving_report_items_secondary_accepted_nonneg_chk",
+        "definition": "CHECK (((secondary_quantity_accepted IS NULL) OR ((secondary_quantity_accepted <> 'NaN'::numeric) AND (secondary_quantity_accepted >= (0)::numeric))))"
+      },
+      {
+        "table_name": "receiving_report_items",
+        "conname": "receiving_report_items_secondary_delivered_pos_chk",
+        "definition": "CHECK (((secondary_quantity_delivered IS NULL) OR ((secondary_quantity_delivered <> 'NaN'::numeric) AND (secondary_quantity_delivered > (0)::numeric))))"
+      },
+      {
+        "table_name": "receiving_report_items",
+        "conname": "receiving_report_items_secondary_quantities_pair_chk",
+        "definition": "CHECK (((secondary_quantity_delivered IS NULL) = (secondary_quantity_accepted IS NULL)))"
+      },
+      {
+        "table_name": "receiving_report_items",
+        "conname": "receiving_report_items_source_lot_code_chk",
+        "definition": "CHECK (((source_lot_code IS NULL) OR (btrim(source_lot_code) <> ''::text)))"
+      },
+      {
+        "table_name": "receiving_report_items",
+        "conname": "receiving_report_items_source_reference_chk",
+        "definition": "CHECK ((num_nonnulls(inventory_item_id, purchase_order_item_id) = 1))"
+      },
+      {
+        "table_name": "receiving_reports",
+        "conname": "receiving_report_replenishment_source_chk",
+        "definition": "CHECK (((replenishment_request_id IS NULL) OR ((source_type = 'production_team'::text) AND (purchase_order_id IS NULL))))"
+      },
+      {
+        "table_name": "receiving_reports",
+        "conname": "receiving_reports_pkey",
+        "definition": "PRIMARY KEY (id)"
+      },
+      {
+        "table_name": "receiving_reports",
+        "conname": "receiving_reports_posted_by_fkey",
+        "definition": "FOREIGN KEY (posted_by) REFERENCES profiles(id)"
+      },
+      {
+        "table_name": "receiving_reports",
+        "conname": "receiving_reports_posting_fields_chk",
+        "definition": "CHECK ((((status = 'draft'::text) AND (posted_at IS NULL) AND (posted_by IS NULL)) OR ((status = 'posted'::text) AND (posted_at IS NOT NULL) AND (posted_by IS NOT NULL))))"
+      },
+      {
+        "table_name": "receiving_reports",
+        "conname": "receiving_reports_purchase_order_id_fkey",
+        "definition": "FOREIGN KEY (purchase_order_id) REFERENCES purchase_orders(id)"
+      },
+      {
+        "table_name": "receiving_reports",
+        "conname": "receiving_reports_received_by_fkey",
+        "definition": "FOREIGN KEY (received_by) REFERENCES profiles(id)"
+      },
+      {
+        "table_name": "receiving_reports",
+        "conname": "receiving_reports_replenishment_request_id_fkey",
+        "definition": "FOREIGN KEY (replenishment_request_id) REFERENCES production_replenishment_requests(id)"
+      },
+      {
+        "table_name": "receiving_reports",
+        "conname": "receiving_reports_replenishment_request_id_key",
+        "definition": "UNIQUE (replenishment_request_id)"
+      },
+      {
+        "table_name": "receiving_reports",
+        "conname": "receiving_reports_rr_number_key",
+        "definition": "UNIQUE (rr_number)"
+      },
+      {
+        "table_name": "receiving_reports",
+        "conname": "receiving_reports_source_reference_chk",
+        "definition": "CHECK (((source_reference IS NULL) OR (btrim(source_reference) <> ''::text)))"
+      },
+      {
+        "table_name": "receiving_reports",
+        "conname": "receiving_reports_source_semantics_chk",
+        "definition": "CHECK ((((source_type = 'production_team'::text) AND (purchase_order_id IS NULL) AND (supplier_delivery_reference IS NULL)) OR ((source_type = 'direct_supplier'::text) AND (purchase_order_id IS NOT NULL))))"
+      },
+      {
+        "table_name": "receiving_reports",
+        "conname": "receiving_reports_source_type_chk",
+        "definition": "CHECK ((source_type = ANY (ARRAY['production_team'::text, 'direct_supplier'::text])))"
+      },
+      {
+        "table_name": "receiving_reports",
+        "conname": "receiving_reports_status_chk",
+        "definition": "CHECK ((status = ANY (ARRAY['draft'::text, 'posted'::text])))"
+      }
+    ],
+    "triggers": [
+      {
+        "table_name": "inventory_items",
+        "tgname": "inventory_items_enforce_quantity_policy",
+        "definition": "CREATE TRIGGER inventory_items_enforce_quantity_policy BEFORE INSERT OR UPDATE OF quantity_on_hand, reorder_level, quantity_scale ON public.inventory_items FOR EACH ROW EXECUTE FUNCTION enforce_inventory_item_quantity_policy()"
+      },
+      {
+        "table_name": "inventory_items",
+        "tgname": "inventory_open_replenishment_unit_guard",
+        "definition": "CREATE TRIGGER inventory_open_replenishment_unit_guard BEFORE UPDATE OF unit ON public.inventory_items FOR EACH ROW EXECUTE FUNCTION guard_open_replenishment_item_unit()"
+      },
+      {
+        "table_name": "inventory_items",
+        "tgname": "trg_inventory_items_set_updated_at",
+        "definition": "CREATE TRIGGER trg_inventory_items_set_updated_at BEFORE UPDATE ON public.inventory_items FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
+      },
+      {
+        "table_name": "receiving_report_items",
+        "tgname": "receiving_linked_line_guard",
+        "definition": "CREATE TRIGGER receiving_linked_line_guard BEFORE INSERT OR UPDATE ON public.receiving_report_items FOR EACH ROW EXECUTE FUNCTION guard_linked_replenishment_line()"
+      },
+      {
+        "table_name": "receiving_report_items",
+        "tgname": "receiving_report_items_enforce_quantity_scale",
+        "definition": "CREATE TRIGGER receiving_report_items_enforce_quantity_scale BEFORE INSERT OR UPDATE OF inventory_item_id, purchase_order_item_id, quantity_delivered, quantity_accepted ON public.receiving_report_items FOR EACH ROW EXECUTE FUNCTION enforce_inventory_related_quantity_scale()"
+      },
+      {
+        "table_name": "receiving_report_items",
+        "tgname": "receiving_report_items_enforce_shelf_life",
+        "definition": "CREATE TRIGGER receiving_report_items_enforce_shelf_life BEFORE INSERT OR UPDATE OF receiving_report_id, inventory_item_id, purchase_order_item_id, manufactured_on, use_by_date ON public.receiving_report_items FOR EACH ROW EXECUTE FUNCTION enforce_receiving_item_shelf_life()"
+      },
+      {
+        "table_name": "receiving_report_items",
+        "tgname": "receiving_report_items_set_updated_at",
+        "definition": "CREATE TRIGGER receiving_report_items_set_updated_at BEFORE UPDATE ON public.receiving_report_items FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
+      },
+      {
+        "table_name": "receiving_reports",
+        "tgname": "receiving_closes_replenishment",
+        "definition": "CREATE TRIGGER receiving_closes_replenishment AFTER UPDATE OF status ON public.receiving_reports FOR EACH ROW WHEN ((old.status IS DISTINCT FROM new.status)) EXECUTE FUNCTION close_replenishment_from_receiving()"
+      },
+      {
+        "table_name": "receiving_reports",
+        "tgname": "receiving_link_guard",
+        "definition": "CREATE TRIGGER receiving_link_guard BEFORE INSERT OR DELETE OR UPDATE ON public.receiving_reports FOR EACH ROW EXECUTE FUNCTION guard_linked_replenishment_report()"
+      },
+      {
+        "table_name": "receiving_reports",
+        "tgname": "receiving_reports_refresh_shelf_life",
+        "definition": "CREATE TRIGGER receiving_reports_refresh_shelf_life AFTER UPDATE OF received_at ON public.receiving_reports FOR EACH ROW EXECUTE FUNCTION refresh_receiving_item_shelf_life()"
+      },
+      {
+        "table_name": "receiving_reports",
+        "tgname": "receiving_reports_set_updated_at",
+        "definition": "CREATE TRIGGER receiving_reports_set_updated_at BEFORE UPDATE ON public.receiving_reports FOR EACH ROW EXECUTE FUNCTION set_updated_at()"
+      }
+    ],
+    "policies": [
+      {
+        "schemaname": "public",
+        "tablename": "profiles",
+        "policyname": "managers_view_profiles",
+        "roles": "{authenticated}",
+        "cmd": "SELECT",
+        "qual": "(current_user_role() = 'manager'::user_role)",
+        "with_check": null
+      },
+      {
+        "schemaname": "public",
+        "tablename": "profiles",
+        "policyname": "profiles_select_own",
+        "roles": "{authenticated}",
+        "cmd": "SELECT",
+        "qual": "(( SELECT auth.uid() AS uid) = id)",
+        "with_check": null
+      },
+      {
+        "schemaname": "public",
+        "tablename": "profiles",
+        "policyname": "profiles_update_own",
+        "roles": "{authenticated}",
+        "cmd": "UPDATE",
+        "qual": "(( SELECT auth.uid() AS uid) = id)",
+        "with_check": "(( SELECT auth.uid() AS uid) = id)"
+      },
+      {
+        "schemaname": "public",
+        "tablename": "profiles",
+        "policyname": "profiles_view_own",
+        "roles": "{authenticated}",
+        "cmd": "SELECT",
+        "qual": "(id = ( SELECT auth.uid() AS uid))",
+        "with_check": null
+      }
+    ]
+  }
+}

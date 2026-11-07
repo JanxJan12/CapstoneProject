@@ -1,0 +1,76 @@
+{
+  "phase": "H-11H",
+  "dateManila": "2026-10-16",
+  "windowManila": "02:19-02:21",
+  "result": "PARTIAL_READ_ONLY_HEALTH_CAPACITY_TRIAL_BLOCKED",
+  "ownerReportedSelectedWindowsClosed": true,
+  "baselineH11G": {
+    "hostFreeMiB": [607, 536, 737],
+    "wslMinimumAvailableMiB": 638,
+    "wslFinalSwapUsedOf2048MiB": 1965,
+    "containersTotal": 99,
+    "containersRunning": 94,
+    "h09Checks": "6/6",
+    "canonicalDemoChecks": "3/3"
+  },
+  "host": {
+    "totalVisibleMiB": 16107,
+    "freeMiB": [1518, 1753, 1854, 1712, 1995],
+    "initialSanitizedWorkingSetMiB": {
+      "wslVm": 4447,
+      "chatGPT15Processes": 1869,
+      "code15Processes": 1641,
+      "dockerDesktopAndBackend7Processes": 681
+    },
+    "workingSetCaution": "Shared pages and process snapshots prevent additive or causal reclaim claims"
+  },
+  "wsl": {
+    "memTotalMiB": 7803,
+    "initialAvailableMiB": 481,
+    "spacedAvailableMiB": [420, 433, 435, 424],
+    "h09AvailableMiB": [448, 439, 428],
+    "demoAvailableMiB": [423, 392, 364],
+    "minimumObservedAvailableMiB": 364,
+    "refusalFloorMiB": 400,
+    "minimumMarginAboveFloorMiB": -36,
+    "swapTotalMiB": 2048,
+    "swapUsedMiB": "approximately 2048 throughout",
+    "spacedPressureSomeAvg10": [0.56, 0.20, 0.06, 0.02],
+    "spacedPressureFullAvg10": [0.52, 0.19, 0.05, 0.02],
+    "sustainedHeadroomProven": false
+  },
+  "docker": {
+    "engineVersion": "29.8.2",
+    "containersTotal": 99,
+    "containersRunning": 94,
+    "containersStopped": 5,
+    "historicalH11cExactNameIdMatches": 99,
+    "historicalH11cChangedOrMissing": 0,
+    "protectedH09AndDemoCoreRunning": true
+  },
+  "health": {
+    "h09AuthRestSql": "PASS_3_OF_3_READ_ONLY",
+    "canonicalDemoAuthRestSql": "PASS_3_OF_3_READ_ONLY",
+    "h09DbKongRestartCounts": [0, 0],
+    "demoDbKongRestartCounts": [0, 0],
+    "normalLoadQA": "NOT_TESTED",
+    "concurrentDemoRehearsal": "NOT_TESTED",
+    "recoveryIntegrity": "NOT_TESTED"
+  },
+  "trial": {
+    "eligible": false,
+    "reasons": ["WSL available memory fell below the 400 MiB refusal floor", "WSL swap essentially full", "stable WSL operating reserve absent", "candidate current idleness, dependencies, and exact restore window unverified"],
+    "journalWritten": false,
+    "containerStops": [],
+    "containerStarts": [],
+    "beforeRunningOfTotal": "94/99",
+    "afterRunningOfTotal": "94/99 at 02:22:07 Manila; 99/99 historical name-and-ID matches",
+    "measuredGainMiB": null,
+    "restoreLatency": "NOT_TESTED"
+  },
+  "windowsApplicationTermination": false,
+  "wslConfigChange": false,
+  "dockerResetPruneOrVolumeMutation": false,
+  "hostedContact": false,
+  "businessDataMutation": false
+}

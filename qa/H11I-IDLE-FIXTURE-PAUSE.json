@@ -1,0 +1,30 @@
+{
+  "task": "H-11I",
+  "dateManila": "2026-10-16",
+  "result": "BLOCKED_BEFORE_MUTATION",
+  "dryRunOnly": true,
+  "docker": { "version": "29.8.2", "containersBefore": 99, "runningBefore": 94, "containersAfter": 99, "runningAfter": 94, "initialCallStalled": true, "boundedRetryMs": 625 },
+  "windowsFreeMiB": [
+    { "timeManila": "02:39:31", "value": 1900 },
+    { "timeManila": "02:40:16", "value": 1720 },
+    { "timeManila": "02:41:00", "value": 1589 }
+  ],
+  "wsl": {
+    "initialCallFailed": "Wsl/Service/0x8007274c",
+    "boundedRetryMs": 320,
+    "availableMiB": [580, 493, 481, 536, 546, 546, 543, 519],
+    "swapTotalMiB": 2048,
+    "swapUsedMiBRange": [2046, 2048],
+    "hardRefusalFloorMiB": 400,
+    "proposedTrialReserveMiB": 800
+  },
+  "protectedChecks": {
+    "h09": { "samples": 4, "auth200": 4, "rest200": 4, "sqlSelect1Pass": 4, "dbRestarts": 0, "kongRestarts": 0, "authLatencyMsRange": [23, 121], "restLatencyMsRange": [72, 354] },
+    "canonicalDemo": { "samples": 1, "auth200": 1, "rest200": 1, "sqlSelect1Pass": 1, "dbRestarts": 0, "kongRestarts": 0, "authLatencyMs": 84, "restLatencyMs": 214 }
+  },
+  "eligibility": { "verifiedIdleCompleteStacks": [], "currentUseVerified": false, "dependenciesVerified": false, "stackLevelStopImplemented": false, "existingSingleServiceAllowlist": ["supabase_analytics_rrj_h08c_history_20261015"] },
+  "mutationManifest": { "stoppedContainerIds": [], "stoppedStacks": [], "stopOrder": [], "startOrder": [], "activeJournal": null, "restoreCommand": null },
+  "measuredRamReductionMiB": null,
+  "hostedAccess": false,
+  "sourceChanges": []
+}

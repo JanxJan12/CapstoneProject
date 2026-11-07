@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#faf8f4">
+  <meta name="description" content="A local visual prototype of RRJ's Food-Haus customer ordering screens.">
+  <title>RRJ customer ordering · visual prototype</title>
+  <link rel="stylesheet" href="prototype.css">
+  <script src="prototype.js" defer></script>
+</head>
+<body>
+  <div class="prototype-note">Visual prototype. Local sample only. No orders placed.</div>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="#menu" aria-label="RRJ's Food-Haus menu prototype">
+        <img src="../../src/assets/brand/rrj-logo.jpg" alt="" width="38" height="38">
+        <span><strong>RRJ’s Food-Haus</strong><small>Halal kitchen</small></span>
+      </a>
+      <nav class="desktop-nav" aria-label="Customer destinations">
+        <a href="#home">Home</a><a href="#menu">Menu</a><a href="#tracking">Track order</a><a href="#orders">Orders</a>
+      </nav>
+      <div class="header-actions"><a class="cart-link" href="#cart">Cart <span id="cart-count">1</span></a><a class="account-link" href="#account">Account</a></div>
+    </div>
+  </header>
+  <main id="main-content">
+    <section class="screen" data-screen="menu" aria-labelledby="menu-title">
+      <div class="page-top menu-top"><div><h1 id="menu-title">Menu</h1><p>Choose what you’d like to eat.</p><p class="menu-snapshot">Menu snapshot from 3 Nov 2026</p></div><img class="restaurant-photo" src="../../src/assets/brand/rrj-restaurant.jpg" alt="RRJ's Food-Haus outdoor dining area at night" width="188" height="108"></div>
+      <div class="menu-layout">
+        <aside class="menu-filter" aria-label="Find dishes">
+          <label for="dish-search">Search dishes</label>
+          <input id="dish-search" type="search" placeholder="Search by dish name" autocomplete="off">
+          <fieldset><legend>Category</legend><div class="filter-list"><button class="filter active" type="button" data-category="All" aria-pressed="true">All</button><button class="filter" type="button" data-category="Viands" aria-pressed="false">Viands</button><button class="filter" type="button" data-category="Rice" aria-pressed="false">Rice</button><button class="filter" type="button" data-category="Beverages" aria-pressed="false">Beverages</button></div></fieldset>
+        </aside>
+        <div class="menu-results">
+          <div class="section-heading"><h2>Available dishes</h2><span id="results-count">3 shown</span></div>
+          <div class="dish-list" id="dish-list">
+            <article class="dish" data-name="Chicken Bicol Express" data-category="Viands"><div><h3>Chicken Bicol Express</h3><p>Spicy chicken in coconut milk</p><span class="availability">Available</span></div><div class="dish-end"><strong>₱130.00</strong><a href="#detail" aria-label="View Chicken Bicol Express">View item</a></div></article>
+            <article class="dish" data-name="Crispy Beef Tadyang" data-category="Viands"><div><h3>Crispy Beef Tadyang</h3><p>Crispy beef ribs with garlic and spices</p><span class="availability">Available</span></div><div class="dish-end"><strong>₱185.00</strong><span class="secondary-text">View in live menu</span></div></article>
+            <article class="dish" data-name="Fried Rice" data-category="Rice"><div><h3>Fried Rice</h3><span class="availability">Available</span></div><div class="dish-end"><strong>₱45.00</strong><span class="secondary-text">View in live menu</span></div></article>
+          </div>
+          <div class="section-heading unavailable-title"><h2>Unavailable today</h2><span>From captured menu</span></div>
+          <div class="dish-list subdued" id="unavailable-list">
+            <article class="dish" data-name="Adobong Manok" data-category="Viands"><div><h3>Adobong Manok</h3><p>Classic chicken adobo</p></div><div class="dish-end"><strong>₱120.00</strong><span>Unavailable</span></div></article>
+            <article class="dish" data-name="Buko Juice" data-category="Beverages"><div><h3>Buko Juice</h3><p>Fresh coconut juice</p></div><div class="dish-end"><strong>₱35.00</strong><span>Unavailable</span></div></article>
+          </div>
+          <p class="empty-result" id="empty-result" hidden>No matching dishes in this prototype sample. Try another search or category.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen narrow" data-screen="detail" aria-labelledby="detail-title" hidden>
+      <a class="back-link" href="#menu">Back to menu</a>
+      <div class="detail-layout"><div class="detail-main"><h1 id="detail-title">Chicken Bicol Express</h1><p class="category-line">Viands <span>Halal</span></p><p class="lead">Spicy chicken in coconut milk</p><p class="detail-availability">Available</p><div class="detail-divider"></div><h2>Quantity</h2><div class="quantity" aria-label="Sample quantity"><button type="button" class="qty-minus" aria-label="Decrease quantity">−</button><output id="detail-qty">1</output><button type="button" class="qty-plus" aria-label="Increase quantity">+</button></div></div><aside class="detail-order"><p>Menu price</p><strong id="detail-price">₱130.00</strong><p>Final price and delivery fee are confirmed at checkout.</p><a class="primary-action" href="#cart" id="detail-add">Add to cart · ₱130.00</a></aside></div>
+    </section>
+
+    <section class="screen" data-screen="cart" aria-labelledby="cart-title" hidden>
+      <div class="page-top"><div><h1 id="cart-title">Your cart</h1><p>Review your items before checkout.</p></div><a class="text-link" href="#menu">Add more from menu</a></div>
+      <div class="transaction-layout"><section class="order-panel" aria-labelledby="cart-items-title"><div class="panel-heading"><h2 id="cart-items-title">Order items</h2><span id="cart-item-count">1 item</span></div><div class="cart-item"><div><h3>Chicken Bicol Express</h3><p>₱130.00 each</p><div class="quantity" aria-label="Sample cart quantity"><button type="button" class="qty-minus" aria-label="Decrease cart quantity">−</button><output id="cart-qty">1</output><button type="button" class="qty-plus" aria-label="Increase cart quantity">+</button></div></div><strong id="cart-line-total">₱130.00</strong></div></section><aside class="summary-panel"><h2>Order estimate</h2><dl><div><dt>Items subtotal</dt><dd id="cart-subtotal">₱130.00</dd></div><div><dt>Delivery fee</dt><dd>Shown at checkout</dd></div><div class="total-row"><dt>Final total</dt><dd>Pending server confirmation</dd></div></dl><p>Review the server-calculated fee and total before creating your order.</p><a class="primary-action" href="#checkout">Continue to checkout</a></aside></div>
+    </section>
+
+    <section class="screen" data-screen="checkout" aria-labelledby="checkout-title" hidden>
+      <a class="back-link" href="#cart">Back to cart</a><div class="page-top"><div><h1 id="checkout-title">Checkout</h1><p>Sign in, review your delivery details, then confirm the final amount.</p></div></div>
+      <div class="checkout-progress" aria-label="Checkout steps"><span class="current">1. Sign in</span><span>2. Delivery</span><span>3. Payment</span></div>
+      <div class="transaction-layout"><section class="order-panel sign-in"><p class="step-caption">Current step</p><h2>Sign in to continue</h2><p>Your account keeps this order connected to tracking and payment updates.</p><button type="button" id="google-demo" aria-describedby="demo-notice">Continue with Google</button><p id="demo-notice" class="demo-notice" hidden>Sign-in is shown for layout review only. Use the live app to continue a real order.</p></section><aside class="summary-panel"><h2>Your order</h2><div class="checkout-item"><span id="checkout-item-name">1 × Chicken Bicol Express</span><strong id="checkout-item-price">₱130.00</strong></div><dl><div><dt>Items subtotal <small>(estimate)</small></dt><dd id="checkout-subtotal">₱130.00</dd></div><div><dt>Delivery fee</dt><dd>Shown before confirmation</dd></div><div class="total-row"><dt>Final total</dt><dd>Pending server confirmation</dd></div></dl><p>You’ll review the server-confirmed amount before creating the order.</p></aside></div>
+    </section>
+
+    <section class="screen" data-screen="tracking" aria-labelledby="tracking-title" hidden>
+      <div class="page-top"><div><h1 id="tracking-title">Track your order</h1><p>Order and payment updates in one place.</p></div></div>
+      <div class="sample-banner">Sample state for design review · not a live order</div>
+      <div class="tracking-layout"><section class="status-panel"><p class="step-caption">Order status</p><h2>Preparing</h2><p>Next: Ready</p><div class="tracking-divider"></div><div class="status-pair"><div><span>Payment status</span><strong>Verified</strong></div><div><span>Service type</span><strong>Delivery</strong></div></div></section><section class="timeline-panel"><h2>Order progress</h2><ol><li class="done">Waiting for Payment Verification</li><li class="done">Confirmed</li><li class="current">Preparing</li><li>Ready</li><li>Waiting for Rider</li><li>Rider Accepted</li><li>Picked Up</li><li>Out for Delivery</li><li>Delivered</li></ol><p>Labels follow the existing delivery order steps. Actual status, order details, and confirmed total must come from the server.</p></section></div>
+    </section>
+
+    <section class="screen narrow" data-screen="home" hidden><h1>Home</h1><p>This prototype focuses on the ordering journey. Home stays a route in the live app.</p><a class="primary-action inline-action" href="#menu">Browse the menu</a></section>
+    <section class="screen narrow" data-screen="orders" hidden><h1>Orders</h1><p>Order history remains available in the live app. This prototype does not display private orders.</p><a class="primary-action inline-action" href="#tracking">See tracking layout</a></section>
+    <section class="screen narrow" data-screen="account" hidden><h1>Account</h1><p>Account and sign-in remain available in the live app.</p><a class="primary-action inline-action" href="#checkout">See checkout layout</a></section>
+  </main>
+  <nav class="mobile-nav" aria-label="Customer destinations"><a href="#menu">Menu</a><a href="#cart">Cart</a><a href="#tracking">Track</a><a href="#orders">Orders</a><a href="#account">Account</a></nav>
+</body>
+</html>

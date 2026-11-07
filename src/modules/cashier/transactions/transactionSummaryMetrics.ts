@@ -7,7 +7,6 @@ export interface TransactionSummaryMetrics {
   gcashRevenue: number;
   refunds: number;
   refundCount: number;
-  discounts: number;
   voids: number;
   voidCount: number;
   completedCount: number;
@@ -58,12 +57,8 @@ export function calculateTransactionSummary(
     gcashRevenue: completed
       .filter((entry) => entry.method === "GCash")
       .reduce((sum, entry) => sum + entry.amount, 0),
-    refunds: transactions
-      .filter((entry) => entry.status === "Refunded")
-      .reduce((sum, entry) => sum + (entry.refundAmount ?? entry.amount), 0),
-    refundCount: transactions.filter((entry) => entry.status === "Refunded")
-      .length,
-    discounts: completed.reduce((sum, entry) => sum + entry.discountAmount, 0),
+    refunds: 0,
+    refundCount: 0,
     voids: transactions
       .filter((entry) => entry.status === "Voided")
       .reduce((sum, entry) => sum + entry.amount, 0),

@@ -13,15 +13,18 @@ import {
 } from "../api/shiftApi";
 
 import { createWalkInSale } from "../api/walkInSaleApi";
-import { fetchCashierSale } from "../api/cashierSaleHydrationApi";
+import { fetchCashierSale, findCurrentShiftWalkInSaleByRequestId, type HydratedCashierSale } from "../api/cashierSaleHydrationApi";
 import { clearPOSDraft } from "../pos/posPersistence";
 import {
   cancelCashierOrder,
+  confirmCashierOrderOperationalDetails,
   fetchCashierOrders,
   offerOrderToNextRider,
   releaseReadyCashierOrder,
   updateCashierOrderOperationalDetails,
 } from "../services/supabaseOrderService";
+import { canOfferOrderToRider } from "../services/cashierAssignmentService";
+import { canCancelCashierOrder, canEditCashierOrder } from "../orders/orderOperations";
 import {
   endShift,
   holdOrder,
@@ -43,10 +46,37 @@ import type {
   OptimisticCommit,
 } from "./cashierStoreTypes";
 
+async function fetchOrdersWithOnlinePayments(): Promise<CashierState["orders"]> {
+  const [databaseOrders, onlinePayments] = await Promise.all([
+    fetchCashierOrders(),
+    fetchCashierOnlinePayments(),
+  ]);
+  const onlinePaymentsByOrderId = new Map(
+    onlinePayments.map(({ databaseOrderId, payment }) => [databaseOrderId, payment]),
+  );
+
+  return databaseOrders.map((entry) => {
+    const onlinePayment = entry.databaseId
+      ? onlinePaymentsByOrderId.get(entry.databaseId)
+      : undefined;
+    if (!onlinePayment) return entry;
+    if (onlinePayment.orderId !== entry.id) {
+      throw new Error("An online payment did not match its database order number.");
+    }
+    return {
+      ...entry,
+      paymentId: onlinePayment.id,
+      paymentMethod: onlinePayment.method,
+      paymentStatus: onlinePayment.status,
+    };
+  });
+}
+
 export function useCashierActions(
   stateRef: MutableRefObject<CashierState>,
   commit: CashierCommit,
   commitOptimistically: OptimisticCommit,
+  refreshDatabaseState: () => void,
 ): CashierActions {
   const verificationRequestIds = useRef(
     new Map<string, string>(),
@@ -132,8 +162,6 @@ export function useCashierActions(
         hydratedSale.payment.status !== "Verified" ||
         hydratedSale.transaction.id !==
           verified.transactionId ||
-        hydratedSale.transaction.transactionNumber !==
-          verified.transactionNumber ||
         hydratedSale.transaction.receiptNumber !==
           verified.receiptNumber ||
         hydratedSale.transaction.shiftId !==
@@ -313,11 +341,26 @@ export function useCashierActions(
     [commit, stateRef],
   );
 
+const commitWalkInSale = useCallback((hydratedSale: HydratedCashierSale) => {
+  const current = stateRef.current;
+  commit({
+    ...current,
+    orders: [hydratedSale.order, ...current.orders.filter((order) =>
+      order.databaseId !== hydratedSale.order.databaseId && order.id !== hydratedSale.order.id)],
+    payments: [hydratedSale.payment, ...current.payments.filter((payment) =>
+      payment.id !== hydratedSale.payment.id)],
+    transactions: [hydratedSale.transaction, ...current.transactions.filter((transaction) =>
+      transaction.id !== hydratedSale.transaction.id)],
+  });
+  return hydratedSale.order;
+}, [commit, stateRef]);
+
 const createOrder = useCallback(
   async (
     requestId: string,
     input: WalkInOrderInput,
   ) => {
+    const cashierId = stateRef.current.cashier.id;
     const createdSale = await createWalkInSale(
       requestId,
       input,
@@ -328,41 +371,36 @@ const createOrder = useCallback(
       stateRef.current.cashier.name,
     );
 
-    const current = stateRef.current;
+    if (hydratedSale.order.databaseId !== createdSale.orderId ||
+      hydratedSale.order.id !== createdSale.orderNumber ||
+      hydratedSale.payment.id !== createdSale.paymentId ||
+      hydratedSale.transaction.id !== createdSale.transactionId ||
+      hydratedSale.transaction.receiptNumber !== createdSale.receiptNumber ||
+      hydratedSale.order.total !== createdSale.grandTotal ||
+      hydratedSale.payment.status !== "Verified" ||
+      hydratedSale.transaction.status !== "Completed") {
+      throw new Error("The sale records did not match the creation result.");
+    }
 
-    commit({
-      ...current,
+    if (stateRef.current.cashier.id !== cashierId) {
+      throw new Error("The active cashier changed while the sale was being confirmed.");
+    }
 
-      orders: [
-        hydratedSale.order,
-        ...current.orders.filter(
-          (order) =>
-            order.databaseId !== hydratedSale.order.databaseId &&
-            order.id !== hydratedSale.order.id,
-        ),
-      ],
-
-      payments: [
-        hydratedSale.payment,
-        ...current.payments.filter(
-          (payment) =>
-            payment.id !== hydratedSale.payment.id,
-        ),
-      ],
-
-      transactions: [
-        hydratedSale.transaction,
-        ...current.transactions.filter(
-          (transaction) =>
-            transaction.id !== hydratedSale.transaction.id,
-        ),
-      ],
-    });
-
-    return hydratedSale.order;
+    return commitWalkInSale(hydratedSale);
   },
-  [commit, stateRef],
+  [commitWalkInSale, stateRef],
 );
+
+const recoverOrder = useCallback(async (requestId: string) => {
+  const cashierId = stateRef.current.cashier.id;
+  const sale = await findCurrentShiftWalkInSaleByRequestId(
+    requestId,
+    stateRef.current.cashier.name,
+  );
+  if (stateRef.current.cashier.id !== cashierId) return null;
+  if (sale) commitWalkInSale(sale);
+  return sale;
+}, [commitWalkInSale, stateRef]);
 
   const cancel = useCallback(
     async (orderId: string, reason: string) => {
@@ -382,13 +420,17 @@ const createOrder = useCallback(
         );
       }
 
+      if (!canCancelCashierOrder(order)) {
+        throw new Error("This order is no longer eligible for ordinary cancellation. Refresh its status and payment.");
+      }
+
       await cancelCashierOrder(
         order.databaseId,
         reason,
       );
 
       const databaseOrders =
-        await fetchCashierOrders();
+        await fetchOrdersWithOnlinePayments();
 
       const latest = stateRef.current;
 
@@ -436,40 +478,27 @@ const createOrder = useCallback(
         );
       }
 
-      await updateCashierOrderOperationalDetails(
+      if (!canEditCashierOrder(order)) {
+        throw new Error("This order is no longer editable. Refresh its status.");
+      }
+
+      const result = await updateCashierOrderOperationalDetails(
         order.databaseId,
         input,
       );
-
-      const databaseOrders =
-        await fetchCashierOrders();
-
-      const latest = stateRef.current;
-
-      const databaseOrderNumbers = new Set(
-        databaseOrders.map(
-          (entry) => entry.id,
-        ),
-      );
-
-      const localOnlyOrders =
-        latest.orders.filter(
-          (entry) =>
-            !entry.databaseId &&
-            !databaseOrderNumbers.has(
-              entry.id,
-            ),
-        );
-
+      if (result.order_id !== order.databaseId || result.order_number !== order.id) {
+        throw new Error("Order saved, but the backend returned a different order. Refresh before editing again.");
+      }
+      const confirmed = await confirmCashierOrderOperationalDetails(order.databaseId, input);
       commit({
-        ...latest,
-        orders: [
-          ...databaseOrders,
-          ...localOnlyOrders,
-        ],
+        ...stateRef.current,
+        orders: stateRef.current.orders.map((entry) => entry.databaseId === order.databaseId
+          ? { ...entry, ...confirmed }
+          : entry),
       });
+      refreshDatabaseState();
     },
-    [commit, stateRef],
+    [commit, refreshDatabaseState, stateRef],
   );
 
   const offerNextRider = useCallback(
@@ -490,11 +519,34 @@ const createOrder = useCallback(
       );
     }
 
-    await offerOrderToNextRider(
+    if (!canOfferOrderToRider(order)) {
+      throw new Error("Refresh the rider assignment before offering this order again.");
+    }
+
+    const result = await offerOrderToNextRider(
       order.databaseId,
     );
+    if (result.order_id !== order.databaseId || result.order_number !== order.id || result.assignment_status !== "offered") {
+      throw new Error("The offer response could not be matched to this order. Refresh before trying again.");
+    }
+    commit({
+      ...stateRef.current,
+      orders: stateRef.current.orders.map((entry) => entry.databaseId === order.databaseId
+        ? {
+            ...entry,
+            assignedRider: undefined,
+            riderStatus: "Offer pending",
+            riderAssignmentKnown: true,
+            riderAssignmentId: result.assignment_id,
+            riderAssignmentStatus: "offered",
+            riderAssignedAt: result.assigned_at,
+            riderAssignmentUpdatedAt: result.assigned_at,
+          }
+        : entry),
+    });
+    refreshDatabaseState();
   },
-  [stateRef],
+  [commit, refreshDatabaseState, stateRef],
 );
 
 const releaseReadyOrderAction = useCallback(
@@ -515,18 +567,25 @@ const releaseReadyOrderAction = useCallback(
       );
     }
 
-    await releaseReadyCashierOrder(
-      order.databaseId,
-      "Ready order released by cashier",
-    );
+    if (order.status !== "Ready") {
+      throw new Error("This order is no longer ready for release. Refresh its status.");
+    }
 
-    const databaseOrders =
-      await fetchCashierOrders();
+    const result = await releaseReadyCashierOrder(
+      order.databaseId,
+    );
+    const expectedStatus = order.type === "Delivery" ? "waiting_for_rider" : "completed";
+    if (result.order_id !== order.databaseId || result.order_number !== order.id ||
+        result.previous_status !== "ready" || result.current_status !== expectedStatus) {
+      throw new Error("The release response did not match this order. Refresh before taking another action.");
+    }
+
+    const refreshedOrders = await fetchOrdersWithOnlinePayments();
 
     const latest = stateRef.current;
 
     const databaseOrderNumbers = new Set(
-      databaseOrders.map((entry) => entry.id),
+      refreshedOrders.map((entry) => entry.id),
     );
 
     const localOnlyOrders = latest.orders.filter(
@@ -538,7 +597,7 @@ const releaseReadyOrderAction = useCallback(
     commit({
       ...latest,
       orders: [
-        ...databaseOrders,
+        ...refreshedOrders,
         ...localOnlyOrders,
       ],
     });
@@ -574,24 +633,17 @@ const releaseReadyOrderAction = useCallback(
 
   const end = useCallback(
     async (input: ShiftClosureInput) => {
-      const closedShift = await closeCashierShift(
-        input.actualCash,
-        input.varianceReason,
-        input.notes,
-      );
+      const closedShift = await closeCashierShift(input.actualCash);
 
       clearPOSDraft();
 
-      const closedState = endShift(
-        stateRef.current,
-        closedShift,
-        input.notes,
-      );
+      const closedState = endShift(stateRef.current, closedShift);
 
       commit({
         ...closedState,
         heldOrders: [],
       });
+      return closedShift;
     },
     [commit, stateRef],
 );
@@ -611,6 +663,7 @@ const releaseReadyOrderAction = useCallback(
       verifyPayment,
       rejectPayment,
       createWalkInOrder: createOrder,
+      recoverWalkInOrder: recoverOrder,
       cancelOrder: cancel,
       updateOrder,
       offerNextRider,
@@ -626,6 +679,7 @@ const releaseReadyOrderAction = useCallback(
       offerNextRider,
       cancel,
       createOrder,
+      recoverOrder,
       end,
       hold,
       markAllRead,

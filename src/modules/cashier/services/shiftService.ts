@@ -50,7 +50,6 @@ export function calculateShiftTotals(
       refunds: 0,
       cashRefunds: 0,
       voids: 0,
-      discounts: 0,
       transactionCount: 0,
       ordersProcessed: 0,
       expectedCash: 0,
@@ -76,17 +75,12 @@ export function calculateShiftTotals(
   const voids = transactions
     .filter((entry) => entry.status === "Voided")
     .reduce((sum, entry) => sum + entry.amount, 0);
-  const discounts = completed.reduce(
-    (sum, entry) => sum + entry.discountAmount,
-    0,
-  );
   return {
     cashSales,
     gcashSales,
     refunds,
     cashRefunds,
     voids,
-    discounts,
     transactionCount: transactions.length,
     ordersProcessed: new Set(transactions.map((entry) => entry.orderId)).size,
     expectedCash: shift.openingCash + cashSales - cashRefunds,
@@ -96,7 +90,6 @@ export function calculateShiftTotals(
 export function endShift(
   current: CashierState,
   closedShift: CloseCashierShiftResult,
-  notes?: string,
 ): CashierState {
   const state = cloneState(current);
 
@@ -124,8 +117,6 @@ export function endShift(
     actualCash: closedShift.actualCash,
     expectedCash: closedShift.expectedCash,
     variance: closedShift.variance,
-    varianceReason: closedShift.varianceReason,
-    notes: notes?.trim() || undefined,
     pendingPaymentCountAtClose: 0,
     status: "Closed",
   };

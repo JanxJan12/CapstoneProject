@@ -1,0 +1,53 @@
+{
+  "dateManila": "2026-10-14",
+  "status": "PASS_LOCAL_SYNTHETIC",
+  "environment": {
+    "api": "http://127.0.0.1:52321",
+    "databasePort": 52322,
+    "migrationVersions": 52,
+    "migrationBoundary": "demo-only synthetic historical prerequisite and local compatibility variant"
+  },
+  "document": {
+    "number": "PR-20261014-000001",
+    "initialRevision": 1,
+    "finalRevision": 2,
+    "status": "partially_received",
+    "attestations": ["synthetic dispatch", "synthetic external reply"],
+    "stockSignatureBeforeIssue": "4 batches | 4 ledger entries | 400.000 total stock",
+    "stockSignatureAfterRevisionAndAttestation": "4 batches | 4 ledger entries | 400.000 total stock"
+  },
+  "receipts": [
+    {
+      "number": "RR-20261014-7D264816",
+      "status": "posted",
+      "lines": [
+        { "item": "Chicken", "delivered": 3, "accepted": 2, "rejected": 1 },
+        { "item": "Rice", "delivered": 2, "accepted": 1, "rejected": 1 }
+      ]
+    },
+    {
+      "number": "RR-20261014-101FE449",
+      "status": "posted",
+      "lines": [
+        { "item": "Chicken", "delivered": 2, "accepted": 2, "rejected": 0 },
+        { "item": "Rice", "delivered": 1, "accepted": 1, "rejected": 0 }
+      ]
+    }
+  ],
+  "finalLines": [
+    { "item": "Chicken", "requested": 6, "accepted": 4, "rejected": 1, "remaining": 2 },
+    { "item": "Rice", "requested": 4, "accepted": 2, "rejected": 1, "remaining": 2 }
+  ],
+  "postedBatches": 4,
+  "postedReceivingLedgerEntries": 4,
+  "duplicatePostHttpStatuses": [400, 400],
+  "openDraftDuplicateHttpStatus": 409,
+  "productionDeniedHttpStatuses": [403, 403],
+  "productionBrowserManagerRouteDenied": true,
+  "navigation": "request to both receipts and back to same request passed",
+  "errorRecovery": "injected formal-register error visible, Refresh recovered",
+  "readOnlyBrowserSignature": "2 receipts | 8 batches | 8 ledger entries | 406.000 total stock",
+  "realMessengerDelivery": "NOT TESTED",
+  "realProductionAcknowledgment": "NOT TESTED",
+  "hostedAcceptance": "BLOCKED"
+}

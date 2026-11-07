@@ -53,11 +53,12 @@ enabled = true
 schema_paths = []
 
 [db.seed]
-# If enabled, seeds the database after migrations during a db reset.
-enabled = true
+# No approved post-migration business seed exists. Historical Phase 2A needs
+# reviewed master identities before that migration; db.seed runs too late.
+enabled = false
 # Specifies an ordered list of seed files to load during db reset.
 # Supports glob patterns relative to supabase directory: "./seeds/*.sql"
-sql_paths = ["./seed.sql"]
+sql_paths = []
 
 [db.network_restrictions]
 # Enable management of network restrictions.
@@ -112,6 +113,18 @@ file_size_limit = "50MiB"
 # file_size_limit = "50MiB"
 # allowed_mime_types = ["image/png", "image/jpeg"]
 # objects_path = "./images"
+
+# Local proof buckets. Access to objects remains governed by the existing
+# storage.objects RLS policies from the schema migration.
+[storage.buckets.payment-proofs]
+public = false
+file_size_limit = "5MiB"
+allowed_mime_types = ["image/jpeg", "image/png"]
+
+[storage.buckets.delivery-proofs]       
+public = false
+file_size_limit = "5MiB"
+allowed_mime_types = ["image/jpeg", "image/png", "image/webp"]
 
 [auth]
 enabled = true

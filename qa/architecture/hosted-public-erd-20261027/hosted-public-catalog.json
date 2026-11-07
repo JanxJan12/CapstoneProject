@@ -1,0 +1,7407 @@
+{
+  "project_ref": "zhzluhqvysvsadwuugpa",
+  "captured_at_utc": "2026-10-26T20:58:45.038881+00:00",
+  "constraints_captured_at_utc": "2026-10-26T20:58:52.529734+00:00",
+  "table_count": 36,
+  "column_count": 414,
+  "constraint_count": 147,
+  "tables": [
+    {
+      "kind": "r",
+      "name": "cashier_shifts",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "identity": null,
+          "nullable": false,
+          "position": 1,
+          "generated": null
+        },
+        {
+          "name": "cashier_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 2,
+          "generated": null
+        },
+        {
+          "name": "terminal",
+          "type": "character varying(50)",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 3,
+          "generated": null
+        },
+        {
+          "name": "opening_cash",
+          "type": "numeric(12,2)",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 4,
+          "generated": null
+        },
+        {
+          "name": "status",
+          "type": "cashier_shift_status",
+          "default": "'open'::cashier_shift_status",
+          "identity": null,
+          "nullable": false,
+          "position": 5,
+          "generated": null
+        },
+        {
+          "name": "started_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 6,
+          "generated": null
+        },
+        {
+          "name": "ended_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 7,
+          "generated": null
+        },
+        {
+          "name": "actual_cash",
+          "type": "numeric(12,2)",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 8,
+          "generated": null
+        },
+        {
+          "name": "expected_cash",
+          "type": "numeric(12,2)",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 9,
+          "generated": null
+        },
+        {
+          "name": "variance",
+          "type": "numeric(12,2)",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 10,
+          "generated": null
+        },
+        {
+          "name": "variance_reason",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 11,
+          "generated": null
+        },
+        {
+          "name": "notes",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 12,
+          "generated": null
+        },
+        {
+          "name": "closed_by",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 13,
+          "generated": null
+        },
+        {
+          "name": "manager_approved_by",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 14,
+          "generated": null
+        },
+        {
+          "name": "manager_approved_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 15,
+          "generated": null
+        }
+      ]
+    },
+    {
+      "kind": "r",
+      "name": "cashier_transactions",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "identity": null,
+          "nullable": false,
+          "position": 1,
+          "generated": null
+        },
+        {
+          "name": "transaction_number",
+          "type": "character varying(20)",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 2,
+          "generated": null
+        },
+        {
+          "name": "receipt_number",
+          "type": "character varying(20)",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 3,
+          "generated": null
+        },
+        {
+          "name": "order_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 4,
+          "generated": null
+        },
+        {
+          "name": "payment_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 5,
+          "generated": null
+        },
+        {
+          "name": "shift_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 6,
+          "generated": null
+        },
+        {
+          "name": "cashier_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 7,
+          "generated": null
+        },
+        {
+          "name": "status",
+          "type": "cashier_transaction_status",
+          "default": "'completed'::cashier_transaction_status",
+          "identity": null,
+          "nullable": false,
+          "position": 8,
+          "generated": null
+        },
+        {
+          "name": "void_reason",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 9,
+          "generated": null
+        },
+        {
+          "name": "voided_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 10,
+          "generated": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 11,
+          "generated": null
+        },
+        {
+          "name": "request_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 12,
+          "generated": null
+        }
+      ]
+    },
+    {
+      "kind": "r",
+      "name": "delivery_assignments",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "identity": null,
+          "nullable": false,
+          "position": 1,
+          "generated": null
+        },
+        {
+          "name": "order_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 2,
+          "generated": null
+        },
+        {
+          "name": "rider_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 3,
+          "generated": null
+        },
+        {
+          "name": "assignment_method",
+          "type": "assignment_method",
+          "default": "'fairness_rule'::assignment_method",
+          "identity": null,
+          "nullable": false,
+          "position": 4,
+          "generated": null
+        },
+        {
+          "name": "status",
+          "type": "delivery_assignment_status",
+          "default": "'offered'::delivery_assignment_status",
+          "identity": null,
+          "nullable": false,
+          "position": 5,
+          "generated": null
+        },
+        {
+          "name": "assigned_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 6,
+          "generated": null
+        },
+        {
+          "name": "responded_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 7,
+          "generated": null
+        },
+        {
+          "name": "accepted_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 8,
+          "generated": null
+        },
+        {
+          "name": "rejected_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 9,
+          "generated": null
+        },
+        {
+          "name": "picked_up_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 10,
+          "generated": null
+        },
+        {
+          "name": "out_for_delivery_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 11,
+          "generated": null
+        },
+        {
+          "name": "delivered_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 12,
+          "generated": null
+        },
+        {
+          "name": "rejection_reason",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 13,
+          "generated": null
+        },
+        {
+          "name": "proof_of_delivery_path",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 14,
+          "generated": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 15,
+          "generated": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 16,
+          "generated": null
+        }
+      ]
+    },
+    {
+      "kind": "r",
+      "name": "drink_choices",
+      "columns": [
+        {
+          "name": "menu_item_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 1,
+          "generated": null
+        },
+        {
+          "name": "choice_kind",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 2,
+          "generated": null
+        },
+        {
+          "name": "option_id",
+          "type": "character varying(50)",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 3,
+          "generated": null
+        },
+        {
+          "name": "option_name",
+          "type": "character varying(100)",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 4,
+          "generated": null
+        },
+        {
+          "name": "price_adjustment",
+          "type": "numeric(12,2)",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 5,
+          "generated": null
+        },
+        {
+          "name": "sort_order",
+          "type": "integer",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 6,
+          "generated": null
+        },
+        {
+          "name": "is_active",
+          "type": "boolean",
+          "default": "true",
+          "identity": null,
+          "nullable": false,
+          "position": 7,
+          "generated": null
+        }
+      ]
+    },
+    {
+      "kind": "r",
+      "name": "inventory_audit_items",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "identity": null,
+          "nullable": false,
+          "position": 1,
+          "generated": null
+        },
+        {
+          "name": "audit_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 2,
+          "generated": null
+        },
+        {
+          "name": "inventory_item_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 3,
+          "generated": null
+        },
+        {
+          "name": "latest_movement_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 4,
+          "generated": null
+        },
+        {
+          "name": "item_name",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 5,
+          "generated": null
+        },
+        {
+          "name": "recorded_unit",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 6,
+          "generated": null
+        },
+        {
+          "name": "book_quantity",
+          "type": "numeric(12,3)",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 7,
+          "generated": null
+        },
+        {
+          "name": "ledger_quantity",
+          "type": "numeric(12,3)",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 8,
+          "generated": null
+        },
+        {
+          "name": "result",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 9,
+          "generated": null
+        },
+        {
+          "name": "finding_code",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 10,
+          "generated": null
+        },
+        {
+          "name": "movement_count",
+          "type": "integer",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 11,
+          "generated": null
+        }
+      ]
+    },
+    {
+      "kind": "r",
+      "name": "inventory_audits",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "identity": null,
+          "nullable": false,
+          "position": 1,
+          "generated": null
+        },
+        {
+          "name": "request_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 2,
+          "generated": null
+        },
+        {
+          "name": "performed_by",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 3,
+          "generated": null
+        },
+        {
+          "name": "started_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 4,
+          "generated": null
+        },
+        {
+          "name": "completed_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 5,
+          "generated": null
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "default": "'completed'::text",
+          "identity": null,
+          "nullable": false,
+          "position": 6,
+          "generated": null
+        },
+        {
+          "name": "movement_rows_examined",
+          "type": "bigint",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 7,
+          "generated": null
+        }
+      ]
+    },
+    {
+      "kind": "r",
+      "name": "inventory_batches",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "identity": null,
+          "nullable": false,
+          "position": 1,
+          "generated": null
+        },
+        {
+          "name": "batch_code",
+          "type": "character varying(100)",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 2,
+          "generated": null
+        },
+        {
+          "name": "inventory_item_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 3,
+          "generated": null
+        },
+        {
+          "name": "origin_type",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 4,
+          "generated": null
+        },
+        {
+          "name": "receiving_report_item_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 5,
+          "generated": null
+        },
+        {
+          "name": "supplier_lot_code",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 6,
+          "generated": null
+        },
+        {
+          "name": "received_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 7,
+          "generated": null
+        },
+        {
+          "name": "manufactured_on",
+          "type": "date",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 8,
+          "generated": null
+        },
+        {
+          "name": "use_by_date",
+          "type": "date",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 9,
+          "generated": null
+        },
+        {
+          "name": "quantity_initial",
+          "type": "numeric(12,3)",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 10,
+          "generated": null
+        },
+        {
+          "name": "quantity_on_hand",
+          "type": "numeric(12,3)",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 11,
+          "generated": null
+        },
+        {
+          "name": "secondary_quantity_initial",
+          "type": "numeric(12,3)",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 12,
+          "generated": null
+        },
+        {
+          "name": "secondary_quantity_on_hand",
+          "type": "numeric(12,3)",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 13,
+          "generated": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 14,
+          "generated": null
+        },
+        {
+          "name": "opening_balance_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 15,
+          "generated": null
+        },
+        {
+          "name": "received_at_is_estimated",
+          "type": "boolean",
+          "default": "false",
+          "identity": null,
+          "nullable": false,
+          "position": 16,
+          "generated": null
+        },
+        {
+          "name": "notes",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 17,
+          "generated": null
+        },
+        {
+          "name": "quantity_positive_adjustments",
+          "type": "numeric(12,3)",
+          "default": "0",
+          "identity": null,
+          "nullable": false,
+          "position": 18,
+          "generated": null
+        }
+      ]
+    },
+    {
+      "kind": "r",
+      "name": "inventory_items",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "identity": null,
+          "nullable": false,
+          "position": 1,
+          "generated": null
+        },
+        {
+          "name": "item_name",
+          "type": "character varying(150)",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 2,
+          "generated": null
+        },
+        {
+          "name": "unit",
+          "type": "character varying(20)",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 3,
+          "generated": null
+        },
+        {
+          "name": "quantity_on_hand",
+          "type": "numeric(12,3)",
+          "default": "0",
+          "identity": null,
+          "nullable": false,
+          "position": 4,
+          "generated": null
+        },
+        {
+          "name": "reorder_level",
+          "type": "numeric(12,3)",
+          "default": "0",
+          "identity": null,
+          "nullable": false,
+          "position": 5,
+          "generated": null
+        },
+        {
+          "name": "inventory_category",
+          "type": "character varying(100)",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 6,
+          "generated": null
+        },
+        {
+          "name": "is_active",
+          "type": "boolean",
+          "default": "true",
+          "identity": null,
+          "nullable": false,
+          "position": 7,
+          "generated": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 8,
+          "generated": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 9,
+          "generated": null
+        },
+        {
+          "name": "item_kind",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 10,
+          "generated": null
+        },
+        {
+          "name": "secondary_unit",
+          "type": "character varying(20)",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 11,
+          "generated": null
+        },
+        {
+          "name": "quantity_scale",
+          "type": "smallint",
+          "default": "3",
+          "identity": null,
+          "nullable": false,
+          "position": 12,
+          "generated": null
+        },
+        {
+          "name": "rotation_policy",
+          "type": "text",
+          "default": "'fifo'::text",
+          "identity": null,
+          "nullable": false,
+          "position": 13,
+          "generated": null
+        },
+        {
+          "name": "expiry_required",
+          "type": "boolean",
+          "default": "false",
+          "identity": null,
+          "nullable": false,
+          "position": 14,
+          "generated": null
+        },
+        {
+          "name": "shelf_life_days",
+          "type": "smallint",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 15,
+          "generated": null
+        },
+        {
+          "name": "batch_consumption_enabled",
+          "type": "boolean",
+          "default": "false",
+          "identity": null,
+          "nullable": false,
+          "position": 16,
+          "generated": null
+        }
+      ]
+    },
+    {
+      "kind": "r",
+      "name": "inventory_opening_balances",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "identity": null,
+          "nullable": false,
+          "position": 1,
+          "generated": null
+        },
+        {
+          "name": "request_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 2,
+          "generated": null
+        },
+        {
+          "name": "inventory_item_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 3,
+          "generated": null
+        },
+        {
+          "name": "verified_by",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 4,
+          "generated": null
+        },
+        {
+          "name": "verified_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 5,
+          "generated": null
+        },
+        {
+          "name": "quantity_total",
+          "type": "numeric(12,3)",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 6,
+          "generated": null
+        },
+        {
+          "name": "batch_count",
+          "type": "integer",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 7,
+          "generated": null
+        },
+        {
+          "name": "request_payload",
+          "type": "jsonb",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 8,
+          "generated": null
+        },
+        {
+          "name": "notes",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 9,
+          "generated": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 10,
+          "generated": null
+        }
+      ]
+    },
+    {
+      "kind": "r",
+      "name": "inventory_request_documents",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 1,
+          "generated": null
+        },
+        {
+          "name": "request_number",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 2,
+          "generated": null
+        },
+        {
+          "name": "current_revision",
+          "type": "integer",
+          "default": "1",
+          "identity": null,
+          "nullable": false,
+          "position": 3,
+          "generated": null
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "default": "'issued'::text",
+          "identity": null,
+          "nullable": false,
+          "position": 4,
+          "generated": null
+        },
+        {
+          "name": "priority",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 5,
+          "generated": null
+        },
+        {
+          "name": "needed_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 6,
+          "generated": null
+        },
+        {
+          "name": "issue_input",
+          "type": "jsonb",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 8,
+          "generated": null
+        },
+        {
+          "name": "issued_by",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 9,
+          "generated": null
+        },
+        {
+          "name": "issued_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 10,
+          "generated": null
+        },
+        {
+          "name": "closed_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 11,
+          "generated": null
+        },
+        {
+          "name": "closed_by",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 12,
+          "generated": null
+        },
+        {
+          "name": "close_reason",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 13,
+          "generated": null
+        }
+      ]
+    },
+    {
+      "kind": "r",
+      "name": "inventory_request_events",
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "default": null,
+          "identity": "a",
+          "nullable": false,
+          "position": 1,
+          "generated": null
+        },
+        {
+          "name": "request_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 2,
+          "generated": null
+        },
+        {
+          "name": "revision",
+          "type": "integer",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 3,
+          "generated": null
+        },
+        {
+          "name": "event_type",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 4,
+          "generated": null
+        },
+        {
+          "name": "actor_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 5,
+          "generated": null
+        },
+        {
+          "name": "recorded_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 6,
+          "generated": null
+        },
+        {
+          "name": "details",
+          "type": "jsonb",
+          "default": "'{}'::jsonb",
+          "identity": null,
+          "nullable": false,
+          "position": 7,
+          "generated": null
+        }
+      ]
+    },
+    {
+      "kind": "r",
+      "name": "inventory_request_lines",
+      "columns": [
+        {
+          "name": "request_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 1,
+          "generated": null
+        },
+        {
+          "name": "inventory_item_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 2,
+          "generated": null
+        },
+        {
+          "name": "item_name",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 3,
+          "generated": null
+        },
+        {
+          "name": "requested_unit",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 4,
+          "generated": null
+        },
+        {
+          "name": "quantity_scale",
+          "type": "integer",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 5,
+          "generated": null
+        },
+        {
+          "name": "requested_quantity",
+          "type": "numeric(12,3)",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 6,
+          "generated": null
+        },
+        {
+          "name": "recommendation",
+          "type": "jsonb",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 7,
+          "generated": null
+        },
+        {
+          "name": "override_reason",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 8,
+          "generated": null
+        }
+      ]
+    },
+    {
+      "kind": "r",
+      "name": "inventory_request_revisions",
+      "columns": [
+        {
+          "name": "request_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 1,
+          "generated": null
+        },
+        {
+          "name": "revision",
+          "type": "integer",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 2,
+          "generated": null
+        },
+        {
+          "name": "snapshot",
+          "type": "jsonb",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 3,
+          "generated": null
+        },
+        {
+          "name": "issued_by",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 4,
+          "generated": null
+        },
+        {
+          "name": "issued_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 5,
+          "generated": null
+        }
+      ]
+    },
+    {
+      "kind": "r",
+      "name": "inventory_transaction_batch_allocations",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "identity": null,
+          "nullable": false,
+          "position": 1,
+          "generated": null
+        },
+        {
+          "name": "inventory_transaction_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 2,
+          "generated": null
+        },
+        {
+          "name": "inventory_batch_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 3,
+          "generated": null
+        },
+        {
+          "name": "quantity",
+          "type": "numeric(12,3)",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 4,
+          "generated": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 5,
+          "generated": null
+        }
+      ]
+    },
+    {
+      "kind": "r",
+      "name": "inventory_transactions",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "identity": null,
+          "nullable": false,
+          "position": 1,
+          "generated": null
+        },
+        {
+          "name": "inventory_item_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 2,
+          "generated": null
+        },
+        {
+          "name": "purchase_order_item_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 3,
+          "generated": null
+        },
+        {
+          "name": "order_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 4,
+          "generated": null
+        },
+        {
+          "name": "performed_by",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 5,
+          "generated": null
+        },
+        {
+          "name": "transaction_type",
+          "type": "inventory_transaction_type",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 6,
+          "generated": null
+        },
+        {
+          "name": "quantity_change",
+          "type": "numeric(12,3)",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 7,
+          "generated": null
+        },
+        {
+          "name": "quantity_before",
+          "type": "numeric(12,3)",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 8,
+          "generated": null
+        },
+        {
+          "name": "quantity_after",
+          "type": "numeric(12,3)",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 9,
+          "generated": null
+        },
+        {
+          "name": "reason",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 10,
+          "generated": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 11,
+          "generated": null
+        },
+        {
+          "name": "mutation_request_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 12,
+          "generated": null
+        },
+        {
+          "name": "inventory_batch_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 13,
+          "generated": null
+        },
+        {
+          "name": "opening_balance_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 14,
+          "generated": null
+        },
+        {
+          "name": "batch_quantity_before",
+          "type": "numeric(12,3)",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 15,
+          "generated": null
+        },
+        {
+          "name": "batch_quantity_after",
+          "type": "numeric(12,3)",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 16,
+          "generated": null
+        },
+        {
+          "name": "batch_mutation_notes",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 17,
+          "generated": null
+        },
+        {
+          "name": "reverses_issuance_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 18,
+          "generated": null
+        },
+        {
+          "name": "reverses_allocation_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 19,
+          "generated": null
+        }
+      ]
+    },
+    {
+      "kind": "r",
+      "name": "kds_terminals",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "identity": null,
+          "nullable": false,
+          "position": 1,
+          "generated": null
+        },
+        {
+          "name": "terminal_name",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 2,
+          "generated": null
+        },
+        {
+          "name": "secret_hash",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 3,
+          "generated": null
+        },
+        {
+          "name": "is_active",
+          "type": "boolean",
+          "default": "true",
+          "identity": null,
+          "nullable": false,
+          "position": 4,
+          "generated": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 5,
+          "generated": null
+        },
+        {
+          "name": "last_used_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 6,
+          "generated": null
+        }
+      ]
+    },
+    {
+      "kind": "r",
+      "name": "menu_categories",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "identity": null,
+          "nullable": false,
+          "position": 1,
+          "generated": null
+        },
+        {
+          "name": "name",
+          "type": "character varying(100)",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 2,
+          "generated": null
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 3,
+          "generated": null
+        },
+        {
+          "name": "is_active",
+          "type": "boolean",
+          "default": "true",
+          "identity": null,
+          "nullable": false,
+          "position": 4,
+          "generated": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 5,
+          "generated": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 6,
+          "generated": null
+        }
+      ]
+    },
+    {
+      "kind": "r",
+      "name": "menu_ingredients",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "identity": null,
+          "nullable": false,
+          "position": 1,
+          "generated": null
+        },
+        {
+          "name": "menu_item_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 2,
+          "generated": null
+        },
+        {
+          "name": "inventory_item_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 3,
+          "generated": null
+        },
+        {
+          "name": "quantity_required",
+          "type": "numeric(12,3)",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 4,
+          "generated": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 5,
+          "generated": null
+        },
+        {
+          "name": "fixed_meal_added_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 6,
+          "generated": null
+        }
+      ]
+    },
+    {
+      "kind": "r",
+      "name": "menu_items",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "identity": null,
+          "nullable": false,
+          "position": 1,
+          "generated": null
+        },
+        {
+          "name": "category_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 2,
+          "generated": null
+        },
+        {
+          "name": "name",
+          "type": "character varying(150)",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 3,
+          "generated": null
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 4,
+          "generated": null
+        },
+        {
+          "name": "price",
+          "type": "numeric(10,2)",
+          "default": "0",
+          "identity": null,
+          "nullable": false,
+          "position": 5,
+          "generated": null
+        },
+        {
+          "name": "image_path",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 6,
+          "generated": null
+        },
+        {
+          "name": "is_available",
+          "type": "boolean",
+          "default": "true",
+          "identity": null,
+          "nullable": false,
+          "position": 7,
+          "generated": null
+        },
+        {
+          "name": "is_active",
+          "type": "boolean",
+          "default": "true",
+          "identity": null,
+          "nullable": false,
+          "position": 8,
+          "generated": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 9,
+          "generated": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 10,
+          "generated": null
+        },
+        {
+          "name": "code",
+          "type": "character varying(20)",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 11,
+          "generated": null
+        },
+        {
+          "name": "aliases",
+          "type": "text[]",
+          "default": "'{}'::text[]",
+          "identity": null,
+          "nullable": false,
+          "position": 12,
+          "generated": null
+        },
+        {
+          "name": "without_rice_price",
+          "type": "numeric(10,2)",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 13,
+          "generated": null
+        },
+        {
+          "name": "without_rice_inventory_item_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 14,
+          "generated": null
+        }
+      ]
+    },
+    {
+      "kind": "r",
+      "name": "order_items",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "identity": null,
+          "nullable": false,
+          "position": 1,
+          "generated": null
+        },
+        {
+          "name": "order_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 2,
+          "generated": null
+        },
+        {
+          "name": "menu_item_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 3,
+          "generated": null
+        },
+        {
+          "name": "quantity",
+          "type": "integer",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 4,
+          "generated": null
+        },
+        {
+          "name": "unit_price",
+          "type": "numeric(10,2)",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 5,
+          "generated": null
+        },
+        {
+          "name": "line_total",
+          "type": "numeric(10,2)",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 6,
+          "generated": null
+        },
+        {
+          "name": "special_instructions",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 7,
+          "generated": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 8,
+          "generated": null
+        },
+        {
+          "name": "item_name",
+          "type": "character varying",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 9,
+          "generated": null
+        },
+        {
+          "name": "modifiers",
+          "type": "jsonb",
+          "default": "'[]'::jsonb",
+          "identity": null,
+          "nullable": false,
+          "position": 10,
+          "generated": null
+        }
+      ]
+    },
+    {
+      "kind": "r",
+      "name": "order_status_history",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "identity": null,
+          "nullable": false,
+          "position": 1,
+          "generated": null
+        },
+        {
+          "name": "order_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 2,
+          "generated": null
+        },
+        {
+          "name": "status",
+          "type": "order_status",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 3,
+          "generated": null
+        },
+        {
+          "name": "changed_by",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 4,
+          "generated": null
+        },
+        {
+          "name": "notes",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 5,
+          "generated": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 6,
+          "generated": null
+        }
+      ]
+    },
+    {
+      "kind": "r",
+      "name": "orders",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "identity": null,
+          "nullable": false,
+          "position": 1,
+          "generated": null
+        },
+        {
+          "name": "order_number",
+          "type": "character varying(50)",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 2,
+          "generated": null
+        },
+        {
+          "name": "customer_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 3,
+          "generated": null
+        },
+        {
+          "name": "processed_by",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 4,
+          "generated": null
+        },
+        {
+          "name": "order_channel",
+          "type": "order_channel",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 5,
+          "generated": null
+        },
+        {
+          "name": "fulfillment_type",
+          "type": "fulfillment_type",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 6,
+          "generated": null
+        },
+        {
+          "name": "customer_name",
+          "type": "character varying(150)",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 7,
+          "generated": null
+        },
+        {
+          "name": "customer_contact_number",
+          "type": "character varying(20)",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 8,
+          "generated": null
+        },
+        {
+          "name": "delivery_address",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 9,
+          "generated": null
+        },
+        {
+          "name": "landmark",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 10,
+          "generated": null
+        },
+        {
+          "name": "geolocation",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 11,
+          "generated": null
+        },
+        {
+          "name": "current_status",
+          "type": "order_status",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 12,
+          "generated": null
+        },
+        {
+          "name": "subtotal",
+          "type": "numeric(10,2)",
+          "default": "0",
+          "identity": null,
+          "nullable": false,
+          "position": 13,
+          "generated": null
+        },
+        {
+          "name": "delivery_fee",
+          "type": "numeric(10,2)",
+          "default": "0",
+          "identity": null,
+          "nullable": false,
+          "position": 14,
+          "generated": null
+        },
+        {
+          "name": "grand_total",
+          "type": "numeric(10,2)",
+          "default": "0",
+          "identity": null,
+          "nullable": false,
+          "position": 15,
+          "generated": null
+        },
+        {
+          "name": "notes",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 16,
+          "generated": null
+        },
+        {
+          "name": "confirmed_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 17,
+          "generated": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 18,
+          "generated": null
+        },
+        {
+          "name": "completed_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 19,
+          "generated": null
+        },
+        {
+          "name": "cancelled_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 20,
+          "generated": null
+        },
+        {
+          "name": "table_number",
+          "type": "character varying(20)",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 21,
+          "generated": null
+        },
+        {
+          "name": "discount_type",
+          "type": "character varying(40)",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 22,
+          "generated": null
+        },
+        {
+          "name": "discount_reference",
+          "type": "character varying(100)",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 23,
+          "generated": null
+        },
+        {
+          "name": "discount_amount",
+          "type": "numeric(12,2)",
+          "default": "0",
+          "identity": null,
+          "nullable": false,
+          "position": 24,
+          "generated": null
+        },
+        {
+          "name": "tax_amount",
+          "type": "numeric(12,2)",
+          "default": "0",
+          "identity": null,
+          "nullable": false,
+          "position": 25,
+          "generated": null
+        },
+        {
+          "name": "customer_request_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 26,
+          "generated": null
+        }
+      ]
+    },
+    {
+      "kind": "r",
+      "name": "paid_order_cancellations",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "identity": null,
+          "nullable": false,
+          "position": 1,
+          "generated": null
+        },
+        {
+          "name": "order_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 2,
+          "generated": null
+        },
+        {
+          "name": "payment_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 3,
+          "generated": null
+        },
+        {
+          "name": "cashier_transaction_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 4,
+          "generated": null
+        },
+        {
+          "name": "previous_status",
+          "type": "order_status",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 5,
+          "generated": null
+        },
+        {
+          "name": "inventory_disposition",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 6,
+          "generated": null
+        },
+        {
+          "name": "refund_amount",
+          "type": "numeric(10,2)",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 7,
+          "generated": null
+        },
+        {
+          "name": "refund_method",
+          "type": "payment_method",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 8,
+          "generated": null
+        },
+        {
+          "name": "refund_reference",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 9,
+          "generated": null
+        },
+        {
+          "name": "reason",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 10,
+          "generated": null
+        },
+        {
+          "name": "processed_by",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 11,
+          "generated": null
+        },
+        {
+          "name": "processed_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 12,
+          "generated": null
+        }
+      ]
+    },
+    {
+      "kind": "r",
+      "name": "payments",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "identity": null,
+          "nullable": false,
+          "position": 1,
+          "generated": null
+        },
+        {
+          "name": "order_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 2,
+          "generated": null
+        },
+        {
+          "name": "payment_method",
+          "type": "payment_method",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 3,
+          "generated": null
+        },
+        {
+          "name": "amount",
+          "type": "numeric(10,2)",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 4,
+          "generated": null
+        },
+        {
+          "name": "gcash_reference_number",
+          "type": "character varying(100)",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 5,
+          "generated": null
+        },
+        {
+          "name": "proof_image_path",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 6,
+          "generated": null
+        },
+        {
+          "name": "status",
+          "type": "payment_status",
+          "default": "'pending'::payment_status",
+          "identity": null,
+          "nullable": false,
+          "position": 7,
+          "generated": null
+        },
+        {
+          "name": "verified_by",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 8,
+          "generated": null
+        },
+        {
+          "name": "verified_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 9,
+          "generated": null
+        },
+        {
+          "name": "rejection_reason",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 10,
+          "generated": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 11,
+          "generated": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 12,
+          "generated": null
+        },
+        {
+          "name": "cash_received",
+          "type": "numeric(12,2)",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 13,
+          "generated": null
+        },
+        {
+          "name": "rejection_notes",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 14,
+          "generated": null
+        },
+        {
+          "name": "rejected_by",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 15,
+          "generated": null
+        },
+        {
+          "name": "rejected_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 16,
+          "generated": null
+        }
+      ]
+    },
+    {
+      "kind": "r",
+      "name": "production_replenishment_requests",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 1,
+          "generated": null
+        },
+        {
+          "name": "inventory_item_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 2,
+          "generated": null
+        },
+        {
+          "name": "requested_unit",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 3,
+          "generated": null
+        },
+        {
+          "name": "requested_quantity",
+          "type": "numeric(12,3)",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 4,
+          "generated": null
+        },
+        {
+          "name": "needed_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 5,
+          "generated": null
+        },
+        {
+          "name": "priority",
+          "type": "text",
+          "default": "'normal'::text",
+          "identity": null,
+          "nullable": false,
+          "position": 6,
+          "generated": null
+        },
+        {
+          "name": "note",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 7,
+          "generated": null
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "default": "'requested'::text",
+          "identity": null,
+          "nullable": false,
+          "position": 8,
+          "generated": null
+        },
+        {
+          "name": "requested_by",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 9,
+          "generated": null
+        },
+        {
+          "name": "requested_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 10,
+          "generated": null
+        },
+        {
+          "name": "ready_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 11,
+          "generated": null
+        },
+        {
+          "name": "closed_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 12,
+          "generated": null
+        },
+        {
+          "name": "fulfilled_report_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 13,
+          "generated": null
+        }
+      ]
+    },
+    {
+      "kind": "r",
+      "name": "production_replenishment_status_events",
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "default": null,
+          "identity": "a",
+          "nullable": false,
+          "position": 1,
+          "generated": null
+        },
+        {
+          "name": "request_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 2,
+          "generated": null
+        },
+        {
+          "name": "previous_status",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 3,
+          "generated": null
+        },
+        {
+          "name": "next_status",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 4,
+          "generated": null
+        },
+        {
+          "name": "changed_by",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 5,
+          "generated": null
+        },
+        {
+          "name": "changed_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 6,
+          "generated": null
+        },
+        {
+          "name": "receiving_report_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 7,
+          "generated": null
+        }
+      ]
+    },
+    {
+      "kind": "r",
+      "name": "profiles",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 1,
+          "generated": null
+        },
+        {
+          "name": "first_name",
+          "type": "character varying(100)",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 2,
+          "generated": null
+        },
+        {
+          "name": "last_name",
+          "type": "character varying(100)",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 3,
+          "generated": null
+        },
+        {
+          "name": "contact_number",
+          "type": "character varying(20)",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 4,
+          "generated": null
+        },
+        {
+          "name": "role",
+          "type": "user_role",
+          "default": "'customer'::user_role",
+          "identity": null,
+          "nullable": false,
+          "position": 5,
+          "generated": null
+        },
+        {
+          "name": "is_active",
+          "type": "boolean",
+          "default": "true",
+          "identity": null,
+          "nullable": false,
+          "position": 6,
+          "generated": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 7,
+          "generated": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 8,
+          "generated": null
+        },
+        {
+          "name": "avatar_url",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 9,
+          "generated": null
+        }
+      ]
+    },
+    {
+      "kind": "r",
+      "name": "purchase_order_items",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "identity": null,
+          "nullable": false,
+          "position": 1,
+          "generated": null
+        },
+        {
+          "name": "purchase_order_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 2,
+          "generated": null
+        },
+        {
+          "name": "inventory_item_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 3,
+          "generated": null
+        },
+        {
+          "name": "quantity_ordered",
+          "type": "numeric(12,3)",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 4,
+          "generated": null
+        },
+        {
+          "name": "quantity_received",
+          "type": "numeric(12,3)",
+          "default": "0",
+          "identity": null,
+          "nullable": false,
+          "position": 5,
+          "generated": null
+        },
+        {
+          "name": "unit_cost",
+          "type": "numeric(12,2)",
+          "default": "0",
+          "identity": null,
+          "nullable": false,
+          "position": 7,
+          "generated": null
+        },
+        {
+          "name": "total_cost",
+          "type": "numeric(12,2)",
+          "default": "0",
+          "identity": null,
+          "nullable": false,
+          "position": 8,
+          "generated": null
+        },
+        {
+          "name": "received_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 9,
+          "generated": null
+        },
+        {
+          "name": "expiration_date",
+          "type": "date",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 10,
+          "generated": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 11,
+          "generated": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 12,
+          "generated": null
+        },
+        {
+          "name": "secondary_quantity_ordered",
+          "type": "numeric(12,3)",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 13,
+          "generated": null
+        },
+        {
+          "name": "secondary_quantity_received",
+          "type": "numeric(12,3)",
+          "default": "0",
+          "identity": null,
+          "nullable": false,
+          "position": 14,
+          "generated": null
+        },
+        {
+          "name": "quantity_cancelled",
+          "type": "numeric(12,3)",
+          "default": "0",
+          "identity": null,
+          "nullable": false,
+          "position": 15,
+          "generated": null
+        },
+        {
+          "name": "quantity_remaining",
+          "type": "numeric(12,3)",
+          "default": "((quantity_ordered - quantity_received) - quantity_cancelled)",
+          "identity": null,
+          "nullable": false,
+          "position": 16,
+          "generated": "s"
+        }
+      ]
+    },
+    {
+      "kind": "r",
+      "name": "purchase_orders",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "identity": null,
+          "nullable": false,
+          "position": 1,
+          "generated": null
+        },
+        {
+          "name": "po_number",
+          "type": "character varying(50)",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 2,
+          "generated": null
+        },
+        {
+          "name": "supplier_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 3,
+          "generated": null
+        },
+        {
+          "name": "created_by",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 4,
+          "generated": null
+        },
+        {
+          "name": "status",
+          "type": "purchase_order_status",
+          "default": "'draft'::purchase_order_status",
+          "identity": null,
+          "nullable": false,
+          "position": 5,
+          "generated": null
+        },
+        {
+          "name": "ordered_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 6,
+          "generated": null
+        },
+        {
+          "name": "received_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 7,
+          "generated": null
+        },
+        {
+          "name": "total_amount",
+          "type": "numeric(12,2)",
+          "default": "0",
+          "identity": null,
+          "nullable": false,
+          "position": 8,
+          "generated": null
+        },
+        {
+          "name": "notes",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 9,
+          "generated": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 10,
+          "generated": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 11,
+          "generated": null
+        }
+      ]
+    },
+    {
+      "kind": "r",
+      "name": "receiving_report_items",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "identity": null,
+          "nullable": false,
+          "position": 1,
+          "generated": null
+        },
+        {
+          "name": "receiving_report_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 2,
+          "generated": null
+        },
+        {
+          "name": "purchase_order_item_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 3,
+          "generated": null
+        },
+        {
+          "name": "quantity_delivered",
+          "type": "numeric(12,3)",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 4,
+          "generated": null
+        },
+        {
+          "name": "quantity_accepted",
+          "type": "numeric(12,3)",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 5,
+          "generated": null
+        },
+        {
+          "name": "quantity_rejected",
+          "type": "numeric(12,3)",
+          "default": "(quantity_delivered - quantity_accepted)",
+          "identity": null,
+          "nullable": true,
+          "position": 6,
+          "generated": "s"
+        },
+        {
+          "name": "secondary_quantity_delivered",
+          "type": "numeric(12,3)",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 7,
+          "generated": null
+        },
+        {
+          "name": "secondary_quantity_accepted",
+          "type": "numeric(12,3)",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 8,
+          "generated": null
+        },
+        {
+          "name": "secondary_quantity_rejected",
+          "type": "numeric(12,3)",
+          "default": "\nCASE\n    WHEN (secondary_quantity_delivered IS NULL) THEN NULL::numeric\n    ELSE (secondary_quantity_delivered - secondary_quantity_accepted)\nEND",
+          "identity": null,
+          "nullable": true,
+          "position": 9,
+          "generated": "s"
+        },
+        {
+          "name": "rejection_reason",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 10,
+          "generated": null
+        },
+        {
+          "name": "notes",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 11,
+          "generated": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 12,
+          "generated": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 13,
+          "generated": null
+        },
+        {
+          "name": "inventory_item_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 14,
+          "generated": null
+        },
+        {
+          "name": "source_lot_code",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 15,
+          "generated": null
+        },
+        {
+          "name": "manufactured_on",
+          "type": "date",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 16,
+          "generated": null
+        },
+        {
+          "name": "use_by_date",
+          "type": "date",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 17,
+          "generated": null
+        }
+      ]
+    },
+    {
+      "kind": "r",
+      "name": "receiving_reports",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "identity": null,
+          "nullable": false,
+          "position": 1,
+          "generated": null
+        },
+        {
+          "name": "rr_number",
+          "type": "character varying(50)",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 2,
+          "generated": null
+        },
+        {
+          "name": "purchase_order_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 3,
+          "generated": null
+        },
+        {
+          "name": "received_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 4,
+          "generated": null
+        },
+        {
+          "name": "received_by",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 5,
+          "generated": null
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "default": "'draft'::text",
+          "identity": null,
+          "nullable": false,
+          "position": 6,
+          "generated": null
+        },
+        {
+          "name": "supplier_delivery_reference",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 7,
+          "generated": null
+        },
+        {
+          "name": "notes",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 8,
+          "generated": null
+        },
+        {
+          "name": "posted_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 9,
+          "generated": null
+        },
+        {
+          "name": "posted_by",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 10,
+          "generated": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 11,
+          "generated": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 12,
+          "generated": null
+        },
+        {
+          "name": "source_type",
+          "type": "text",
+          "default": "'direct_supplier'::text",
+          "identity": null,
+          "nullable": false,
+          "position": 13,
+          "generated": null
+        },
+        {
+          "name": "source_reference",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 14,
+          "generated": null
+        },
+        {
+          "name": "replenishment_request_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 15,
+          "generated": null
+        },
+        {
+          "name": "inventory_request_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 16,
+          "generated": null
+        },
+        {
+          "name": "inventory_request_revision",
+          "type": "integer",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 17,
+          "generated": null
+        },
+        {
+          "name": "inspected_by_name",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 18,
+          "generated": null
+        },
+        {
+          "name": "inspection_note",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 19,
+          "generated": null
+        },
+        {
+          "name": "emergency_reason",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 20,
+          "generated": null
+        },
+        {
+          "name": "emergency_authorized_by",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 21,
+          "generated": null
+        },
+        {
+          "name": "emergency_authorized_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 22,
+          "generated": null
+        },
+        {
+          "name": "emergency_inspected_by_name",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 23,
+          "generated": null
+        }
+      ]
+    },
+    {
+      "kind": "r",
+      "name": "rider_offer_push_outbox",
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "default": null,
+          "identity": "a",
+          "nullable": false,
+          "position": 1,
+          "generated": null
+        },
+        {
+          "name": "assignment_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 2,
+          "generated": null
+        },
+        {
+          "name": "device_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 3,
+          "generated": null
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "default": "'pending'::text",
+          "identity": null,
+          "nullable": false,
+          "position": 4,
+          "generated": null
+        },
+        {
+          "name": "attempts",
+          "type": "integer",
+          "default": "0",
+          "identity": null,
+          "nullable": false,
+          "position": 5,
+          "generated": null
+        },
+        {
+          "name": "next_attempt_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 6,
+          "generated": null
+        },
+        {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "default": "(now() + '00:10:00'::interval)",
+          "identity": null,
+          "nullable": false,
+          "position": 7,
+          "generated": null
+        },
+        {
+          "name": "lease_until",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 8,
+          "generated": null
+        },
+        {
+          "name": "ticket_id",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 9,
+          "generated": null
+        },
+        {
+          "name": "sent_expo_push_token",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 10,
+          "generated": null
+        },
+        {
+          "name": "receipt_due_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 11,
+          "generated": null
+        },
+        {
+          "name": "last_error_code",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 12,
+          "generated": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 13,
+          "generated": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 14,
+          "generated": null
+        }
+      ]
+    },
+    {
+      "kind": "r",
+      "name": "rider_push_devices",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 1,
+          "generated": null
+        },
+        {
+          "name": "rider_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 2,
+          "generated": null
+        },
+        {
+          "name": "expo_push_token",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 3,
+          "generated": null
+        },
+        {
+          "name": "enabled",
+          "type": "boolean",
+          "default": "true",
+          "identity": null,
+          "nullable": false,
+          "position": 4,
+          "generated": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 5,
+          "generated": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 6,
+          "generated": null
+        }
+      ]
+    },
+    {
+      "kind": "r",
+      "name": "riders",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 1,
+          "generated": null
+        },
+        {
+          "name": "valid_id_path",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 2,
+          "generated": null
+        },
+        {
+          "name": "or_cr_document_path",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 3,
+          "generated": null
+        },
+        {
+          "name": "driver_license_number",
+          "type": "character varying(100)",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 4,
+          "generated": null
+        },
+        {
+          "name": "plate_number",
+          "type": "character varying(100)",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 5,
+          "generated": null
+        },
+        {
+          "name": "motor_brand",
+          "type": "character varying(100)",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 6,
+          "generated": null
+        },
+        {
+          "name": "motor_model",
+          "type": "character varying(100)",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 7,
+          "generated": null
+        },
+        {
+          "name": "rider_photo_path",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 8,
+          "generated": null
+        },
+        {
+          "name": "approval_status",
+          "type": "rider_approval_status",
+          "default": "'pending'::rider_approval_status",
+          "identity": null,
+          "nullable": false,
+          "position": 9,
+          "generated": null
+        },
+        {
+          "name": "availability_status",
+          "type": "rider_availability_status",
+          "default": "'offline'::rider_availability_status",
+          "identity": null,
+          "nullable": false,
+          "position": 10,
+          "generated": null
+        },
+        {
+          "name": "last_assigned_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 11,
+          "generated": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 12,
+          "generated": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 13,
+          "generated": null
+        }
+      ]
+    },
+    {
+      "kind": "r",
+      "name": "supplier_items",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "identity": null,
+          "nullable": false,
+          "position": 1,
+          "generated": null
+        },
+        {
+          "name": "supplier_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 2,
+          "generated": null
+        },
+        {
+          "name": "inventory_item_id",
+          "type": "uuid",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 3,
+          "generated": null
+        },
+        {
+          "name": "price_per_unit",
+          "type": "numeric(12,2)",
+          "default": "0",
+          "identity": null,
+          "nullable": false,
+          "position": 4,
+          "generated": null
+        },
+        {
+          "name": "is_preferred",
+          "type": "boolean",
+          "default": "false",
+          "identity": null,
+          "nullable": false,
+          "position": 5,
+          "generated": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 6,
+          "generated": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 7,
+          "generated": null
+        }
+      ]
+    },
+    {
+      "kind": "r",
+      "name": "suppliers",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "identity": null,
+          "nullable": false,
+          "position": 1,
+          "generated": null
+        },
+        {
+          "name": "name",
+          "type": "character varying(150)",
+          "default": null,
+          "identity": null,
+          "nullable": false,
+          "position": 2,
+          "generated": null
+        },
+        {
+          "name": "contact_person",
+          "type": "character varying(150)",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 3,
+          "generated": null
+        },
+        {
+          "name": "contact_number",
+          "type": "character varying(20)",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 4,
+          "generated": null
+        },
+        {
+          "name": "email",
+          "type": "character varying(150)",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 5,
+          "generated": null
+        },
+        {
+          "name": "address",
+          "type": "text",
+          "default": null,
+          "identity": null,
+          "nullable": true,
+          "position": 6,
+          "generated": null
+        },
+        {
+          "name": "is_active",
+          "type": "boolean",
+          "default": "true",
+          "identity": null,
+          "nullable": false,
+          "position": 7,
+          "generated": null
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 8,
+          "generated": null
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": null,
+          "nullable": false,
+          "position": 9,
+          "generated": null
+        }
+      ]
+    }
+  ],
+  "constraints": [
+    {
+      "name": "cashier_shifts_cashier_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "cashier_shifts",
+      "columns": [
+        "cashier_id"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "profiles",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "cashier_shifts_closed_by_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "cashier_shifts",
+      "columns": [
+        "closed_by"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "profiles",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "cashier_shifts_manager_approved_by_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "cashier_shifts",
+      "columns": [
+        "manager_approved_by"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "profiles",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "cashier_shifts_pkey",
+      "type": "p",
+      "match": " ",
+      "table": "cashier_shifts",
+      "columns": [
+        "id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "cashier_transactions_cashier_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "cashier_transactions",
+      "columns": [
+        "cashier_id"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "profiles",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "cashier_transactions_order_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "cashier_transactions",
+      "columns": [
+        "order_id"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "orders",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "cashier_transactions_order_id_key",
+      "type": "u",
+      "match": " ",
+      "table": "cashier_transactions",
+      "columns": [
+        "order_id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "cashier_transactions_payment_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "cashier_transactions",
+      "columns": [
+        "payment_id"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "payments",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "cashier_transactions_payment_id_key",
+      "type": "u",
+      "match": " ",
+      "table": "cashier_transactions",
+      "columns": [
+        "payment_id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "cashier_transactions_pkey",
+      "type": "p",
+      "match": " ",
+      "table": "cashier_transactions",
+      "columns": [
+        "id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "cashier_transactions_receipt_number_key",
+      "type": "u",
+      "match": " ",
+      "table": "cashier_transactions",
+      "columns": [
+        "receipt_number"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "cashier_transactions_request_id_key",
+      "type": "u",
+      "match": " ",
+      "table": "cashier_transactions",
+      "columns": [
+        "request_id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "cashier_transactions_shift_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "cashier_transactions",
+      "columns": [
+        "shift_id"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "cashier_shifts",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "cashier_transactions_transaction_number_key",
+      "type": "u",
+      "match": " ",
+      "table": "cashier_transactions",
+      "columns": [
+        "transaction_number"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "delivery_assignments_order_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "delivery_assignments",
+      "columns": [
+        "order_id"
+      ],
+      "on_delete": "c",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "orders",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "delivery_assignments_pkey",
+      "type": "p",
+      "match": " ",
+      "table": "delivery_assignments",
+      "columns": [
+        "id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "delivery_assignments_rider_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "delivery_assignments",
+      "columns": [
+        "rider_id"
+      ],
+      "on_delete": "r",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "riders",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "drink_choices_menu_item_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "drink_choices",
+      "columns": [
+        "menu_item_id"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "menu_items",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "drink_choices_pkey",
+      "type": "p",
+      "match": " ",
+      "table": "drink_choices",
+      "columns": [
+        "menu_item_id",
+        "option_id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "inventory_audit_item_unique",
+      "type": "u",
+      "match": " ",
+      "table": "inventory_audit_items",
+      "columns": [
+        "audit_id",
+        "inventory_item_id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "inventory_audit_items_audit_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "inventory_audit_items",
+      "columns": [
+        "audit_id"
+      ],
+      "on_delete": "r",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "inventory_audits",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "inventory_audit_items_inventory_item_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "inventory_audit_items",
+      "columns": [
+        "inventory_item_id"
+      ],
+      "on_delete": "r",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "inventory_items",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "inventory_audit_items_pkey",
+      "type": "p",
+      "match": " ",
+      "table": "inventory_audit_items",
+      "columns": [
+        "id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "inventory_audit_movement_item_fk",
+      "type": "f",
+      "match": "s",
+      "table": "inventory_audit_items",
+      "columns": [
+        "latest_movement_id",
+        "inventory_item_id"
+      ],
+      "on_delete": "r",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "inventory_transactions",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id",
+        "inventory_item_id"
+      ]
+    },
+    {
+      "name": "inventory_audits_performed_by_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "inventory_audits",
+      "columns": [
+        "performed_by"
+      ],
+      "on_delete": "r",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "profiles",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "inventory_audits_pkey",
+      "type": "p",
+      "match": " ",
+      "table": "inventory_audits",
+      "columns": [
+        "id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "inventory_audits_request_id_key",
+      "type": "u",
+      "match": " ",
+      "table": "inventory_audits",
+      "columns": [
+        "request_id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "inventory_batches_batch_code_key",
+      "type": "u",
+      "match": " ",
+      "table": "inventory_batches",
+      "columns": [
+        "batch_code"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "inventory_batches_inventory_item_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "inventory_batches",
+      "columns": [
+        "inventory_item_id"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "inventory_items",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "inventory_batches_opening_balance_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "inventory_batches",
+      "columns": [
+        "opening_balance_id"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "inventory_opening_balances",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "inventory_batches_pkey",
+      "type": "p",
+      "match": " ",
+      "table": "inventory_batches",
+      "columns": [
+        "id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "inventory_batches_receiving_report_item_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "inventory_batches",
+      "columns": [
+        "receiving_report_item_id"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "receiving_report_items",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "inventory_items_item_name_key",
+      "type": "u",
+      "match": " ",
+      "table": "inventory_items",
+      "columns": [
+        "item_name"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "inventory_items_pkey",
+      "type": "p",
+      "match": " ",
+      "table": "inventory_items",
+      "columns": [
+        "id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "inventory_opening_balances_inventory_item_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "inventory_opening_balances",
+      "columns": [
+        "inventory_item_id"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "inventory_items",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "inventory_opening_balances_inventory_item_id_key",
+      "type": "u",
+      "match": " ",
+      "table": "inventory_opening_balances",
+      "columns": [
+        "inventory_item_id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "inventory_opening_balances_pkey",
+      "type": "p",
+      "match": " ",
+      "table": "inventory_opening_balances",
+      "columns": [
+        "id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "inventory_opening_balances_request_id_key",
+      "type": "u",
+      "match": " ",
+      "table": "inventory_opening_balances",
+      "columns": [
+        "request_id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "inventory_opening_balances_verified_by_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "inventory_opening_balances",
+      "columns": [
+        "verified_by"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "profiles",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "inventory_request_documents_closed_by_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "inventory_request_documents",
+      "columns": [
+        "closed_by"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "profiles",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "inventory_request_documents_issued_by_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "inventory_request_documents",
+      "columns": [
+        "issued_by"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "profiles",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "inventory_request_documents_pkey",
+      "type": "p",
+      "match": " ",
+      "table": "inventory_request_documents",
+      "columns": [
+        "id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "inventory_request_documents_request_number_key",
+      "type": "u",
+      "match": " ",
+      "table": "inventory_request_documents",
+      "columns": [
+        "request_number"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "inventory_request_events_actor_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "inventory_request_events",
+      "columns": [
+        "actor_id"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "profiles",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "inventory_request_events_pkey",
+      "type": "p",
+      "match": " ",
+      "table": "inventory_request_events",
+      "columns": [
+        "id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "inventory_request_events_request_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "inventory_request_events",
+      "columns": [
+        "request_id"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "inventory_request_documents",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "inventory_request_lines_inventory_item_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "inventory_request_lines",
+      "columns": [
+        "inventory_item_id"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "inventory_items",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "inventory_request_lines_pkey",
+      "type": "p",
+      "match": " ",
+      "table": "inventory_request_lines",
+      "columns": [
+        "request_id",
+        "inventory_item_id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "inventory_request_lines_request_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "inventory_request_lines",
+      "columns": [
+        "request_id"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "inventory_request_documents",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "inventory_request_revisions_issued_by_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "inventory_request_revisions",
+      "columns": [
+        "issued_by"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "profiles",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "inventory_request_revisions_pkey",
+      "type": "p",
+      "match": " ",
+      "table": "inventory_request_revisions",
+      "columns": [
+        "request_id",
+        "revision"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "inventory_request_revisions_request_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "inventory_request_revisions",
+      "columns": [
+        "request_id"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "inventory_request_documents",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "inventory_transaction_batch_alloc_inventory_transaction_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "inventory_transaction_batch_allocations",
+      "columns": [
+        "inventory_transaction_id"
+      ],
+      "on_delete": "r",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "inventory_transactions",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "inventory_transaction_batch_allocations_inventory_batch_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "inventory_transaction_batch_allocations",
+      "columns": [
+        "inventory_batch_id"
+      ],
+      "on_delete": "r",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "inventory_batches",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "inventory_transaction_batch_allocations_pkey",
+      "type": "p",
+      "match": " ",
+      "table": "inventory_transaction_batch_allocations",
+      "columns": [
+        "id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "inventory_transaction_batch_allocations_transaction_batch_key",
+      "type": "u",
+      "match": " ",
+      "table": "inventory_transaction_batch_allocations",
+      "columns": [
+        "inventory_transaction_id",
+        "inventory_batch_id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "inventory_transactions_id_item_unique",
+      "type": "u",
+      "match": " ",
+      "table": "inventory_transactions",
+      "columns": [
+        "id",
+        "inventory_item_id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "inventory_transactions_inventory_batch_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "inventory_transactions",
+      "columns": [
+        "inventory_batch_id"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "inventory_batches",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "inventory_transactions_inventory_item_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "inventory_transactions",
+      "columns": [
+        "inventory_item_id"
+      ],
+      "on_delete": "r",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "inventory_items",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "inventory_transactions_opening_balance_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "inventory_transactions",
+      "columns": [
+        "opening_balance_id"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "inventory_opening_balances",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "inventory_transactions_order_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "inventory_transactions",
+      "columns": [
+        "order_id"
+      ],
+      "on_delete": "n",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "orders",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "inventory_transactions_performed_by_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "inventory_transactions",
+      "columns": [
+        "performed_by"
+      ],
+      "on_delete": "n",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "profiles",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "inventory_transactions_pkey",
+      "type": "p",
+      "match": " ",
+      "table": "inventory_transactions",
+      "columns": [
+        "id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "inventory_transactions_purchase_order_item_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "inventory_transactions",
+      "columns": [
+        "purchase_order_item_id"
+      ],
+      "on_delete": "n",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "purchase_order_items",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "inventory_transactions_reverses_allocation_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "inventory_transactions",
+      "columns": [
+        "reverses_allocation_id"
+      ],
+      "on_delete": "r",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "inventory_transaction_batch_allocations",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "inventory_transactions_reverses_issuance_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "inventory_transactions",
+      "columns": [
+        "reverses_issuance_id"
+      ],
+      "on_delete": "r",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "inventory_transactions",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "kds_terminals_pkey",
+      "type": "p",
+      "match": " ",
+      "table": "kds_terminals",
+      "columns": [
+        "id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "kds_terminals_secret_hash_key",
+      "type": "u",
+      "match": " ",
+      "table": "kds_terminals",
+      "columns": [
+        "secret_hash"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "menu_categories_name_key",
+      "type": "u",
+      "match": " ",
+      "table": "menu_categories",
+      "columns": [
+        "name"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "menu_categories_pkey",
+      "type": "p",
+      "match": " ",
+      "table": "menu_categories",
+      "columns": [
+        "id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "menu_ingredients_inventory_item_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "menu_ingredients",
+      "columns": [
+        "inventory_item_id"
+      ],
+      "on_delete": "r",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "inventory_items",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "menu_ingredients_menu_item_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "menu_ingredients",
+      "columns": [
+        "menu_item_id"
+      ],
+      "on_delete": "c",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "menu_items",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "menu_ingredients_menu_item_inventory_unique",
+      "type": "u",
+      "match": " ",
+      "table": "menu_ingredients",
+      "columns": [
+        "menu_item_id",
+        "inventory_item_id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "menu_ingredients_pkey",
+      "type": "p",
+      "match": " ",
+      "table": "menu_ingredients",
+      "columns": [
+        "id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "menu_items_category_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "menu_items",
+      "columns": [
+        "category_id"
+      ],
+      "on_delete": "r",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "menu_categories",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "menu_items_code_key",
+      "type": "u",
+      "match": " ",
+      "table": "menu_items",
+      "columns": [
+        "code"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "menu_items_pkey",
+      "type": "p",
+      "match": " ",
+      "table": "menu_items",
+      "columns": [
+        "id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "menu_items_without_rice_inventory_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "menu_items",
+      "columns": [
+        "id",
+        "without_rice_inventory_item_id"
+      ],
+      "on_delete": "r",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "menu_ingredients",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "menu_item_id",
+        "inventory_item_id"
+      ]
+    },
+    {
+      "name": "order_items_menu_item_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "order_items",
+      "columns": [
+        "menu_item_id"
+      ],
+      "on_delete": "r",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "menu_items",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "order_items_order_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "order_items",
+      "columns": [
+        "order_id"
+      ],
+      "on_delete": "c",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "orders",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "order_items_pkey",
+      "type": "p",
+      "match": " ",
+      "table": "order_items",
+      "columns": [
+        "id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "order_status_history_changed_by_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "order_status_history",
+      "columns": [
+        "changed_by"
+      ],
+      "on_delete": "n",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "profiles",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "order_status_history_order_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "order_status_history",
+      "columns": [
+        "order_id"
+      ],
+      "on_delete": "c",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "orders",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "order_status_history_pkey",
+      "type": "p",
+      "match": " ",
+      "table": "order_status_history",
+      "columns": [
+        "id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "orders_customer_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "orders",
+      "columns": [
+        "customer_id"
+      ],
+      "on_delete": "n",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "profiles",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "orders_order_number_key",
+      "type": "u",
+      "match": " ",
+      "table": "orders",
+      "columns": [
+        "order_number"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "orders_pkey",
+      "type": "p",
+      "match": " ",
+      "table": "orders",
+      "columns": [
+        "id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "orders_processed_by_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "orders",
+      "columns": [
+        "processed_by"
+      ],
+      "on_delete": "n",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "profiles",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "paid_order_cancellations_cashier_transaction_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "paid_order_cancellations",
+      "columns": [
+        "cashier_transaction_id"
+      ],
+      "on_delete": "r",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "cashier_transactions",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "paid_order_cancellations_cashier_transaction_id_key",
+      "type": "u",
+      "match": " ",
+      "table": "paid_order_cancellations",
+      "columns": [
+        "cashier_transaction_id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "paid_order_cancellations_order_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "paid_order_cancellations",
+      "columns": [
+        "order_id"
+      ],
+      "on_delete": "r",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "orders",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "paid_order_cancellations_order_id_key",
+      "type": "u",
+      "match": " ",
+      "table": "paid_order_cancellations",
+      "columns": [
+        "order_id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "paid_order_cancellations_payment_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "paid_order_cancellations",
+      "columns": [
+        "payment_id"
+      ],
+      "on_delete": "r",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "payments",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "paid_order_cancellations_payment_id_key",
+      "type": "u",
+      "match": " ",
+      "table": "paid_order_cancellations",
+      "columns": [
+        "payment_id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "paid_order_cancellations_pkey",
+      "type": "p",
+      "match": " ",
+      "table": "paid_order_cancellations",
+      "columns": [
+        "id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "paid_order_cancellations_processed_by_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "paid_order_cancellations",
+      "columns": [
+        "processed_by"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "profiles",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "payments_order_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "payments",
+      "columns": [
+        "order_id"
+      ],
+      "on_delete": "c",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "orders",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "payments_order_id_key",
+      "type": "u",
+      "match": " ",
+      "table": "payments",
+      "columns": [
+        "order_id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "payments_pkey",
+      "type": "p",
+      "match": " ",
+      "table": "payments",
+      "columns": [
+        "id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "payments_rejected_by_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "payments",
+      "columns": [
+        "rejected_by"
+      ],
+      "on_delete": "n",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "profiles",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "payments_verified_by_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "payments",
+      "columns": [
+        "verified_by"
+      ],
+      "on_delete": "n",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "profiles",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "production_replenishment_requests_fulfilled_report_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "production_replenishment_requests",
+      "columns": [
+        "fulfilled_report_id"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "receiving_reports",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "production_replenishment_requests_fulfilled_report_id_key",
+      "type": "u",
+      "match": " ",
+      "table": "production_replenishment_requests",
+      "columns": [
+        "fulfilled_report_id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "production_replenishment_requests_inventory_item_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "production_replenishment_requests",
+      "columns": [
+        "inventory_item_id"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "inventory_items",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "production_replenishment_requests_pkey",
+      "type": "p",
+      "match": " ",
+      "table": "production_replenishment_requests",
+      "columns": [
+        "id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "production_replenishment_requests_requested_by_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "production_replenishment_requests",
+      "columns": [
+        "requested_by"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "profiles",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "production_replenishment_status_events_changed_by_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "production_replenishment_status_events",
+      "columns": [
+        "changed_by"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "profiles",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "production_replenishment_status_events_pkey",
+      "type": "p",
+      "match": " ",
+      "table": "production_replenishment_status_events",
+      "columns": [
+        "id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "production_replenishment_status_events_receiving_report_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "production_replenishment_status_events",
+      "columns": [
+        "receiving_report_id"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "receiving_reports",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "production_replenishment_status_events_request_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "production_replenishment_status_events",
+      "columns": [
+        "request_id"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "production_replenishment_requests",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "profiles_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "profiles",
+      "columns": [
+        "id"
+      ],
+      "on_delete": "c",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "users",
+      "referenced_schema": "auth",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "profiles_pkey",
+      "type": "p",
+      "match": " ",
+      "table": "profiles",
+      "columns": [
+        "id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "purchase_order_items_inventory_item_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "purchase_order_items",
+      "columns": [
+        "inventory_item_id"
+      ],
+      "on_delete": "r",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "inventory_items",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "purchase_order_items_pkey",
+      "type": "p",
+      "match": " ",
+      "table": "purchase_order_items",
+      "columns": [
+        "id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "purchase_order_items_purchase_order_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "purchase_order_items",
+      "columns": [
+        "purchase_order_id"
+      ],
+      "on_delete": "c",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "purchase_orders",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "purchase_order_items_unique_purchase_order_inventory",
+      "type": "u",
+      "match": " ",
+      "table": "purchase_order_items",
+      "columns": [
+        "purchase_order_id",
+        "inventory_item_id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "purchase_orders_created_by_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "purchase_orders",
+      "columns": [
+        "created_by"
+      ],
+      "on_delete": "r",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "profiles",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "purchase_orders_pkey",
+      "type": "p",
+      "match": " ",
+      "table": "purchase_orders",
+      "columns": [
+        "id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "purchase_orders_po_number_key",
+      "type": "u",
+      "match": " ",
+      "table": "purchase_orders",
+      "columns": [
+        "po_number"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "purchase_orders_supplier_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "purchase_orders",
+      "columns": [
+        "supplier_id"
+      ],
+      "on_delete": "r",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "suppliers",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "receiving_report_items_inventory_item_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "receiving_report_items",
+      "columns": [
+        "inventory_item_id"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "inventory_items",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "receiving_report_items_pkey",
+      "type": "p",
+      "match": " ",
+      "table": "receiving_report_items",
+      "columns": [
+        "id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "receiving_report_items_purchase_order_item_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "receiving_report_items",
+      "columns": [
+        "purchase_order_item_id"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "purchase_order_items",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "receiving_report_items_receiving_report_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "receiving_report_items",
+      "columns": [
+        "receiving_report_id"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "receiving_reports",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "receiving_report_items_report_po_item_key",
+      "type": "u",
+      "match": " ",
+      "table": "receiving_report_items",
+      "columns": [
+        "receiving_report_id",
+        "purchase_order_item_id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "receiving_reports_emergency_authorized_by_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "receiving_reports",
+      "columns": [
+        "emergency_authorized_by"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "profiles",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "receiving_reports_inventory_request_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "receiving_reports",
+      "columns": [
+        "inventory_request_id"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "inventory_request_documents",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "receiving_reports_pkey",
+      "type": "p",
+      "match": " ",
+      "table": "receiving_reports",
+      "columns": [
+        "id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "receiving_reports_posted_by_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "receiving_reports",
+      "columns": [
+        "posted_by"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "profiles",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "receiving_reports_purchase_order_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "receiving_reports",
+      "columns": [
+        "purchase_order_id"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "purchase_orders",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "receiving_reports_received_by_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "receiving_reports",
+      "columns": [
+        "received_by"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "profiles",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "receiving_reports_replenishment_request_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "receiving_reports",
+      "columns": [
+        "replenishment_request_id"
+      ],
+      "on_delete": "a",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "production_replenishment_requests",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "receiving_reports_replenishment_request_id_key",
+      "type": "u",
+      "match": " ",
+      "table": "receiving_reports",
+      "columns": [
+        "replenishment_request_id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "receiving_reports_rr_number_key",
+      "type": "u",
+      "match": " ",
+      "table": "receiving_reports",
+      "columns": [
+        "rr_number"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "rider_offer_push_outbox_assignment_id_device_id_key",
+      "type": "u",
+      "match": " ",
+      "table": "rider_offer_push_outbox",
+      "columns": [
+        "assignment_id",
+        "device_id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "rider_offer_push_outbox_assignment_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "rider_offer_push_outbox",
+      "columns": [
+        "assignment_id"
+      ],
+      "on_delete": "c",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "delivery_assignments",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "rider_offer_push_outbox_device_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "rider_offer_push_outbox",
+      "columns": [
+        "device_id"
+      ],
+      "on_delete": "c",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "rider_push_devices",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "rider_offer_push_outbox_pkey",
+      "type": "p",
+      "match": " ",
+      "table": "rider_offer_push_outbox",
+      "columns": [
+        "id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "rider_push_devices_pkey",
+      "type": "p",
+      "match": " ",
+      "table": "rider_push_devices",
+      "columns": [
+        "id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "rider_push_devices_rider_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "rider_push_devices",
+      "columns": [
+        "rider_id"
+      ],
+      "on_delete": "c",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "riders",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "riders_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "riders",
+      "columns": [
+        "id"
+      ],
+      "on_delete": "c",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "profiles",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "riders_pkey",
+      "type": "p",
+      "match": " ",
+      "table": "riders",
+      "columns": [
+        "id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "supplier_items_inventory_item_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "supplier_items",
+      "columns": [
+        "inventory_item_id"
+      ],
+      "on_delete": "c",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "inventory_items",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "supplier_items_pkey",
+      "type": "p",
+      "match": " ",
+      "table": "supplier_items",
+      "columns": [
+        "id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "supplier_items_supplier_id_fkey",
+      "type": "f",
+      "match": "s",
+      "table": "supplier_items",
+      "columns": [
+        "supplier_id"
+      ],
+      "on_delete": "c",
+      "on_update": "a",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": "suppliers",
+      "referenced_schema": "public",
+      "referenced_columns": [
+        "id"
+      ]
+    },
+    {
+      "name": "supplier_items_supplier_inventory_unique",
+      "type": "u",
+      "match": " ",
+      "table": "supplier_items",
+      "columns": [
+        "supplier_id",
+        "inventory_item_id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    },
+    {
+      "name": "suppliers_pkey",
+      "type": "p",
+      "match": " ",
+      "table": "suppliers",
+      "columns": [
+        "id"
+      ],
+      "on_delete": " ",
+      "on_update": " ",
+      "validated": true,
+      "deferrable": false,
+      "referenced_table": null,
+      "referenced_schema": null,
+      "referenced_columns": null
+    }
+  ],
+  "unique_indexes": [
+    {
+      "name": "cashier_shifts_one_open_per_cashier_idx",
+      "table": "cashier_shifts",
+      "valid": true,
+      "columns": [
+        "cashier_id"
+      ],
+      "predicate": "(status = 'open'::cashier_shift_status)",
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "cashier_shifts_one_open_per_terminal_idx",
+      "table": "cashier_shifts",
+      "valid": true,
+      "columns": null,
+      "predicate": "(status = 'open'::cashier_shift_status)",
+      "nulls_not_distinct": false,
+      "has_expression": true
+    },
+    {
+      "name": "cashier_shifts_pkey",
+      "table": "cashier_shifts",
+      "valid": true,
+      "columns": [
+        "id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "cashier_transactions_order_id_key",
+      "table": "cashier_transactions",
+      "valid": true,
+      "columns": [
+        "order_id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "cashier_transactions_payment_id_key",
+      "table": "cashier_transactions",
+      "valid": true,
+      "columns": [
+        "payment_id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "cashier_transactions_pkey",
+      "table": "cashier_transactions",
+      "valid": true,
+      "columns": [
+        "id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "cashier_transactions_receipt_number_key",
+      "table": "cashier_transactions",
+      "valid": true,
+      "columns": [
+        "receipt_number"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "cashier_transactions_request_id_key",
+      "table": "cashier_transactions",
+      "valid": true,
+      "columns": [
+        "request_id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "cashier_transactions_transaction_number_key",
+      "table": "cashier_transactions",
+      "valid": true,
+      "columns": [
+        "transaction_number"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "delivery_assignments_one_active_per_order_idx",
+      "table": "delivery_assignments",
+      "valid": true,
+      "columns": [
+        "order_id"
+      ],
+      "predicate": "(status = ANY (ARRAY['offered'::delivery_assignment_status, 'accepted'::delivery_assignment_status, 'picked_up'::delivery_assignment_status, 'out_for_delivery'::delivery_assignment_status]))",
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "delivery_assignments_pkey",
+      "table": "delivery_assignments",
+      "valid": true,
+      "columns": [
+        "id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "drink_choices_pkey",
+      "table": "drink_choices",
+      "valid": true,
+      "columns": [
+        "menu_item_id",
+        "option_id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "inventory_audit_item_unique",
+      "table": "inventory_audit_items",
+      "valid": true,
+      "columns": [
+        "audit_id",
+        "inventory_item_id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "inventory_audit_items_pkey",
+      "table": "inventory_audit_items",
+      "valid": true,
+      "columns": [
+        "id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "inventory_audits_pkey",
+      "table": "inventory_audits",
+      "valid": true,
+      "columns": [
+        "id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "inventory_audits_request_id_key",
+      "table": "inventory_audits",
+      "valid": true,
+      "columns": [
+        "request_id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "inventory_batches_batch_code_key",
+      "table": "inventory_batches",
+      "valid": true,
+      "columns": [
+        "batch_code"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "inventory_batches_pkey",
+      "table": "inventory_batches",
+      "valid": true,
+      "columns": [
+        "id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "inventory_batches_receiving_report_item_uidx",
+      "table": "inventory_batches",
+      "valid": true,
+      "columns": [
+        "receiving_report_item_id"
+      ],
+      "predicate": "(receiving_report_item_id IS NOT NULL)",
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "inventory_items_item_name_key",
+      "table": "inventory_items",
+      "valid": true,
+      "columns": [
+        "item_name"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "inventory_items_pkey",
+      "table": "inventory_items",
+      "valid": true,
+      "columns": [
+        "id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "inventory_opening_balances_inventory_item_id_key",
+      "table": "inventory_opening_balances",
+      "valid": true,
+      "columns": [
+        "inventory_item_id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "inventory_opening_balances_pkey",
+      "table": "inventory_opening_balances",
+      "valid": true,
+      "columns": [
+        "id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "inventory_opening_balances_request_id_key",
+      "table": "inventory_opening_balances",
+      "valid": true,
+      "columns": [
+        "request_id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "inventory_request_documents_pkey",
+      "table": "inventory_request_documents",
+      "valid": true,
+      "columns": [
+        "id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "inventory_request_documents_request_number_key",
+      "table": "inventory_request_documents",
+      "valid": true,
+      "columns": [
+        "request_number"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "inventory_request_events_pkey",
+      "table": "inventory_request_events",
+      "valid": true,
+      "columns": [
+        "id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "inventory_request_lines_pkey",
+      "table": "inventory_request_lines",
+      "valid": true,
+      "columns": [
+        "request_id",
+        "inventory_item_id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "inventory_request_revisions_pkey",
+      "table": "inventory_request_revisions",
+      "valid": true,
+      "columns": [
+        "request_id",
+        "revision"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "inventory_transaction_batch_allocations_pkey",
+      "table": "inventory_transaction_batch_allocations",
+      "valid": true,
+      "columns": [
+        "id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "inventory_transaction_batch_allocations_transaction_batch_key",
+      "table": "inventory_transaction_batch_allocations",
+      "valid": true,
+      "columns": [
+        "inventory_transaction_id",
+        "inventory_batch_id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "inventory_transactions_actor_mutation_request_uidx",
+      "table": "inventory_transactions",
+      "valid": true,
+      "columns": [
+        "performed_by",
+        "mutation_request_id"
+      ],
+      "predicate": "(mutation_request_id IS NOT NULL)",
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "inventory_transactions_id_item_unique",
+      "table": "inventory_transactions",
+      "valid": true,
+      "columns": [
+        "id",
+        "inventory_item_id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "inventory_transactions_opening_balance_id_uidx",
+      "table": "inventory_transactions",
+      "valid": true,
+      "columns": [
+        "opening_balance_id"
+      ],
+      "predicate": "(opening_balance_id IS NOT NULL)",
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "inventory_transactions_order_item_issuance_uidx",
+      "table": "inventory_transactions",
+      "valid": true,
+      "columns": [
+        "order_id",
+        "inventory_item_id"
+      ],
+      "predicate": "((transaction_type = 'issuance'::inventory_transaction_type) AND (order_id IS NOT NULL))",
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "inventory_transactions_pkey",
+      "table": "inventory_transactions",
+      "valid": true,
+      "columns": [
+        "id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "inventory_transactions_receiving_batch_uidx",
+      "table": "inventory_transactions",
+      "valid": true,
+      "columns": [
+        "inventory_batch_id"
+      ],
+      "predicate": "((transaction_type = 'receiving'::inventory_transaction_type) AND (inventory_batch_id IS NOT NULL))",
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "inventory_transactions_reversed_allocation_uidx",
+      "table": "inventory_transactions",
+      "valid": true,
+      "columns": [
+        "reverses_allocation_id"
+      ],
+      "predicate": "(reverses_allocation_id IS NOT NULL)",
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "inventory_transactions_reversed_legacy_issuance_uidx",
+      "table": "inventory_transactions",
+      "valid": true,
+      "columns": [
+        "reverses_issuance_id"
+      ],
+      "predicate": "((reverses_issuance_id IS NOT NULL) AND (reverses_allocation_id IS NULL))",
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "kds_terminals_pkey",
+      "table": "kds_terminals",
+      "valid": true,
+      "columns": [
+        "id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "kds_terminals_secret_hash_key",
+      "table": "kds_terminals",
+      "valid": true,
+      "columns": [
+        "secret_hash"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "menu_categories_name_key",
+      "table": "menu_categories",
+      "valid": true,
+      "columns": [
+        "name"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "menu_categories_pkey",
+      "table": "menu_categories",
+      "valid": true,
+      "columns": [
+        "id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "menu_ingredients_menu_item_inventory_unique",
+      "table": "menu_ingredients",
+      "valid": true,
+      "columns": [
+        "menu_item_id",
+        "inventory_item_id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "menu_ingredients_pkey",
+      "table": "menu_ingredients",
+      "valid": true,
+      "columns": [
+        "id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "menu_items_code_key",
+      "table": "menu_items",
+      "valid": true,
+      "columns": [
+        "code"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "menu_items_pkey",
+      "table": "menu_items",
+      "valid": true,
+      "columns": [
+        "id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "order_items_pkey",
+      "table": "order_items",
+      "valid": true,
+      "columns": [
+        "id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "order_status_history_pkey",
+      "table": "order_status_history",
+      "valid": true,
+      "columns": [
+        "id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "orders_customer_request_id_uidx",
+      "table": "orders",
+      "valid": true,
+      "columns": [
+        "customer_id",
+        "customer_request_id"
+      ],
+      "predicate": "(customer_request_id IS NOT NULL)",
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "orders_order_number_key",
+      "table": "orders",
+      "valid": true,
+      "columns": [
+        "order_number"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "orders_pkey",
+      "table": "orders",
+      "valid": true,
+      "columns": [
+        "id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "paid_order_cancellations_cashier_transaction_id_key",
+      "table": "paid_order_cancellations",
+      "valid": true,
+      "columns": [
+        "cashier_transaction_id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "paid_order_cancellations_order_id_key",
+      "table": "paid_order_cancellations",
+      "valid": true,
+      "columns": [
+        "order_id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "paid_order_cancellations_payment_id_key",
+      "table": "paid_order_cancellations",
+      "valid": true,
+      "columns": [
+        "payment_id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "paid_order_cancellations_pkey",
+      "table": "paid_order_cancellations",
+      "valid": true,
+      "columns": [
+        "id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "paid_order_cancellations_refund_reference_uidx",
+      "table": "paid_order_cancellations",
+      "valid": true,
+      "columns": [
+        "refund_method"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": true
+    },
+    {
+      "name": "payments_gcash_reference_unique_idx",
+      "table": "payments",
+      "valid": true,
+      "columns": null,
+      "predicate": "((payment_method = 'gcash'::payment_method) AND (gcash_reference_number IS NOT NULL))",
+      "nulls_not_distinct": false,
+      "has_expression": true
+    },
+    {
+      "name": "payments_order_id_key",
+      "table": "payments",
+      "valid": true,
+      "columns": [
+        "order_id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "payments_pkey",
+      "table": "payments",
+      "valid": true,
+      "columns": [
+        "id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "production_replenishment_requests_fulfilled_report_id_key",
+      "table": "production_replenishment_requests",
+      "valid": true,
+      "columns": [
+        "fulfilled_report_id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "production_replenishment_requests_pkey",
+      "table": "production_replenishment_requests",
+      "valid": true,
+      "columns": [
+        "id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "production_replenishment_status_events_pkey",
+      "table": "production_replenishment_status_events",
+      "valid": true,
+      "columns": [
+        "id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "profiles_pkey",
+      "table": "profiles",
+      "valid": true,
+      "columns": [
+        "id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "purchase_order_items_pkey",
+      "table": "purchase_order_items",
+      "valid": true,
+      "columns": [
+        "id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "purchase_order_items_unique_purchase_order_inventory",
+      "table": "purchase_order_items",
+      "valid": true,
+      "columns": [
+        "purchase_order_id",
+        "inventory_item_id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "purchase_orders_pkey",
+      "table": "purchase_orders",
+      "valid": true,
+      "columns": [
+        "id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "purchase_orders_po_number_key",
+      "table": "purchase_orders",
+      "valid": true,
+      "columns": [
+        "po_number"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "receiving_report_items_pkey",
+      "table": "receiving_report_items",
+      "valid": true,
+      "columns": [
+        "id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "receiving_report_items_report_inventory_item_uidx",
+      "table": "receiving_report_items",
+      "valid": true,
+      "columns": [
+        "receiving_report_id",
+        "inventory_item_id"
+      ],
+      "predicate": "(inventory_item_id IS NOT NULL)",
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "receiving_report_items_report_po_item_key",
+      "table": "receiving_report_items",
+      "valid": true,
+      "columns": [
+        "receiving_report_id",
+        "purchase_order_item_id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "one_open_inventory_request_receipt",
+      "table": "receiving_reports",
+      "valid": true,
+      "columns": [
+        "inventory_request_id"
+      ],
+      "predicate": "((inventory_request_id IS NOT NULL) AND (status = 'draft'::text))",
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "receiving_reports_pkey",
+      "table": "receiving_reports",
+      "valid": true,
+      "columns": [
+        "id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "receiving_reports_replenishment_request_id_key",
+      "table": "receiving_reports",
+      "valid": true,
+      "columns": [
+        "replenishment_request_id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "receiving_reports_rr_number_key",
+      "table": "receiving_reports",
+      "valid": true,
+      "columns": [
+        "rr_number"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "rider_offer_push_outbox_assignment_id_device_id_key",
+      "table": "rider_offer_push_outbox",
+      "valid": true,
+      "columns": [
+        "assignment_id",
+        "device_id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "rider_offer_push_outbox_pkey",
+      "table": "rider_offer_push_outbox",
+      "valid": true,
+      "columns": [
+        "id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "rider_push_devices_active_token_idx",
+      "table": "rider_push_devices",
+      "valid": true,
+      "columns": [
+        "expo_push_token"
+      ],
+      "predicate": "enabled",
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "rider_push_devices_pkey",
+      "table": "rider_push_devices",
+      "valid": true,
+      "columns": [
+        "id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "riders_pkey",
+      "table": "riders",
+      "valid": true,
+      "columns": [
+        "id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "supplier_items_pkey",
+      "table": "supplier_items",
+      "valid": true,
+      "columns": [
+        "id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "supplier_items_supplier_inventory_unique",
+      "table": "supplier_items",
+      "valid": true,
+      "columns": [
+        "supplier_id",
+        "inventory_item_id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    },
+    {
+      "name": "suppliers_pkey",
+      "table": "suppliers",
+      "valid": true,
+      "columns": [
+        "id"
+      ],
+      "predicate": null,
+      "nulls_not_distinct": false,
+      "has_expression": false
+    }
+  ]
+}

@@ -1,16 +1,9 @@
 import { useMemo } from "react";
 import { ACTIVE_ORDER_STATUSES, minutesSince } from "../constants";
 import { useCashierStore } from "./CashierStore";
+import { currentLocalDate, manilaDate } from "../utils/exportUtils";
 
-const isToday = (iso: string) => {
-  const date = new Date(iso);
-  const today = new Date();
-  return (
-    date.getFullYear() === today.getFullYear() &&
-    date.getMonth() === today.getMonth() &&
-    date.getDate() === today.getDate()
-  );
-};
+const isToday = (iso: string) => manilaDate(iso) === currentLocalDate();
 
 export function useCashierMetrics() {
   const { state, activeShift, shiftTotals } = useCashierStore();
@@ -73,7 +66,8 @@ export function useCashierMetrics() {
       walkInOrders: state.orders.filter(
         (entry) => entry.type !== "Delivery" && isToday(entry.createdAt),
       ).length,
-      readyOrders: state.orders.filter((entry) => entry.status === "Ready")
+      readyOrders: state.orders.filter((entry) => entry.status === "Ready" &&
+        !(entry.type === "Delivery" && entry.orderChannel === "online"))
         .length,
       completedTransactions: completedTransactions.length,
       cashSales,

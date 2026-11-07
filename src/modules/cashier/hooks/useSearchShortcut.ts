@@ -5,8 +5,10 @@ const EDITABLE_ELEMENTS = new Set(["INPUT", "TEXTAREA", "SELECT"]);
 export function useSearchShortcut(
   searchRef: RefObject<HTMLInputElement | null>,
   key = "/",
+  enabled = true,
 ) {
   useEffect(() => {
+    if (!enabled) return;
     const focusSearch = (event: KeyboardEvent) => {
       const target = event.target;
       if (!(target instanceof HTMLElement)) return;
@@ -19,5 +21,5 @@ export function useSearchShortcut(
     };
     window.addEventListener("keydown", focusSearch);
     return () => window.removeEventListener("keydown", focusSearch);
-  }, [key, searchRef]);
+  }, [key, searchRef, enabled]);
 }

@@ -1,0 +1,326 @@
+{
+  "run": "H16-20261016-manager-first",
+  "at": "2026-10-16T03:20:34.028Z",
+  "apiOrigin": "http://127.0.0.1:48321",
+  "environment": "rrj_h09_order_flow_20261015, existing synthetic DB",
+  "steps": [
+    {
+      "scenario": "preflight",
+      "status": "PASS",
+      "proposalCount": 16,
+      "registerCount": 0,
+      "itemIds": [
+        "07e2a344-1d50-4453-b8b9-7f3a17251e5a",
+        "f3bcd723-761c-4bc3-8294-d5c547021bde"
+      ],
+      "before": {
+        "items": [
+          {
+            "id": "07e2a344-1d50-4453-b8b9-7f3a17251e5a",
+            "name": "Beef",
+            "quantity": 0
+          },
+          {
+            "id": "f3bcd723-761c-4bc3-8294-d5c547021bde",
+            "name": "Biryani Chicken - Breast",
+            "quantity": 9
+          }
+        ],
+        "ledger": [
+          {
+            "id": "2f2cd46a-91b6-476d-bf07-9fdabf73618a",
+            "item_id": "f3bcd723-761c-4bc3-8294-d5c547021bde",
+            "quantity": -1
+          },
+          {
+            "id": "f141463f-968c-4dc7-89da-ed2fc559e44f",
+            "item_id": "f3bcd723-761c-4bc3-8294-d5c547021bde",
+            "quantity": 10
+          }
+        ],
+        "batches": [
+          {
+            "id": "b866ff7e-87a2-4b0e-ad9b-1c0243b76b5b",
+            "item_id": "f3bcd723-761c-4bc3-8294-d5c547021bde",
+            "quantity": 9
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "A1",
+      "status": "PASS",
+      "transport": "authenticated Manager RPC + SQL",
+      "requestId": "62109307-7420-4611-b1eb-305ba30b156f",
+      "requestNumber": "PR-20261016-000001",
+      "document": {
+        "id": "62109307-7420-4611-b1eb-305ba30b156f",
+        "number": "PR-20261016-000001",
+        "status": "issued",
+        "revision": 1,
+        "line_count": 2,
+        "issue_events": 1,
+        "revision_count": 1
+      },
+      "after": {
+        "items": [
+          {
+            "id": "07e2a344-1d50-4453-b8b9-7f3a17251e5a",
+            "name": "Beef",
+            "quantity": 0
+          },
+          {
+            "id": "f3bcd723-761c-4bc3-8294-d5c547021bde",
+            "name": "Biryani Chicken - Breast",
+            "quantity": 9
+          }
+        ],
+        "ledger": [
+          {
+            "id": "2f2cd46a-91b6-476d-bf07-9fdabf73618a",
+            "item_id": "f3bcd723-761c-4bc3-8294-d5c547021bde",
+            "quantity": -1
+          },
+          {
+            "id": "f141463f-968c-4dc7-89da-ed2fc559e44f",
+            "item_id": "f3bcd723-761c-4bc3-8294-d5c547021bde",
+            "quantity": 10
+          }
+        ],
+        "batches": [
+          {
+            "id": "b866ff7e-87a2-4b0e-ad9b-1c0243b76b5b",
+            "item_id": "f3bcd723-761c-4bc3-8294-d5c547021bde",
+            "quantity": 9
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "A3",
+      "status": "PASS",
+      "transport": "authenticated Manager RPC + SQL",
+      "dispatch": {
+        "events": 1,
+        "details": "{\"channel\": \"test record only\", \"recipient\": \"H16 synthetic Production handoff\", \"reference\": \"H16-20261016\"}"
+      }
+    },
+    {
+      "scenario": "B1",
+      "status": "PASS",
+      "transport": "authenticated Manager RPC + SQL",
+      "report": {
+        "id": "b6b1e3f1-a3de-4b37-9412-904a329727f1",
+        "number": "RR-20261016-B6B1E3F1",
+        "status": "draft",
+        "revision": 1,
+        "request_id": "62109307-7420-4611-b1eb-305ba30b156f"
+      }
+    },
+    {
+      "scenario": "B2",
+      "status": "PASS",
+      "transport": "authenticated Manager RPC + SQL",
+      "lines": [
+        {
+          "id": "f02e79eb-fca9-41aa-8b0f-e67990041e0f",
+          "reason": "H16 synthetic quality rejection; no physical goods",
+          "item_id": "07e2a344-1d50-4453-b8b9-7f3a17251e5a",
+          "accepted": 0,
+          "rejected": 1,
+          "delivered": 1
+        },
+        {
+          "id": "806fa8d5-ef6b-4242-965b-6f803abb8303",
+          "reason": "H16 synthetic quality rejection; no physical goods",
+          "item_id": "f3bcd723-761c-4bc3-8294-d5c547021bde",
+          "accepted": 1,
+          "rejected": 1,
+          "delivered": 2
+        }
+      ],
+      "stockUnchanged": true
+    },
+    {
+      "scenario": "B3",
+      "status": "PASS",
+      "transport": "authenticated Manager RPC + SQL",
+      "postResult": {
+        "status": "posted",
+        "posted_at": "2026-10-16T03:21:39.692124+00:00",
+        "posted_by": "d48be708-448c-4e90-8ef0-642134025aa3",
+        "rr_number": "RR-20261016-B6B1E3F1",
+        "line_count": 2,
+        "batch_count": 1,
+        "source_type": "production_team",
+        "total_accepted": 1,
+        "transaction_count": 1,
+        "receiving_report_id": "b6b1e3f1-a3de-4b37-9412-904a329727f1"
+      },
+      "finalReport": {
+        "status": "posted",
+        "posted_at": "2026-10-16T03:21:39.692124+00:00",
+        "request_id": "62109307-7420-4611-b1eb-305ba30b156f"
+      },
+      "before": {
+        "items": [
+          {
+            "id": "07e2a344-1d50-4453-b8b9-7f3a17251e5a",
+            "quantity": 0
+          },
+          {
+            "id": "f3bcd723-761c-4bc3-8294-d5c547021bde",
+            "quantity": 9
+          }
+        ],
+        "ledger": [
+          {
+            "id": "2f2cd46a-91b6-476d-bf07-9fdabf73618a",
+            "item_id": "f3bcd723-761c-4bc3-8294-d5c547021bde",
+            "batch_id": null,
+            "quantity": -1
+          },
+          {
+            "id": "f141463f-968c-4dc7-89da-ed2fc559e44f",
+            "item_id": "f3bcd723-761c-4bc3-8294-d5c547021bde",
+            "batch_id": null,
+            "quantity": 10
+          }
+        ],
+        "batches": [
+          {
+            "id": "b866ff7e-87a2-4b0e-ad9b-1c0243b76b5b",
+            "item_id": "f3bcd723-761c-4bc3-8294-d5c547021bde",
+            "line_id": null,
+            "quantity": 9
+          }
+        ]
+      },
+      "after": {
+        "items": [
+          {
+            "id": "07e2a344-1d50-4453-b8b9-7f3a17251e5a",
+            "quantity": 0
+          },
+          {
+            "id": "f3bcd723-761c-4bc3-8294-d5c547021bde",
+            "quantity": 10
+          }
+        ],
+        "ledger": [
+          {
+            "id": "2f2cd46a-91b6-476d-bf07-9fdabf73618a",
+            "item_id": "f3bcd723-761c-4bc3-8294-d5c547021bde",
+            "batch_id": null,
+            "quantity": -1
+          },
+          {
+            "id": "f141463f-968c-4dc7-89da-ed2fc559e44f",
+            "item_id": "f3bcd723-761c-4bc3-8294-d5c547021bde",
+            "batch_id": null,
+            "quantity": 10
+          },
+          {
+            "id": "fa0c0792-27f0-4f3d-b10c-ce99d9d47a11",
+            "item_id": "f3bcd723-761c-4bc3-8294-d5c547021bde",
+            "batch_id": "da52bcc9-ccda-450a-a893-ec069c612181",
+            "quantity": 1
+          }
+        ],
+        "batches": [
+          {
+            "id": "b866ff7e-87a2-4b0e-ad9b-1c0243b76b5b",
+            "item_id": "f3bcd723-761c-4bc3-8294-d5c547021bde",
+            "line_id": null,
+            "quantity": 9
+          },
+          {
+            "id": "da52bcc9-ccda-450a-a893-ec069c612181",
+            "item_id": "f3bcd723-761c-4bc3-8294-d5c547021bde",
+            "line_id": "806fa8d5-ef6b-4242-965b-6f803abb8303",
+            "quantity": 1
+          }
+        ]
+      },
+      "newBatches": [
+        {
+          "id": "da52bcc9-ccda-450a-a893-ec069c612181",
+          "item_id": "f3bcd723-761c-4bc3-8294-d5c547021bde",
+          "line_id": "806fa8d5-ef6b-4242-965b-6f803abb8303",
+          "quantity": 1
+        }
+      ],
+      "newLedger": [
+        {
+          "id": "fa0c0792-27f0-4f3d-b10c-ce99d9d47a11",
+          "item_id": "f3bcd723-761c-4bc3-8294-d5c547021bde",
+          "batch_id": "da52bcc9-ccda-450a-a893-ec069c612181",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "scenario": "C3",
+      "status": "PASS",
+      "transport": "independent SQL",
+      "itemDelta": {
+        "07e2a344-1d50-4453-b8b9-7f3a17251e5a": 0,
+        "f3bcd723-761c-4bc3-8294-d5c547021bde": 1
+      }
+    },
+    {
+      "scenario": "C4",
+      "status": "PASS",
+      "transport": "independent SQL",
+      "batchId": "da52bcc9-ccda-450a-a893-ec069c612181",
+      "lineId": "806fa8d5-ef6b-4242-965b-6f803abb8303",
+      "ledgerId": "fa0c0792-27f0-4f3d-b10c-ce99d9d47a11"
+    },
+    {
+      "scenario": "B4",
+      "status": "PASS",
+      "transport": "authenticated Manager RPC + SQL",
+      "duplicateHttp": 400,
+      "duplicateMessage": "Receiving report is already posted.",
+      "stockUnchanged": true
+    },
+    {
+      "scenario": "C1",
+      "status": "PASS",
+      "transport": "authenticated Manager read RPC + SQL",
+      "itemId": "f3bcd723-761c-4bc3-8294-d5c547021bde",
+      "physical": 10,
+      "usable": 10,
+      "batchTotal": 10
+    },
+    {
+      "scenario": "C2",
+      "status": "PASS",
+      "transport": "authenticated Manager read RPC + SQL",
+      "batchId": "da52bcc9-ccda-450a-a893-ec069c612181",
+      "batchStatus": "current",
+      "useByDate": "2026-10-17",
+      "expired": 0
+    }
+  ],
+  "boundary": "Authenticated local synthetic RPC and independent SQL; no real supplier dispatch, physical goods, hosted writes, or browser evidence.",
+  "requestId": "62109307-7420-4611-b1eb-305ba30b156f",
+  "requestNumber": "PR-20261016-000001",
+  "reportId": "b6b1e3f1-a3de-4b37-9412-904a329727f1",
+  "reportNumber": "RR-20261016-B6B1E3F1",
+  "lineIds": {
+    "beefLine": "f02e79eb-fca9-41aa-8b0f-e67990041e0f",
+    "chickenLine": "806fa8d5-ef6b-4242-965b-6f803abb8303"
+  },
+  "readback": {
+    "requestStatus": "partially_received",
+    "requestLineCount": 2,
+    "movementIds": [
+      "fa0c0792-27f0-4f3d-b10c-ce99d9d47a11",
+      "2f2cd46a-91b6-476d-bf07-9fdabf73618a",
+      "f141463f-968c-4dc7-89da-ed2fc559e44f"
+    ],
+    "receivingMovementVisible": true,
+    "stockSummaryRows": 16
+  }
+}

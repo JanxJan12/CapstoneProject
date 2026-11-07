@@ -1,0 +1,41 @@
+# CASHIER-DATA-01 — Order List and Transaction History read models
+
+**Date:** 30 October 2026, Asia/Manila. **Result:** local implementation and disposable verification pass; hosted acceptance pending the separately authorized migration. No hosted write, migration execution, RLS change, financial transaction, refund, shift close, or order repair was performed.
+
+## Impact map and exact edit scope
+
+| Finding | Read path and change | Files changed by this task |
+| --- | --- | --- |
+| Current-shift-only History versus all-shift CSV | New authenticated, cashier-owned, filtered RPC returns a total and at most 100 rows; UI pages 50 at a time; CSV pages through the same filtered result, capped at 5,000. Selected detail/reprint uses the existing own-sale RPC once for the chosen receipt. | `supabase/migrations/20261030034730_cashier_owned_transaction_history_read.sql`; `src/modules/cashier/transactions/historyReadApi.ts`, `useTransactionHistory.ts`, `TransactionHistoryPage.tsx`, `TransactionTable.tsx`, `TransactionCards.tsx`; old `transactionExportApi.ts` removed from the active codebase; `transactionExport.ts` legacy pure adapter no longer called by the page. |
+| Speculative payment state | Direct order rows without linked evidence display `Unknown` / “Payment unlinked” for method/status; online payment and own sale hydration still supply authoritative states. Order List's Needs Payment filter includes the unlinked state for review. Ordinary cancellation remains unavailable for unknown state. | `src/modules/cashier/services/supabaseOrderService.ts`, `src/modules/cashier/types.ts`, `src/modules/cashier/components/StatusBadge.tsx`, `src/modules/cashier/orders/OrderFilters.tsx`, `src/modules/cashier/orders/useOrderList.ts`, `src/modules/cashier/hooks/CashierStore.tsx`. |
+| Delivery fee lost during sale hydration | Sale hydration reads recorded `orders.delivery_fee` in one batched direct RLS query (100 IDs per batch) because both hosted sale RPCs omit it. Direct Order List snapshots retain their recorded fee when sale data overlays them. History list RPC includes fee; selected detail validates the own sale link. Detail and receipt list subtotal, fee, discount, tax, and recorded total. | `src/modules/cashier/api/cashierSaleHydrationApi.ts`, `src/modules/cashier/hooks/CashierStore.tsx`, `src/modules/cashier/transactions/TransactionDetailDrawer.tsx`, `src/modules/cashier/pos/ReceiptContent.tsx`. |
+| Unsupported Refunded transaction state | History status selector has Completed/Voided only. Summary counts completed revenue only, with voided amounts labeled as recorded amounts and excluded from completed revenue. This screen does not assert a refund ledger or net cash payout. | `src/modules/cashier/transactions/TransactionFilters.tsx`, `transactionSummaryMetrics.ts`, `TransactionSummary.tsx`, `TransactionDetailDrawer.tsx`, `TransactionTable.tsx`, `historyReadApi.ts`, `transactionExport.ts`. |
+
+Tests/evidence edited: `qa/cashier-data-01-read-model.mjs`, `qa/cashier-data-01-rpc-setup.sql`, `qa/cashier-data-01-rpc-checks.sql`, `scripts/verify-cashier-transaction-history.mjs`, `scripts/verify-cashier-transaction-export.mjs`, this report, and the appended entry in `qa/CASHIER-MANUAL-FINDINGS-20261030.md`. Existing unrelated dirty files and the separate navigation workspaces were preserved.
+
+## Source and data evidence
+
+The prior [lineage audit](CASHIER-IA-DATA-LINEAGE-20261030.md) found that `get_current_shift_cashier_sales` returns only completed receipts in the current open shift, while the old CSV adapter paged own `cashier_transactions` and called `get_cashier_sale` for each row. Hosted `cashier_transaction_status` has `completed` and `voided`, and payment rows have no direct Cashier SELECT policy. The prepared RPC joins transactions to payment, order, and shift **inside the database**, checks the active `auth.uid()` Cashier profile, applies `tx.cashier_id = auth.uid()` and `shift.cashier_id = auth.uid()`, then applies filters before count/page. It has an empty `search_path`, revoked `PUBLIC` execute, and an `authenticated` grant. No caller-supplied cashier ID is trusted. The UI never falls back to a broader direct query if this RPC is unavailable.
+
+Read-only hosted investigation on this date found delivered online `ORD-000003` (₱85) and `ORD-000007` (₱170), each with zero linked `payments` and zero `cashier_transactions`; both were created 17 August 2026 UTC. Their channel and delivered status cannot establish payment method or financial settlement. No record was changed or fabricated. The direct Order List now shows missing payment evidence explicitly and keeps cancellation/action guards conservative.
+
+The hosted sample previously reported 13 delivery transactions with positive fees. The new list RPC includes recorded `orders.delivery_fee`; current-shift and selected sale hydration supplement the existing RPC payload through an RLS-authorized `orders` read. The display keeps `orders.grand_total` authoritative and exposes the recorded components; it does not recompute or overwrite the saved total. A disposable fixture checks `120 subtotal + 30 fee − 10 discount + 10 tax = 150 total`.
+
+`paid_order_cancellations` remains a separate Manager refund contract. `Voided` is a receipt state, not proof of refund payout. This read model does not invent a `refunded` enum, deduct a voided row a second time, or claim a net refund total. Legacy client `Refunded` branches remain in shift compatibility code and are outside the hosted transaction enum; this screen no longer offers that filter or metric.
+
+## Verification and limits
+
+| Check | Result |
+| --- | --- |
+| `npm.cmd run typecheck`; `npm.cmd run build` | PASS. |
+| `qa/cashier-data-01-read-model.mjs` | PASS: closed shifts/no open shift, paged result, own-row validation, same-filter CSV rows, error fail-closed, unknown payment, guarded cancel, and fee arithmetic. |
+| Disposable PostgreSQL 17: setup → prepared migration → checks | PASS after fixing a SQL operator-precedence error. Verified pagination, Manila date/filter shape, own closed-shift rows, positive fee, voided status, no other-Cashier receipt, and inactive/anonymous denial. Container was disposable. This is not hosted deployment or full historical migration replay. |
+| Prior Cashier workspace, OPT-02/03/04/05, Order List, History, export, and FIN-01 fixtures | PASS after updating the old History fixture to hosted-supported `Voided`; FIN-01's explicitly unsupported legacy `Refunded` scenario remains historical compatibility evidence. |
+| Authenticated browser | BLOCKED: Chrome accessibility reported `localhost:5173/cashier` and a signed-in dashboard, but its captured screenshot showed a different application/window, and a navigation click failed before a trustworthy target geometry was available. No UI action or current print/export pass is claimed. |
+| Hosted runtime and business journey | NOT RUN. New RPC is **unapplied**; current hosted History cannot use it. No hosted role penetration, receipt print, CSV download, or financial action was run. |
+
+## Deployment and residual risk
+
+The SQL file is **prepared, not executed**. Hosted migration history was already divergent; do not run an unscoped `supabase db push`. A separate explicit authorization and a bounded deployment plan are required. Before live acceptance, compare the prepared query with current hosted column/enum/ACL definitions, review index and query-plan cost at expected row volume, apply only this approved migration, and test signed-in Cashier A/B isolation, closed/no-open shifts, filter/count/CSV parity, selected detail/reprint, and responsive print output.
+
+Pagination is capped at offset 10,000, shifts offered in the selector at 500 own rows, and CSV at 5,000 matching transactions. These bounds avoid unbounded client hydration but require product pagination policy if volumes grow. CSV pages can change during concurrent writes; the client rejects count changes, though equal-count reorder across requests remains possible. The display uses current order snapshots and the existing own-sale detail RPC, so later operational edits can change historical descriptive fields; immutable at-sale receipt snapshots need a separate contract. The source-only build cannot establish hosted authorization or printed layout.

@@ -1,0 +1,16 @@
+flowchart LR
+  C[Customer: menu and modifier] --> O[Server prices and stores order]
+  O --> P[Private synthetic payment proof]
+  P --> V{Cashier decision}
+  V -->|Reject| R[Customer resubmits proof]
+  R --> V
+  V -->|Verify| K[KDS terminal: channel, options, preparing, ready]
+  K --> L[Cashier releases order]
+  L --> D[Rider accepts, picks up, delivers]
+  D --> DP[Private synthetic delivery proof]
+  DP --> F[Delivered order and transaction history]
+  M[Manager formal request] --> PR[Production preparation and dispatch record]
+  PR --> RR[Source-linked Receiving draft]
+  RR --> PA{Post accepted quantities}
+  PA --> B[Batch plus movement ledger plus stock]
+  RR -.->|Draft, dispatch, or rejection| N[No stock movement]

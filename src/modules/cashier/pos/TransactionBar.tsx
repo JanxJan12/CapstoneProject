@@ -26,10 +26,12 @@ export function TransactionBar({
   total,
   state,
   busy,
+  shiftOpen,
+  onOpenShift,
   paymentRef,
   onAdjust,
   onUndoLast,
-  onReview,
+  onViewOrder,
   onPayment,
 }: {
   items: POSCartLine[];
@@ -38,10 +40,12 @@ export function TransactionBar({
   total: number;
   state: POSTransactionState;
   busy: boolean;
+  shiftOpen: boolean;
+  onOpenShift: () => void;
   paymentRef?: RefObject<HTMLButtonElement | null>;
   onAdjust: (lineId: string, delta: number) => void;
   onUndoLast: () => void;
-  onReview: () => void;
+  onViewOrder: () => void;
   onPayment: () => void;
 }) {
   const lastItem = items.at(-1);
@@ -65,7 +69,7 @@ export function TransactionBar({
             <div className="min-w-0 flex-1">
               <p>
                 <span>{lastItemCode ?? "ITEM"}</span>
-                Last added
+                Latest item
               </p>
               <strong>{lastItem.name}</strong>
             </div>
@@ -104,19 +108,19 @@ export function TransactionBar({
       </div>
 
       <div className="pos-running-total">
-        <small>Running total</small>
+        <small>Total</small>
         <strong>{formatMoney(total)}</strong>
       </div>
 
       <div className="pos-transaction-actions">
         <button
           type="button"
-          onClick={onReview}
+          onClick={onViewOrder}
           disabled={!hasItems || busy}
           className="pos-view-order"
         >
           <ClipboardList className="h-4 w-4" aria-hidden="true" />
-          <span>View Order</span>
+          <span>Current order</span>
         </button>
         <button
           ref={paymentRef}
@@ -132,6 +136,12 @@ export function TransactionBar({
           <ArrowRight className="h-4 w-4" aria-hidden="true" />
         </button>
       </div>
+      {!shiftOpen ? (
+        <div className="pos-transaction-shift-note" role="status">
+          <span>Shift closed · Open a shift before payment.</span>
+          <button type="button" onClick={onOpenShift}>Open shift</button>
+        </div>
+      ) : null}
     </footer>
   );
 }

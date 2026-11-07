@@ -79,7 +79,7 @@ export const CashierIconButton = forwardRef<
   HTMLButtonElement,
   CashierIconButtonProps
 >(function CashierIconButton(
-  { label, icon: Icon, className, type = "button", ...props },
+  { label, icon: Icon, className, type = "button", children, ...props },
   ref,
 ) {
   return (
@@ -95,6 +95,7 @@ export const CashierIconButton = forwardRef<
       {...props}
     >
       <Icon className="h-4 w-4" aria-hidden="true" />
+      {children}
     </button>
   );
 });

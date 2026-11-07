@@ -35,6 +35,8 @@ export function RejectPaymentDialog({
     register,
     handleSubmit,
     reset,
+    setValue,
+    clearErrors,
     watch,
     formState: { errors },
   } = useForm<RejectionForm>({
@@ -43,7 +45,7 @@ export function RejectPaymentDialog({
   });
   const selectedReason = watch("reason");
   const submit = handleSubmit(async (values) => {
-    await onConfirm(values.reason, values.notes);
+    await onConfirm(values.reason, values.reason === "Other" ? values.notes : undefined);
     reset();
   });
   return (
@@ -60,8 +62,7 @@ export function RejectPaymentDialog({
         <DialogHeader>
           <DialogTitle>Reject payment for {orderId}?</DialogTitle>
           <DialogDescription>
-            The order will remain out of the kitchen queue and the customer will
-            receive the reason.
+            The customer will receive the rejection reason and can resubmit payment proof.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={submit} className="space-y-4">
@@ -71,28 +72,35 @@ export function RejectPaymentDialog({
               id="rejection-reason"
               autoFocus
               aria-invalid={Boolean(errors.reason)}
-              {...register("reason")}
+              {...register("reason", {
+                onChange: (event) => {
+                  if (event.target.value !== "Other") {
+                    setValue("notes", "");
+                    clearErrors("notes");
+                  }
+                },
+              })}
             >
               <option value="">Select a reason</option>
               {PAYMENT_REJECTION_REASONS.map((reason) => (
-                <option key={reason}>{reason}</option>
+                <option key={reason} value={reason}>{reason}</option>
               ))}
             </CashierSelect>
             <FieldError>{errors.reason?.message}</FieldError>
           </div>
-          <div>
-            <Label htmlFor="rejection-notes">
-              Notes {selectedReason === "Other" ? "(required)" : "(optional)"}
-            </Label>
-            <CashierTextarea
-              id="rejection-notes"
-              required={selectedReason === "Other"}
-              aria-invalid={Boolean(errors.notes)}
-              placeholder="Add details that will help the customer resubmit"
-              {...register("notes")}
-            />
-            <FieldError>{errors.notes?.message}</FieldError>
-          </div>
+          {selectedReason === "Other" && (
+            <div>
+              <Label htmlFor="rejection-notes">Message to customer (required)</Label>
+              <CashierTextarea
+                id="rejection-notes"
+                required
+                aria-invalid={Boolean(errors.notes)}
+                placeholder="Explain why the payment was rejected and what to resubmit"
+                {...register("notes")}
+              />
+              <FieldError>{errors.notes?.message}</FieldError>
+            </div>
+          )}
           <DialogFooter className="border-t border-border/70 pt-4">
             <CashierButton
               type="button"

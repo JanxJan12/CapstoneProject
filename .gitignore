@@ -4,6 +4,8 @@ dist/
 .DS_Store
 *.log
 *.tgz
+qa/manager-final-gaps-20261012/chrome-desktop/
+qa/manager-final-gaps-20261012/chrome-mobile/
 
 # Environment variables
 .env
